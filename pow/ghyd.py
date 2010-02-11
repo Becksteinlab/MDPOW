@@ -1,7 +1,5 @@
 # ghyd.py
-# Copyright (c) 2010 Oliver Beckstein <orbeckst@gmail.com>
-# Released under the GNU Public License 3 (or higher, your choice)
-# See the file COPYING for details.
+# Copyright (c) 2010 Oliver Beckstein
 """
 :mod:`ghyd` -- calculate free energy of hydration
 =================================================
@@ -31,6 +29,7 @@ from __future__ import with_statement
 import os
 from subprocess import call
 from pkg_resources import resource_filename
+import cPickle
 
 import numpy
 
@@ -89,17 +88,19 @@ class Ghyd(object):
                              ),
                  }
 
-    def __init__(self, molecule, top, struct, **kwargs):
+    def __init__(self, molecule=None, top=None, struct=None, filename=None,
+                 **kwargs):
         """Prepare all input files.
         
         :Arguments:
            *molecule*
                name of the molecule for which the hydration free 
                energy is to be computed (as in the gromacs topology)
+               [REQUIRED]
            *top*
-               topology
+               topology [REQUIRED]
            *struct* 
-               solvated and equilibrated input structure 
+               solvated and equilibrated input structure [REQUIRED]
            *dirname*
                directory to work under [.]
            *lambda_coulomb*
@@ -113,44 +114,65 @@ class Ghyd(object):
            *templates*
                template or list of templates for queuing system scripts
                (see :data:`gromacs.config.templates` for details) [local.sh]
+           *filename*
+               Instead of providing the required arguments, load from pickle
+               file
            *kwargs*
                other undocumented arguments (see source for the moment)
         """
-        self.molecule = molecule   # should check that this is in top (?)
-        self.top = top
-        self.struct = struct
-        self.Temperature = kwargs.pop('temperature', 300.0)
-        self.templates = kwargs.pop('templates', ['local.sh'])
-        self.deffnm = kwargs.setdefault('deffnm', 'md')
+        required_args = ('molecule', 'top', 'struct')
+        
+        if None in (molecule, top, struct) and not filename is None:
+            # load from pickle file
+            self.load(filename)
+            self.filename = filename
+        else:
+            
+            self.molecule = molecule   # should check that this is in top (?)
+            self.top = top
+            self.struct = struct
 
-        kwargs.setdefault('mdp', fep_templates['production_mdp'])
+            for attr in required_args:
+                if self.__getattribute__(attr) is None:
+                    raise ValueError("A value is required for %(attr)r." % vars())
+            
+            self.Temperature = kwargs.pop('temperature', 300.0)
+            self.templates = kwargs.pop('templates', ['local.sh'])
+            self.deffnm = kwargs.setdefault('deffnm', 'md')
 
-        kwargs.setdefault('lambda_coulomb', [0, 0.25, 0.5, 0.75, 1.0])
-        kwargs.setdefault('lambda_vdw', [0.0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6,
-                                         0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1])
-        # should be longer, this is for testing
-        kwargs.setdefault('runtime', 100) # ps
-        kwargs.setdefault('dirname', os.path.curdir)
+            kwargs.setdefault('mdp', fep_templates['production_mdp'])
 
-        self.mdp = kwargs['mdp']
-        self.lambdas = {'coulomb': kwargs['lambda_coulomb'],
-                        'vdw': kwargs['lambda_vdw']}
-        self.runtime = kwargs['runtime']
-        self.dirname = kwargs['dirname']
-        self.component_dirs = {'coulomb': os.path.join(self.dirname, 'Coulomb'),
-                               'vdw': os.path.join(self.dirname, 'VDW')}
+            kwargs.setdefault('lambda_coulomb', [0, 0.25, 0.5, 0.75, 1.0])
+            kwargs.setdefault('lambda_vdw', [0.0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6,
+                                             0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1])
+            # should be longer, this is for testing
+            kwargs.setdefault('runtime', 100) # ps
+            kwargs.setdefault('dirname', os.path.curdir)
+
+            self.mdp = kwargs['mdp']
+            self.lambdas = {'coulomb': kwargs['lambda_coulomb'],
+                            'vdw': kwargs['lambda_vdw']}
+            self.runtime = kwargs['runtime']
+            self.dirname = kwargs['dirname']
+            self.component_dirs = {'coulomb': os.path.join(self.dirname, 'Coulomb'),
+                                   'vdw': os.path.join(self.dirname, 'VDW')}
+
+            self.filename = filename or \
+                            os.path.join(self.dirname, self.__class__.__name__ + '.pickle')
+
+            # other variables
+            #: Results from the analysis
+            self.results = AttributeDict(xvg=AttributeDict(),
+                                         dvdl=AttributeDict(),
+                                         DeltaA=AttributeDict(),
+                                         )
+            #: Generated run scripts
+            self.scripts = AttributeDict()
 
         logger.info("Hydration free energy calculation for molecule %(molecule)r." % vars(self))
         logger.info("Using directories under %(dirname)r: %(component_dirs)r" % vars(self))
 
-        # other variables
-        #: Results from the analysis
-        self.results = AttributeDict(xvg=AttributeDict(),
-                                     dvdl=AttributeDict(),
-                                     DeltaA=AttributeDict(),
-                                     )
-        #: Generated run scripts
-        self.scripts = AttributeDict()
+
 
     def wdir(self, component, lmbda):
         """Return path to the work directory for *component* and *lmbda*."""
@@ -196,6 +218,10 @@ class Ghyd(object):
             qsubargs['prefix'] = self.label(component)+'_'
             self.scripts[component] = gromacs.qsub.generate_submit_array(templates, directories, **qsubargs)
             logger.info("[%s] Wrote array job scripts %r", component, self.scripts[component])
+
+        self.save(self.filename)
+        logger.info("Saved state information to %(filename)r; reload this Ghyd instance with "
+                    "Ghyd(filename=%(filename)r)." % vars(self))
         logger.info("Finished setting up all individual simulations. Now run them...")
 
     def _setup(self, component, lmbda, **kwargs):
@@ -250,7 +276,23 @@ class Ghyd(object):
         return self.results.DeltaA.standardstate
 
 
-    def analyze(self, c0=1.0):
+    def collect(self, autosave=True):
+        """Collect dV/dl from output"""
+        
+        from gromacs.formats import XVG
+        def dgdl_xvg(*args):
+            return os.path.join(*args + (self.deffnm + '.xvg',))
+
+        logger.info("[%(dirname)s] Finding dgdl xvg files." % vars(self))
+        for component, lambdas in self.lambdas.items():
+            xvg_files = [dgdl_xvg(self.wdir(component, l)) for l in lambdas]
+            self.results.xvg[component] = (numpy.array(lambdas),
+                                           [XVG(xvg) for xvg in xvg_files])            
+        if autosave:
+            self.save()
+
+
+    def analyze(self, c0=1.0, force=False, autosave=True):
         """Extract dV/dl from output and calculate dG by TI.
 
         Thermodynamic integration (TI) is performed on the individual component
@@ -271,25 +313,29 @@ class Ghyd(object):
         Data are stored in :attr:`Ghyd.results`.
 
         :Keywords:
-          *c_standard*
+          *c0*
               standard state concentration in mol L^-1 (i.e. M) [1.0]
+          *force*
+              reload raw data even though it is already loaded
+          *autosave*
+              save to the pickle file when results have been computed
         """
-        from gromacs.formats import XVG
+
         import scipy.integrate
 
-        def dgdl_xvg(*args):
-            return os.path.join(*args + (self.deffnm + '.xvg',))
-
-        logger.info("Finding dgdl xvg files.")
-        for component, lambdas in self.lambdas.items():
-            xvg_files = [dgdl_xvg(self.wdir(component, l)) for l in lambdas]
-            self.results.xvg[component] = (numpy.array(lambdas),
-                                           [XVG(xvg) for xvg in xvg_files])            
+        if force or numpy.any(numpy.array(
+            [len(xvgs) for (lambdas,xvgs) in self.results.xvg.values()]) == 0):
+            # get data if any of the xvg lists have 0 entries
+            self.collect(autosave=False)
+        else:
+            logger.info("Analyzing stored data.")
+        
         self.results.DeltaA.total = 0.0   # total free energy difference
         for component, (lambdas, xvgs) in self.results.xvg.items():
             logger.info("[%s] Computing averages <dV/dl> for %d lambda values.",
                         component, len(lambdas))
             # for TI just get the average dv/dl value (in array column 1; col 0 is the time)
+            # (This can take a while if the XVG is now reading the array from disk first time)
             Y = numpy.array([x.array[1].mean() for x in xvgs])
             DY = numpy.array([x.array[1].std()  for x in xvgs])
             self.results.dvdl[component] = (lambdas, Y, DY)
@@ -301,10 +347,13 @@ class Ghyd(object):
 
         # standard state
         self.results.DeltaA.total += self.DeltaA0(c0)
+
+        if autosave:
+            self.save()
         
         # TODO: error estimate (e.g. from boot strapping from the raw data)
         logger.info("Hydration free energy %g kJ/mol", self.results.DeltaA.total)
-        return self.results.DeltaA.total
+        return self.results.DeltaA.total    
 
 
     def plot(self, **kwargs):
@@ -376,3 +425,26 @@ class Ghyd(object):
                     raise OSError(errmsg)
 
         logger.info("[%r] Submitted jobs locally for %r", self.dirname, self.scripts.keys())
+
+    def save(self, filename=None):
+        """Save instance to a pickle file.
+
+        The default filename is the name of the file that was last loaded from
+        or saved to.
+        """
+        if filename is None:
+            filename = self.filename
+        else:
+            self.filename = filename
+        with open(filename, 'wb') as f:
+            cPickle.dump(self, f, protocol=cPickle.HIGHEST_PROTOCOL)
+        logger.debug("Instance pickled to %(filename)r" % vars())
+        
+    def load(self, filename=None):
+        """Re-instantiate class from pickled file."""
+        if filename is None:
+            filename = self.filename        
+        with open(filename, 'rb') as f:
+            instance = cPickle.load(f)
+        self.__dict__.update(instance.__dict__)
+        logger.debug("Instance loaded from %(filename)r" % vars())
