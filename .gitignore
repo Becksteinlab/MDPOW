@@ -1,0 +1,4 @@
+*.pyc
+*.log
+*.egg-info
+install_devel_kauha.sh
