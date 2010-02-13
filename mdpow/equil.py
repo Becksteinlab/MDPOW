@@ -117,6 +117,32 @@ class Simulation(object):
         self.__dict__.update(instance.__dict__)
         logger.debug("Instance loaded from %(filename)r" % vars())
 
+    def make_paths_relative(self, prefix=os.path.curdir):
+        """Hack to be able to copy directories around: prune basedir from paths.
+
+        .. Warning:: This is not guaranteed to work for all paths. In particular,
+                     check :data:`mdpow.equil.Simulation.dirs.includes` and adjust
+                     manually if necessary.
+        """
+        def assinglet(m):
+            if len(m) == 1:
+                return m[0]
+            elif len(m) == 0:
+                return None
+            return m
+        
+        basedir = self.dirs.basedir
+        for key, fn in self.files.items():
+            try:
+                self.files[key] = fn.replace(basedir, prefix)
+            except AttributeError:
+                pass
+        for key, val in self.dirs.items():
+            fns = asiterable(val)  # treat them all as lists
+            try:
+                self.dirs[key] = assinglet([fn.replace(basedir, prefix) for fn in fns])
+            except AttributeError:
+                pass
 
     def topology(self, itp='drug.itp', **kwargs):
         """Generate a topology for compound *molecule*.
