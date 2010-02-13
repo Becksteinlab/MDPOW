@@ -19,10 +19,10 @@ The simulations are performed with Gromacs_ 4.x
 
 """
 
-__all__ = ['ghyd', 'config']
+__all__ = ['ghyd', 'equil']
 
 import log
 logger = log.create('pow', 'pow.log')
 
-import ghyd
+import config, ghyd, equil
 

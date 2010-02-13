@@ -52,21 +52,16 @@ The following functions can be used to access configuration data.
 """
 
 import os
-from pkg_resources import resource_filename
-
-import utilities
+from pkg_resources import resource_filename, resource_listdir
 
 
 
 # Location of template files
 # --------------------------
 
-# TODO: This is becoming unwieldy: should be more abstract/automatic.
-#       Maybe simply use filename as key? This would require some cleaning up
-#       in gromacs.setup but would not be too bad.
-templates = {
-    'md_OPLSAA_mdp': resource_filename(__name__, 'templates/md_OPLSAA.mdp'),
-    }
+_templates = ['templates/md_OPLSAA.mdp', 'templates/system.top']
+templates = dict((os.path.basename(fn),resource_filename(__name__,fn))
+                 for fn in _templates)
 """Templates have to be extracted from the egg because they are used
 by external code. All template filenames are stored in
 :data:`gromacs.config.templates`.
@@ -81,6 +76,14 @@ by external code. All template filenames are stored in
    modify later with :func:`~gromacs.cbook.edit_mdp`.
 
 """
+
+# includefir only works if we can find the ffoplsaa.itp file (which
+# SHOULD be there... but I am too lazy to do error checking)
+topfiles = dict((os.path.basename(fn), resource_filename(__name__,'top/'+fn))
+                for fn in resource_listdir(__name__,'top'))
+includedir = os.path.dirname(topfiles['ffoplsaa.itp'])
+
+
 
 # Functions to access configuration data
 # --------------------------------------

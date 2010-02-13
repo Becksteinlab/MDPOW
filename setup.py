@@ -23,7 +23,7 @@ and relies on GromacsWrapper
       download_url="http://sbcb.bioch.ox.ac.uk/oliver/download/Python/",
       keywords="science Gromacs analysis 'molecular dynamics'",
       packages=find_packages(exclude=['examples']),
-      package_data={'pow': ['pow/top'], },
+      package_data={'pow': ['top/*', 'templates/*'], },
       install_requires = ['numpy>=1.0',
                           'GromacsWrapper>=0.1.0'],
       dependency_links = ["http://sbcb.bioch.ox.ac.uk/oliver/download/Python/"],

@@ -1,0 +1,31 @@
+; system.top
+; Part of the POW package.
+; Template for simple Gromacs simulations of a compound in water
+; NOTE: This file is processed with pow.equil.topology()
+
+; Include forcefield parameters
+#include "ffoplsaa.itp"
+
+; Include compound topology
+#include "compound.itp"
+
+; Include water topology
+#include "tip4p.itp"
+#ifdef POSRES_WATER
+; Position restraint for each water oxygen
+[ position_restraints ]
+;  i funct       fcx        fcy        fcz
+   1    1       1000       1000       1000
+#endif
+
+; Include generic topology for ions
+#include "ions_opls.itp"
+
+[ system ]
+; Name
+Compound DRUG in water (OPLS-AA parameters)
+
+[ molecules ]
+; Compound        #mols
+DRUG               1
+
