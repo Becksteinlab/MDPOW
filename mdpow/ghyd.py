@@ -131,6 +131,7 @@ class Ghyd(object):
             self.molecule = molecule   # should check that this is in top (?)
             self.top = top
             self.struct = struct
+            self.ndx = kwargs.pop('ndx', None)
 
             for attr in required_args:
                 if self.__getattribute__(attr) is None:
@@ -235,7 +236,8 @@ class Ghyd(object):
         kwargs.setdefault('couple-intramol', 'no')
         kwargs.update(self.schedules[component].mdp_dict)  # sets soft core & lambda0/1 state
         kwargs.update(dirname=wdir, struct=self.struct, top=self.top,
-                      mdp=self.mdp, # ... add ndx ?
+                      mdp=self.mdp,
+                      ndx=self.ndx,
                       mainselection=None,
                       runtime=self.runtime,
                       ref_t=self.Temperature,    # TODO: maybe not working yet, check _setup()

@@ -37,7 +37,7 @@ class Simulation(object):
     """Simple MD simulation of a single compound molecule in water.
 
     Typical use ::
-       S = Simulation(name='DRUG')
+       S = Simulation(molecule='DRUG')
        S.topology(itp='drug.itp')
        S.solvate(struct='DRUG-H.pdb')
        S.energy_minimize()
@@ -47,30 +47,30 @@ class Simulation(object):
               customized itp and mdp files at various stages.
     """
     
-    def __init__(self, name=None, filename=None, **kwargs):
+    def __init__(self, molecule=None, filename=None, **kwargs):
         """Set up Simulation instance.
 
-        The *name* of the compound molecule should be supplied. Existing files
+        The *molecule* of the compound molecule should be supplied. Existing files
         (which have been generated in previous runs) can also be supplied.
 
         :Keywords:
-          *name*
+          *molecule*
               Identifier for the compound molecule. This is the same as the
               entry in the ``[ molecule ]`` section of the itp file. ["DRUG"]
           *filename*
-              If provided and *name* is ``None`` then load the instance from
+              If provided and *molecule* is ``None`` then load the instance from
               the pickle file *filename*, which was generated with
               :meth:`~mdpow.equil.Simulation.save`.
           *kwargs*
               advanced keywords for short-circuiting; see the source
         """
-        if name is None and not filename is None:
+        if molecule is None and not filename is None:
             # load from pickle file
             self.load(filename)
             self.filename = filename            
             kwargs = {}    # for super
         else:
-            self.name = name or 'DRUG'
+            self.molecule = molecule or 'DRUG'
             self.dirs = AttributeDict(
                 basedir=realpath(os.path.curdir),
                 includes=list(asiterable(kwargs.pop('includes',[]))) + [config.includedir],
@@ -83,6 +83,7 @@ class Simulation(object):
                 ndx=kwargs.pop('ndx', None),
                 energy_minimized=kwargs.pop('energy_minimized', None),
                 MD_restrained=kwargs.pop('MD_restrained', None),
+                MD_NPT=kwargs.pop('MD_NPT', None),                
                 )
 
             if self.files.topology:
@@ -118,10 +119,10 @@ class Simulation(object):
 
 
     def topology(self, itp='drug.itp', **kwargs):
-        """Generate a topology for compound *name*.
+        """Generate a topology for compound *molecule*.
 
         :Keywords:
-           *name*
+           *molecule*
                identifier, should be the same as used in the itp
             *struct*
                coordinate file (gro or pdb) (is copied to topology dir)
@@ -145,8 +146,8 @@ class Simulation(object):
             shutil.copy(itp, _itp)
             gromacs.cbook.edit_txt(top_template,
                                    [('#include', 'compound.itp', _itp),
-                                    ('Compound', 'DRUG', self.name),
-                                    ('DRUG\s*1', 'DRUG', self.name),
+                                    ('Compound', 'DRUG', self.molecule),
+                                    ('DRUG\s*1', 'DRUG', self.molecule),
                                     ],
                                    newname=topol)
         logger.info('[%(dirname)s] Created topology %(topol)r that includes %(_itp)r', vars())
@@ -174,7 +175,7 @@ class Simulation(object):
         kwargs.setdefault('struct', self.files.structure)
         kwargs['top'] = self.files.topology
         kwargs.setdefault('water', 'tip4p')
-        kwargs.setdefault('mainselection', '"%s"' % self.name)  # quotes are needed for make_ndx
+        kwargs.setdefault('mainselection', '"%s"' % self.molecule)  # quotes are needed for make_ndx
         kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.dirs.includes
 
         params = gromacs.setup.solvate(**kwargs)
