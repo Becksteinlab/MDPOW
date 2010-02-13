@@ -78,6 +78,7 @@ class Ghyd(object):
                              label='Coul',
                              couple_lambda0='vdw-q', couple_lambda1='vdw',
                              sc_alpha=0,      # linear scaling for coulomb
+                             lambdas=[0, 0.25, 0.5, 0.75, 1.0],  # default values
                              ),
                  'vdw':
                  FEPschedule(name='vdw',
@@ -85,10 +86,14 @@ class Ghyd(object):
                              label='VDW',
                              couple_lambda0='vdw', couple_lambda1='none',
                              sc_alpha=0.5, sc_power=1.0, sc_sigma=0.3, # recommended values
+                             lambdas=[0.0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6,  # defaults
+                                      0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1],
                              ),
                  }
 
-    def __init__(self, molecule=None, top=None, struct=None, filename=None,
+
+    def __init__(self, molecule=None, top=None, struct=None,
+                 simulation=None, filename=None,
                  **kwargs):
         """Prepare all input files.
         
@@ -101,8 +106,10 @@ class Ghyd(object):
                topology [REQUIRED]
            *struct* 
                solvated and equilibrated input structure [REQUIRED]
+           *ndx*
+               index file
            *dirname*
-               directory to work under [.]
+               directory to work under ['FEP']
            *lambda_coulomb*
                list of lambdas for discharging: q+vdw --> vdw
            *lambda_vdw*
@@ -114,6 +121,9 @@ class Ghyd(object):
            *templates*
                template or list of templates for queuing system scripts
                (see :data:`gromacs.config.templates` for details) [local.sh]
+           *simulation*
+               Instead of providing the required arguments, obtain the input
+               files from a :class:`mdpow.equil.Simulation` instance.
            *filename*
                Instead of providing the required arguments, load from pickle
                file
@@ -122,16 +132,22 @@ class Ghyd(object):
         """
         required_args = ('molecule', 'top', 'struct')
 
-        if None in (molecule, top, struct) and not filename is None:
+        if (None in (molecule, top, struct) and simulation is None) and not filename is None:
             # load from pickle file
             self.load(filename)
-            self.filename = filename            
+            self.filename = filename
         else:
-            
-            self.molecule = molecule   # should check that this is in top (?)
-            self.top = top
-            self.struct = struct
-            self.ndx = kwargs.pop('ndx', None)
+            if not simulation is None:
+                # load data from Simulation instance
+                self.molecule = simulation.molecule
+                self.top = simulation.files.processed_topology or simulation.files.topology
+                self.struct = simulation.files.MD_NPT
+                self.ndx = simulation.files.ndx
+            else:
+                self.molecule = molecule   # should check that this is in top (?)
+                self.top = top
+                self.struct = struct
+                self.ndx = kwargs.pop('ndx', None)
 
             for attr in required_args:
                 if self.__getattribute__(attr) is None:
@@ -141,20 +157,14 @@ class Ghyd(object):
             self.templates = kwargs.pop('templates', ['local.sh'])
             self.deffnm = kwargs.setdefault('deffnm', 'md')
 
-            kwargs.setdefault('mdp', fep_templates['production_mdp'])
 
-            kwargs.setdefault('lambda_coulomb', [0, 0.25, 0.5, 0.75, 1.0])
-            kwargs.setdefault('lambda_vdw', [0.0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6,
-                                             0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1])
-            # should be longer, this is for testing
-            kwargs.setdefault('runtime', 100) # ps
-            kwargs.setdefault('dirname', os.path.curdir)
-
-            self.mdp = kwargs['mdp']
-            self.lambdas = {'coulomb': kwargs['lambda_coulomb'],
-                            'vdw': kwargs['lambda_vdw']}
-            self.runtime = kwargs['runtime']
-            self.dirname = kwargs['dirname']
+            self.mdp = kwargs.pop('mdp', fep_templates['production_mdp'])
+            self.lambdas = {
+                'coulomb': kwargs.pop('lambda_coulomb', self.schedules['coulomb'].lambdas),
+                'vdw':     kwargs.pop('lambda_vdw', self.schedules['vdw'].lambdas),
+                }
+            self.runtime = kwargs.pop('runtime', 100.0)   # ps, short for testing!!
+            self.dirname = kwargs.pop('dirname', 'FEP')
             self.component_dirs = {'coulomb': os.path.join(self.dirname, 'Coulomb'),
                                    'vdw': os.path.join(self.dirname, 'VDW')}
 
@@ -169,6 +179,15 @@ class Ghyd(object):
                                          )
             #: Generated run scripts
             self.scripts = AttributeDict()
+
+            # sanity checks
+            if os.path.exists(self.dirname):
+                wmsg = "Directory %(dirname)r already exists --- will overwrite " \
+                       "existing files." % vars(self)
+                warnings.warn(wmsg)
+                logger.warn(wmsg)
+
+        super(Ghyd, self).__init__(**kwargs)
 
         logger.info("Hydration free energy calculation for molecule %(molecule)r." % vars(self))
         logger.info("Using directories under %(dirname)r: %(component_dirs)r" % vars(self))
