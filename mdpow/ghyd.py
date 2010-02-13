@@ -28,6 +28,7 @@ from __future__ import with_statement
 
 import os
 from subprocess import call
+import warnings
 from pkg_resources import resource_filename
 import cPickle
 
@@ -155,7 +156,7 @@ class Ghyd(object):
             
             self.Temperature = kwargs.pop('temperature', 300.0)
             self.templates = kwargs.pop('templates', ['local.sh'])
-            self.deffnm = kwargs.setdefault('deffnm', 'md')
+            self.deffnm = kwargs.pop('deffnm', 'md')
 
 
             self.mdp = kwargs.pop('mdp', fep_templates['production_mdp'])
