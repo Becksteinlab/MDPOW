@@ -77,9 +77,12 @@ class Simulation(object):
                 )
             self.files = AttributeDict(
                 topology=kwargs.pop('top', None),     # realpath?
+                processed_topology = None,
                 structure=kwargs.pop('struct', None), # realpath?
                 solvated=kwargs.pop('solvated', None), # realpath?
-                ndx=kwargs.pop('ndx', None)
+                ndx=kwargs.pop('ndx', None),
+                energy_minimized=kwargs.pop('energy_minimized', None),
+                MD_restrained=kwargs.pop('MD_restrained', None),
                 )
 
             if self.files.topology:
@@ -179,7 +182,19 @@ class Simulation(object):
         self.files.structure = kwargs['struct']
         self.files.solvated = params['struct']
         self.files.ndx = params['ndx']
+
+        # we can also make a processed topology right now
+        self.processed_topology()
+        
         return params
+
+    def processed_topology(self):
+        """Create a portable topology file from the topology and the solvated system."""
+        if not os.path.exists(self.files.solvated):
+            self.solvate()
+        self.files.processed_topology = gromacs.cbook.create_portable_topology(
+            self.files.topology, self.files.solvated, includes=self.dirs.includes)
+        return self.files.processed_topology
 
     def energy_minimize(self, **kwargs):
         """Energy minimize the solvated structure on the local machine.
@@ -223,3 +238,24 @@ class Simulation(object):
 
         self.files.MD_restrained = params['struct']
         return params
+
+    def MD(self, **kwargs):
+        """Short NPT MD simulation.
+
+        See documentation of :func:`gromacs.setup.MD` for
+        details. The following keywords can not be changed: top, mdp, ndx,
+        mainselection
+        """
+        self.dirs.MD_NPT = realpath(kwargs.setdefault('dirname', 'MD_NPT'))
+        kwargs['top'] = self.files.topology
+        kwargs.setdefault('struct', self.files.MD_restrained)
+        kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.dirs.includes
+        kwargs['mdp'] = config.get_template('NPT_opls.mdp')
+        kwargs['ndx'] = self.files.ndx
+        kwargs['mainselection'] = None    # important for SD (use custom mdp and ndx!)
+
+        params = gromacs.setup.MD(**kwargs)
+
+        self.files.MD_NPT = params['struct']
+        return params
+        
