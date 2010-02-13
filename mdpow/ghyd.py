@@ -121,11 +121,11 @@ class Ghyd(object):
                other undocumented arguments (see source for the moment)
         """
         required_args = ('molecule', 'top', 'struct')
-        
+
         if None in (molecule, top, struct) and not filename is None:
             # load from pickle file
             self.load(filename)
-            self.filename = filename
+            self.filename = filename            
         else:
             
             self.molecule = molecule   # should check that this is in top (?)

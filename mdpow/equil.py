@@ -21,6 +21,7 @@ from __future__ import with_statement
 
 import os
 import shutil
+import cPickle
 import logging
 
 import gromacs.setup
@@ -33,25 +34,85 @@ logger = logging.getLogger('mdpow.equil')
 
 
 class Simulation(object):
-    """Simple MD simulation of a compound in water."""
-    
-    def __init__(self, name='DRUG', **kwargs):
-        self.name = name
-        self.dirs = AttributeDict(
-            basedir=realpath(os.path.curdir),
-            includes=list(asiterable(kwargs.pop('includes',[]))) + [config.includedir],
-            )
-        self.files = AttributeDict(
-            topology=kwargs.pop('top', None),     # realpath?
-            structure=kwargs.pop('struct', None), # realpath?
-            solvated=kwargs.pop('solvated', None), # realpath?
-            )
+    """Simple MD simulation of a single compound molecule in water.
 
-        if self.files.topology:
-            # assume that a user-supplied topology lives in a 'standard' top dir
-            # that includes the necessary itp file(s)
-            self.dirs.topology = realpath(os.path.dirname(self.files.topology))
-            self.dirs.includes.append(self.dirs.topology)
+    Typical use ::
+       S = Simulation(name='DRUG')
+       S.topology(itp='drug.itp')
+       S.solvate(struct='DRUG-H.pdb')
+       S.energy_minimize()
+
+    .. Note:: The OPLS/AA force field and the TIP4P water molecule is the
+              default; changing this is possible but will require provision of
+              customized itp and mdp files at various stages.
+    """
+    
+    def __init__(self, name=None, filename=None, **kwargs):
+        """Set up Simulation instance.
+
+        The *name* of the compound molecule should be supplied. Existing files
+        (which have been generated in previous runs) can also be supplied.
+
+        :Keywords:
+          *name*
+              Identifier for the compound molecule. This is the same as the
+              entry in the ``[ molecule ]`` section of the itp file. ["DRUG"]
+          *filename*
+              If provided and *name* is ``None`` then load the instance from
+              the pickle file *filename*, which was generated with
+              :meth:`~mdpow.equil.Simulation.save`.
+          *kwargs*
+              advanced keywords for short-circuiting; see the source
+        """
+        if name is None and not filename is None:
+            # load from pickle file
+            self.load(filename)
+            self.filename = filename            
+            kwargs = {}    # for super
+        else:
+            self.name = name or 'DRUG'
+            self.dirs = AttributeDict(
+                basedir=realpath(os.path.curdir),
+                includes=list(asiterable(kwargs.pop('includes',[]))) + [config.includedir],
+                )
+            self.files = AttributeDict(
+                topology=kwargs.pop('top', None),     # realpath?
+                structure=kwargs.pop('struct', None), # realpath?
+                solvated=kwargs.pop('solvated', None), # realpath?
+                ndx=kwargs.pop('ndx', None)
+                )
+
+            if self.files.topology:
+                # assume that a user-supplied topology lives in a 'standard' top dir
+                # that includes the necessary itp file(s)
+                self.dirs.topology = realpath(os.path.dirname(self.files.topology))
+                self.dirs.includes.append(self.dirs.topology)
+
+        super(Simulation, self).__init__(**kwargs)
+
+    def save(self, filename=None):
+        """Save instance to a pickle file.
+
+        The default filename is the name of the file that was last loaded from
+        or saved to.
+        """
+        if filename is None:
+            filename = self.filename
+        else:
+            self.filename = filename
+        with open(filename, 'wb') as f:
+            cPickle.dump(self, f, protocol=cPickle.HIGHEST_PROTOCOL)
+        logger.debug("Instance pickled to %(filename)r" % vars())
+        
+    def load(self, filename=None):
+        """Re-instantiate class from pickled file."""
+        if filename is None:
+            filename = self.filename        
+        with open(filename, 'rb') as f:
+            instance = cPickle.load(f)
+        self.__dict__.update(instance.__dict__)
+        logger.debug("Instance loaded from %(filename)r" % vars())
+
 
     def topology(self, itp='drug.itp', **kwargs):
         """Generate a topology for compound *name*.
@@ -114,12 +175,14 @@ class Simulation(object):
         kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.dirs.includes
 
         params = gromacs.setup.solvate(**kwargs)
-        
+
+        self.files.structure = kwargs['struct']
         self.files.solvated = params['struct']
+        self.files.ndx = params['ndx']
         return params
 
     def energy_minimize(self, **kwargs):
-        """Energy minimize the solvatet structure on the local machine.
+        """Energy minimize the solvated structure on the local machine.
 
         *kwargs* are passed to :func:`gromacs.setup.energ_minimize` but if
         :meth:`~mdpow.equil.Simulation.solvate` step has been carried out
@@ -129,9 +192,34 @@ class Simulation(object):
         self.dirs.energy_minimization = realpath(kwargs.setdefault('dirname', 'em'))
         kwargs['top'] = self.files.topology
         kwargs.setdefault('struct', self.files.solvated)
-        # construct the complete include path
         kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.dirs.includes
 
         params = gromacs.setup.energy_minimize(**kwargs)
 
+        self.files.energy_minimized = params['struct']
+        return params
+
+    def MD_restrained(self, **kwargs):
+        """Short MD simulation with position restraints on compound.
+
+        See documentation of :func:`gromacs.setup.MD_restrained` for
+        details. The following keywords can not be changed: top, mdp, ndx,
+        mainselection
+
+        .. Note:: Position restraints are activated with ``-DPOSRES`` directives
+                  for :func:`gromacs.grompp`. Hence this will only work if the
+                  compound itp file does indeed contain a ``[ posres ]``
+                  section that is protected by a ``#ifdef POSRES`` clause.
+        """
+        self.dirs.MD_restrained = realpath(kwargs.setdefault('dirname', 'MD_restrained'))
+        kwargs['top'] = self.files.topology
+        kwargs.setdefault('struct', self.files.energy_minimized)
+        kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.dirs.includes
+        kwargs['mdp'] = config.get_template('NPT_opls.mdp')
+        kwargs['ndx'] = self.files.ndx
+        kwargs['mainselection'] = None    # important for SD (use custom mdp and ndx!)
+
+        params = gromacs.setup.MD_restrained(**kwargs)
+
+        self.files.MD_restrained = params['struct']
         return params

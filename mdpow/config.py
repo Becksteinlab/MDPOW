@@ -15,20 +15,6 @@ located. If the user wants to change anything they will still have to do it
 here in source until a better mechanism with rc files has been implemented.
 
 
-Logging
--------
-
-Gromacs commands log their invocation to a log file; typically at
-loglevel *INFO* (see the python `logging module`_ for details).
-
-.. autodata:: logfilename
-.. autodata:: loglevel_console
-.. autodata:: loglevel_file
-
-.. _logging module: http://docs.python.org/library/logging.html
-
-
-
 Location of template files
 --------------------------
 
@@ -38,7 +24,8 @@ egg we actually have to unwrap these files at this stage but this is
 completely transparent to the user.
 
 .. autodata:: templates
-.. autodata:: sge_template
+.. autodata:: topfiles
+.. autodata:: includedir
 
 
 Functions
@@ -59,12 +46,22 @@ from pkg_resources import resource_filename, resource_listdir
 # Location of template files
 # --------------------------
 
-_templates = ['templates/md_OPLSAA.mdp', 'templates/system.top']
-templates = dict((os.path.basename(fn),resource_filename(__name__,fn))
-                 for fn in _templates)
+
+def _generate_template_dict(dirname):
+    """Generate a list of included files *and* extract them to a temp space.
+
+    Templates have to be extracted from the egg because they are used
+    by external code. All template filenames are stored in
+    :data:`config.templates` or :data:`config.topfiles`.
+    """
+    # XXX: should not use os.path.basename for resources; '/' not sep on Win
+    return dict((os.path.basename(fn), resource_filename(__name__, dirname+'/'+fn))
+                for fn in resource_listdir(__name__, dirname))
+
+templates = _generate_template_dict('templates')
 """Templates have to be extracted from the egg because they are used
 by external code. All template filenames are stored in
-:data:`gromacs.config.templates`.
+:data:`config.templates`.
 
 **Gromacs mdp templates**
 
@@ -77,11 +74,14 @@ by external code. All template filenames are stored in
 
 """
 
-# includefir only works if we can find the ffoplsaa.itp file (which
-# SHOULD be there... but I am too lazy to do error checking)
-topfiles = dict((os.path.basename(fn), resource_filename(__name__,'top/'+fn))
-                for fn in resource_listdir(__name__,'top'))
-includedir = os.path.dirname(topfiles['ffoplsaa.itp'])
+#: List of all topology files that are included in the package.
+topfiles = _generate_template_dict('top')
+
+try:
+    #: The package's include directory for :func:`gromacs.grompp`.
+    includedir = os.path.dirname(topfiles['ffoplsaa.itp'])
+except KeyError:
+    raise ImportError("Missing required data files (ffoplsaa.itp). Check your installation.")
 
 
 
