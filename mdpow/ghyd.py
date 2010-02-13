@@ -1,8 +1,8 @@
 # ghyd.py
 # Copyright (c) 2010 Oliver Beckstein
 """
-:mod:`ghyd` -- calculate free energy of hydration
-=================================================
+:mod:`mdpow.ghyd` -- calculate free energy of hydration
+=======================================================
 
 Set up and run free energy perturbation calculations to calculate the
 free energy of hydration of a solute in a water box. The protocol
@@ -37,7 +37,7 @@ import gromacs, gromacs.setup
 from gromacs.utilities import asiterable, AttributeDict, in_dir
 
 import logging
-logger = logging.getLogger('Ligands.ghyd')
+logger = logging.getLogger('mdpow.ghyd')
 
 #: `Avogadro's constant (NIST)`_ in mol^-1.
 #: .. _Avogadro's constant (NIST): http://physics.nist.gov/cgi-bin/cuu/Value?na

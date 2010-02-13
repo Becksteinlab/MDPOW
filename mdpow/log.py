@@ -4,11 +4,11 @@
 # See the file COPYING for details.
 
 """
-:mod:`pow.log` --- Configure logging for POW analysis
-=====================================================
+:mod:`mdpow.log` --- Configure logging for POW analysis
+=======================================================
 
 Import this module if logging is desired in application code and
-create the logger in __init__.py::
+create the logger in ``__init__.py``::
 
   import log
   logger = log.create(logname, logfile)

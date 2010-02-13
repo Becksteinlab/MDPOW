@@ -2,10 +2,10 @@
 # Copyright (c) 2010 Oliver Beckstein
 
 """
-:mod:`pow.equil` --- Setting up and running equilibrium MD
-==========================================================
+:mod:`mdpow.equil` --- Setting up and running equilibrium MD
+============================================================
 
-The :mod:`pow.equil` module facilitates the setup of equilibrium
+The :mod:`mdpow.equil` module facilitates the setup of equilibrium
 molecular dynamics simulations of compound molecule in a simulation
 box of water.
 
@@ -29,7 +29,7 @@ from gromacs.utilities import in_dir, realpath, asiterable
 
 import config
 
-logger = logging.getLogger('pow.equil')
+logger = logging.getLogger('mdpow.equil')
 
 
 class Simulation(object):

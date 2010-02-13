@@ -4,7 +4,7 @@
 # See the file COPYING for details.
 
 """
-:mod:`pow.config` -- Configuration for POW
+:mod:`mdpow.config` -- Configuration for POW
 ==========================================================
 
 The config module provides configurable options for the whole package;
