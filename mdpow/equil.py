@@ -25,7 +25,7 @@ import logging
 
 import gromacs.setup
 import gromacs.cbook
-from gromacs.utilities import in_dir, realpath, asiterable
+from gromacs.utilities import in_dir, realpath, asiterable, AttributeDict
 
 import config
 
@@ -37,12 +37,23 @@ class Simulation(object):
     
     def __init__(self, name='DRUG', **kwargs):
         self.name = name
-        self.dirs = {'basedir': realpath(os.path.curdir),
-                     'includes': list(asiterable(kwargs.pop('includes',[]))) + [config.includedir],
-                     }
-        self.topology = kwargs.pop('top', None)
+        self.dirs = AttributeDict(
+            basedir=realpath(os.path.curdir),
+            includes=list(asiterable(kwargs.pop('includes',[]))) + [config.includedir],
+            )
+        self.files = AttributeDict(
+            topology=kwargs.pop('top', None),     # realpath?
+            structure=kwargs.pop('struct', None), # realpath?
+            solvated=kwargs.pop('solvated', None), # realpath?
+            )
 
-    def create_topology(self, itp='drug.itp', **kwargs):
+        if self.files.topology:
+            # assume that a user-supplied topology lives in a 'standard' top dir
+            # that includes the necessary itp file(s)
+            self.dirs.topology = realpath(os.path.dirname(self.files.topology))
+            self.dirs.includes.append(self.dirs.topology)
+
+    def topology(self, itp='drug.itp', **kwargs):
         """Generate a topology for compound *name*.
 
         :Keywords:
@@ -59,6 +70,8 @@ class Simulation(object):
                see source for *top_template*, *topol*
         """
         dirname = kwargs.pop('dirname', 'top')
+        self.dirs.topology = realpath(dirname)
+        
         top_template = config.get_template(kwargs.pop('top_template', 'system.top'))
         topol = kwargs.pop('topol', os.path.basename(top_template))
         itp = os.path.realpath(itp)
@@ -74,24 +87,51 @@ class Simulation(object):
                                    newname=topol)
         logger.info('[%(dirname)s] Created topology %(topol)r that includes %(_itp)r', vars())
 
-        self.topology = realpath(dirname, topol)
-        self.dirs['topology'] = realpath(dirname)
+        # update known files and dirs
+        self.files.topology = realpath(dirname, topol)
+        if not self.dirs.topology in self.dirs.includes:
+            self.dirs.includes.append(self.dirs.topology)
         
         return {'dirname': dirname, 'topol': topol}
 
 
-    def solvate(self, struct='drug.pdb', **kwargs):
-        """Solvate structure *struct* in a dodecahedral box of water.
+    def solvate(self, **kwargs):
+        """Solvate structure *struct* in a box of water.
 
-        *kwargs* are passed on to :func:`gromacs.setup.solvate`.
+        :Keywords:
+          *struct*
+              pdb or gro coordinate file (if not supplied, the value is used
+              that was supplied to the constructor of :class:`~mdpow.equil.Simulation`)
+          *kwargs*
+              All other arguments are passed on to :func:`gromacs.setup.solvate`, but
+              set to sensible default values. *top* is always fixed.
         """
-        self.structure = realpath(struct)
-        kwargs['struct'] = struct
-        kwargs['top'] = self.topology
+        self.dirs.solvation = realpath(kwargs.setdefault('dirname', 'solvation'))        
+        kwargs.setdefault('struct', self.files.structure)
+        kwargs['top'] = self.files.topology
         kwargs.setdefault('water', 'tip4p')
-        kwargs.setdefault('mainselection', self.name)
-        kwargs.setdefault('dirname', 'solvation')
-        kwargs['includes'] = self.dirs['includes']  # XXX: add user ones
-        self.dirs['solvation'] = realpath(kwargs['dirname'])
+        kwargs.setdefault('mainselection', '"%s"' % self.name)  # quotes are needed for make_ndx
+        kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.dirs.includes
 
-        return gromacs.setup.solvate(**kwargs)
+        params = gromacs.setup.solvate(**kwargs)
+        
+        self.files.solvated = params['struct']
+        return params
+
+    def energy_minimize(self, **kwargs):
+        """Energy minimize the solvatet structure on the local machine.
+
+        *kwargs* are passed to :func:`gromacs.setup.energ_minimize` but if
+        :meth:`~mdpow.equil.Simulation.solvate` step has been carried out
+        previously all the defaults should just work.
+        """
+
+        self.dirs.energy_minimization = realpath(kwargs.setdefault('dirname', 'em'))
+        kwargs['top'] = self.files.topology
+        kwargs.setdefault('struct', self.files.solvated)
+        # construct the complete include path
+        kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.dirs.includes
+
+        params = gromacs.setup.energy_minimize(**kwargs)
+
+        return params
