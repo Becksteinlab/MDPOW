@@ -40,6 +40,8 @@ from gromacs.utilities import asiterable, AttributeDict, in_dir
 import logging
 logger = logging.getLogger('mdpow.ghyd')
 
+import config
+
 #: `Avogadro's constant (NIST)`_ in mol^-1.
 #: .. _Avogadro's constant (NIST): http://physics.nist.gov/cgi-bin/cuu/Value?na
 N_AVOGADRO = 6.02214179e23
@@ -122,6 +124,8 @@ class Ghyd(object):
            *templates*
                template or list of templates for queuing system scripts
                (see :data:`gromacs.config.templates` for details) [local.sh]
+           *includes*
+               include directories
            *simulation*
                Instead of providing the required arguments, obtain the input
                files from a :class:`mdpow.equil.Simulation` instance.
@@ -166,6 +170,7 @@ class Ghyd(object):
                 }
             self.runtime = kwargs.pop('runtime', 100.0)   # ps, short for testing!!
             self.dirname = kwargs.pop('dirname', 'FEP')
+            self.includes = list(asiterable(kwargs.pop('includes',[]))) + [config.includedir]
             self.component_dirs = {'coulomb': os.path.join(self.dirname, 'Coulomb'),
                                    'vdw': os.path.join(self.dirname, 'VDW')}
 
@@ -215,19 +220,24 @@ class Ghyd(object):
         """Prepare the input files for all Gromacs runs.
 
         :Keywords:
-           *sge*
+           *templates*
                (List of) template(s) for batch submission scripts; if not set then 
                the templates are used that were supplied to the constructor.
+               (The keyword *sge* is an alias for *templates*.)
            *kwargs*
                Most kwargs are passed on to :func:`gromacs.setup.MD` although some
                are set to values that are required for the FEP functionality.
         """
         kwargs['mdrun_opts'] = " ".join([kwargs.pop('mdrun_opts',''), '-dgdl'])  # crucial for FEP!!        
+        kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.includes        
         qsubargs = kwargs.copy()
         qsubargs['dirname'] = self.dirname
         # handle templates separately (necessary for array jobs)
         templates = qsubargs.pop('sge', None) or self.templates
+        templates.extend(qsubargs.pop('templates',[]))  # also allow canonical 'templates'
+        
         # make sure that the individual batch scripts are also written
+        kwargs.pop('templates', None)         # clean up (templates not understood further down)
         kwargs.setdefault('sge', templates)
         
         for component, lambdas in self.lambdas.items():

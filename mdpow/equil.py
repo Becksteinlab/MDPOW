@@ -46,8 +46,13 @@ class Simulation(object):
               default; changing this is possible but will require provision of
               customized itp and mdp files at various stages.
     """
+
+    #: kwyword arguments to pre-set some file names
+    filekeys = ('topology', 'processed_topology', 'structure', 'solvated',
+                'ndx', 'energy_minimized', 'MD_restrained', 'MD_NPT')
+
     
-    def __init__(self, molecule=None, filename=None, **kwargs):
+    def __init__(self, molecule=None, filename=None, dirname=os.path.curdir,  **kwargs):
         """Set up Simulation instance.
 
         The *molecule* of the compound molecule should be supplied. Existing files
@@ -61,8 +66,12 @@ class Simulation(object):
               If provided and *molecule* is ``None`` then load the instance from
               the pickle file *filename*, which was generated with
               :meth:`~mdpow.equil.Simulation.save`.
+          *dirname*
+              base directory; all other directories are created under it
           *kwargs*
-              advanced keywords for short-circuiting; see the source
+              advanced keywords for short-circuiting; see
+              :data:`mdpow.equil.Simulation.filekeys`.
+              
         """
         if molecule is None and not filename is None:
             # load from pickle file
@@ -72,19 +81,11 @@ class Simulation(object):
         else:
             self.molecule = molecule or 'DRUG'
             self.dirs = AttributeDict(
-                basedir=realpath(os.path.curdir),
+                basedir=realpath(dirname),
                 includes=list(asiterable(kwargs.pop('includes',[]))) + [config.includedir],
                 )
-            self.files = AttributeDict(
-                topology=kwargs.pop('top', None),     # realpath?
-                processed_topology = None,
-                structure=kwargs.pop('struct', None), # realpath?
-                solvated=kwargs.pop('solvated', None), # realpath?
-                ndx=kwargs.pop('ndx', None),
-                energy_minimized=kwargs.pop('energy_minimized', None),
-                MD_restrained=kwargs.pop('MD_restrained', None),
-                MD_NPT=kwargs.pop('MD_NPT', None),                
-                )
+            # pre-set filenames: keyword == variable name
+            self.files = AttributeDict([(k, kwargs.pop(k, None)) for k in self.filekeys])
 
             if self.files.topology:
                 # assume that a user-supplied topology lives in a 'standard' top dir
@@ -94,13 +95,21 @@ class Simulation(object):
 
         super(Simulation, self).__init__(**kwargs)
 
+    def BASEDIR(self, *args):
+        return os.path.join(self.basedir, *args)
+
     def save(self, filename=None):
         """Save instance to a pickle file.
 
         The default filename is the name of the file that was last loaded from
         or saved to.
+
+        If no filename is known then we use '<molecule>.pickle'.
         """
         if filename is None:
+            if self.filename is None:
+                self.filename = self.molecule.lower() + '.pickle'
+                logger.warning("No filename known, saving instance under name %r", self.filename)
             filename = self.filename
         else:
             self.filename = filename
@@ -111,6 +120,9 @@ class Simulation(object):
     def load(self, filename=None):
         """Re-instantiate class from pickled file."""
         if filename is None:
+            if self.filename is None:
+                self.filename = self.molecule.lower() + '.pickle'
+                logger.warning("No filename known, trying name %r", self.filename)
             filename = self.filename        
         with open(filename, 'rb') as f:
             instance = cPickle.load(f)
@@ -160,7 +172,7 @@ class Simulation(object):
             *kwargs*
                see source for *top_template*, *topol*
         """
-        dirname = kwargs.pop('dirname', 'top')
+        dirname = kwargs.pop('dirname', self.BASEDIR('top'))
         self.dirs.topology = realpath(dirname)
         
         top_template = config.get_template(kwargs.pop('top_template', 'system.top'))
@@ -197,7 +209,7 @@ class Simulation(object):
               All other arguments are passed on to :func:`gromacs.setup.solvate`, but
               set to sensible default values. *top* is always fixed.
         """
-        self.dirs.solvation = realpath(kwargs.setdefault('dirname', 'solvation'))        
+        self.dirs.solvation = realpath(kwargs.setdefault('dirname', self.BASEDIR('solvation')))
         kwargs.setdefault('struct', self.files.structure)
         kwargs['top'] = self.files.topology
         kwargs.setdefault('water', 'tip4p')
@@ -231,7 +243,7 @@ class Simulation(object):
         previously all the defaults should just work.
         """
 
-        self.dirs.energy_minimization = realpath(kwargs.setdefault('dirname', 'em'))
+        self.dirs.energy_minimization = realpath(kwargs.setdefault('dirname', self.BASEDIR('em')))
         kwargs['top'] = self.files.topology
         kwargs.setdefault('struct', self.files.solvated)
         kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.dirs.includes
@@ -253,7 +265,7 @@ class Simulation(object):
                   compound itp file does indeed contain a ``[ posres ]``
                   section that is protected by a ``#ifdef POSRES`` clause.
         """
-        self.dirs.MD_restrained = realpath(kwargs.setdefault('dirname', 'MD_restrained'))
+        self.dirs.MD_restrained = realpath(kwargs.setdefault('dirname', self.BASEDIR('MD_restrained')))
         kwargs['top'] = self.files.topology
         kwargs.setdefault('struct', self.files.energy_minimized)
         kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.dirs.includes
@@ -273,7 +285,7 @@ class Simulation(object):
         details. The following keywords can not be changed: top, mdp, ndx,
         mainselection
         """
-        self.dirs.MD_NPT = realpath(kwargs.setdefault('dirname', 'MD_NPT'))
+        self.dirs.MD_NPT = realpath(kwargs.setdefault('dirname', self.BASEDIR('MD_NPT')))
         kwargs['top'] = self.files.topology
         kwargs.setdefault('struct', self.files.MD_restrained)
         kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.dirs.includes
