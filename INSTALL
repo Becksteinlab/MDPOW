@@ -1,0 +1,47 @@
+Quick installation instructions for mdpow
+=========================================
+
+Use easy_install (setuptools) because it will fetch additional
+dependencies. 
+
+Standard installation
+---------------------
+
+Example for installation under ~/opt with python2.6::
+
+  export PYTHONPATH=$HOME/opt/lib/python2.6:$PYTHONPATH
+  cd ..
+  easy_install --prefix=$HOME/opt POW
+
+Check that you can import the module::
+
+  python
+  >>> import mdpow
+  >>> help(mdpow)
+
+
+In case of problems contact Oliver Beckstein <orbeckt@gmail.com>.
+
+
+Developer installation
+----------------------
+
+A development install is useful while hacking away on the code::
+
+ cd POW
+ python setup.py develop
+
+Use --prefix/--install-lib as above or use the defaults in
+~/.pydistutils.cfg; I have
+
+   # Mac OS X user installation:
+   # http://peak.telecommunity.com/DevCenter/EasyInstall#mac-os-x-user-installation
+   # http://peak.telecommunity.com/DevCenter/EasyInstall#downloading-and-installing-a-package
+
+   # note python 2.6 uses ~/.local
+   # http://docs.python.org/whatsnew/2.6.html
+
+   [install]
+   install_lib = ~/.local/lib/python$py_version_short/site-packages
+   install_scripts = ~/bin
+  
