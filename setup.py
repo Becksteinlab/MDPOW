@@ -8,7 +8,7 @@ use_setuptools()
 from setuptools import setup, find_packages
 
 setup(name="POW",
-      version="0.0.1",
+      version="0.0.2",
       description="A library for computing octanol/water partitioning coefficients",
       long_description="""The POW module simplifies the setup and
 execution of free energy calculations of small molecules in water and

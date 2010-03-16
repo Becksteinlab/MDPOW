@@ -169,7 +169,7 @@ class Ghyd(object):
                 'vdw':     kwargs.pop('lambda_vdw', self.schedules['vdw'].lambdas),
                 }
             self.runtime = kwargs.pop('runtime', 100.0)   # ps, short for testing!!
-            self.dirname = kwargs.pop('dirname', 'FEP')
+            self.dirname = kwargs.pop('dirname', os.path.join('FEP', 'water'))
             self.includes = list(asiterable(kwargs.pop('includes',[]))) + [config.includedir]
             self.component_dirs = {'coulomb': os.path.join(self.dirname, 'Coulomb'),
                                    'vdw': os.path.join(self.dirname, 'VDW')}
@@ -197,7 +197,6 @@ class Ghyd(object):
 
         logger.info("Hydration free energy calculation for molecule %(molecule)r." % vars(self))
         logger.info("Using directories under %(dirname)r: %(component_dirs)r" % vars(self))
-
 
 
     def wdir(self, component, lmbda):

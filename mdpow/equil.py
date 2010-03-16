@@ -32,6 +32,10 @@ import config
 
 logger = logging.getLogger('mdpow.equil')
 
+#: itp files are picked up via include dirs
+ITP = {'water': 'tip4p.itp', 'octanol': '1oct.itp'}
+#: solvent boxes
+BOX = {'water': 'tip4p.gro', 'octanol': config.topfiles['1oct.gro']}
 
 class Simulation(object):
     """Simple MD simulation of a single compound molecule in water.
@@ -50,9 +54,10 @@ class Simulation(object):
     #: kwyword arguments to pre-set some file names
     filekeys = ('topology', 'processed_topology', 'structure', 'solvated',
                 'ndx', 'energy_minimized', 'MD_restrained', 'MD_NPT')
-
+    dirname_default = os.path.curdir
+    solvent_default = 'water'
     
-    def __init__(self, molecule=None, filename=None, dirname=os.path.curdir,  **kwargs):
+    def __init__(self, molecule=None, **kwargs):
         """Set up Simulation instance.
 
         The *molecule* of the compound molecule should be supplied. Existing files
@@ -68,11 +73,16 @@ class Simulation(object):
               :meth:`~mdpow.equil.Simulation.save`.
           *dirname*
               base directory; all other directories are created under it
+          *solvent*
+              water or octanol
           *kwargs*
               advanced keywords for short-circuiting; see
               :data:`mdpow.equil.Simulation.filekeys`.
               
         """
+        filename = kwargs.pop('filename', None)
+        dirname = kwargs.pop('dirname', self.dirname_default)
+        solvent = kwargs.pop('solvent', self.solvent_default)
         if molecule is None and not filename is None:
             # load from pickle file
             self.load(filename)
@@ -93,10 +103,18 @@ class Simulation(object):
                 self.dirs.topology = realpath(os.path.dirname(self.files.topology))
                 self.dirs.includes.append(self.dirs.topology)
 
+            self.solvent_type = solvent
+            try:
+                self.solvent = AttributeDict(itp=ITP[solvent], box=BOX[solvent])
+            except KeyError:
+                raise ValueError("solvent must be either 'water' or 'octanol'")
+
+            self.filename = filename or self.solvent_type+'.simulation'
+
         super(Simulation, self).__init__(**kwargs)
 
     def BASEDIR(self, *args):
-        return os.path.join(self.basedir, *args)
+        return os.path.join(self.dirs.basedir, *args)
 
     def save(self, filename=None):
         """Save instance to a pickle file.
@@ -183,7 +201,8 @@ class Simulation(object):
         with in_dir(dirname):
             shutil.copy(itp, _itp)
             gromacs.cbook.edit_txt(top_template,
-                                   [('#include', 'compound.itp', _itp),
+                                   [('#include +"compound\.itp"', 'compound.itp', _itp),
+                                    ('#include +"tip4p\.itp"', 'tip4p.itp', self.solvent.itp),
                                     ('Compound', 'DRUG', self.molecule),
                                     ('DRUG\s*1', 'DRUG', self.molecule),
                                     ],
@@ -198,7 +217,7 @@ class Simulation(object):
         return {'dirname': dirname, 'topol': topol}
 
 
-    def solvate(self, **kwargs):
+    def solvate(self, struct=None, **kwargs):
         """Solvate structure *struct* in a box of water.
 
         :Keywords:
@@ -207,12 +226,12 @@ class Simulation(object):
               that was supplied to the constructor of :class:`~mdpow.equil.Simulation`)
           *kwargs*
               All other arguments are passed on to :func:`gromacs.setup.solvate`, but
-              set to sensible default values. *top* is always fixed.
+              set to sensible default values. *top* and *water* are always fixed.
         """
         self.dirs.solvation = realpath(kwargs.setdefault('dirname', self.BASEDIR('solvation')))
-        kwargs.setdefault('struct', self.files.structure)
-        kwargs['top'] = self.files.topology
-        kwargs.setdefault('water', 'tip4p')
+        kwargs['struct'] = self._checknotempty(struct or self.files.structure, 'struct')
+        kwargs['top'] = self._checknotempty(self.files.topology, 'top')
+        kwargs['water'] = self.solvent.box
         kwargs.setdefault('mainselection', '"%s"' % self.molecule)  # quotes are needed for make_ndx
         kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.dirs.includes
 
@@ -273,6 +292,8 @@ class Simulation(object):
         kwargs['ndx'] = self.files.ndx
         kwargs['mainselection'] = None    # important for SD (use custom mdp and ndx!)
 
+        self._checknotempty(kwargs['struct'], 'struct')
+
         params = gromacs.setup.MD_restrained(**kwargs)
 
         self.files.MD_restrained = params['struct']
@@ -281,20 +302,45 @@ class Simulation(object):
     def MD(self, **kwargs):
         """Short NPT MD simulation.
 
-        See documentation of :func:`gromacs.setup.MD` for
-        details. The following keywords can not be changed: top, mdp, ndx,
-        mainselection
+        See documentation of :func:`gromacs.setup.MD` for details such
+        as *runtime* or specific queuing system options. The following
+        keywords can not be changed: top, mdp, ndx, mainselection.
+
+        By default, the *struct* is the last frame from the position
+        restraints run, or, if this file cannot be found (e.g. because
+        :meth:`Simulation.MD_restrained` was not run) it falls back to
+        the solvated system.
         """
         self.dirs.MD_NPT = realpath(kwargs.setdefault('dirname', self.BASEDIR('MD_NPT')))
+        # user structure or restrained or solvated
+        kwargs.setdefault('struct', self.files.MD_restrained or self.files.solvated)
         kwargs['top'] = self.files.topology
-        kwargs.setdefault('struct', self.files.MD_restrained)
         kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.dirs.includes
         kwargs['mdp'] = config.get_template('NPT_opls.mdp')
         kwargs['ndx'] = self.files.ndx
         kwargs['mainselection'] = None    # important for SD (use custom mdp and ndx!)
+
+        self._checknotempty(kwargs['struct'], 'struct')
 
         params = gromacs.setup.MD(**kwargs)
 
         self.files.MD_NPT = params['struct']
         return params
         
+
+    def _checknotempty(self, value, name):
+        if value is None or value == "":
+            raise ValueError("Parameter %s cannot be empty." % name)
+        return value
+
+
+class WaterSimulation(Simulation):
+    """Equilibrium MD of a solute in a box of water."""
+    dirname_default = os.path.join('Equilibrium/water')
+    solvent_default = 'water'
+
+class OctanolSimulation(Simulation):
+    """Equilibrium MD of a solute in a box of octanol."""
+    dirname_default = os.path.join('Equilibrium/octanol')
+    solvent_default = 'octanol'
+
