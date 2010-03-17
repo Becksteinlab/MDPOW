@@ -1,4 +1,4 @@
-# config.py
+# POW: config.py
 # Copyright (c) 2010 Oliver Beckstein <orbeckst@gmail.com>
 # Released under the GNU Public License 3 (or higher, your choice)
 # See the file COPYING for details.
@@ -54,14 +54,28 @@ def _generate_template_dict(dirname):
     by external code. All template filenames are stored in
     :data:`config.templates` or :data:`config.topfiles`.
     """
-    # XXX: should not use os.path.basename for resources; '/' not sep on Win
-    return dict((os.path.basename(fn), resource_filename(__name__, dirname+'/'+fn))
-                for fn in resource_listdir(__name__, dirname))
+    return dict((resource_basename(fn), resource_filename(__name__, dirname+'/'+fn))
+                for fn in resource_listdir(__name__, dirname)
+                if not fn.endswith('~'))
+
+def resource_basename(resource):
+     """Last component of a resource (which always uses '/' as sep)."""
+     if resource.endswith('/'):
+          resource = resource[:-1]
+     parts = resource.split('/')
+     return parts[-1]
+
 
 templates = _generate_template_dict('templates')
-"""Templates have to be extracted from the egg because they are used
-by external code. All template filenames are stored in
-:data:`config.templates`.
+"""*POW* comes with a number of templates for run input files
+and queuing system scripts. They are provided as a convenience and
+examples but **WITHOUT ANY GUARANTEE FOR CORRECTNESS OR SUITABILITY FOR
+ANY PURPOSE**.
+
+All template filenames are stored in
+:data:`gromacs.config.templates`. Templates have to be extracted from
+the GromacsWrapper python egg file because they are used by external
+code: find the actual file locations from this variable.
 
 **Gromacs mdp templates**
 
@@ -72,6 +86,10 @@ by external code. All template filenames are stored in
    parameter with its gromacs default value (or empty values) and
    modify later with :func:`~gromacs.cbook.edit_mdp`.
 
+
+   The safest bet is to use one of the ``mdout.mdp`` files produced by
+   :func:`gromacs.grompp` as a template as this mdp contains all
+   parameters that are legal in the current version of Gromacs.
 """
 
 #: List of all topology files that are included in the package.
