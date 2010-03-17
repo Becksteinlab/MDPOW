@@ -36,6 +36,8 @@ logger = logging.getLogger('mdpow.equil')
 ITP = {'water': 'tip4p.itp', 'octanol': '1oct.itp'}
 #: solvent boxes
 BOX = {'water': 'tip4p.gro', 'octanol': config.topfiles['1oct.gro']}
+#: minimum distance between solute and box surface (in nm)
+DIST = {'water': 1.0, 'octanol': 1.5}
 
 class Simulation(object):
     """Simple MD simulation of a single compound molecule in water.
@@ -105,7 +107,8 @@ class Simulation(object):
 
             self.solvent_type = solvent
             try:
-                self.solvent = AttributeDict(itp=ITP[solvent], box=BOX[solvent])
+                self.solvent = AttributeDict(itp=ITP[solvent], box=BOX[solvent],
+                                             distance=DIST[solvent])
             except KeyError:
                 raise ValueError("solvent must be either 'water' or 'octanol'")
 
@@ -233,6 +236,7 @@ class Simulation(object):
         kwargs['top'] = self._checknotempty(self.files.topology, 'top')
         kwargs['water'] = self.solvent.box
         kwargs.setdefault('mainselection', '"%s"' % self.molecule)  # quotes are needed for make_ndx
+        kwargs.setdefault('distance', self.solvent.distance)
         kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.dirs.includes
 
         params = gromacs.setup.solvate(**kwargs)
@@ -310,6 +314,10 @@ class Simulation(object):
         restraints run, or, if this file cannot be found (e.g. because
         :meth:`Simulation.MD_restrained` was not run) it falls back to
         the solvated system.
+
+        .. Note:: If the system crashes (with LINCS errors), try initial
+                  equilibration with timestep *dt* = 0.0001 ps (0.1 fs instead
+                  of 2 fs) and *runtime* = 5 ps.
         """
         self.dirs.MD_NPT = realpath(kwargs.setdefault('dirname', self.BASEDIR('MD_NPT')))
         # user structure or restrained or solvated
