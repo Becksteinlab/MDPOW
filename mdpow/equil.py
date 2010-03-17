@@ -19,7 +19,7 @@ model.
 
 from __future__ import with_statement
 
-import os
+import os, errno
 import shutil
 import cPickle
 import logging
@@ -53,11 +53,16 @@ class Simulation(object):
               customized itp and mdp files at various stages.
     """
 
-    #: kwyword arguments to pre-set some file names
-    filekeys = ('topology', 'processed_topology', 'structure', 'solvated',
-                'ndx', 'energy_minimized', 'MD_restrained', 'MD_NPT')
+    #: Keyword arguments to pre-set some file names; they are keys in :attr:`Simulation.files`.
+    filekeys = ('topology', 'processed_topology', 'structure', 'solvated', 'ndx', 
+                'energy_minimized', 'MD_relaxed', 'MD_restrained', 'MD_NPT')
     dirname_default = os.path.curdir
     solvent_default = 'water'
+
+    #: Coordinate files of the full system in increasing order of advancement of
+    #: the protocol; the later the better. The values are keys into :attr:`Simulation.files`.
+    coordinate_structures = ('solvated', 'energy_minimized', 'MD_relaxed',  
+                             'MD_restrained', 'MD_NPT')
     
     def __init__(self, molecule=None, **kwargs):
         """Set up Simulation instance.
@@ -221,7 +226,9 @@ class Simulation(object):
 
 
     def solvate(self, struct=None, **kwargs):
-        """Solvate structure *struct* in a box of water.
+        """Solvate structure *struct* in a box of solvent.
+
+        The solvent is determined with the *solvent* keyword to the constructor.
 
         :Keywords:
           *struct*
@@ -250,10 +257,10 @@ class Simulation(object):
         
         return params
 
-    def processed_topology(self):
+    def processed_topology(self, **kwargs):
         """Create a portable topology file from the topology and the solvated system."""
         if not os.path.exists(self.files.solvated):
-            self.solvate()
+            self.solvate(**kwargs)
         self.files.processed_topology = gromacs.cbook.create_portable_topology(
             self.files.topology, self.files.solvated, includes=self.dirs.includes)
         return self.files.processed_topology
@@ -269,12 +276,47 @@ class Simulation(object):
         self.dirs.energy_minimization = realpath(kwargs.setdefault('dirname', self.BASEDIR('em')))
         kwargs['top'] = self.files.topology
         kwargs.setdefault('struct', self.files.solvated)
+        kwargs['mainselection'] = None
         kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.dirs.includes
 
         params = gromacs.setup.energy_minimize(**kwargs)
 
         self.files.energy_minimized = params['struct']
         return params
+
+    def _MD(self, protocol, **kwargs):
+        """Basic MD driver for this Simulation. Do not call directly."""
+        assert protocol in self.filekeys    # simple check (allows too many XXX)
+
+        kwargs.setdefault('dirname', self.BASEDIR(protocol))
+        self.dirs[protocol] = realpath(kwargs['dirname'])
+        MD = kwargs.pop('MDfunc', gromacs.setup.MD)
+        kwargs['top'] = self.files.topology
+        kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.dirs.includes
+        kwargs['mdp'] = config.get_template('NPT_opls.mdp')
+        kwargs['ndx'] = self.files.ndx
+        kwargs['mainselection'] = None # important for SD (use custom mdp and ndx!, gromacs.setup._MD)
+        self._checknotempty(kwargs['struct'], 'struct')
+        if not os.path.exists(kwargs['struct']):
+            errmsg = "Starting structure %(struct)r does not exist (yet)" % kwargs
+            logger.error(errmsg)
+            raise IOError(errno.ENOENT, errmsg, kwargs['struct'])
+        params =  MD(**kwargs)
+        self.files[protocol] = params['struct']
+        return params
+
+    def MD_relaxed(self, **kwargs):
+        """Short MD simulation with *timestep* = 0.1 fs to relax strain.
+
+        Energy minimization does not always remove all problems and LINCS
+        constraint errors occur. A very short *runtime* = 5 ps MD with very
+        short integration time step *dt* tends to solve these problems.
+        """
+        # user structure or restrained or solvated
+        kwargs.setdefault('struct', self.files.energy_minimized)
+        kwargs.setdefault('dt', 0.0001)  # ps
+        kwargs.setdefault('runtime', 5)  # ps
+        return self._MD('MD_relaxed', **kwargs)
 
     def MD_restrained(self, **kwargs):
         """Short MD simulation with position restraints on compound.
@@ -288,20 +330,10 @@ class Simulation(object):
                   compound itp file does indeed contain a ``[ posres ]``
                   section that is protected by a ``#ifdef POSRES`` clause.
         """
-        self.dirs.MD_restrained = realpath(kwargs.setdefault('dirname', self.BASEDIR('MD_restrained')))
-        kwargs['top'] = self.files.topology
-        kwargs.setdefault('struct', self.files.energy_minimized)
-        kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.dirs.includes
-        kwargs['mdp'] = config.get_template('NPT_opls.mdp')
-        kwargs['ndx'] = self.files.ndx
-        kwargs['mainselection'] = None    # important for SD (use custom mdp and ndx!)
-
-        self._checknotempty(kwargs['struct'], 'struct')
-
-        params = gromacs.setup.MD_restrained(**kwargs)
-
-        self.files.MD_restrained = params['struct']
-        return params
+        kwargs.setdefault('struct', 
+                          self._lastnotempty([self.files.energy_minimized, self.files.MD_relaxed]))
+        kwargs['MDfunc'] = gromacs.setup.MD_restrained
+        return self._MD('MD_restrained', **kwargs)
 
     def MD(self, **kwargs):
         """Short NPT MD simulation.
@@ -310,30 +342,27 @@ class Simulation(object):
         as *runtime* or specific queuing system options. The following
         keywords can not be changed: top, mdp, ndx, mainselection.
 
-        By default, the *struct* is the last frame from the position
-        restraints run, or, if this file cannot be found (e.g. because
-        :meth:`Simulation.MD_restrained` was not run) it falls back to
-        the solvated system.
-
         .. Note:: If the system crashes (with LINCS errors), try initial
                   equilibration with timestep *dt* = 0.0001 ps (0.1 fs instead
                   of 2 fs) and *runtime* = 5 ps.
+
+        :Keywords:
+          *struct*
+               starting conformation; by default, the *struct* is the last frame
+               from the position restraints run, or, if this file cannot be
+               found (e.g. because :meth:`Simulation.MD_restrained` was not run)
+               it falls back to the relaxed and then the solvated system.
+          *runtime*
+               total run time in ps
+          *qscript*
+               list of queuing system scripts to prepare; available values are
+               in :data:`gromacs.config.templates` or you can provide your own
+               filename(s) in the current directory (see :mod:`gromacs.qsub` for
+               the format of the templates)
         """
-        self.dirs.MD_NPT = realpath(kwargs.setdefault('dirname', self.BASEDIR('MD_NPT')))
-        # user structure or restrained or solvated
-        kwargs.setdefault('struct', self.files.MD_restrained or self.files.solvated)
-        kwargs['top'] = self.files.topology
-        kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.dirs.includes
-        kwargs['mdp'] = config.get_template('NPT_opls.mdp')
-        kwargs['ndx'] = self.files.ndx
-        kwargs['mainselection'] = None    # important for SD (use custom mdp and ndx!)
-
-        self._checknotempty(kwargs['struct'], 'struct')
-
-        params = gromacs.setup.MD(**kwargs)
-
-        self.files.MD_NPT = params['struct']
-        return params
+        # user structure or relaxed or restrained or solvated
+        kwargs.setdefault('struct', self.get_last_structure())
+        return self._MD('MD_NPT', **kwargs)
         
 
     def _checknotempty(self, value, name):
@@ -341,6 +370,14 @@ class Simulation(object):
             raise ValueError("Parameter %s cannot be empty." % name)
         return value
 
+    def _lastnotempty(self, l):
+        """Return the last non-empty value in list *l* (or None :-p)"""
+        nonempty = [None] + [x for x in l if not (x is None or x == "" or x == [])]
+        return nonempty[-1]
+
+    def get_last_structure(self):
+        """Returns the coordinates of the most advanced step in the protocol."""
+        return self._lastnotempty([self.files[name] for name in self.coordinate_structures])
 
 class WaterSimulation(Simulation):
     """Equilibrium MD of a solute in a box of water."""
