@@ -213,6 +213,7 @@ class Simulation(object):
                                     ('#include +"tip4p\.itp"', 'tip4p.itp', self.solvent.itp),
                                     ('Compound', 'DRUG', self.molecule),
                                     ('DRUG\s*1', 'DRUG', self.molecule),
+                                    ('Compound', 'solvent', self.solvent), # XXX still igored
                                     ],
                                    newname=topol)
         logger.info('[%(dirname)s] Created topology %(topol)r that includes %(_itp)r', vars())

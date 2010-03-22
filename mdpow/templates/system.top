@@ -17,7 +17,7 @@
 
 [ system ]
 ; Name
-Compound DRUG in water (OPLS-AA parameters)
+Compound DRUG in solvent (OPLS-AA parameters)
 
 [ molecules ]
 ; Compound        #mols

@@ -83,6 +83,7 @@ directory and type::
    S.topology(itp="octanol.itp")
    S.solvate(struct="octanol.gro")
    S.energy_minimize()
+   S.MD_relaxed()
    S.MD(runtime=50)            # only run for 50 ps in this tutorial
    S.save("water.simulation")  # save setup for later (analysis stage)
 
@@ -132,6 +133,7 @@ Almost identical to the water case
    H.topology(itp="octanol.itp")
    H.solvate(struct="octanol.gro")
    H.energy_minimize()
+   H.MD_relaxed()
    H.MD(runtime=50)          # only run for 50 ps in this tutorial
 
 
