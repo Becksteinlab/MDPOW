@@ -6,8 +6,8 @@
 ============================================================
 
 The :mod:`mdpow.equil` module facilitates the setup of equilibrium
-molecular dynamics simulations of compound molecule in a simulation
-box of water.
+molecular dynamics simulations of a compound molecule in a simulation
+box of water or other solvent such as octanol.
 
 It requires as input
 - the itp file for the compound
@@ -27,6 +27,7 @@ import logging
 import gromacs.setup
 import gromacs.cbook
 from gromacs.utilities import in_dir, realpath, asiterable, AttributeDict
+import gromacs.utilities
 
 import config
 
@@ -47,6 +48,8 @@ class Simulation(object):
        S.topology(itp='drug.itp')
        S.solvate(struct='DRUG-H.pdb')
        S.energy_minimize()
+       S.MD_relaxed()
+       S.MD()
 
     .. Note:: The OPLS/AA force field and the TIP4P water molecule is the
               default; changing this is possible but will require provision of
@@ -115,7 +118,7 @@ class Simulation(object):
                 self.solvent = AttributeDict(itp=ITP[solvent], box=BOX[solvent],
                                              distance=DIST[solvent])
             except KeyError:
-                raise ValueError("solvent must be either 'water' or 'octanol'")
+                raise ValueError("solvent must be one of %r" % ITP.keys())
 
             self.filename = filename or self.solvent_type+'.simulation'
 
@@ -129,12 +132,10 @@ class Simulation(object):
 
         The default filename is the name of the file that was last loaded from
         or saved to.
-
-        If no filename is known then we use '<molecule>.pickle'.
         """
         if filename is None:
             if self.filename is None:
-                self.filename = self.molecule.lower() + '.pickle'
+                self.filename = filename or self.solvent_type+'.simulation'
                 logger.warning("No filename known, saving instance under name %r", self.filename)
             filename = self.filename
         else:
@@ -186,10 +187,6 @@ class Simulation(object):
         """Generate a topology for compound *molecule*.
 
         :Keywords:
-           *molecule*
-               identifier, should be the same as used in the itp
-            *struct*
-               coordinate file (gro or pdb) (is copied to topology dir)
             *itp*
                Gromacs itp file; will be copied to topology dir and
                included in topology
@@ -209,11 +206,11 @@ class Simulation(object):
         with in_dir(dirname):
             shutil.copy(itp, _itp)
             gromacs.cbook.edit_txt(top_template,
-                                   [('#include +"compound\.itp"', 'compound.itp', _itp),
-                                    ('#include +"tip4p\.itp"', 'tip4p.itp', self.solvent.itp),
+                                   [('#include +"compound\.itp"', 'compound\.itp', _itp),
+                                    ('#include +"tip4p\.itp"', 'tip4p\.itp', self.solvent.itp),
+                                    ('Compound', 'solvent', self.solvent),
                                     ('Compound', 'DRUG', self.molecule),
                                     ('DRUG\s*1', 'DRUG', self.molecule),
-                                    ('Compound', 'solvent', self.solvent), # XXX still igored
                                     ],
                                    newname=topol)
         logger.info('[%(dirname)s] Created topology %(topol)r that includes %(_itp)r', vars())
@@ -273,7 +270,6 @@ class Simulation(object):
         :meth:`~mdpow.equil.Simulation.solvate` step has been carried out
         previously all the defaults should just work.
         """
-
         self.dirs.energy_minimization = realpath(kwargs.setdefault('dirname', self.BASEDIR('em')))
         kwargs['top'] = self.files.topology
         kwargs.setdefault('struct', self.files.solvated)
@@ -287,7 +283,7 @@ class Simulation(object):
 
     def _MD(self, protocol, **kwargs):
         """Basic MD driver for this Simulation. Do not call directly."""
-        assert protocol in self.filekeys    # simple check (allows too many XXX)
+        assert protocol in self.filekeys    # simple check (XXX: should only check a subset,not all keys)
 
         kwargs.setdefault('dirname', self.BASEDIR(protocol))
         self.dirs[protocol] = realpath(kwargs['dirname'])
@@ -299,10 +295,16 @@ class Simulation(object):
         kwargs['mainselection'] = None # important for SD (use custom mdp and ndx!, gromacs.setup._MD)
         self._checknotempty(kwargs['struct'], 'struct')
         if not os.path.exists(kwargs['struct']):
-            errmsg = "Starting structure %(struct)r does not exist (yet)" % kwargs
-            logger.error(errmsg)
-            raise IOError(errno.ENOENT, errmsg, kwargs['struct'])
+            # struct is not reliable as it depends on qscript so now we just try everything...
+            struct = gromacs.utilities.find_first(kwargs['struct'], suffices=['pdb', 'gro'])
+            if struct is None:
+                logger.error("Starting structure %(struct)r does not exist (yet)" % kwargs)
+                raise IOError(errno.ENOENT, "Starting structure not found", kwargs['struct'])
+            else:
+                logger.info("Found starting structure %r (instead of %r).", struct, kwargs['struct'])
+                kwargs['struct'] = struct
         params =  MD(**kwargs)
+        # params['struct'] is md.gro but could also be md.pdb --- depends entirely on qscript
         self.files[protocol] = params['struct']
         return params
 

@@ -118,7 +118,7 @@ class Ghyd(object):
            *lambda_vdw*
                list of lambdas for decoupling: vdw --> none
            *runtime*
-               simulation time per window in ps [100]
+               simulation time per window in ps [5000]
            *temperature*
                temperature in Kelvin of the simulation [300.0]
            *templates*
@@ -168,7 +168,7 @@ class Ghyd(object):
                 'coulomb': kwargs.pop('lambda_coulomb', self.schedules['coulomb'].lambdas),
                 'vdw':     kwargs.pop('lambda_vdw', self.schedules['vdw'].lambdas),
                 }
-            self.runtime = kwargs.pop('runtime', 100.0)   # ps, short for testing!!
+            self.runtime = kwargs.pop('runtime', 5000.0)   # ps
             self.dirname = kwargs.pop('dirname', os.path.join('FEP', 'water'))
             self.includes = list(asiterable(kwargs.pop('includes',[]))) + [config.includedir]
             self.component_dirs = {'coulomb': os.path.join(self.dirname, 'Coulomb'),
