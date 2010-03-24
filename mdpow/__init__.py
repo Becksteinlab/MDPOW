@@ -256,6 +256,7 @@ required. It might also be necessary to add additional lambda values
 in regions where the function changes rapidly.
  
 """
+VERSION = "0.0.4"
 
 __all__ = ['fep', 'equil']
 
@@ -264,3 +265,6 @@ logger = log.create('mdpow', 'mdpow.log')
 
 import config, fep, equil
 
+def get_version():
+    """Return current package version as a string."""
+    return VERSION

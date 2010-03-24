@@ -7,8 +7,11 @@ from ez_setup import use_setuptools
 use_setuptools()
 from setuptools import setup, find_packages
 
+# Dynamically calculate the version based on mdpow.VERSION.
+version = __import__('mdpow').get_version()
+
 setup(name="POW",
-      version="0.0.3",
+      version=version,
       description="A library for computing octanol/water partitioning coefficients",
       long_description="""The POW module simplifies the setup and
 execution of free energy calculations of small molecules in water and

@@ -5,6 +5,7 @@
 
 PACKAGE=POW
 EPYDOC_DIRS="mdpow"
+PDF=MDpow.pdf
 
 SERVERDIR=/sansom/public_html/sbcb/oliver
 PACKAGES=$SERVERDIR/download/Python
@@ -54,6 +55,10 @@ distribution () {
       || die "Failed distribution"
 }
 
+dist () {
+    distribution
+}
+
 make_epydocs() {
   epydoc -v -o doc/epydoc --html --name=$PACKAGE \
          --url=http://sbcb.bioch.ox.ac.uk/oliver/software/$PACKAGE/ \
@@ -64,12 +69,27 @@ make_epydocs() {
 
 make_sphinx () {
   (cd doc/sphinx && make clean && make html) || die "Failed making sphinx docs"
+  (cd doc; rm -rf html; (cd sphinx/build && find html -type d) | xargs mkdir -p) && \
+      (cd doc/sphinx/build && find html -type f -exec ln -v '{}' '../../{}' \;)
+  echo "Created doc/html"
   RSYNC -vrP --delete doc/sphinx/build/html $DOCS
 }
 
-docs () {
-  make_epydocs 
+make_pdf () {
+  (cd doc/sphinx && make latex && cd build/latex && make all-pdf) || die "Failed making sphinx pdf"
+  cp doc/sphinx/build/latex/$PDF doc
+  echo "Updated pdf doc/$PDF"
+}
+
+sphinx () {
   make_sphinx
+  make_pdf
+}    
+
+docs () {
+  #make_epydocs
+  make_sphinx
+  make_pdf
 }
 
 
@@ -99,7 +119,7 @@ case "$PYVERSION" in
 esac
 
 commands="$@"
-[ -n "$commands" ] || commands="distribution docs"
+[ -n "$commands" ] || commands="docs distribution"
 
 for cmd in $commands; do
     eval "$cmd"
