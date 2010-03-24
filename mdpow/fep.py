@@ -307,6 +307,7 @@ class Gsolv(object):
            *kwargs*
                Most kwargs are passed on to :func:`gromacs.setup.MD` although some
                are set to values that are required for the FEP functionality.
+               Note: *runtime* is set from the constructor.
         """
         kwargs['mdrun_opts'] = " ".join([kwargs.pop('mdrun_opts',''), '-dgdl'])  # crucial for FEP!!        
         kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.includes        
