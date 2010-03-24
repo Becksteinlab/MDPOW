@@ -10,8 +10,9 @@ box. The protocol follows the works of D. Mobley (`Free Energy
 Tutorial`_) and M. Shirts, and uses Gromacs 4.0.x.
 
 Required Input:
-- topology
-- equilibrated structure of the solvated molecule
+
+ - topology
+ - equilibrated structure of the solvated molecule
 
 
 .. _Free Energy Tutorial:
@@ -21,7 +22,7 @@ Required Input:
 Example
 -------
 
-TODO
+see :mod:`mdpow`
 
 
 User reference
@@ -50,12 +51,17 @@ Developer notes
 Additional objects that support :class:`mdpow.fep.Gsolv`.
 
 .. autoclass:: FEPschedule
-
+   :members:
 .. autofunction:: molar_to_nm3
 
 .. autodata:: N_AVOGADRO
 .. autodata:: kBOLTZ
 .. autodata:: fep_templates
+
+.. |NA| replace:: *N*\ :sub:`A`
+.. |kB| replace:: *k*\ :sub:`B`
+.. _NA NIST value: http://physics.nist.gov/cgi-bin/cuu/Value?na
+.. _kB NIST value: http://physics.nist.gov/cgi-bin/cuu/Value?k
 
 TODO
 ~~~~
@@ -84,11 +90,10 @@ logger = logging.getLogger('mdpow.fep')
 
 import config
 
-#: `Avogadro's constant (NIST)`_ in mol^-1.
-#: .. _Avogadro's constant (NIST): http://physics.nist.gov/cgi-bin/cuu/Value?na
+
+#: Avogadro's constant |NA| in mol^-1 (`NA NIST value`_).
 N_AVOGADRO = 6.02214179e23
-#: `Boltzmann's constant (NIST)`_ in kJ mol^-1.
-#: .. _Boltzmann's constant (NIST): http://physics.nist.gov/cgi-bin/cuu/Value?k
+#: Boltzmann's constant |kB| in kJ mol^-1 (`kB NIST value`_).
 kBOLTZ = 1.3806504e-23 *1e-3 * N_AVOGADRO
 
 def molar_to_nm3(c):
@@ -116,6 +121,7 @@ class Gsolv(object):
     """Simulations to calculate and analyze the solvation free energy.
 
     Typical work flow::
+
        G = Gsolv(simulation='drug.simulation')           # continue from :mod:`mdpow.equil`
        G.setup(qscript=['my_template.sge', 'local.sh'])  # my_template.sge is user supplied
        G.qsub()    # run SGE job arrays as generated from my_template.sge
@@ -563,10 +569,10 @@ class Gsolv(object):
         return "%s(filename=%r)" % (self.__class__.__name__, self.filename)
 
 class Ghyd(Gsolv):
-    """Sets up and analysis MD to obtain the hydration free energy of a solute."""
+    """Sets up and analyses MD to obtain the hydration free energy of a solute."""
     solvent_default = "water"
 
 class Goct(Gsolv):
-    """Sets up and analysis MD to obtain the solvation free energy of a solute in octanol."""
+    """Sets up and analyses MD to obtain the solvation free energy of a solute in octanol."""
     solvent_default = "octanol"
 

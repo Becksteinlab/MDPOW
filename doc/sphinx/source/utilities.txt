@@ -1,0 +1,8 @@
+================
+ Helper modules
+================
+
+The code described here is only relevant for developers.
+
+.. automodule:: mdpow.config
+.. automodule:: mdpow.log

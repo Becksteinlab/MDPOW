@@ -10,11 +10,21 @@ molecular dynamics simulations of a compound molecule in a simulation
 box of water or other solvent such as octanol.
 
 It requires as input
-- the itp file for the compound
-- a coordinate (structure) file (in pdb or gro format)
+
+ - the itp file for the compound
+ - a coordinate (structure) file (in pdb or gro format)
 
 By default it uses the *OPLS/AA* forcefield and the *TIP4P* water
 model.
+
+.. autoclass:: Simulation
+   :members:
+.. autoclass:: WaterSimulation
+.. autoclass:: OctanolSimulation
+
+.. autodata:: ITP
+.. autodata:: BOX
+.. autodata:: DIST
 """
 
 from __future__ import with_statement
@@ -44,6 +54,7 @@ class Simulation(object):
     """Simple MD simulation of a single compound molecule in water.
 
     Typical use ::
+
        S = Simulation(molecule='DRUG')
        S.topology(itp='drug.itp')
        S.solvate(struct='DRUG-H.pdb')

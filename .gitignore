@@ -2,3 +2,4 @@
 *.log
 *.egg-info
 install_devel_kauha.sh
+dist

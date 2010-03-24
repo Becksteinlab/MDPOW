@@ -4,6 +4,7 @@
 # See the file COPYING for details.
 
 """
+=====================================================================
 :mod:`mdpow` --- Computing the octanol/water partitioning coefficient
 =====================================================================
 
@@ -24,32 +25,32 @@ How to use the module
 
 Before you can start you will need
 
-  1. a coordinate file for the small molecule
-  2. a Gromacs OPLS/AA topology (itp) file
-  3. an installation of Gromacs_ 4.0.x.
+  -  a coordinate file for the small molecule
+  -  a Gromacs OPLS/AA topology (itp) file
+  -  an installation of Gromacs_ 4.0.x.
 
 Basic work flow
 ---------------
 
-Then you will typically calculate two solvation free energies (free
+You will typically calculate two solvation free energies (free
 energy of transfer of the solute from the liquid into the vacuum
 phase):
 
   1. solvent = *water*
 
-  1.1 set up a short equilibrium simulation of the molecule in a *water*
-      box (and run the MD simulation);
+     1.1 set up a short equilibrium simulation of the molecule in a *water*
+         box (and run the MD simulation);
 
-  1.2 set up a free energy perturbation calculation of the ligand in
-      water , which will yield the hydration free energy;
+     1.2 set up a free energy perturbation calculation of the ligand in
+         water , which will yield the hydration free energy;
 
   2. solvent = *octanol*
 
-  2.1 set up a short equilibrium simulation of the molecule in a *octanol*
-      box (and run the MD simulation);
+     2.1 set up a short equilibrium simulation of the molecule in a *octanol*
+         box (and run the MD simulation);
 
-  2.2 set up a free energy perturbation calculation of the ligand in
-      octanol , which will yield the solvation free energy in octanol;
+     2.2 set up a free energy perturbation calculation of the ligand in
+         octanol , which will yield the solvation free energy in octanol;
 
   3. run these simulations on a cluster;
 
@@ -68,7 +69,8 @@ section on `writing queuing system templates`_ . You will have to
   directory (``~/.gromacswrapper/qscripts``); in this example we call
   it ``my_script.sge``;
 
-- add the keyword *qscript* to the MD_relaxed() and MD() invocations; e.g. as
+- add the keyword *qscript* to the :meth:`~mdpow.equil.Simulation.MD_relaxed`
+  and :meth:`~mdpow.equil.Simulation.MD` invocations; e.g. as
 
     *qscript* = ['my_script.sge', 'local.sh']
 
@@ -82,8 +84,8 @@ section on `writing queuing system templates`_ . You will have to
 
     
 
-Example session: Octanol
-------------------------
+Example session: 1-octanol as a solute
+--------------------------------------
 
 In the following interactive python session we use octanol as an
 example for a solute; all files are present in the package so one can
@@ -130,24 +132,26 @@ mdpow`` again) and set up a Ghyd object::
 
    G = mdpow.fep.Ghyd(molecule="OcOH", top="Equilibrium/water/top/system.top", struct="Equilibrium/water/MD_NPT/md.pdb", ndx="Equilibrium/water/solvation/main.ndx", runtime=100)
    
-.. Note: Here we only run 100 ps per window for testing. For
-production this should be rather something like 5-10 ns (the default
-is 5 ns)
-
-Alternatively, one can save some typing if we continue the last
-session and use the Simulation object::
+Alternatively, one can save some typing if we continue the last session and use
+the :class:`mdpow.equil.Simulation` object (which we can re-load from its saved
+state file from disk)::
 
   S = mdpow.equil.WaterSimulation(filename="water.simulation")  # only needed when quit
   G = mdpow.fep.Ghyd(simulation=S, runtime=100)
+
+This generates all the input files under ``FEP/water``.
+
+.. note: Here we only run 100 ps per window for testing. For production this
+         should be rather something like 5-10 ns (the default is 5 ns).
 
 Then set up all input files::
 
   G.setup(qscript=['my_script.sge', 'local.sh'])
 
-(The details of the FEP runs can be customized by setting some
-keywords (*lambda_vdw*, *lamda_coulomb*) or by deriving a new class from
-the :class:`mdpow.fep.Ghyd` base class but this is not covered in
-this tutorial.)
+(The details of the FEP runs can be customized by setting some keywords (such as
+*lambda_vdw*, *lamda_coulomb*, see :class:`mdpow.fep.Gsolv` for details) or by
+deriving a new class from the :class:`mdpow.fep.Ghyd` base class but this is not
+covered in this tutorial.)
 
 
 Octanol
@@ -156,7 +160,7 @@ Octanol
 Equilibrium simulation
 ......................
 
-Almost identical to the water case
+Almost identical to the water case::
 
    O = mdpow.equil.OctanolSimulation(molecule="OcOH")
    O.topology(itp="octanol.itp")
@@ -171,12 +175,14 @@ Octanol solvation free energy
 
 Almost identical setup as in the water case::
 
- H = mdpow.fep.Goct(simulation=H, runtime=100)
- H.setup(qscript=['my_script.sge', 'local.sh'])
+   H = mdpow.fep.Goct(simulation=O, runtime=100)
+   H.setup(qscript=['my_script.sge', 'local.sh'])
 
-.. Note: Here we only run 100 ps per window for testing. For
-production this should be rather something like 5-10 ns (the default
-is 5 ns)
+This generates all the input files under ``FEP/octanol``.
+
+.. note: Here we only run 100 ps per window for testing. For
+         production this should be rather something like 5-10 ns (the
+         default is 5 ns)
 
 
 Running the FEP simulations
@@ -194,7 +200,7 @@ Either run job arrays that should have been generated from the
 Or run each job in its own directory. Note that :program:`mdrun`
 should be called with at least the following options ::
 
-     mdrun -deffnm $DEFFNM  -dgdl
+   mdrun -deffnm $DEFFNM  -dgdl
 
 where DEFFNM is typically "md"; see the run ``local.sh`` script in
 each direcory for hints what needs to be done.
@@ -203,7 +209,7 @@ each direcory for hints what needs to be done.
 Analyze output
 ~~~~~~~~~~~~~~
 
-For the water and aoctanol FEPs do ::
+For the water and octanol FEPs do ::
 
  G.collect()
  G.analyze()
