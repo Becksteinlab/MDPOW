@@ -1,0 +1,439 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mdpow.equil — Setting up and running equilibrium MD &mdash; MDpow v0.0 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '#',
+        VERSION:     '0.0',
+        COLLAPSE_MODINDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="MDpow v0.0 documentation" href="index.html" />
+    <link rel="next" title="mdpow.fep – calculate free energy of solvation" href="fep.html" />
+    <link rel="prev" title="mdpow — Computing the octanol/water partitioning coefficient" href="init.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="modindex.html" title="Global Module Index"
+             accesskey="M">modules</a> |</li>
+        <li class="right" >
+          <a href="fep.html" title="mdpow.fep – calculate free energy of solvation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="init.html" title="mdpow — Computing the octanol/water partitioning coefficient"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">MDpow v0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="mdpow-equil-setting-up-and-running-equilibrium-md">
+<span id="module-mdpow.equil"></span><h1><tt class="xref docutils literal"><span class="pre">mdpow.equil</span></tt> &#8212; Setting up and running equilibrium MD<a class="headerlink" href="#mdpow-equil-setting-up-and-running-equilibrium-md" title="Permalink to this headline">¶</a></h1>
+<p>The <tt class="xref docutils literal"><span class="pre">mdpow.equil</span></tt> module facilitates the setup of equilibrium
+molecular dynamics simulations of a compound molecule in a simulation
+box of water or other solvent such as octanol.</p>
+<p>It requires as input</p>
+<blockquote>
+<ul class="simple">
+<li>the itp file for the compound</li>
+<li>a coordinate (structure) file (in pdb or gro format)</li>
+</ul>
+</blockquote>
+<p>By default it uses the <em>OPLS/AA</em> forcefield and the <em>TIP4P</em> water
+model.</p>
+<dl class="class">
+<dt id="mdpow.equil.Simulation">
+<em class="property">class </em><tt class="descclassname">mdpow.equil.</tt><tt class="descname">Simulation</tt><big>(</big><em>molecule=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.equil.Simulation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple MD simulation of a single compound molecule in water.</p>
+<p>Typical use</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">S</span> <span class="o">=</span> <span class="n">Simulation</span><span class="p">(</span><span class="n">molecule</span><span class="o">=</span><span class="s">&#39;DRUG&#39;</span><span class="p">)</span>
+<span class="n">S</span><span class="o">.</span><span class="n">topology</span><span class="p">(</span><span class="n">itp</span><span class="o">=</span><span class="s">&#39;drug.itp&#39;</span><span class="p">)</span>
+<span class="n">S</span><span class="o">.</span><span class="n">solvate</span><span class="p">(</span><span class="n">struct</span><span class="o">=</span><span class="s">&#39;DRUG-H.pdb&#39;</span><span class="p">)</span>
+<span class="n">S</span><span class="o">.</span><span class="n">energy_minimize</span><span class="p">()</span>
+<span class="n">S</span><span class="o">.</span><span class="n">MD_relaxed</span><span class="p">()</span>
+<span class="n">S</span><span class="o">.</span><span class="n">MD</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The OPLS/AA force field and the TIP4P water molecule is the
+default; changing this is possible but will require provision of
+customized itp and mdp files at various stages.</p>
+</div>
+<p>Set up Simulation instance.</p>
+<p>The <em>molecule</em> of the compound molecule should be supplied. Existing files
+(which have been generated in previous runs) can also be supplied.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Keywords:</th><td class="field-body"><dl class="first last docutils">
+<dt><em>molecule</em></dt>
+<dd><p class="first last">Identifier for the compound molecule. This is the same as the
+entry in the <tt class="docutils literal"><span class="pre">[</span> <span class="pre">molecule</span> <span class="pre">]</span></tt> section of the itp file. [&#8220;DRUG&#8221;]</p>
+</dd>
+<dt><em>filename</em></dt>
+<dd><p class="first last">If provided and <em>molecule</em> is <tt class="xref docutils literal"><span class="pre">None</span></tt> then load the instance from
+the pickle file <em>filename</em>, which was generated with
+<a title="mdpow.equil.Simulation.save" class="reference internal" href="#mdpow.equil.Simulation.save"><tt class="xref docutils literal"><span class="pre">save()</span></tt></a>.</p>
+</dd>
+<dt><em>dirname</em></dt>
+<dd><p class="first last">base directory; all other directories are created under it</p>
+</dd>
+<dt><em>solvent</em></dt>
+<dd><p class="first last">water or octanol</p>
+</dd>
+<dt><em>kwargs</em></dt>
+<dd><p class="first last">advanced keywords for short-circuiting; see
+<a title="mdpow.equil.Simulation.filekeys" class="reference internal" href="#mdpow.equil.Simulation.filekeys"><tt class="xref docutils literal"><span class="pre">mdpow.equil.Simulation.filekeys</span></tt></a>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="mdpow.equil.Simulation.MD">
+<tt class="descname">MD</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.equil.Simulation.MD" title="Permalink to this definition">¶</a></dt>
+<dd><p>Short NPT MD simulation.</p>
+<p>See documentation of <a title="(in GromacsWrapper v0.1)" class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/setup.html#gromacs.setup.MD"><tt class="xref docutils literal"><span class="pre">gromacs.setup.MD()</span></tt></a> for details such
+as <em>runtime</em> or specific queuing system options. The following
+keywords can not be changed: top, mdp, ndx, mainselection.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If the system crashes (with LINCS errors), try initial
+equilibration with timestep <em>dt</em> = 0.0001 ps (0.1 fs instead
+of 2 fs) and <em>runtime</em> = 5 ps.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Keywords:</th><td class="field-body"><dl class="first last docutils">
+<dt><em>struct</em></dt>
+<dd><p class="first last">starting conformation; by default, the <em>struct</em> is the last frame
+from the position restraints run, or, if this file cannot be
+found (e.g. because <a title="mdpow.equil.Simulation.MD_restrained" class="reference internal" href="#mdpow.equil.Simulation.MD_restrained"><tt class="xref docutils literal"><span class="pre">Simulation.MD_restrained()</span></tt></a> was not run)
+it falls back to the relaxed and then the solvated system.</p>
+</dd>
+<dt><em>runtime</em></dt>
+<dd><p class="first last">total run time in ps</p>
+</dd>
+<dt><em>qscript</em></dt>
+<dd><p class="first last">list of queuing system scripts to prepare; available values are
+in <a title="(in GromacsWrapper v0.1)" class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core.html#gromacs.config.templates"><tt class="xref docutils literal"><span class="pre">gromacs.config.templates</span></tt></a> or you can provide your own
+filename(s) in the current directory (see <a title="(in GromacsWrapper v0.1)" class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/qsub.html#module-gromacs.qsub"><tt class="xref docutils literal"><span class="pre">gromacs.qsub</span></tt></a> for
+the format of the templates)</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mdpow.equil.Simulation.MD_relaxed">
+<tt class="descname">MD_relaxed</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.equil.Simulation.MD_relaxed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Short MD simulation with <em>timestep</em> = 0.1 fs to relax strain.</p>
+<p>Energy minimization does not always remove all problems and LINCS
+constraint errors occur. A very short <em>runtime</em> = 5 ps MD with very
+short integration time step <em>dt</em> tends to solve these problems.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mdpow.equil.Simulation.MD_restrained">
+<tt class="descname">MD_restrained</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.equil.Simulation.MD_restrained" title="Permalink to this definition">¶</a></dt>
+<dd><p>Short MD simulation with position restraints on compound.</p>
+<p>See documentation of <a title="(in GromacsWrapper v0.1)" class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/setup.html#gromacs.setup.MD_restrained"><tt class="xref docutils literal"><span class="pre">gromacs.setup.MD_restrained()</span></tt></a> for
+details. The following keywords can not be changed: top, mdp, ndx,
+mainselection</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Position restraints are activated with <tt class="docutils literal"><span class="pre">-DPOSRES</span></tt> directives
+for <tt class="xref docutils literal"><span class="pre">gromacs.grompp()</span></tt>. Hence this will only work if the
+compound itp file does indeed contain a <tt class="docutils literal"><span class="pre">[</span> <span class="pre">posres</span> <span class="pre">]</span></tt>
+section that is protected by a <tt class="docutils literal"><span class="pre">#ifdef</span> <span class="pre">POSRES</span></tt> clause.</p>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mdpow.equil.Simulation.coordinate_structures">
+<tt class="descname">coordinate_structures</tt><a class="headerlink" href="#mdpow.equil.Simulation.coordinate_structures" title="Permalink to this definition">¶</a></dt>
+<dd>Coordinate files of the full system in increasing order of advancement of
+the protocol; the later the better. The values are keys into <tt class="xref docutils literal"><span class="pre">Simulation.files</span></tt>.</dd></dl>
+
+<dl class="method">
+<dt id="mdpow.equil.Simulation.energy_minimize">
+<tt class="descname">energy_minimize</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.equil.Simulation.energy_minimize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Energy minimize the solvated structure on the local machine.</p>
+<p><em>kwargs</em> are passed to <tt class="xref docutils literal"><span class="pre">gromacs.setup.energ_minimize()</span></tt> but if
+<a title="mdpow.equil.Simulation.solvate" class="reference internal" href="#mdpow.equil.Simulation.solvate"><tt class="xref docutils literal"><span class="pre">solvate()</span></tt></a> step has been carried out
+previously all the defaults should just work.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mdpow.equil.Simulation.filekeys">
+<tt class="descname">filekeys</tt><a class="headerlink" href="#mdpow.equil.Simulation.filekeys" title="Permalink to this definition">¶</a></dt>
+<dd>Keyword arguments to pre-set some file names; they are keys in <tt class="xref docutils literal"><span class="pre">Simulation.files</span></tt>.</dd></dl>
+
+<dl class="method">
+<dt id="mdpow.equil.Simulation.get_last_structure">
+<tt class="descname">get_last_structure</tt><big>(</big><big>)</big><a class="headerlink" href="#mdpow.equil.Simulation.get_last_structure" title="Permalink to this definition">¶</a></dt>
+<dd>Returns the coordinates of the most advanced step in the protocol.</dd></dl>
+
+<dl class="method">
+<dt id="mdpow.equil.Simulation.load">
+<tt class="descname">load</tt><big>(</big><em>filename=None</em><big>)</big><a class="headerlink" href="#mdpow.equil.Simulation.load" title="Permalink to this definition">¶</a></dt>
+<dd>Re-instantiate class from pickled file.</dd></dl>
+
+<dl class="method">
+<dt id="mdpow.equil.Simulation.make_paths_relative">
+<tt class="descname">make_paths_relative</tt><big>(</big><em>prefix='.'</em><big>)</big><a class="headerlink" href="#mdpow.equil.Simulation.make_paths_relative" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hack to be able to copy directories around: prune basedir from paths.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This is not guaranteed to work for all paths. In particular,
+check <tt class="xref docutils literal"><span class="pre">mdpow.equil.Simulation.dirs.includes</span></tt> and adjust
+manually if necessary.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="mdpow.equil.Simulation.processed_topology">
+<tt class="descname">processed_topology</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.equil.Simulation.processed_topology" title="Permalink to this definition">¶</a></dt>
+<dd>Create a portable topology file from the topology and the solvated system.</dd></dl>
+
+<dl class="method">
+<dt id="mdpow.equil.Simulation.save">
+<tt class="descname">save</tt><big>(</big><em>filename=None</em><big>)</big><a class="headerlink" href="#mdpow.equil.Simulation.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save instance to a pickle file.</p>
+<p>The default filename is the name of the file that was last loaded from
+or saved to.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mdpow.equil.Simulation.solvate">
+<tt class="descname">solvate</tt><big>(</big><em>struct=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.equil.Simulation.solvate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solvate structure <em>struct</em> in a box of solvent.</p>
+<p>The solvent is determined with the <em>solvent</em> keyword to the constructor.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Keywords:</th><td class="field-body"><dl class="first last docutils">
+<dt><em>struct</em></dt>
+<dd><p class="first last">pdb or gro coordinate file (if not supplied, the value is used
+that was supplied to the constructor of <a title="mdpow.equil.Simulation" class="reference internal" href="#mdpow.equil.Simulation"><tt class="xref docutils literal"><span class="pre">Simulation</span></tt></a>)</p>
+</dd>
+<dt><em>kwargs</em></dt>
+<dd><p class="first last">All other arguments are passed on to <a title="(in GromacsWrapper v0.1)" class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/setup.html#gromacs.setup.solvate"><tt class="xref docutils literal"><span class="pre">gromacs.setup.solvate()</span></tt></a>, but
+set to sensible default values. <em>top</em> and <em>water</em> are always fixed.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mdpow.equil.Simulation.topology">
+<tt class="descname">topology</tt><big>(</big><em>itp='drug.itp'</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.equil.Simulation.topology" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a topology for compound <em>molecule</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Keywords:</th><td class="field-body"><dl class="first last docutils">
+<dt><em>itp</em></dt>
+<dd><p class="first last">Gromacs itp file; will be copied to topology dir and
+included in topology</p>
+</dd>
+<dt><em>dirname</em></dt>
+<dd><p class="first last">name of the topology directory [&#8220;top&#8221;]</p>
+</dd>
+<dt><em>kwargs</em></dt>
+<dd><p class="first last">see source for <em>top_template</em>, <em>topol</em></p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mdpow.equil.WaterSimulation">
+<em class="property">class </em><tt class="descclassname">mdpow.equil.</tt><tt class="descname">WaterSimulation</tt><big>(</big><em>molecule=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.equil.WaterSimulation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Equilibrium MD of a solute in a box of water.</p>
+<p>Set up Simulation instance.</p>
+<p>The <em>molecule</em> of the compound molecule should be supplied. Existing files
+(which have been generated in previous runs) can also be supplied.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Keywords:</th><td class="field-body"><dl class="first last docutils">
+<dt><em>molecule</em></dt>
+<dd><p class="first last">Identifier for the compound molecule. This is the same as the
+entry in the <tt class="docutils literal"><span class="pre">[</span> <span class="pre">molecule</span> <span class="pre">]</span></tt> section of the itp file. [&#8220;DRUG&#8221;]</p>
+</dd>
+<dt><em>filename</em></dt>
+<dd><p class="first last">If provided and <em>molecule</em> is <tt class="xref docutils literal"><span class="pre">None</span></tt> then load the instance from
+the pickle file <em>filename</em>, which was generated with
+<a title="mdpow.equil.Simulation.save" class="reference internal" href="#mdpow.equil.Simulation.save"><tt class="xref docutils literal"><span class="pre">save()</span></tt></a>.</p>
+</dd>
+<dt><em>dirname</em></dt>
+<dd><p class="first last">base directory; all other directories are created under it</p>
+</dd>
+<dt><em>solvent</em></dt>
+<dd><p class="first last">water or octanol</p>
+</dd>
+<dt><em>kwargs</em></dt>
+<dd><p class="first last">advanced keywords for short-circuiting; see
+<a title="mdpow.equil.Simulation.filekeys" class="reference internal" href="#mdpow.equil.Simulation.filekeys"><tt class="xref docutils literal"><span class="pre">mdpow.equil.Simulation.filekeys</span></tt></a>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="mdpow.equil.OctanolSimulation">
+<em class="property">class </em><tt class="descclassname">mdpow.equil.</tt><tt class="descname">OctanolSimulation</tt><big>(</big><em>molecule=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.equil.OctanolSimulation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Equilibrium MD of a solute in a box of octanol.</p>
+<p>Set up Simulation instance.</p>
+<p>The <em>molecule</em> of the compound molecule should be supplied. Existing files
+(which have been generated in previous runs) can also be supplied.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Keywords:</th><td class="field-body"><dl class="first last docutils">
+<dt><em>molecule</em></dt>
+<dd><p class="first last">Identifier for the compound molecule. This is the same as the
+entry in the <tt class="docutils literal"><span class="pre">[</span> <span class="pre">molecule</span> <span class="pre">]</span></tt> section of the itp file. [&#8220;DRUG&#8221;]</p>
+</dd>
+<dt><em>filename</em></dt>
+<dd><p class="first last">If provided and <em>molecule</em> is <tt class="xref docutils literal"><span class="pre">None</span></tt> then load the instance from
+the pickle file <em>filename</em>, which was generated with
+<a title="mdpow.equil.Simulation.save" class="reference internal" href="#mdpow.equil.Simulation.save"><tt class="xref docutils literal"><span class="pre">save()</span></tt></a>.</p>
+</dd>
+<dt><em>dirname</em></dt>
+<dd><p class="first last">base directory; all other directories are created under it</p>
+</dd>
+<dt><em>solvent</em></dt>
+<dd><p class="first last">water or octanol</p>
+</dd>
+<dt><em>kwargs</em></dt>
+<dd><p class="first last">advanced keywords for short-circuiting; see
+<a title="mdpow.equil.Simulation.filekeys" class="reference internal" href="#mdpow.equil.Simulation.filekeys"><tt class="xref docutils literal"><span class="pre">mdpow.equil.Simulation.filekeys</span></tt></a>.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="mdpow.equil.ITP">
+<tt class="descclassname">mdpow.equil.</tt><tt class="descname">ITP</tt><a class="headerlink" href="#mdpow.equil.ITP" title="Permalink to this definition">¶</a></dt>
+<dd>itp files are picked up via include dirs</dd></dl>
+
+<dl class="data">
+<dt id="mdpow.equil.BOX">
+<tt class="descclassname">mdpow.equil.</tt><tt class="descname">BOX</tt><a class="headerlink" href="#mdpow.equil.BOX" title="Permalink to this definition">¶</a></dt>
+<dd>solvent boxes</dd></dl>
+
+<dl class="data">
+<dt id="mdpow.equil.DIST">
+<tt class="descclassname">mdpow.equil.</tt><tt class="descname">DIST</tt><a class="headerlink" href="#mdpow.equil.DIST" title="Permalink to this definition">¶</a></dt>
+<dd>minimum distance between solute and box surface (in nm)</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <h4>Previous topic</h4>
+            <p class="topless"><a href="init.html"
+                                  title="previous chapter"><tt class="docutils literal docutils literal"><span class="pre">mdpow</span></tt> &#8212; Computing the octanol/water partitioning coefficient</a></p>
+            <h4>Next topic</h4>
+            <p class="topless"><a href="fep.html"
+                                  title="next chapter"><tt class="docutils literal"><span class="pre">mdpow.fep</span></tt> &#8211; calculate free energy of solvation</a></p>
+            <h3>This Page</h3>
+            <ul class="this-page-menu">
+              <li><a href="_sources/equil.txt"
+                     rel="nofollow">Show Source</a></li>
+            </ul>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="modindex.html" title="Global Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="fep.html" title="mdpow.fep – calculate free energy of solvation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="init.html" title="mdpow — Computing the octanol/water partitioning coefficient"
+             >previous</a> |</li>
+        <li><a href="index.html">MDpow v0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2010, Oliver Beckstein and Bogdan Iorga.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,38 @@
+.. MDpow documentation master file, created by
+   sphinx-quickstart on Wed Mar 24 13:28:55 2010.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+MDpow documentation
+===================
+
+*MDpow* is a python package that automates the calculation of
+solvation free energies via molecular dynamics (MD) simulations. In
+particular, it facilitates the computation of *water-octanol partition
+coefficients* (|Pow|).
+
+The package is built on top of the `GromacsWrapper`_ framework (which
+can be automatically installed).
+
+.. _GromacsWrapper: http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/
+.. |Pow| replace:: *P*\ :sub:`OW`
+
+
+Contents:
+
+.. toctree::
+   :maxdepth: 2
+
+   INSTALL
+   init
+   equil
+   fep
+   utilities      
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+

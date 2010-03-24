@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# XXX: would be nice to get version from setup.py and patch it into
-# XXX: doc/sphinx/source/conf.py
-
 PACKAGE=POW
 EPYDOC_DIRS="mdpow"
 PDF=MDpow.pdf
