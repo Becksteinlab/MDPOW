@@ -12,7 +12,7 @@ The :mod:`mdpow` module helps in setting up and analyzing absolute
 free energy calculations of small molecules by molecular dynamics (MD)
 simulations. By computing the hydration free energy and the solvation
 free energy in octanol one can compute the octanol/water partitioning
-coefficient, and important quantity that is used to characterize
+coefficient, an important quantity that is used to characterize
 drug-like compounds.
 
 The MD simulations are performed with Gromacs_ 4.x
@@ -38,19 +38,19 @@ phase):
 
   1. solvent = *water*
 
-     1.1 set up a short equilibrium simulation of the molecule in a *water*
-         box (and run the MD simulation);
+     1. set up a short equilibrium simulation of the molecule in a *water*
+        box (and run the MD simulation);
 
-     1.2 set up a free energy perturbation calculation of the ligand in
-         water , which will yield the hydration free energy;
+     2. set up a free energy perturbation calculation of the ligand in
+        water , which will yield the hydration free energy;
 
   2. solvent = *octanol*
 
-     2.1 set up a short equilibrium simulation of the molecule in a *octanol*
-         box (and run the MD simulation);
+     1. set up a short equilibrium simulation of the molecule in a *octanol*
+        box (and run the MD simulation);
 
-     2.2 set up a free energy perturbation calculation of the ligand in
-         octanol , which will yield the solvation free energy in octanol;
+     2. set up a free energy perturbation calculation of the ligand in
+        octanol , which will yield the solvation free energy in octanol;
 
   3. run these simulations on a cluster;
 
@@ -69,8 +69,8 @@ section on `writing queuing system templates`_ . You will have to
   directory (``~/.gromacswrapper/qscripts``); in this example we call
   it ``my_script.sge``;
 
-- add the keyword *qscript* to the :meth:`~mdpow.equil.Simulation.MD_relaxed`
-  and :meth:`~mdpow.equil.Simulation.MD` invocations; e.g. as
+- add the keyword *qscript* to the :meth:`mdpow.equil.Simulation.MD`
+  and :meth:`mdpow.fep.Gsolv.setup` invocations; e.g. as
 
     *qscript* = ['my_script.sge', 'local.sh']
 
@@ -106,7 +106,7 @@ Equilibrium simulation
 ......................
 
 Make a directory ``octanol`` and copy the ``octanol.itp`` and
-``octanol.gro`` file into it. Launch :program:`python` from this
+``octanol.gro`` file into it. Launch :program:`ipython` from this
 directory and type::
 
    import mdpow
@@ -119,16 +119,21 @@ directory and type::
    S.MD(runtime=50, qscript=['my_script.sge', 'local.sh'])  # only run for 50 ps in this tutorial
    S.save("water.simulation")                               # save setup for later (analysis stage)
 
-Background (Ctrl-Z) or quit (Ctrl-D) python and run the simulations in
-the ``MD_relaxed`` and ``MD_NPT`` subdirectory. You can modify the
-``local.sh`` script to your ends. 
+Background (:kbd:`Ctrl-Z`) or quit (:kbd:`Ctrl-D`) python and run the
+simulations in the ``MD_relaxed`` and ``MD_NPT`` subdirectory. You can modify
+the ``local.sh`` script to your ends or use *qscript* to generate queuing system
+scripts.
+
+.. note:: Here we only run 50 ps equilibrium MD for testing. For production this
+          should be substantially longer, maybe even 50 ns if you want to
+          extract thermodynamic data.
 
 
 Hydration free energy
 .....................
 
 Reopen the python session (if you quit it you will have to ``import
-mdpow`` again) and set up a Ghyd object::
+mdpow`` again) and set up a :class:`~mdpow.fep.Ghyd` object::
 
    G = mdpow.fep.Ghyd(molecule="OcOH", top="Equilibrium/water/top/system.top", struct="Equilibrium/water/MD_NPT/md.pdb", ndx="Equilibrium/water/solvation/main.ndx", runtime=100)
    
@@ -141,8 +146,8 @@ state file from disk)::
 
 This generates all the input files under ``FEP/water``.
 
-.. note: Here we only run 100 ps per window for testing. For production this
-         should be rather something like 5-10 ns (the default is 5 ns).
+.. note:: Here we only run 100 ps per window for testing. For production this
+          should be rather something like 5-10 ns (the default is 5 ns).
 
 Then set up all input files::
 
@@ -170,6 +175,11 @@ Almost identical to the water case::
    O.MD(runtime=50, qscript=['my_script.sge', 'local.sh'])    # only run for 50 ps in this tutorial
    O.save()
 
+.. note:: Here we only run 50 ps equilibrium MD for testing. For production this
+          should be substantially longer, maybe even 50 ns if you want to
+          extract thermodynamic data.
+
+
 Octanol solvation free energy
 .............................
 
@@ -180,9 +190,9 @@ Almost identical setup as in the water case::
 
 This generates all the input files under ``FEP/octanol``.
 
-.. note: Here we only run 100 ps per window for testing. For
-         production this should be rather something like 5-10 ns (the
-         default is 5 ns)
+.. note:: Here we only run 100 ps per window for testing. For
+          production this should be rather something like 5-10 ns (the
+          default is 5 ns)
 
 
 Running the FEP simulations
@@ -203,7 +213,7 @@ should be called with at least the following options ::
    mdrun -deffnm $DEFFNM  -dgdl
 
 where DEFFNM is typically "md"; see the run ``local.sh`` script in
-each direcory for hints what needs to be done.
+each direcory for hints on what needs to be done.
 
 
 Analyze output
