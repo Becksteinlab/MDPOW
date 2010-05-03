@@ -439,9 +439,7 @@ class Gsolv(object):
 
         import scipy.integrate
 
-        if force or numpy.any(numpy.array(
-            [len(xvgs) for (lambdas,xvgs) in self.results.xvg.values()]) == 0):
-            # get data if any of the xvg lists have 0 entries
+        if force or not self.has_dVdl():
             self.collect(autosave=False)
         else:
             logger.info("Analyzing stored data.")
@@ -468,9 +466,24 @@ class Gsolv(object):
             self.save()
         
         # TODO: error estimate (e.g. from boot strapping from the raw data)
-        logger.info("Hydration free energy %g kJ/mol", self.results.DeltaA.total)
+        logger.info("DeltaA0 = -(DeltaA_coul + DeltaA_vdw) + DeltaA_stdstate")
+        for component, value in self.results.DeltaA.items():
+            logger.info("%s solvation free energy (%s) %g kJ/mol",
+                        self.solvent_type.capitalize(), component, value)
         return self.results.DeltaA.total    
 
+    def has_dVdl(self):
+        """Check if dV/dl data have already been collected.
+
+        :Returns: ``True`` if the dV/dl data have bee aquired
+                  (:meth:`Gsolv.collect`) for all FEP simulations.
+        """
+        try:
+            if len(self.results.xvg) == 0:
+                return False
+        except AttributeError:
+            return False
+        return numpy.all(numpy.array([len(xvgs) for (lambdas,xvgs) in self.results.xvg.values()]) > 0)
 
     def plot(self, **kwargs):
         """Plot the TI data with error bars.
