@@ -5,13 +5,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>mdpow.equil — Setting up and running equilibrium MD &mdash; MDpow v0.0.4 documentation</title>
+    <title>mdpow.equil — Setting up and running equilibrium MD &mdash; MDpow v0.1.0 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '#',
-        VERSION:     '0.0.4',
+        VERSION:     '0.1.0',
         COLLAPSE_MODINDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -19,7 +19,7 @@
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="MDpow v0.0.4 documentation" href="index.html" />
+    <link rel="top" title="MDpow v0.1.0 documentation" href="index.html" />
     <link rel="next" title="mdpow.fep – calculate free energy of solvation" href="fep.html" />
     <link rel="prev" title="mdpow — Computing the octanol/water partitioning coefficient" href="init.html" /> 
   </head>
@@ -39,7 +39,7 @@
         <li class="right" >
           <a href="init.html" title="mdpow — Computing the octanol/water partitioning coefficient"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">MDpow v0.0.4 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow v0.1.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -96,7 +96,7 @@ entry in the <tt class="docutils literal"><span class="pre">[</span> <span class
 <dt><em>filename</em></dt>
 <dd><p class="first last">If provided and <em>molecule</em> is <tt class="xref docutils literal"><span class="pre">None</span></tt> then load the instance from
 the pickle file <em>filename</em>, which was generated with
-<a title="mdpow.equil.Simulation.save" class="reference internal" href="#mdpow.equil.Simulation.save"><tt class="xref docutils literal"><span class="pre">save()</span></tt></a>.</p>
+<a title="mdpow.equil.Simulation.save" class="reference" href="#mdpow.equil.Simulation.save"><tt class="xref docutils literal"><span class="pre">save()</span></tt></a>.</p>
 </dd>
 <dt><em>dirname</em></dt>
 <dd><p class="first last">base directory; all other directories are created under it</p>
@@ -106,7 +106,7 @@ the pickle file <em>filename</em>, which was generated with
 </dd>
 <dt><em>kwargs</em></dt>
 <dd><p class="first last">advanced keywords for short-circuiting; see
-<a title="mdpow.equil.Simulation.filekeys" class="reference internal" href="#mdpow.equil.Simulation.filekeys"><tt class="xref docutils literal"><span class="pre">mdpow.equil.Simulation.filekeys</span></tt></a>.</p>
+<a title="mdpow.equil.Simulation.filekeys" class="reference" href="#mdpow.equil.Simulation.filekeys"><tt class="xref docutils literal"><span class="pre">mdpow.equil.Simulation.filekeys</span></tt></a>.</p>
 </dd>
 </dl>
 </td>
@@ -117,7 +117,7 @@ the pickle file <em>filename</em>, which was generated with
 <dt id="mdpow.equil.Simulation.MD">
 <tt class="descname">MD</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.equil.Simulation.MD" title="Permalink to this definition">¶</a></dt>
 <dd><p>Short NPT MD simulation.</p>
-<p>See documentation of <a title="(in GromacsWrapper v0.1)" class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/setup.html#gromacs.setup.MD"><tt class="xref docutils literal"><span class="pre">gromacs.setup.MD()</span></tt></a> for details such
+<p>See documentation of <a title="(in GromacsWrapper v0.1)" class="reference" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/setup.html#gromacs.setup.MD"><tt class="xref docutils literal"><span class="pre">gromacs.setup.MD()</span></tt></a> for details such
 as <em>runtime</em> or specific queuing system options. The following
 keywords can not be changed: top, mdp, ndx, mainselection.</p>
 <div class="admonition note">
@@ -134,7 +134,7 @@ of 2 fs) and <em>runtime</em> = 5 ps.</p>
 <dt><em>struct</em></dt>
 <dd><p class="first last">starting conformation; by default, the <em>struct</em> is the last frame
 from the position restraints run, or, if this file cannot be
-found (e.g. because <a title="mdpow.equil.Simulation.MD_restrained" class="reference internal" href="#mdpow.equil.Simulation.MD_restrained"><tt class="xref docutils literal"><span class="pre">Simulation.MD_restrained()</span></tt></a> was not run)
+found (e.g. because <a title="mdpow.equil.Simulation.MD_restrained" class="reference" href="#mdpow.equil.Simulation.MD_restrained"><tt class="xref docutils literal"><span class="pre">Simulation.MD_restrained()</span></tt></a> was not run)
 it falls back to the relaxed and then the solvated system.</p>
 </dd>
 <dt><em>runtime</em></dt>
@@ -142,8 +142,8 @@ it falls back to the relaxed and then the solvated system.</p>
 </dd>
 <dt><em>qscript</em></dt>
 <dd><p class="first last">list of queuing system scripts to prepare; available values are
-in <a title="(in GromacsWrapper v0.1)" class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core.html#gromacs.config.templates"><tt class="xref docutils literal"><span class="pre">gromacs.config.templates</span></tt></a> or you can provide your own
-filename(s) in the current directory (see <a title="(in GromacsWrapper v0.1)" class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/qsub.html#module-gromacs.qsub"><tt class="xref docutils literal"><span class="pre">gromacs.qsub</span></tt></a> for
+in <a title="(in GromacsWrapper v0.1)" class="reference" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/config.html#gromacs.config.templates"><tt class="xref docutils literal"><span class="pre">gromacs.config.templates</span></tt></a> or you can provide your own
+filename(s) in the current directory (see <a title="(in GromacsWrapper v0.1)" class="reference" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/qsub.html#module-gromacs.qsub"><tt class="xref docutils literal"><span class="pre">gromacs.qsub</span></tt></a> for
 the format of the templates)</p>
 </dd>
 </dl>
@@ -166,7 +166,7 @@ short integration time step <em>dt</em> tends to solve these problems.</p>
 <dt id="mdpow.equil.Simulation.MD_restrained">
 <tt class="descname">MD_restrained</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.equil.Simulation.MD_restrained" title="Permalink to this definition">¶</a></dt>
 <dd><p>Short MD simulation with position restraints on compound.</p>
-<p>See documentation of <a title="(in GromacsWrapper v0.1)" class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/setup.html#gromacs.setup.MD_restrained"><tt class="xref docutils literal"><span class="pre">gromacs.setup.MD_restrained()</span></tt></a> for
+<p>See documentation of <a title="(in GromacsWrapper v0.1)" class="reference" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/setup.html#gromacs.setup.MD_restrained"><tt class="xref docutils literal"><span class="pre">gromacs.setup.MD_restrained()</span></tt></a> for
 details. The following keywords can not be changed: top, mdp, ndx,
 mainselection</p>
 <div class="admonition note">
@@ -189,7 +189,7 @@ the protocol; the later the better. The values are keys into <tt class="xref doc
 <tt class="descname">energy_minimize</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.equil.Simulation.energy_minimize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Energy minimize the solvated structure on the local machine.</p>
 <p><em>kwargs</em> are passed to <tt class="xref docutils literal"><span class="pre">gromacs.setup.energ_minimize()</span></tt> but if
-<a title="mdpow.equil.Simulation.solvate" class="reference internal" href="#mdpow.equil.Simulation.solvate"><tt class="xref docutils literal"><span class="pre">solvate()</span></tt></a> step has been carried out
+<a title="mdpow.equil.Simulation.solvate" class="reference" href="#mdpow.equil.Simulation.solvate"><tt class="xref docutils literal"><span class="pre">solvate()</span></tt></a> step has been carried out
 previously all the defaults should just work.</p>
 </dd></dl>
 
@@ -245,10 +245,10 @@ or saved to.</p>
 <tr class="field"><th class="field-name">Keywords:</th><td class="field-body"><dl class="first last docutils">
 <dt><em>struct</em></dt>
 <dd><p class="first last">pdb or gro coordinate file (if not supplied, the value is used
-that was supplied to the constructor of <a title="mdpow.equil.Simulation" class="reference internal" href="#mdpow.equil.Simulation"><tt class="xref docutils literal"><span class="pre">Simulation</span></tt></a>)</p>
+that was supplied to the constructor of <a title="mdpow.equil.Simulation" class="reference" href="#mdpow.equil.Simulation"><tt class="xref docutils literal"><span class="pre">Simulation</span></tt></a>)</p>
 </dd>
 <dt><em>kwargs</em></dt>
-<dd><p class="first last">All other arguments are passed on to <a title="(in GromacsWrapper v0.1)" class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/setup.html#gromacs.setup.solvate"><tt class="xref docutils literal"><span class="pre">gromacs.setup.solvate()</span></tt></a>, but
+<dd><p class="first last">All other arguments are passed on to <a title="(in GromacsWrapper v0.1)" class="reference" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/setup.html#gromacs.setup.solvate"><tt class="xref docutils literal"><span class="pre">gromacs.setup.solvate()</span></tt></a>, but
 set to sensible default values. <em>top</em> and <em>water</em> are always fixed.</p>
 </dd>
 </dl>
@@ -305,7 +305,7 @@ entry in the <tt class="docutils literal"><span class="pre">[</span> <span class
 <dt><em>filename</em></dt>
 <dd><p class="first last">If provided and <em>molecule</em> is <tt class="xref docutils literal"><span class="pre">None</span></tt> then load the instance from
 the pickle file <em>filename</em>, which was generated with
-<a title="mdpow.equil.Simulation.save" class="reference internal" href="#mdpow.equil.Simulation.save"><tt class="xref docutils literal"><span class="pre">save()</span></tt></a>.</p>
+<a title="mdpow.equil.Simulation.save" class="reference" href="#mdpow.equil.Simulation.save"><tt class="xref docutils literal"><span class="pre">save()</span></tt></a>.</p>
 </dd>
 <dt><em>dirname</em></dt>
 <dd><p class="first last">base directory; all other directories are created under it</p>
@@ -315,7 +315,7 @@ the pickle file <em>filename</em>, which was generated with
 </dd>
 <dt><em>kwargs</em></dt>
 <dd><p class="first last">advanced keywords for short-circuiting; see
-<a title="mdpow.equil.Simulation.filekeys" class="reference internal" href="#mdpow.equil.Simulation.filekeys"><tt class="xref docutils literal"><span class="pre">mdpow.equil.Simulation.filekeys</span></tt></a>.</p>
+<a title="mdpow.equil.Simulation.filekeys" class="reference" href="#mdpow.equil.Simulation.filekeys"><tt class="xref docutils literal"><span class="pre">mdpow.equil.Simulation.filekeys</span></tt></a>.</p>
 </dd>
 </dl>
 </td>
@@ -343,7 +343,7 @@ entry in the <tt class="docutils literal"><span class="pre">[</span> <span class
 <dt><em>filename</em></dt>
 <dd><p class="first last">If provided and <em>molecule</em> is <tt class="xref docutils literal"><span class="pre">None</span></tt> then load the instance from
 the pickle file <em>filename</em>, which was generated with
-<a title="mdpow.equil.Simulation.save" class="reference internal" href="#mdpow.equil.Simulation.save"><tt class="xref docutils literal"><span class="pre">save()</span></tt></a>.</p>
+<a title="mdpow.equil.Simulation.save" class="reference" href="#mdpow.equil.Simulation.save"><tt class="xref docutils literal"><span class="pre">save()</span></tt></a>.</p>
 </dd>
 <dt><em>dirname</em></dt>
 <dd><p class="first last">base directory; all other directories are created under it</p>
@@ -353,7 +353,7 @@ the pickle file <em>filename</em>, which was generated with
 </dd>
 <dt><em>kwargs</em></dt>
 <dd><p class="first last">advanced keywords for short-circuiting; see
-<a title="mdpow.equil.Simulation.filekeys" class="reference internal" href="#mdpow.equil.Simulation.filekeys"><tt class="xref docutils literal"><span class="pre">mdpow.equil.Simulation.filekeys</span></tt></a>.</p>
+<a title="mdpow.equil.Simulation.filekeys" class="reference" href="#mdpow.equil.Simulation.filekeys"><tt class="xref docutils literal"><span class="pre">mdpow.equil.Simulation.filekeys</span></tt></a>.</p>
 </dd>
 </dl>
 </td>
@@ -428,7 +428,7 @@ the pickle file <em>filename</em>, which was generated with
         <li class="right" >
           <a href="init.html" title="mdpow — Computing the octanol/water partitioning coefficient"
              >previous</a> |</li>
-        <li><a href="index.html">MDpow v0.0.4 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow v0.1.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

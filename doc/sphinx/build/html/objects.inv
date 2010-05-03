@@ -1,6 +1,6 @@
 # Sphinx inventory version 1
 # Project: MDpow
-# Version: 0.0
+# Version: 0.1
 mdpow.config mod utilities.html
 mdpow.log mod utilities.html
 mdpow mod init.html
@@ -35,7 +35,7 @@ mdpow.fep.Gsolv.plot method fep.html
 mdpow.equil.Simulation.filekeys attribute equil.html
 mdpow.equil.Simulation.solvate method equil.html
 mdpow.fep.Gsolv.qsub method fep.html
-mdpow.fep.fep_templates data fep.html
+mdpow.fep.Gsolv.has_dVdl method fep.html
 mdpow.equil.Simulation.coordinate_structures attribute equil.html
 mdpow.fep.Gsolv.tasklabel method fep.html
 mdpow.equil.Simulation.energy_minimize method equil.html
@@ -50,4 +50,6 @@ mdpow.equil.WaterSimulation class equil.html
 mdpow.fep.Gsolv.analyze method fep.html
 mdpow.fep.FEPschedule class fep.html
 mdpow.fep.Gsolv class fep.html
+mdpow.fep.pOW function fep.html
+mdpow.fep.fep_templates data fep.html
 mdpow.equil.Simulation.load method equil.html
