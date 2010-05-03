@@ -5,13 +5,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>mdpow.fep – calculate free energy of solvation &mdash; MDpow v0.1.0 documentation</title>
+    <title>mdpow.fep – calculate free energy of solvation &mdash; MDpow v0.1.1 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '#',
-        VERSION:     '0.1.0',
+        VERSION:     '0.1.1',
         COLLAPSE_MODINDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -19,7 +19,7 @@
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="MDpow v0.1.0 documentation" href="index.html" />
+    <link rel="top" title="MDpow v0.1.1 documentation" href="index.html" />
     <link rel="next" title="Helper modules" href="utilities.html" />
     <link rel="prev" title="mdpow.equil — Setting up and running equilibrium MD" href="equil.html" /> 
   </head>
@@ -39,7 +39,7 @@
         <li class="right" >
           <a href="equil.html" title="mdpow.equil — Setting up and running equilibrium MD"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">MDpow v0.1.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow v0.1.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -131,6 +131,9 @@ files from a <a title="mdpow.equil.Simulation" class="reference" href="equil.htm
 <dd><p class="first last">Instead of providing the required arguments, load from pickle
 file</p>
 </dd>
+<dt><em>basedir</em></dt>
+<dd><p class="first last">Prepend <em>basedir</em> to all filenames; <tt class="xref docutils literal"><span class="pre">None</span></tt> disables [.]</p>
+</dd>
 <dt><em>kwargs</em></dt>
 <dd><p class="first last">other undocumented arguments (see source for the moment)</p>
 </dd>
@@ -198,6 +201,9 @@ files from a <a title="mdpow.equil.Simulation" class="reference" href="equil.htm
 <dt><em>filename</em></dt>
 <dd><p class="first last">Instead of providing the required arguments, load from pickle
 file</p>
+</dd>
+<dt><em>basedir</em></dt>
+<dd><p class="first last">Prepend <em>basedir</em> to all filenames; <tt class="xref docutils literal"><span class="pre">None</span></tt> disables [.]</p>
 </dd>
 <dt><em>kwargs</em></dt>
 <dd><p class="first last">other undocumented arguments (see source for the moment)</p>
@@ -277,6 +283,9 @@ files from a <a title="mdpow.equil.Simulation" class="reference" href="equil.htm
 <dd><p class="first last">Instead of providing the required arguments, load from pickle
 file</p>
 </dd>
+<dt><em>basedir</em></dt>
+<dd><p class="first last">Prepend <em>basedir</em> to all filenames; <tt class="xref docutils literal"><span class="pre">None</span></tt> disables [.]</p>
+</dd>
 <dt><em>kwargs</em></dt>
 <dd><p class="first last">other undocumented arguments (see source for the moment)</p>
 </dd>
@@ -351,6 +360,11 @@ energy change was computed.)</p>
 <dt id="mdpow.fep.Gsolv.collect">
 <tt class="descname">collect</tt><big>(</big><em>autosave=True</em><big>)</big><a class="headerlink" href="#mdpow.fep.Gsolv.collect" title="Permalink to this definition">¶</a></dt>
 <dd>Collect dV/dl from output</dd></dl>
+
+<dl class="method">
+<dt id="mdpow.fep.Gsolv.frombase">
+<tt class="descname">frombase</tt><big>(</big><em>*args</em><big>)</big><a class="headerlink" href="#mdpow.fep.Gsolv.frombase" title="Permalink to this definition">¶</a></dt>
+<dd>Return path relative to the basedir.</dd></dl>
 
 <dl class="method">
 <dt id="mdpow.fep.Gsolv.has_dVdl">
@@ -575,7 +589,7 @@ use preprocessed topology from <tt class="docutils literal"><span class="pre">gr
         <li class="right" >
           <a href="equil.html" title="mdpow.equil — Setting up and running equilibrium MD"
              >previous</a> |</li>
-        <li><a href="index.html">MDpow v0.1.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow v0.1.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

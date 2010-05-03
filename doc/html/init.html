@@ -5,13 +5,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>mdpow — Computing the octanol/water partitioning coefficient &mdash; MDpow v0.1.0 documentation</title>
+    <title>mdpow — Computing the octanol/water partitioning coefficient &mdash; MDpow v0.1.1 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '#',
-        VERSION:     '0.1.0',
+        VERSION:     '0.1.1',
         COLLAPSE_MODINDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -19,7 +19,7 @@
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="MDpow v0.1.0 documentation" href="index.html" />
+    <link rel="top" title="MDpow v0.1.1 documentation" href="index.html" />
     <link rel="next" title="mdpow.equil — Setting up and running equilibrium MD" href="equil.html" />
     <link rel="prev" title="Quick installation instructions for POW" href="INSTALL.html" /> 
   </head>
@@ -39,7 +39,7 @@
         <li class="right" >
           <a href="INSTALL.html" title="Quick installation instructions for POW"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">MDpow v0.1.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow v0.1.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -158,14 +158,14 @@ extract thermodynamic data.</p>
 <h5>Hydration free energy<a class="headerlink" href="#hydration-free-energy" title="Permalink to this headline">¶</a></h5>
 <p>Reopen the python session (if you quit it you will have to <tt class="docutils literal"><span class="pre">import</span>
 <span class="pre">mdpow</span></tt> again) and set up a <a title="mdpow.fep.Ghyd" class="reference" href="fep.html#mdpow.fep.Ghyd"><tt class="xref docutils literal"><span class="pre">Ghyd</span></tt></a> object:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">G</span> <span class="o">=</span> <span class="n">mdpow</span><span class="o">.</span><span class="n">fep</span><span class="o">.</span><span class="n">Ghyd</span><span class="p">(</span><span class="n">molecule</span><span class="o">=</span><span class="s">&quot;OcOH&quot;</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="s">&quot;Equilibrium/water/top/system.top&quot;</span><span class="p">,</span> <span class="n">struct</span><span class="o">=</span><span class="s">&quot;Equilibrium/water/MD_NPT/md.pdb&quot;</span><span class="p">,</span> <span class="n">ndx</span><span class="o">=</span><span class="s">&quot;Equilibrium/water/solvation/main.ndx&quot;</span><span class="p">,</span> <span class="n">runtime</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">gwat</span> <span class="o">=</span> <span class="n">mdpow</span><span class="o">.</span><span class="n">fep</span><span class="o">.</span><span class="n">Ghyd</span><span class="p">(</span><span class="n">molecule</span><span class="o">=</span><span class="s">&quot;OcOH&quot;</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="s">&quot;Equilibrium/water/top/system.top&quot;</span><span class="p">,</span> <span class="n">struct</span><span class="o">=</span><span class="s">&quot;Equilibrium/water/MD_NPT/md.pdb&quot;</span><span class="p">,</span> <span class="n">ndx</span><span class="o">=</span><span class="s">&quot;Equilibrium/water/solvation/main.ndx&quot;</span><span class="p">,</span> <span class="n">runtime</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Alternatively, one can save some typing if we continue the last session and use
 the <a title="mdpow.equil.Simulation" class="reference" href="equil.html#mdpow.equil.Simulation"><tt class="xref docutils literal"><span class="pre">mdpow.equil.Simulation</span></tt></a> object (which we can re-load from its saved
 state file from disk):</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">S</span> <span class="o">=</span> <span class="n">mdpow</span><span class="o">.</span><span class="n">equil</span><span class="o">.</span><span class="n">WaterSimulation</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s">&quot;water.simulation&quot;</span><span class="p">)</span>  <span class="c"># only needed when quit</span>
-<span class="n">G</span> <span class="o">=</span> <span class="n">mdpow</span><span class="o">.</span><span class="n">fep</span><span class="o">.</span><span class="n">Ghyd</span><span class="p">(</span><span class="n">simulation</span><span class="o">=</span><span class="n">S</span><span class="p">,</span> <span class="n">runtime</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">gwat</span> <span class="o">=</span> <span class="n">mdpow</span><span class="o">.</span><span class="n">fep</span><span class="o">.</span><span class="n">Ghyd</span><span class="p">(</span><span class="n">simulation</span><span class="o">=</span><span class="n">S</span><span class="p">,</span> <span class="n">runtime</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>This generates all the input files under <tt class="docutils literal"><span class="pre">FEP/water</span></tt>.</p>
@@ -175,7 +175,7 @@ state file from disk):</p>
 should be rather something like 5-10 ns (the default is 5 ns).</p>
 </div>
 <p>Then set up all input files:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">G</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">qscript</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;my_script.sge&#39;</span><span class="p">,</span> <span class="s">&#39;local.sh&#39;</span><span class="p">])</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">gwat</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">qscript</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;my_script.sge&#39;</span><span class="p">,</span> <span class="s">&#39;local.sh&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>(The details of the FEP runs can be customized by setting some keywords (such as
@@ -208,8 +208,8 @@ extract thermodynamic data.</p>
 <div class="section" id="octanol-solvation-free-energy">
 <h5>Octanol solvation free energy<a class="headerlink" href="#octanol-solvation-free-energy" title="Permalink to this headline">¶</a></h5>
 <p>Almost identical setup as in the water case:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">H</span> <span class="o">=</span> <span class="n">mdpow</span><span class="o">.</span><span class="n">fep</span><span class="o">.</span><span class="n">Goct</span><span class="p">(</span><span class="n">simulation</span><span class="o">=</span><span class="n">O</span><span class="p">,</span> <span class="n">runtime</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
-<span class="n">H</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">qscript</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;my_script.sge&#39;</span><span class="p">,</span> <span class="s">&#39;local.sh&#39;</span><span class="p">])</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">goct</span> <span class="o">=</span> <span class="n">mdpow</span><span class="o">.</span><span class="n">fep</span><span class="o">.</span><span class="n">Goct</span><span class="p">(</span><span class="n">simulation</span><span class="o">=</span><span class="n">O</span><span class="p">,</span> <span class="n">runtime</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">goct</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">qscript</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;my_script.sge&#39;</span><span class="p">,</span> <span class="s">&#39;local.sh&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>This generates all the input files under <tt class="docutils literal"><span class="pre">FEP/octanol</span></tt>.</p>
@@ -240,27 +240,27 @@ each direcory for hints on what needs to be done.</p>
 <div class="section" id="analyze-output">
 <h4>Analyze output<a class="headerlink" href="#analyze-output" title="Permalink to this headline">¶</a></h4>
 <p>For the water and octanol FEPs do</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">G</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
-<span class="n">G</span><span class="o">.</span><span class="n">analyze</span><span class="p">()</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">gwat</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+<span class="n">gwat</span><span class="o">.</span><span class="n">analyze</span><span class="p">()</span>
 
-<span class="n">H</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
-<span class="n">H</span><span class="o">.</span><span class="n">analyze</span><span class="p">()</span>
+<span class="n">goct</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+<span class="n">goct</span><span class="o">.</span><span class="n">analyze</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>The analyze step reports the estimate for the free energy
 difference.</p>
 <p>Calculate the free energy for transferring the solute from water to
 octanol and octanol-water partition coefficient log P_OW</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">mdpow</span><span class="o">.</span><span class="n">fep</span><span class="o">.</span><span class="n">pOW</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">H</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">mdpow</span><span class="o">.</span><span class="n">fep</span><span class="o">.</span><span class="n">pOW</span><span class="p">(</span><span class="n">gwat</span><span class="p">,</span> <span class="n">H</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>(see <a title="mdpow.fep.pOW" class="reference" href="fep.html#mdpow.fep.pOW"><tt class="xref docutils literal"><span class="pre">mdpow.fep.pOW()</span></tt></a> for details and definitions).</p>
 <p>All individual results can also accessed as a dictionary</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">G</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">DeltaA</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">gwat</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">DeltaA</span>
 </pre></div>
 </div>
 <p>Free energy of transfer from water to octanol:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">H</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">DeltaA</span><span class="o">.</span><span class="n">total</span> <span class="o">-</span> <span class="n">G</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">DeltaA</span><span class="o">.</span><span class="n">total</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">goct</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">DeltaA</span><span class="o">.</span><span class="n">total</span> <span class="o">-</span> <span class="n">gwat</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">DeltaA</span><span class="o">.</span><span class="n">total</span>
 </pre></div>
 </div>
 <p>The individual components are</p>
@@ -281,9 +281,9 @@ be supplied as an argument to analyze().</dd>
 </blockquote>
 <p>To plot the data (de-charging and de-coupling):</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">pylab</span>
-<span class="n">G</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">gwat</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 <span class="n">pylab</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-<span class="n">H</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">goct</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>The error data points are the average of dV/dl over each windows. The
@@ -294,6 +294,24 @@ required. It might also be necessary to add additional lambda values
 in regions where the function changes rapidly.</p>
 </div>
 </div>
+</div>
+<div class="section" id="the-mdpow-scripts">
+<h2>The mdpow scripts<a class="headerlink" href="#the-mdpow-scripts" title="Permalink to this headline">¶</a></h2>
+<p>Some tasks are simplified by using scripts, which are installed in a
+bin directory (or the directory pointed to by <tt class="docutils literal"><span class="pre">--install-scripts</span></tt>).</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">mdpow-pow</span></tt></dt>
+<dd><blockquote class="first">
+usage: <tt class="docutils literal"><span class="pre">mdpow-pow</span></tt> <em>DIRECTORY</em></blockquote>
+<p>Run the free energy analysis for water and octanol in <em>DIRECTORY*``/FEP``
+and return the octanol-water partition coefficient log *P_OW</em>. It relies on
+files and directories being named according to the defaults. It requires
+finished FEP simulations, with the Goct and Ghyd objects saved as
+<tt class="docutils literal"><span class="pre">FEP/water/Ghyd.fep</span></tt> and <tt class="docutils literal"><span class="pre">FEP/octanol/Goct.fep</span></tt>.</p>
+<p class="last">By default the script also produces a graph <tt class="docutils literal"><span class="pre">dVdl.pdf</span></tt> under <em>DIRECTORY</em>;
+for more details see <tt class="docutils literal"><span class="pre">--help</span></tt>.</p>
+</dd>
+</dl>
 </div>
 </div>
 
@@ -326,6 +344,7 @@ in regions where the function changes rapidly.</p>
 </li>
 </ul>
 </li>
+<li><a class="reference" href="#the-mdpow-scripts">The mdpow scripts</a></li>
 </ul>
 </li>
 </ul>
@@ -373,7 +392,7 @@ in regions where the function changes rapidly.</p>
         <li class="right" >
           <a href="INSTALL.html" title="Quick installation instructions for POW"
              >previous</a> |</li>
-        <li><a href="index.html">MDpow v0.1.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow v0.1.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

@@ -31,6 +31,7 @@ mdpow.fep.Gsolv.setup method fep.html
 mdpow.equil.Simulation.get_last_structure method equil.html
 mdpow.fep.Gsolv.label method fep.html
 mdpow.fep.Gsolv.save method fep.html
+mdpow.fep.Gsolv.frombase method fep.html
 mdpow.fep.Gsolv.plot method fep.html
 mdpow.equil.Simulation.filekeys attribute equil.html
 mdpow.equil.Simulation.solvate method equil.html
