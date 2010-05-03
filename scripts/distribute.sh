@@ -8,6 +8,9 @@ SERVERDIR=/sansom/public_html/sbcb/oliver
 PACKAGES=$SERVERDIR/download/Python
 DOCS=$SERVERDIR/software/$PACKAGE
 
+# environment variables
+: ${SPHINXBUILD:=sphinx-build}
+
 COPY=0
 
 usage="usage: $0 [OPTIONS] [cmd1 cmd2 ...]
@@ -23,6 +26,10 @@ distribution  make sdist and egg, ##copy to $PACKAGES
 docs          'make_epydoc make_sphinx'
 make_epydoc   source code docs, copy to $DOCS/epydoc
 make_sphinx   documentation, copy to $DOCS/html
+
+environment variables
+---------------------
+SPHINXBUILD     $SPHINXBUILD
 
 
 Options
@@ -64,8 +71,14 @@ make_epydocs() {
   RSYNC -vrP --delete doc/epydoc $DOCS
 }
 
+sphinx_make () {
+    make SPHINXBUILD=$SPHINXBUILD $*
+}
+
 make_sphinx () {
-  (cd doc/sphinx && make clean && make html) || die "Failed making sphinx docs"
+    (cd doc/sphinx && \
+	sphinx_make clean && \
+	sphinx_make html) || die "Failed making sphinx docs"
   (cd doc; rm -rf html; (cd sphinx/build && find html -type d) | xargs mkdir -p) && \
       (cd doc/sphinx/build && find html -type f -exec ln -v '{}' '../../{}' \;)
   echo "Created doc/html"
@@ -73,7 +86,7 @@ make_sphinx () {
 }
 
 make_pdf () {
-  (cd doc/sphinx && make latex && cd build/latex && make all-pdf) || die "Failed making sphinx pdf"
+  (cd doc/sphinx && sphinx_make latex && cd build/latex && sphinx_make all-pdf) || die "Failed making sphinx pdf"
   cp doc/sphinx/build/latex/$PDF doc
   echo "Updated pdf doc/$PDF"
 }
