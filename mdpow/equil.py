@@ -217,7 +217,7 @@ class Simulation(object):
 
     def processed_topology(self):
         """Create a portable topology file from the topology and the solvated system."""
-        if not os.path.exists(self.files.solvated):
+        if self.files.solvated is None or not os.path.exists(self.files.solvated):
             self.solvate()
         self.files.processed_topology = gromacs.cbook.create_portable_topology(
             self.files.topology, self.files.solvated, includes=self.dirs.includes)
