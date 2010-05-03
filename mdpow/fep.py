@@ -196,12 +196,15 @@ class Gsolv(object):
            *filename*
                Instead of providing the required arguments, load from pickle
                file
+           *basedir*
+               Prepend *basedir* to all filenames; ``None`` disables [.]
            *kwargs*
                other undocumented arguments (see source for the moment)
         """
         required_args = ('molecule', 'top', 'struct')
 
         filename = kwargs.pop('filename', None)
+        basedir = kwargs.pop('basedir', os.path.curdir)
         simulation = kwargs.pop('simulation', None)
         solvent = kwargs.pop('solvent', self.solvent_default)
 
@@ -281,16 +284,29 @@ class Gsolv(object):
                 warnings.warn(wmsg)
                 logger.warn(wmsg)
 
+        # overrides pickle file so that we can run from elsewhere
+        if not basedir is None:
+            self.basedir = os.path.realpath(basedir)
+        else:
+            self.basedir = None
+
         super(Gsolv, self).__init__(**kwargs)
 
         logger.info("Solvation free energy calculation for molecule "
                     "%(molecule)s in solvent %(solvent_type)s." % vars(self))
         logger.info("Using directories under %(dirname)r: %(component_dirs)r" % vars(self))
 
+    def frombase(self, *args):
+        """Return path relative to the basedir."""
+        # wrap paths with frombase() and hopefully this allows us fairly
+        # flexible use of the class, especially for analysis
+        if self.basedir is None:
+            return os.path.join(*args)
+        return os.path.join(self.basedir, *args)
 
     def wdir(self, component, lmbda):
         """Return path to the work directory for *component* and *lmbda*."""
-        return os.path.join(self.component_dirs[component], "%04d" % (1000 * lmbda))
+        return self.frombase(self.component_dirs[component], "%04d" % (1000 * lmbda))
 
     def label(self, component):
         """Simple label for component, e.g. for use in filenames."""
@@ -319,7 +335,7 @@ class Gsolv(object):
         kwargs['mdrun_opts'] = " ".join([kwargs.pop('mdrun_opts',''), '-dgdl'])  # crucial for FEP!!        
         kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.includes        
         qsubargs = kwargs.copy()
-        qsubargs['dirname'] = self.dirname
+        qsubargs['dirname'] = self.dirname  # XXX: try and use frombase() here?
         # handle templates separately (necessary for array jobs)
         qscripts = qsubargs.pop('sge', None) or self.qscript
         qscripts.extend(qsubargs.pop('qscript',[]))  # also allow canonical 'templates'        
@@ -382,7 +398,7 @@ class Gsolv(object):
                   the correct one (but the difference should be small).        
         """
 
-        V = gromacs.cbook.get_volume(self.struct)
+        V = gromacs.cbook.get_volume(self.frombase(self.struct))
         V0 = float(N)/molar_to_nm3(c0)
         self.results.DeltaA.standardstate = -kBOLTZ * \
                                             self.Temperature * numpy.log(V0/V)
@@ -510,15 +526,15 @@ class Gsolv(object):
         for i, (component, (x,y,dy)) in enumerate(dvdl.items()):
             iplot = i+1
             subplot(1, nplots, iplot)
-            label = r"$\Delta A_{\rm{%s}} = %.2f$ kJ/mol" \
-                    % (component, self.results.DeltaA[component])
+            label = r"$\Delta A^{\rm{%s}}_{\rm{%s}} = %.2f$ kJ/mol" \
+                    % (component, self.solvent_type, self.results.DeltaA[component])
             errorbar(x, y, yerr=dy, label=label, **kwargs)
             xlabel(r'$\lambda$')
             legend(loc='best')
             xlim(-0.05, 1.05)
         subplot(1, nplots, 1)
         ylabel(r'$dV/d\lambda$ in kJ/mol')
-        title(r"Free energy difference $\Delta A^{0}$")
+        title(r"Free energy difference $\Delta A^{0}_{\rm{%s}}$" % self.solvent_type)
         subplot(1, nplots, 2)        
         title(r"for %s: %.2f kJ/mol" %
               (self.molecule, self.results.DeltaA.total))
@@ -623,7 +639,7 @@ def pOW(G1, G2):
     for G in Gsolvs.values():
         try:
             G.results.DeltaA.total
-        except AttributeError:
+        except (KeyError, AttributeError):   # KeyError because results is a AttributeDict
             G.analyze()
 
     transferFE = Gsolvs['octanol'].results.DeltaA.total - Gsolvs['water'].results.DeltaA.total 

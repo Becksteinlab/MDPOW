@@ -26,6 +26,7 @@ octanol. It uses Gromacs (http://www.gromacs.org) for the molecular dynamics
       download_url="http://sbcb.bioch.ox.ac.uk/oliver/download/Python/",
       keywords="science Gromacs analysis 'molecular dynamics'",
       packages=find_packages(exclude=['examples']),
+      scripts = ['scripts/mdpow-pow',],
       package_data={'mdpow': ['top/*', 'templates/*'], },
       install_requires = ['numpy>=1.0', 'scipy',
                           'GromacsWrapper>=0.1.7'],

@@ -135,14 +135,14 @@ Hydration free energy
 Reopen the python session (if you quit it you will have to ``import
 mdpow`` again) and set up a :class:`~mdpow.fep.Ghyd` object::
 
-   G = mdpow.fep.Ghyd(molecule="OcOH", top="Equilibrium/water/top/system.top", struct="Equilibrium/water/MD_NPT/md.pdb", ndx="Equilibrium/water/solvation/main.ndx", runtime=100)
+   gwat = mdpow.fep.Ghyd(molecule="OcOH", top="Equilibrium/water/top/system.top", struct="Equilibrium/water/MD_NPT/md.pdb", ndx="Equilibrium/water/solvation/main.ndx", runtime=100)
    
 Alternatively, one can save some typing if we continue the last session and use
 the :class:`mdpow.equil.Simulation` object (which we can re-load from its saved
 state file from disk)::
 
   S = mdpow.equil.WaterSimulation(filename="water.simulation")  # only needed when quit
-  G = mdpow.fep.Ghyd(simulation=S, runtime=100)
+  gwat = mdpow.fep.Ghyd(simulation=S, runtime=100)
 
 This generates all the input files under ``FEP/water``.
 
@@ -151,7 +151,7 @@ This generates all the input files under ``FEP/water``.
 
 Then set up all input files::
 
-  G.setup(qscript=['my_script.sge', 'local.sh'])
+  gwat.setup(qscript=['my_script.sge', 'local.sh'])
 
 (The details of the FEP runs can be customized by setting some keywords (such as
 *lambda_vdw*, *lamda_coulomb*, see :class:`mdpow.fep.Gsolv` for details) or by
@@ -185,8 +185,8 @@ Octanol solvation free energy
 
 Almost identical setup as in the water case::
 
-   H = mdpow.fep.Goct(simulation=O, runtime=100)
-   H.setup(qscript=['my_script.sge', 'local.sh'])
+   goct = mdpow.fep.Goct(simulation=O, runtime=100)
+   goct.setup(qscript=['my_script.sge', 'local.sh'])
 
 This generates all the input files under ``FEP/octanol``.
 
@@ -221,11 +221,11 @@ Analyze output
 
 For the water and octanol FEPs do ::
 
- G.collect()
- G.analyze()
+ gwat.collect()
+ gwat.analyze()
 
- H.collect()
- H.analyze()
+ goct.collect()
+ goct.analyze()
 
 The analyze step reports the estimate for the free energy
 difference. 
@@ -233,17 +233,17 @@ difference.
 Calculate the free energy for transferring the solute from water to
 octanol and octanol-water partition coefficient log P_OW ::
 
- mdpow.fep.pOW(G, H)
+ mdpow.fep.pOW(gwat, H)
 
 (see :func:`mdpow.fep.pOW` for details and definitions).
 
 All individual results can also accessed as a dictionary ::
 
- G.results.DeltaA
+ gwat.results.DeltaA
 
 Free energy of transfer from water to octanol::
 
- H.results.DeltaA.total - G.results.DeltaA.total
+ goct.results.DeltaA.total - gwat.results.DeltaA.total
 
 The individual components are
 
@@ -262,9 +262,9 @@ The individual components are
 To plot the data (de-charging and de-coupling)::
 
  import pylab
- G.plot()
+ gwat.plot()
  pylab.figure()
- H.plot()
+ goct.plot()
 
 The error data points are the average of dV/dl over each windows. The
 error bars are the standard deviations of the data points from the
@@ -273,9 +273,28 @@ average.
 If the graphs do not look smooth then a longer *runtime* is definitely
 required. It might also be necessary to add additional lambda values
 in regions where the function changes rapidly.
+
+
+The mdpow scripts
+=================
+
+Some tasks are simplified by using scripts, which are installed in a
+bin directory (or the directory pointed to by ``--install-scripts``).
+
+``mdpow-pow``
+    usage: ``mdpow-pow`` *DIRECTORY*
+
+   Run the free energy analysis for water and octanol in *DIRECTORY*``/FEP``
+   and return the octanol-water partition coefficient log *P_OW*. It relies on
+   files and directories being named according to the defaults. It requires
+   finished FEP simulations, with the Goct and Ghyd objects saved as
+   ``FEP/water/Ghyd.fep`` and ``FEP/octanol/Goct.fep``.
+
+   By default the script also produces a graph ``dVdl.pdf`` under *DIRECTORY*;
+   for more details see ``--help``.
  
 """
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 
 __all__ = ['fep', 'equil']
 
