@@ -228,7 +228,16 @@ For the water and octanol FEPs do ::
  H.analyze()
 
 The analyze step reports the estimate for the free energy
-difference. All results can also accessed as a dictionary ::
+difference. 
+
+Calculate the free energy for transferring the solute from water to
+octanol and octanol-water partition coefficient log P_OW ::
+
+ mdpow.fep.pOW(G, H)
+
+(see :func:`mdpow.fep.pOW` for details and definitions).
+
+All individual results can also accessed as a dictionary ::
 
  G.results.DeltaA
 
@@ -266,7 +275,7 @@ required. It might also be necessary to add additional lambda values
 in regions where the function changes rapidly.
  
 """
-VERSION = "0.0.4"
+VERSION = "0.1.0"
 
 __all__ = ['fep', 'equil']
 

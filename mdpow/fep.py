@@ -39,14 +39,15 @@ solvation free energy in octanol there is
 .. autoclass:: Goct
 .. autoclass:: Gsolv
    :members:
-
-A user really only needs to access classes derived from
-:class:`mdpow.fep.Gsolv` such as ; all other classes and functions are
-auxiliary and only of interest to developers.
+.. autofunction:: pOW
 
 
 Developer notes
 ---------------
+
+A user really only needs to access classes derived from
+:class:`mdpow.fep.Gsolv`; all other classes and functions are auxiliary and
+only of interest to developers.
 
 Additional objects that support :class:`mdpow.fep.Gsolv`.
 
@@ -589,3 +590,47 @@ class Goct(Gsolv):
     """Sets up and analyses MD to obtain the solvation free energy of a solute in octanol."""
     solvent_default = "octanol"
 
+
+def pOW(G1, G2):
+    """Compute water-octanol partition coefficient from two :class:`Gsolv` objects.
+
+       transfer free energy from water into octanol
+            DeltaDeltaA0 = DeltaA0_oct - DeltaA0_water
+       water-octanol partition coefficient
+            log P_oct/wat =  log [X]_oct/[X]_wat
+
+    :Arguments:
+       *G1* and *G2* should be a :class:`Ghyd` and a :class:`Goct` instance,
+       but order does not matter
+    :Returns: (transfer free energy, water-octanol partition coefficient)     
+    """
+
+    args = (G1, G2)
+    if G1.Temperature != G2.Temperature:
+        raise ValueError("The two simulations were done at different temperatures.")
+    Gsolvs = {}
+    for solv in ('water', 'octanol'):
+        for G in args:
+            if G.solvent_type == solv:
+                Gsolvs[solv] = G
+    if len(Gsolvs) != 2:
+        errmsg = "Supply one octanol and one water solvation "\
+            "energy simulation object; %r were provided." \
+            % [G1.solvent_type, G2.solvent_type]
+        logger.error(errmsg)
+        raise ValueError(errmsg)
+
+    for G in Gsolvs.values():
+        try:
+            G.results.DeltaA.total
+        except AttributeError:
+            G.analyze()
+
+    transferFE = Gsolvs['octanol'].results.DeltaA.total - Gsolvs['water'].results.DeltaA.total 
+    pOW = -transferFE / (kBOLTZ * Gsolvs['octanol'].Temperature) * numpy.log10(numpy.e)
+
+    logger.info("Values at T = %g K", Gsolvs['octanol'].Temperature)
+    logger.info("Free energy of transfer wat --> oct: %g kJ/mol", transferFE)
+    logger.info("log P_ow: %g", pOW)
+
+    return transferFE, pOW
