@@ -1,0 +1,377 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>mdpow — Computing the octanol/water partitioning coefficient &mdash; MDpow v0.0.4 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '#',
+        VERSION:     '0.0.4',
+        COLLAPSE_MODINDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="MDpow v0.0.4 documentation" href="index.html" />
+    <link rel="next" title="mdpow.equil — Setting up and running equilibrium MD" href="equil.html" />
+    <link rel="prev" title="Quick installation instructions for POW" href="INSTALL.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="modindex.html" title="Global Module Index"
+             accesskey="M">modules</a> |</li>
+        <li class="right" >
+          <a href="equil.html" title="mdpow.equil — Setting up and running equilibrium MD"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="INSTALL.html" title="Quick installation instructions for POW"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">MDpow v0.0.4 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="mdpow-computing-the-octanol-water-partitioning-coefficient">
+<span id="module-mdpow"></span><h1><tt class="xref docutils literal"><span class="pre">mdpow</span></tt> &#8212; Computing the octanol/water partitioning coefficient<a class="headerlink" href="#mdpow-computing-the-octanol-water-partitioning-coefficient" title="Permalink to this headline">¶</a></h1>
+<p>The <tt class="xref docutils literal"><span class="pre">mdpow</span></tt> module helps in setting up and analyzing absolute
+free energy calculations of small molecules by molecular dynamics (MD)
+simulations. By computing the hydration free energy and the solvation
+free energy in octanol one can compute the octanol/water partitioning
+coefficient, an important quantity that is used to characterize
+drug-like compounds.</p>
+<p>The MD simulations are performed with <a class="reference external" href="http://www.gromacs.org">Gromacs</a> 4.x</p>
+<div class="section" id="how-to-use-the-module">
+<h2>How to use the module<a class="headerlink" href="#how-to-use-the-module" title="Permalink to this headline">¶</a></h2>
+<p>Before you can start you will need</p>
+<blockquote>
+<ul class="simple">
+<li>a coordinate file for the small molecule</li>
+<li>a Gromacs OPLS/AA topology (itp) file</li>
+<li>an installation of <a class="reference external" href="http://www.gromacs.org">Gromacs</a> 4.0.x.</li>
+</ul>
+</blockquote>
+<div class="section" id="basic-work-flow">
+<h3>Basic work flow<a class="headerlink" href="#basic-work-flow" title="Permalink to this headline">¶</a></h3>
+<p>You will typically calculate two solvation free energies (free
+energy of transfer of the solute from the liquid into the vacuum
+phase):</p>
+<blockquote>
+<ol class="arabic simple">
+<li>solvent = <em>water</em><ol class="arabic">
+<li>set up a short equilibrium simulation of the molecule in a <em>water</em>
+box (and run the MD simulation);</li>
+<li>set up a free energy perturbation calculation of the ligand in
+water , which will yield the hydration free energy;</li>
+</ol>
+</li>
+<li>solvent = <em>octanol</em><ol class="arabic">
+<li>set up a short equilibrium simulation of the molecule in a <em>octanol</em>
+box (and run the MD simulation);</li>
+<li>set up a free energy perturbation calculation of the ligand in
+octanol , which will yield the solvation free energy in octanol;</li>
+</ol>
+</li>
+<li>run these simulations on a cluster;</li>
+<li>analyze the output and combine the free energies to arrive at an
+estimate of the octanol-water partition coefficient.</li>
+</ol>
+</blockquote>
+</div>
+<div class="section" id="customized-submission-scripts-for-queuing-systems">
+<h3>Customized submission scripts for queuing systems<a class="headerlink" href="#customized-submission-scripts-for-queuing-systems" title="Permalink to this headline">¶</a></h3>
+<p>One can also generate run scripts for various queuing systems; check
+the documentation for <a title="(in GromacsWrapper v0.1)" class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/qsub.html#module-gromacs.qsub"><tt class="xref docutils literal"><span class="pre">gromacs.qsub</span></tt></a> and in particular the
+section on <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/qsub.html#queuing-system-templates">writing queuing system templates</a> . You will have to</p>
+<ul>
+<li><p class="first">add a template script to your private GromacsWrapper template
+directory (<tt class="docutils literal"><span class="pre">~/.gromacswrapper/qscripts</span></tt>); in this example we call
+it <tt class="docutils literal"><span class="pre">my_script.sge</span></tt>;</p>
+</li>
+<li><p class="first">add the keyword <em>qscript</em> to the <a title="mdpow.equil.Simulation.MD" class="reference external" href="equil.html#mdpow.equil.Simulation.MD"><tt class="xref docutils literal"><span class="pre">mdpow.equil.Simulation.MD()</span></tt></a>
+and <a title="mdpow.fep.Gsolv.setup" class="reference external" href="fep.html#mdpow.fep.Gsolv.setup"><tt class="xref docutils literal"><span class="pre">mdpow.fep.Gsolv.setup()</span></tt></a> invocations; e.g. as</p>
+<blockquote>
+<p><em>qscript</em> = [&#8216;my_script.sge&#8217;, &#8216;local.sh&#8217;]</p>
+</blockquote>
+</li>
+<li><p class="first">submit the generated queuing system script to your queuing system, e.g.</p>
+<div class="highlight-python"><pre>cd Equilibrium/water
+qsub my_script.sh</pre>
+</div>
+</li>
+</ul>
+</div>
+<div class="section" id="example-session-1-octanol-as-a-solute">
+<h3>Example session: 1-octanol as a solute<a class="headerlink" href="#example-session-1-octanol-as-a-solute" title="Permalink to this headline">¶</a></h3>
+<p>In the following interactive python session we use octanol as an
+example for a solute; all files are present in the package so one can
+work through the example immediately.</p>
+<p>Before starting <strong>python</strong> (preferrably <a class="reference external" href="http://ipython.scipy.org">ipython</a>) make sure that the
+<a class="reference external" href="http://www.gromacs.org">Gromacs</a> 4.0.x tools can be found, e.g. <tt class="docutils literal"><span class="pre">which</span> <span class="pre">grompp</span></tt> should show you the
+path to <strong>grompp</strong>.</p>
+<div class="section" id="water">
+<h4>Water<a class="headerlink" href="#water" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="equilibrium-simulation">
+<h5>Equilibrium simulation<a class="headerlink" href="#equilibrium-simulation" title="Permalink to this headline">¶</a></h5>
+<p>Make a directory <tt class="docutils literal"><span class="pre">octanol</span></tt> and copy the <tt class="docutils literal"><span class="pre">octanol.itp</span></tt> and
+<tt class="docutils literal"><span class="pre">octanol.gro</span></tt> file into it. Launch <strong>ipython</strong> from this
+directory and type:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">mdpow</span>
+<span class="n">S</span> <span class="o">=</span> <span class="n">mdpow</span><span class="o">.</span><span class="n">equil</span><span class="o">.</span><span class="n">WaterSimulation</span><span class="p">(</span><span class="n">molecule</span><span class="o">=</span><span class="s">&quot;OcOH&quot;</span><span class="p">)</span>
+<span class="n">S</span><span class="o">.</span><span class="n">topology</span><span class="p">(</span><span class="n">itp</span><span class="o">=</span><span class="s">&quot;octanol.itp&quot;</span><span class="p">)</span>
+<span class="n">S</span><span class="o">.</span><span class="n">solvate</span><span class="p">(</span><span class="n">struct</span><span class="o">=</span><span class="s">&quot;octanol.gro&quot;</span><span class="p">)</span>
+<span class="n">S</span><span class="o">.</span><span class="n">energy_minimize</span><span class="p">()</span>
+<span class="n">S</span><span class="o">.</span><span class="n">MD_relaxed</span><span class="p">()</span>
+<span class="c"># run the simulation in the MD_relaxed/ directory</span>
+<span class="n">S</span><span class="o">.</span><span class="n">MD</span><span class="p">(</span><span class="n">runtime</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">qscript</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;my_script.sge&#39;</span><span class="p">,</span> <span class="s">&#39;local.sh&#39;</span><span class="p">])</span>  <span class="c"># only run for 50 ps in this tutorial</span>
+<span class="n">S</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;water.simulation&quot;</span><span class="p">)</span>                               <span class="c"># save setup for later (analysis stage)</span>
+</pre></div>
+</div>
+<p>Background (<tt class="docutils literal"><span class="pre">Ctrl-Z</span></tt>) or quit (<tt class="docutils literal"><span class="pre">Ctrl-D</span></tt>) python and run the
+simulations in the <tt class="docutils literal"><span class="pre">MD_relaxed</span></tt> and <tt class="docutils literal"><span class="pre">MD_NPT</span></tt> subdirectory. You can modify
+the <tt class="docutils literal"><span class="pre">local.sh</span></tt> script to your ends or use <em>qscript</em> to generate queuing system
+scripts.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Here we only run 50 ps equilibrium MD for testing. For production this
+should be substantially longer, maybe even 50 ns if you want to
+extract thermodynamic data.</p>
+</div>
+</div>
+<div class="section" id="hydration-free-energy">
+<h5>Hydration free energy<a class="headerlink" href="#hydration-free-energy" title="Permalink to this headline">¶</a></h5>
+<p>Reopen the python session (if you quit it you will have to <tt class="docutils literal"><span class="pre">import</span>
+<span class="pre">mdpow</span></tt> again) and set up a <a title="mdpow.fep.Ghyd" class="reference external" href="fep.html#mdpow.fep.Ghyd"><tt class="xref docutils literal"><span class="pre">Ghyd</span></tt></a> object:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">G</span> <span class="o">=</span> <span class="n">mdpow</span><span class="o">.</span><span class="n">fep</span><span class="o">.</span><span class="n">Ghyd</span><span class="p">(</span><span class="n">molecule</span><span class="o">=</span><span class="s">&quot;OcOH&quot;</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="s">&quot;Equilibrium/water/top/system.top&quot;</span><span class="p">,</span> <span class="n">struct</span><span class="o">=</span><span class="s">&quot;Equilibrium/water/MD_NPT/md.pdb&quot;</span><span class="p">,</span> <span class="n">ndx</span><span class="o">=</span><span class="s">&quot;Equilibrium/water/solvation/main.ndx&quot;</span><span class="p">,</span> <span class="n">runtime</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Alternatively, one can save some typing if we continue the last session and use
+the <a title="mdpow.equil.Simulation" class="reference external" href="equil.html#mdpow.equil.Simulation"><tt class="xref docutils literal"><span class="pre">mdpow.equil.Simulation</span></tt></a> object (which we can re-load from its saved
+state file from disk):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">S</span> <span class="o">=</span> <span class="n">mdpow</span><span class="o">.</span><span class="n">equil</span><span class="o">.</span><span class="n">WaterSimulation</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s">&quot;water.simulation&quot;</span><span class="p">)</span>  <span class="c"># only needed when quit</span>
+<span class="n">G</span> <span class="o">=</span> <span class="n">mdpow</span><span class="o">.</span><span class="n">fep</span><span class="o">.</span><span class="n">Ghyd</span><span class="p">(</span><span class="n">simulation</span><span class="o">=</span><span class="n">S</span><span class="p">,</span> <span class="n">runtime</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This generates all the input files under <tt class="docutils literal"><span class="pre">FEP/water</span></tt>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Here we only run 100 ps per window for testing. For production this
+should be rather something like 5-10 ns (the default is 5 ns).</p>
+</div>
+<p>Then set up all input files:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">G</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">qscript</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;my_script.sge&#39;</span><span class="p">,</span> <span class="s">&#39;local.sh&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>(The details of the FEP runs can be customized by setting some keywords (such as
+<em>lambda_vdw</em>, <em>lamda_coulomb</em>, see <a title="mdpow.fep.Gsolv" class="reference external" href="fep.html#mdpow.fep.Gsolv"><tt class="xref docutils literal"><span class="pre">mdpow.fep.Gsolv</span></tt></a> for details) or by
+deriving a new class from the <a title="mdpow.fep.Ghyd" class="reference external" href="fep.html#mdpow.fep.Ghyd"><tt class="xref docutils literal"><span class="pre">mdpow.fep.Ghyd</span></tt></a> base class but this is not
+covered in this tutorial.)</p>
+</div>
+</div>
+<div class="section" id="octanol">
+<h4>Octanol<a class="headerlink" href="#octanol" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="id2">
+<h5>Equilibrium simulation<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h5>
+<p>Almost identical to the water case:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">O</span> <span class="o">=</span> <span class="n">mdpow</span><span class="o">.</span><span class="n">equil</span><span class="o">.</span><span class="n">OctanolSimulation</span><span class="p">(</span><span class="n">molecule</span><span class="o">=</span><span class="s">&quot;OcOH&quot;</span><span class="p">)</span>
+<span class="n">O</span><span class="o">.</span><span class="n">topology</span><span class="p">(</span><span class="n">itp</span><span class="o">=</span><span class="s">&quot;octanol.itp&quot;</span><span class="p">)</span>
+<span class="n">O</span><span class="o">.</span><span class="n">solvate</span><span class="p">(</span><span class="n">struct</span><span class="o">=</span><span class="s">&quot;octanol.gro&quot;</span><span class="p">)</span>
+<span class="n">O</span><span class="o">.</span><span class="n">energy_minimize</span><span class="p">()</span>
+<span class="n">O</span><span class="o">.</span><span class="n">MD_relaxed</span><span class="p">()</span>
+<span class="n">O</span><span class="o">.</span><span class="n">MD</span><span class="p">(</span><span class="n">runtime</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">qscript</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;my_script.sge&#39;</span><span class="p">,</span> <span class="s">&#39;local.sh&#39;</span><span class="p">])</span>    <span class="c"># only run for 50 ps in this tutorial</span>
+<span class="n">O</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Here we only run 50 ps equilibrium MD for testing. For production this
+should be substantially longer, maybe even 50 ns if you want to
+extract thermodynamic data.</p>
+</div>
+</div>
+<div class="section" id="octanol-solvation-free-energy">
+<h5>Octanol solvation free energy<a class="headerlink" href="#octanol-solvation-free-energy" title="Permalink to this headline">¶</a></h5>
+<p>Almost identical setup as in the water case:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">H</span> <span class="o">=</span> <span class="n">mdpow</span><span class="o">.</span><span class="n">fep</span><span class="o">.</span><span class="n">Goct</span><span class="p">(</span><span class="n">simulation</span><span class="o">=</span><span class="n">O</span><span class="p">,</span> <span class="n">runtime</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">H</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">qscript</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;my_script.sge&#39;</span><span class="p">,</span> <span class="s">&#39;local.sh&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>This generates all the input files under <tt class="docutils literal"><span class="pre">FEP/octanol</span></tt>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Here we only run 100 ps per window for testing. For
+production this should be rather something like 5-10 ns (the
+default is 5 ns)</p>
+</div>
+</div>
+</div>
+<div class="section" id="running-the-fep-simulations">
+<h4>Running the FEP simulations<a class="headerlink" href="#running-the-fep-simulations" title="Permalink to this headline">¶</a></h4>
+<p>The files are under the <tt class="docutils literal"><span class="pre">FEP/water</span></tt> and <tt class="docutils literal"><span class="pre">FEP/octanol</span></tt> directories
+in separate sub directories.</p>
+<p>Either run job arrays that should have been generated from the
+<tt class="docutils literal"><span class="pre">my_script.sge</span></tt> template</p>
+<div class="highlight-python"><pre>qsub Coul_my_script.sge
+qsub VDW_my_script.sge</pre>
+</div>
+<p>Or run each job in its own directory. Note that <strong>mdrun</strong>
+should be called with at least the following options</p>
+<div class="highlight-python"><pre>mdrun -deffnm $DEFFNM  -dgdl</pre>
+</div>
+<p>where DEFFNM is typically &#8220;md&#8221;; see the run <tt class="docutils literal"><span class="pre">local.sh</span></tt> script in
+each direcory for hints on what needs to be done.</p>
+</div>
+<div class="section" id="analyze-output">
+<h4>Analyze output<a class="headerlink" href="#analyze-output" title="Permalink to this headline">¶</a></h4>
+<p>For the water and octanol FEPs do</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">G</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+<span class="n">G</span><span class="o">.</span><span class="n">analyze</span><span class="p">()</span>
+
+<span class="n">H</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+<span class="n">H</span><span class="o">.</span><span class="n">analyze</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The analyze step reports the estimate for the free energy
+difference. All results can also accessed as a dictionary</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">G</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">DeltaA</span>
+</pre></div>
+</div>
+<p>Free energy of transfer from water to octanol:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">H</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">DeltaA</span><span class="o">.</span><span class="n">total</span> <span class="o">-</span> <span class="n">G</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">DeltaA</span><span class="o">.</span><span class="n">total</span>
+</pre></div>
+</div>
+<p>The individual components are</p>
+<blockquote>
+<dl class="docutils">
+<dt>total</dt>
+<dd>total standard free energy difference in kJ/mol; 
+DeltaA0 = (A_solv - A_vac) + DA_v</dd>
+<dt>standardstate</dt>
+<dd>correction DA_v for the standard state concentration <em>c</em> (depends
+on the volume of the simulation cell); in kJ/mol. Different <em>c</em> can
+be supplied as an argument to analyze().</dd>
+<dt>coulomb</dt>
+<dd>contribution of the de-charging process to DeltaA</dd>
+<dt>vdw</dt>
+<dd>contribution of the de-coupling process to DeltaA</dd>
+</dl>
+</blockquote>
+<p>To plot the data (de-charging and de-coupling):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">pylab</span>
+<span class="n">G</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">pylab</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">H</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The error data points are the average of dV/dl over each windows. The
+error bars are the standard deviations of the data points from the
+average.</p>
+<p>If the graphs do not look smooth then a longer <em>runtime</em> is definitely
+required. It might also be necessary to add additional lambda values
+in regions where the function changes rapidly.</p>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <h3><a href="index.html">Table Of Contents</a></h3>
+            <ul>
+<li><a class="reference external" href="#"><tt class="docutils literal"><span class="pre">mdpow</span></tt> &#8212; Computing the octanol/water partitioning coefficient</a><ul>
+<li><a class="reference external" href="#how-to-use-the-module">How to use the module</a><ul>
+<li><a class="reference external" href="#basic-work-flow">Basic work flow</a></li>
+<li><a class="reference external" href="#customized-submission-scripts-for-queuing-systems">Customized submission scripts for queuing systems</a></li>
+<li><a class="reference external" href="#example-session-1-octanol-as-a-solute">Example session: 1-octanol as a solute</a><ul>
+<li><a class="reference external" href="#water">Water</a><ul>
+<li><a class="reference external" href="#equilibrium-simulation">Equilibrium simulation</a></li>
+<li><a class="reference external" href="#hydration-free-energy">Hydration free energy</a></li>
+</ul>
+</li>
+<li><a class="reference external" href="#octanol">Octanol</a><ul>
+<li><a class="reference external" href="#id2">Equilibrium simulation</a></li>
+<li><a class="reference external" href="#octanol-solvation-free-energy">Octanol solvation free energy</a></li>
+</ul>
+</li>
+<li><a class="reference external" href="#running-the-fep-simulations">Running the FEP simulations</a></li>
+<li><a class="reference external" href="#analyze-output">Analyze output</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            <h4>Previous topic</h4>
+            <p class="topless"><a href="INSTALL.html"
+                                  title="previous chapter">Quick installation instructions for <em>POW</em></a></p>
+            <h4>Next topic</h4>
+            <p class="topless"><a href="equil.html"
+                                  title="next chapter"><tt class="docutils literal docutils literal docutils literal"><span class="pre">mdpow.equil</span></tt> &#8212; Setting up and running equilibrium MD</a></p>
+            <h3>This Page</h3>
+            <ul class="this-page-menu">
+              <li><a href="_sources/init.txt"
+                     rel="nofollow">Show Source</a></li>
+            </ul>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="modindex.html" title="Global Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="equil.html" title="mdpow.equil — Setting up and running equilibrium MD"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="INSTALL.html" title="Quick installation instructions for POW"
+             >previous</a> |</li>
+        <li><a href="index.html">MDpow v0.0.4 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2010, Oliver Beckstein and Bogdan Iorga.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
+    </div>
+  </body>
+</html>

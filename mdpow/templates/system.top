@@ -9,23 +9,16 @@
 ; Include compound topology
 #include "compound.itp"
 
-; Include water topology
+; Include solvent topology
 #include "tip4p.itp"
-#ifdef POSRES_WATER
-; Position restraint for each water oxygen
-[ position_restraints ]
-;  i funct       fcx        fcy        fcz
-   1    1       1000       1000       1000
-#endif
 
 ; Include generic topology for ions
 #include "ions_opls.itp"
 
 [ system ]
 ; Name
-Compound DRUG in water (OPLS-AA parameters)
+Compound DRUG in solvent (OPLS-AA parameters)
 
 [ molecules ]
 ; Compound        #mols
 DRUG               1
-

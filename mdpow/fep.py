@@ -1,28 +1,76 @@
-# ghyd.py
+# mdpow: fep.py
 # Copyright (c) 2010 Oliver Beckstein
 """
-:mod:`mdpow.ghyd` -- calculate free energy of hydration
-=======================================================
+:mod:`mdpow.fep` -- calculate free energy of solvation
+======================================================
 
-Set up and run free energy perturbation calculations to calculate the
-free energy of hydration of a solute in a water box. The protocol
-follows the works of D. Mobley (`Free Energy Tutorial`_) and
-M. Shirts, and uses Gromacs 4.x.
+Set up and run free energy perturbation (FEP) calculations to
+calculate the free energy of hydration of a solute in a solvent
+box. The protocol follows the works of D. Mobley (`Free Energy
+Tutorial`_) and M. Shirts, and uses Gromacs 4.0.x.
 
 Required Input:
-- topology
-- equilibrated structure of the solvated molecule
+
+ - topology
+ - equilibrated structure of the solvated molecule
+
+
+.. _Free Energy Tutorial:
+   http://www.dillgroup.ucsf.edu/group/wiki/index.php?title=Free_Energy:_Tutorial
+
+
+Example
+-------
+
+see :mod:`mdpow`
+
+
+User reference
+--------------
+
+Simulation setup and analysis of all FEP simulations is encapsulated
+by a :class:`mdpow.fep.Gsolv` object. For the hydration free energy
+there is a special class :class:`~mdpow.fep.Ghyd` and for the
+solvation free energy in octanol there is
+:class:`~mdpow.fep.Goct`. See the description of
+:class:`~mdpow.fep.Gsolv` for methods common to both.
+
+.. autoclass:: Ghyd
+.. autoclass:: Goct
+.. autoclass:: Gsolv
+   :members:
+
+A user really only needs to access classes derived from
+:class:`mdpow.fep.Gsolv` such as ; all other classes and functions are
+auxiliary and only of interest to developers.
+
+
+Developer notes
+---------------
+
+Additional objects that support :class:`mdpow.fep.Gsolv`.
+
+.. autoclass:: FEPschedule
+   :members:
+.. autofunction:: molar_to_nm3
+
+.. autodata:: N_AVOGADRO
+.. autodata:: kBOLTZ
+.. autodata:: fep_templates
+
+.. |NA| replace:: *N*\ :sub:`A`
+.. |kB| replace:: *k*\ :sub:`B`
+.. _NA NIST value: http://physics.nist.gov/cgi-bin/cuu/Value?na
+.. _kB NIST value: http://physics.nist.gov/cgi-bin/cuu/Value?k
 
 TODO
-----
+~~~~
 
 - run minimization, NVT-equil, NPT-equil prior to production (probably
   use preprocessed topology from ``grompp -pp`` for portability)
   
   See `Free Energy Tutorial`_.
 
-.. _Free Energy Tutorial:
-   http://www.dillgroup.ucsf.edu/group/wiki/index.php?title=Free_Energy:_Tutorial
 """
 from __future__ import with_statement
 
@@ -34,24 +82,25 @@ import cPickle
 
 import numpy
 
-import gromacs, gromacs.setup
+import gromacs, gromacs.setup, gromacs.utilities
 from gromacs.utilities import asiterable, AttributeDict, in_dir
 
 import logging
-logger = logging.getLogger('mdpow.ghyd')
+logger = logging.getLogger('mdpow.fep')
 
-#: `Avogadro's constant (NIST)`_ in mol^-1.
-#: .. _Avogadro's constant (NIST): http://physics.nist.gov/cgi-bin/cuu/Value?na
+import config
+
+
+#: Avogadro's constant |NA| in mol^-1 (`NA NIST value`_).
 N_AVOGADRO = 6.02214179e23
-#: `Boltzmann's constant (NIST)`_ in kJ mol^-1.
-#: .. _Boltzmann's constant (NIST): http://physics.nist.gov/cgi-bin/cuu/Value?k
+#: Boltzmann's constant |kB| in kJ mol^-1 (`kB NIST value`_).
 kBOLTZ = 1.3806504e-23 *1e-3 * N_AVOGADRO
 
 def molar_to_nm3(c):
     """Convert a concentration in Molar to nm^-3."""
     return c * N_AVOGADRO * 1e-24
 
-# add equilibration, too?
+#: Template mdp files for different stages of the FEP protocol. (add equilibration, too?)
 fep_templates = {
     'production_mdp': resource_filename(__name__, 'templates/fep_opls.mdp'),
     }
@@ -68,10 +117,25 @@ class FEPschedule(AttributeDict):
         return dict(((k,v) for k,v in self.items() if k in self.mdp_keywords))
 
 
-class Ghyd(object):
-    """Simulations to calculate the hydration free energy."""
+class Gsolv(object):
+    """Simulations to calculate and analyze the solvation free energy.
 
-    # TODO: make the class saveable/pickle
+    Typical work flow::
+
+       G = Gsolv(simulation='drug.simulation')           # continue from :mod:`mdpow.equil`
+       G.setup(qscript=['my_template.sge', 'local.sh'])  # my_template.sge is user supplied
+       G.qsub()    # run SGE job arrays as generated from my_template.sge
+       G.analyze()
+       G.plot()
+
+    See :mod:`gromacs.qsub` for notes on how to write templates for
+    queuing system scripts (in particular `queuing system templates`_).
+
+    .. _queuing system templates:
+       http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/building_blocks.html?highlight=qsub#queuing-system-templates
+    """
+
+    solvent_default = "water"
 
     schedules = {'coulomb':
                  FEPschedule(name='coulomb',
@@ -93,10 +157,8 @@ class Ghyd(object):
                  }
 
 
-    def __init__(self, molecule=None, top=None, struct=None,
-                 simulation=None, filename=None,
-                 **kwargs):
-        """Prepare all input files.
+    def __init__(self, molecule=None, top=None, struct=None, **kwargs):
+        """Set up Gsolv from input files or a equilibrium simulation.
         
         :Arguments:
            *molecule*
@@ -110,18 +172,23 @@ class Ghyd(object):
            *ndx*
                index file
            *dirname*
-               directory to work under ['FEP']
+               directory to work under ['FEP/*solvent*']
+           *solvent*
+               name of the solvent (only used for path names); will not 
+               affect the simulations
            *lambda_coulomb*
                list of lambdas for discharging: q+vdw --> vdw
            *lambda_vdw*
                list of lambdas for decoupling: vdw --> none
            *runtime*
-               simulation time per window in ps [100]
+               simulation time per window in ps [5000]
            *temperature*
                temperature in Kelvin of the simulation [300.0]
-           *templates*
+           *qscript*
                template or list of templates for queuing system scripts
                (see :data:`gromacs.config.templates` for details) [local.sh]
+           *includes*
+               include directories
            *simulation*
                Instead of providing the required arguments, obtain the input
                files from a :class:`mdpow.equil.Simulation` instance.
@@ -133,10 +200,15 @@ class Ghyd(object):
         """
         required_args = ('molecule', 'top', 'struct')
 
+        filename = kwargs.pop('filename', None)
+        simulation = kwargs.pop('simulation', None)
+        solvent = kwargs.pop('solvent', self.solvent_default)
+
         if (None in (molecule, top, struct) and simulation is None) and not filename is None:
             # load from pickle file
             self.load(filename)
             self.filename = filename
+            kwargs = {}    # for super
         else:
             if not simulation is None:
                 # load data from Simulation instance
@@ -144,18 +216,37 @@ class Ghyd(object):
                 self.top = simulation.files.processed_topology or simulation.files.topology
                 self.struct = simulation.files.MD_NPT
                 self.ndx = simulation.files.ndx
+                if simulation.solvent_type == solvent:
+                    self.solvent_type = simulation.solvent_type
+                else:
+                    errmsg = "Solvent mismatch: simulation was run for %s but Gsolv is set up for %s" % \
+                        (simulation.solvent_type, solvent)
+                    logger.error(errmsg)
+                    raise ValueError(errmsg)
             else:
                 self.molecule = molecule   # should check that this is in top (?)
                 self.top = top
                 self.struct = struct
                 self.ndx = kwargs.pop('ndx', None)
+                self.solvent_type = solvent
 
             for attr in required_args:
                 if self.__getattribute__(attr) is None:
                     raise ValueError("A value is required for %(attr)r." % vars())
-            
+
+            # fix struct (issue with qscripts being independent from rest of code)
+            if not os.path.exists(self.struct):
+                # struct is not reliable as it depends on qscript so now we just try everything...
+                struct = gromacs.utilities.find_first(self.struct, suffices=['pdb', 'gro'])
+                if struct is None:
+                    logger.error("Starting structure %r does not exist.", self.struct)
+                    raise IOError(errno.ENOENT, "Starting structure not found", self.struct)
+                else:
+                    logger.info("Found starting structure %r (instead of %r).", struct, self.struct)
+                    self.struct = struct
+                        
             self.Temperature = kwargs.pop('temperature', 300.0)
-            self.templates = kwargs.pop('templates', ['local.sh'])
+            self.qscript = kwargs.pop('qscript', ['local.sh'])
             self.deffnm = kwargs.pop('deffnm', 'md')
 
 
@@ -164,13 +255,14 @@ class Ghyd(object):
                 'coulomb': kwargs.pop('lambda_coulomb', self.schedules['coulomb'].lambdas),
                 'vdw':     kwargs.pop('lambda_vdw', self.schedules['vdw'].lambdas),
                 }
-            self.runtime = kwargs.pop('runtime', 100.0)   # ps, short for testing!!
-            self.dirname = kwargs.pop('dirname', 'FEP')
+            self.runtime = kwargs.pop('runtime', 5000.0)   # ps
+            self.dirname = kwargs.pop('dirname', os.path.join('FEP', self.solvent_type))
+            self.includes = list(asiterable(kwargs.pop('includes',[]))) + [config.includedir]
             self.component_dirs = {'coulomb': os.path.join(self.dirname, 'Coulomb'),
                                    'vdw': os.path.join(self.dirname, 'VDW')}
 
             self.filename = filename or \
-                            os.path.join(self.dirname, self.__class__.__name__ + '.pickle')
+                            os.path.join(self.dirname, self.__class__.__name__ + '.fep')
 
             # other variables
             #: Results from the analysis
@@ -188,11 +280,11 @@ class Ghyd(object):
                 warnings.warn(wmsg)
                 logger.warn(wmsg)
 
-        super(Ghyd, self).__init__(**kwargs)
+        super(Gsolv, self).__init__(**kwargs)
 
-        logger.info("Hydration free energy calculation for molecule %(molecule)r." % vars(self))
+        logger.info("Solvation free energy calculation for molecule "
+                    "%(molecule)s in solvent %(solvent_type)s." % vars(self))
         logger.info("Using directories under %(dirname)r: %(component_dirs)r" % vars(self))
-
 
 
     def wdir(self, component, lmbda):
@@ -215,20 +307,23 @@ class Ghyd(object):
         """Prepare the input files for all Gromacs runs.
 
         :Keywords:
-           *sge*
+           *qscript*
                (List of) template(s) for batch submission scripts; if not set then 
                the templates are used that were supplied to the constructor.
            *kwargs*
                Most kwargs are passed on to :func:`gromacs.setup.MD` although some
                are set to values that are required for the FEP functionality.
+               Note: *runtime* is set from the constructor.
         """
         kwargs['mdrun_opts'] = " ".join([kwargs.pop('mdrun_opts',''), '-dgdl'])  # crucial for FEP!!        
+        kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.includes        
         qsubargs = kwargs.copy()
         qsubargs['dirname'] = self.dirname
         # handle templates separately (necessary for array jobs)
-        templates = qsubargs.pop('sge', None) or self.templates
+        qscripts = qsubargs.pop('sge', None) or self.qscript
+        qscripts.extend(qsubargs.pop('qscript',[]))  # also allow canonical 'templates'        
         # make sure that the individual batch scripts are also written
-        kwargs.setdefault('sge', templates)
+        kwargs.setdefault('qscript', qscripts)
         
         for component, lambdas in self.lambdas.items():
             for l in lambdas:
@@ -237,16 +332,15 @@ class Ghyd(object):
             directories = [self.wdir(component, l) for l in lambdas]
             qsubargs['jobname'] = self.arraylabel(component)
             qsubargs['prefix'] = self.label(component)+'_'
-            self.scripts[component] = gromacs.qsub.generate_submit_array(templates, directories, **qsubargs)
+            self.scripts[component] = gromacs.qsub.generate_submit_array(qscripts, directories, **qsubargs)
             logger.info("[%s] Wrote array job scripts %r", component, self.scripts[component])
 
         self.save(self.filename)
-        logger.info("Saved state information to %(filename)r; reload this Ghyd instance with "
-                    "Ghyd(filename=%(filename)r)." % vars(self))
+        logger.info("Saved state information to %r; reload later with G = %r.", self.filename, self)
         logger.info("Finished setting up all individual simulations. Now run them...")
 
     def _setup(self, component, lmbda, **kwargs):
-        """Prepare the input files for an individual  Gromacs runs."""
+        """Prepare the input files for an individual Gromacs runs."""
 
         # note that all arguments pertinent to the submission scripts should be in kwargs
         # and have been set in setup() so that it is easy to generate array job scripts
@@ -262,7 +356,7 @@ class Ghyd(object):
                       runtime=self.runtime,
                       ref_t=self.Temperature,    # TODO: maybe not working yet, check _setup()
                       gen_temp=self.Temperature, # needed until gromacs.setup() is smarter
-                      sgename=self.tasklabel(component,lmbda),
+                      qname=self.tasklabel(component,lmbda),
                       free_energy='yes',
                       couple_moltype=self.molecule,
                       init_lambda=lmbda,
@@ -332,7 +426,7 @@ class Ghyd(object):
         (This assumes that there is only a single molecule for which the free
         energy change was computed.)
 
-        Data are stored in :attr:`Ghyd.results`.
+        Data are stored in :attr:`Gsolv.results`.
 
         :Keywords:
           *c0*
@@ -381,7 +475,7 @@ class Ghyd(object):
     def plot(self, **kwargs):
         """Plot the TI data with error bars.
 
-        Run :meth:`Ligands.ghyd.Ghyd.analyze` first.
+        Run :meth:`mdpow.fep.Gsolv.analyze` first.
 
         All *kwargs* are passed on to :func:`pylab.errorbar`.
         """
@@ -470,3 +564,15 @@ class Ghyd(object):
             instance = cPickle.load(f)
         self.__dict__.update(instance.__dict__)
         logger.debug("Instance loaded from %(filename)r" % vars())
+
+    def __repr__(self):
+        return "%s(filename=%r)" % (self.__class__.__name__, self.filename)
+
+class Ghyd(Gsolv):
+    """Sets up and analyses MD to obtain the hydration free energy of a solute."""
+    solvent_default = "water"
+
+class Goct(Gsolv):
+    """Sets up and analyses MD to obtain the solvation free energy of a solute in octanol."""
+    solvent_default = "octanol"
+
