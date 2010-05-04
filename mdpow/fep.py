@@ -483,11 +483,20 @@ class Gsolv(object):
             self.save()
         
         # TODO: error estimate (e.g. from boot strapping from the raw data)
+
+        self.log_DeltaA0()
+        return self.results.DeltaA.total    
+
+    def log_DeltaA0(self):
+        """Print the free energy contributions."""
+        if not 'DeltaA' in self.results or len(self.results.DeltaA) == 0:
+            logger.info("No DeltaA free energies computed yet.")
+            return
+
         logger.info("DeltaA0 = -(DeltaA_coul + DeltaA_vdw) + DeltaA_stdstate")
         for component, value in self.results.DeltaA.items():
             logger.info("%s solvation free energy (%s) %g kJ/mol",
                         self.solvent_type.capitalize(), component, value)
-        return self.results.DeltaA.total    
 
     def has_dVdl(self):
         """Check if dV/dl data have already been collected.
@@ -515,7 +524,7 @@ class Gsolv(object):
         kwargs.setdefault('capsize', 0)
 
         try:
-            if self.results.DeltaA.total is None:
+            if self.results.DeltaA.total is None or len(self.results.dvdl) == 0:
                 raise KeyError
         except KeyError:
             logger.info("Data were not analyzed yet -- doing that now... patience.")
@@ -523,7 +532,8 @@ class Gsolv(object):
 
         dvdl = self.results.dvdl
         nplots = len(dvdl)
-        for i, (component, (x,y,dy)) in enumerate(dvdl.items()):
+        for i, component in enumerate(numpy.sort(dvdl.keys())):  # stable plot order
+            x,y,dy = dvdl[component]
             iplot = i+1
             subplot(1, nplots, iplot)
             label = r"$\Delta A^{\rm{%s}}_{\rm{%s}} = %.2f$ kJ/mol" \
@@ -639,6 +649,7 @@ def pOW(G1, G2):
     for G in Gsolvs.values():
         try:
             G.results.DeltaA.total
+            G.log_DeltaA0()
         except (KeyError, AttributeError):   # KeyError because results is a AttributeDict
             G.analyze()
 
