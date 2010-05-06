@@ -1,0 +1,58 @@
+#!/usr/bin/env python
+"""%prog [options] DIRECTORY [DIRECTORY ...]
+
+Check status of the progress of the project in DIRECTORY.
+
+"""
+
+import logging
+logger = logging.getLogger('mdpow')
+
+if __name__ == "__main__":
+    import sys
+    import os.path
+    from glob import glob
+    from optparse import OptionParser
+
+    parser = OptionParser(usage=__doc__)
+    parser.add_option('-o', '--outfile', dest="outfile",
+                      help="write status results to FILE [%default]",
+                      metavar="FILE")
+    parser.set_defaults(outfile="status.txt")
+    opts,args = parser.parse_args()
+
+    logger.info("Writing status to %r", opts.outfile)
+
+    # dir status type comment
+    fmt = "%-20s | %-10s | %-15s | %s\n"
+    with open(opts.outfile, 'w') as status:
+        def swrite(*args):
+            all_args = tuple([directory] + list(args))
+            status.write(fmt % all_args) 
+        for directory in args:
+            score = 0
+            if not os.path.isdir(directory):
+                # just silently skip non-dirs
+                continue
+            if not os.path.exists(directory):
+                swrite("NOTFOUND", "directory", "not found")
+                logger.warn("Directory %r not found, skipping...", directory)
+                continue
+            for picklefile in ("water/Ghyd.fep", "octanol/Goct.fep"):
+                fn = os.path.join(directory, 'FEP', picklefile)
+                if os.path.exists(fn):
+                    score += 1
+                    swrite("OK", "pickle", fn)
+                else:
+                    swrite("NOTFOUND", "pickle", picklefile)
+            graphs = glob(os.path.join(directory, 'dVdl_*.*'))
+            if len(graphs) > 0:
+                score += 2
+                swrite("OK", "graph dV/dl", str(graphs))
+            else:
+                swrite("NOTFOUND", "graph dV/dl", "dVdl_*.*")
+
+            if score >= 4:
+                swrite("OK", "ALL", "score=%d" % score)
+            else:
+                swrite("FAIL", "ALL", "score=%d" % score)
