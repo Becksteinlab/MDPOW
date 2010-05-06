@@ -13,11 +13,13 @@ The dV/dlambda plots can be produced automatically (--plot=auto). If multiple
 DIRECTORY arguments are provided then one has to choose the auto option (or
 None).
 """
+from __future__ import with_statement
 
 import os
 import mdpow
-import logging
+import mdpow.filelock
 
+import logging
 logger = logging.getLogger('mdpow')
 
 def load_gsolv(directory):
@@ -40,9 +42,33 @@ def load_gsolv(directory):
 
 
 def run_pow(directory, **kwargs):
+    """Do the P_OW analysis
+
+    :Arguments:
+        *directory*
+             directory under which the project is stored
+        *plotfile*
+             name of a file to plot dV/dlambda graphs to
+        *outfile*
+             name of a file to append results to
+    """
+    # format:
+    #     molecule   DeltaA0(kJ/mol)    log P_OW
+    fmt = "%-10s %+8.4f  %+8.4f\n"
+
     gwat, goct = load_gsolv(directory)
-    transferFE, pow = mdpow.fep.pOW(goct, gwat)
-    if kwargs.get('plot', None):
+    transferFE, pOW = mdpow.fep.pOW(goct, gwat)
+
+    if kwargs.get('outfile', None):
+        with mdpow.filelock.FileLock(kwargs['outfile'], timeout=2):
+            with open(kwargs['outfile'], mode='a') as out:
+                out.write(fmt % (gwat.molecule, transferFE, pOW))
+            logger.info("Wrote results to %(outfile)r", kwargs)
+        
+    plotfile = kwargs.get('plotfile', None)
+    if plotfile:
+        if plotfile == 'auto':
+            plotfile = auto_plotfile(directory, gwat)
         import matplotlib
         matplotlib.use('agg')  # quick non-interactive plotting
         from pylab import clf, title, savefig
@@ -52,9 +78,13 @@ def run_pow(directory, **kwargs):
         activate_subplot(1)
         title(r"[%s] $\Delta A^0 = %g$ kJ/mol" % (goct.molecule, transferFE))
         activate_subplot(2)
-        title(r"$\log P_{OW} = %(pow)g$" % vars())
-        savefig(kwargs['plot'])
-        logger.info("Wrote graph to %(plot)r", kwargs)
+        title(r"$\log P_{OW} = %(pOW)g$" % vars())
+        savefig(plotfile)
+        logger.info("Wrote graph to %(plotfile)r", vars())
+
+def auto_plotfile(directory, gsolv):
+    return os.path.join(directory, "dVdl_%s.pdf" % gsolv.molecule)
+
 
 def activate_subplot(numPlot):
     """Make subplot *numPlot* active on the canvas.
@@ -73,19 +103,22 @@ if __name__ == "__main__":
     from optparse import OptionParser
 
     parser = OptionParser(usage=__doc__)
-    parser.add_option('-p', '--plotfile', dest="plot",
+    parser.add_option('-p', '--plotfile', dest="plotfile",
                       help="plot dV/dlambda to FILE; use png or pdf suffix to "
                       "determine the file type. 'auto' generates a pdf file "
                       "DIRECTORY/dVdl.pdf and 'None' disables it [%default]", 
                       metavar="FILE")
-    parser.set_defaults(plot="auto")
+    parser.add_option('-o', '--outfile', dest="outfile",
+                      help="append one-line results summary to FILE [%default]",
+                      metavar="FILE")
+    parser.set_defaults(plotfile="auto", outfile="pow.txt")
     opts,args = parser.parse_args()
 
     if len(args) == 0:
         logger.error("A directory is required. See --help.")
         sys.exit(1)
-    elif len(args) > 1 and not opts.plot.lower() in ('none', 'auto'):
-        logger.error("Can only use --plot=None or --plot=auto with multiple directories.")
+    elif len(args) > 1 and not opts.plotfile.lower() in ('none', 'auto'):
+        logger.error("Can only use --plotfile=None or --plotfile=auto with multiple directories.")
         sys.exit(1)
 
     for directory in args:
@@ -93,12 +126,18 @@ if __name__ == "__main__":
             logger.warn("Directory %r not found, skipping...", directory)
             continue
         logger.info("Analyzing directory %r... (can take a while)", directory)
-        if opts.plot == "auto":
-            opts.plot = os.path.join(directory, "dVdl.pdf")
-        elif opts.plot.lower() == "none":
-            opts.plot = None
+        if opts.plotfile.lower() == "none":
+            opts.plotfile = None
+        elif opts.plotfile.lower() == "auto":
+            opts.plotfile = "auto"
+
+        if opts.outfile is None:
+            outfile = None
+        else:
+            outfile = os.path.realpath(opts.outfile)
+
         try:
-            run_pow(directory, plot=opts.plot)
+            run_pow(directory, plotfile=opts.plotfile, outfile=outfile)
         except (OSError, IOError), err:
             logger.error("Running analysis in directory %r failed: %s", directory, str(err))
 
