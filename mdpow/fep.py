@@ -487,6 +487,26 @@ class Gsolv(object):
         self.log_DeltaA0()
         return self.results.DeltaA.total    
 
+    def write_DeltaA0(self, filename, mode='w'):
+        """Write free energy components to a file.
+
+        :Arguments:
+            *filename*
+                 name of the text file
+            *mode*
+                 'w' for overwrite or 'a' for append ['w']
+
+        Format:
+                            ---------- kJ/mol -----------
+          molecule solvent  total  coulomb  vdw  stdstate
+        """
+        fmt = "%-10s %-10s %+8.4f  %+8.4f  %+8.4f  %+8.4f\n"
+        DeltaA0 = self.results.DeltaA
+        with open(filename, mode) as tab:
+            tab.write(fmt % (self.molecule, self.solvent_type,
+                             DeltaA0.total, DeltaA0.coulomb, DeltaA0.vdw,
+                             DeltaA0.standardstate))
+
     def log_DeltaA0(self):
         """Print the free energy contributions."""
         if not 'DeltaA' in self.results or len(self.results.DeltaA) == 0:
@@ -626,12 +646,15 @@ def pOW(G1, G2):
             log P_oct/wat =  log [X]_oct/[X]_wat
 
     :Arguments:
-       *G1* and *G2* should be a :class:`Ghyd` and a :class:`Goct` instance,
-       but order does not matter
+       *G1*, *G2*
+           *G1* and *G2* should be a :class:`Ghyd` and a :class:`Goct` instance,
+           but order does not matter
     :Returns: (transfer free energy, water-octanol partition coefficient)     
     """
 
     args = (G1, G2)
+    if G1.molecule != G2.molecule:
+        raise ValueError("The two simulations were done for different molecules.")
     if G1.Temperature != G2.Temperature:
         raise ValueError("The two simulations were done at different temperatures.")
     Gsolvs = {}
