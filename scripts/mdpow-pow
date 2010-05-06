@@ -51,10 +51,13 @@ def run_pow(directory, **kwargs):
              name of a file to plot dV/dlambda graphs to
         *outfile*
              name of a file to append results to
+
+    **Output file format:**
+
+        molecule   DeltaA0(kJ/mol)    log P_OW    directory
+
     """
-    # format:
-    #     molecule   DeltaA0(kJ/mol)    log P_OW
-    fmt = "%-10s %+8.4f  %+8.4f\n"
+    fmt = "%-8s %+8.2f  %+8.2f     %s\n"
 
     gwat, goct = load_gsolv(directory)
     transferFE, pOW = mdpow.fep.pOW(goct, gwat)
@@ -62,7 +65,7 @@ def run_pow(directory, **kwargs):
     if kwargs.get('outfile', None):
         with mdpow.filelock.FileLock(kwargs['outfile'], timeout=2):
             with open(kwargs['outfile'], mode='a') as out:
-                out.write(fmt % (gwat.molecule, transferFE, pOW))
+                out.write(fmt % (gwat.molecule, transferFE, pOW, directory))
             logger.info("Wrote results to %(outfile)r", kwargs)
         
     plotfile = kwargs.get('plotfile', None)
