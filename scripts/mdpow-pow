@@ -22,7 +22,7 @@ import mdpow.filelock
 import logging
 logger = logging.getLogger('mdpow')
 
-def load_gsolv(directory):
+def load_gsolv(directory, **kwargs):
     FEPdir = os.path.join(directory, "FEP")
     
     files = {'water': os.path.join(FEPdir, 'water', 'Ghyd.fep'),
@@ -33,10 +33,11 @@ def load_gsolv(directory):
     if len(files_not_found) > 0:
         raise OSError("Missing input files: %r" % files_not_found)
         
+    permissive = kwargs.pop('permissive', False)
     logger.info("Reading water data %(water)r", files)
-    gwat = mdpow.fep.Ghyd(filename=files['water'], basedir=directory)
+    gwat = mdpow.fep.Ghyd(filename=files['water'], basedir=directory, permissive=permissive)
     logger.info("Reading octanol data %(octanol)r", files)
-    goct = mdpow.fep.Goct(filename=files['octanol'], basedir=directory)
+    goct = mdpow.fep.Goct(filename=files['octanol'], basedir=directory, permissive=permissive)
     
     return gwat, goct
 
@@ -59,7 +60,7 @@ def run_pow(directory, **kwargs):
     """
     fmt = "%-8s %+8.2f  %+8.2f     %s\n"
 
-    gwat, goct = load_gsolv(directory)
+    gwat, goct = load_gsolv(directory, permissive=kwargs.pop('permissive',False))
     transferFE, pOW = mdpow.fep.pOW(goct, gwat)
 
     if kwargs.get('outfile', None):
@@ -114,7 +115,13 @@ if __name__ == "__main__":
     parser.add_option('-o', '--outfile', dest="outfile",
                       help="append one-line results summary to FILE [%default]",
                       metavar="FILE")
-    parser.set_defaults(plotfile="auto", outfile="pow.txt")
+    parser.add_option('--ignore-corrupted', dest="permissive",
+                      action="store_true",
+                      help="skip lines in the md.xvg files that cannot be parsed. "
+                      "WARNING: Other lines in the file might have been corrupted in "
+                      "such a way that they appear correct but are in fact wrong. "
+                      "WRONG RESULTS CAN OCCUR! USE AT YOUR OWN RISK [%default]")
+    parser.set_defaults(plotfile="auto", outfile="pow.txt", permissive=False)
     opts,args = parser.parse_args()
 
     if len(args) == 0:
@@ -140,7 +147,7 @@ if __name__ == "__main__":
             outfile = os.path.realpath(opts.outfile)
 
         try:
-            run_pow(directory, plotfile=opts.plotfile, outfile=outfile)
+            run_pow(directory, plotfile=opts.plotfile, outfile=outfile, permissive=opts.permissive)
         except (OSError, IOError), err:
             logger.error("Running analysis in directory %r failed: %s", directory, str(err))
 

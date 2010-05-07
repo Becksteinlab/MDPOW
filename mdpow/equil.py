@@ -193,6 +193,8 @@ class Simulation(object):
                 self.dirs[key] = assinglet([fn.replace(basedir, prefix) for fn in fns])
             except AttributeError:
                 pass
+        logger.warn("make_paths_relative(): check/manually adjust %s.dirs.includes = %r !",
+                    self.__class__.__name__, self.dirs.includes)
 
     def topology(self, itp='drug.itp', **kwargs):
         """Generate a topology for compound *molecule*.

@@ -76,6 +76,7 @@ TODO
 from __future__ import with_statement
 
 import os
+import errno
 from subprocess import call
 import warnings
 from pkg_resources import resource_filename
@@ -198,6 +199,11 @@ class Gsolv(object):
                file
            *basedir*
                Prepend *basedir* to all filenames; ``None`` disables [.]
+           *permissive*
+               Set to ``True`` if you want to read past corrupt data in output
+               xvg files (see :class:`gromacs.formats.XVG` for details); not that
+               *permissive*=``True`` can lead to **wrong results**. Overrides
+               the value set in a loaded pickle file. [``False``]
            *kwargs*
                other undocumented arguments (see source for the moment)
         """
@@ -289,6 +295,9 @@ class Gsolv(object):
             self.basedir = os.path.realpath(basedir)
         else:
             self.basedir = None
+        # override pickle file for this dangerous option: must be set
+        # on a case-by-case basis
+        self.permissive = kwargs.pop('permissive', False)
 
         super(Gsolv, self).__init__(**kwargs)
 
@@ -420,10 +429,30 @@ class Gsolv(object):
         for component, lambdas in self.lambdas.items():
             xvg_files = [dgdl_xvg(self.wdir(component, l)) for l in lambdas]
             self.results.xvg[component] = (numpy.array(lambdas),
-                                           [XVG(xvg) for xvg in xvg_files])            
+                                           [XVG(xvg, permissive=self.permissive) for xvg in xvg_files])
         if autosave:
             self.save()
 
+    def contains_corrupted_xvgs(self):
+        """Check if any of the source datafiles had reported corrupted lines.
+
+        :Returns: ``True`` if any of the xvg dgdl files were produced with the
+                  permissive=True flag and had skipped lines.
+        """
+        from itertools import izip
+        def _len(xvg):
+            try:
+                return len(xvg.corrupted_lineno)
+            except AttributeError:  # backwards compatible (pre gw 0.1.10 are always ok)
+                return 0
+            except TypeError:       # len(None): XVG.parse() has not been run yet
+                return 0            # ... so we cannot conclude that it does contain bad ones
+        corrupted = {}
+        self._corrupted = {}        # debugging ...
+        for component, (lambdas, xvgs) in self.results.xvg.items():
+            corrupted[component] = numpy.any([(_len(xvg) > 0) for xvg in xvgs])
+            self._corrupted[component] = dict(((l, _len(xvg)) for l,xvg in izip(lambdas, xvgs)))
+        return numpy.any([x for x in corrupted.values()])
 
     def analyze(self, c0=1.0, force=False, autosave=True):
         """Extract dV/dl from output and calculate dG by TI.
