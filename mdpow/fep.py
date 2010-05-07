@@ -438,6 +438,10 @@ class Gsolv(object):
 
         :Returns: ``True`` if any of the xvg dgdl files were produced with the
                   permissive=True flag and had skipped lines.
+
+        For debugging purposes, the number of corrupted lines are stored in 
+        :attr:`Gsolv._corrupted` as dicts of dicts with the component as
+        primary and the lambda as secondary key.
         """
         from itertools import izip
         def _len(xvg):

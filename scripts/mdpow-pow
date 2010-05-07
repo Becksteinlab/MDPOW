@@ -12,7 +12,26 @@ just use the defaults as in the tutorial).
 The dV/dlambda plots can be produced automatically (--plot=auto). If multiple
 DIRECTORY arguments are provided then one has to choose the auto option (or
 None).
+
+Results are *appended* to a data file with **Output file format**::
+
+   molecule   DeltaA0(kJ/mol)    log P_OW  wat_ok octa_ok  directory  
+
+molecule
+    molecule name as used in the itp
+DeltaA0
+    transfer free energy water --> octanol, in kJ/mol
+log P_OW
+    base-10 logarithm of the octanol-water partition coefficient; >0: partitions into
+    octanol, <0: partitions preferrably into water
+wat_ok, octa_ok
+    "OK": input data was clean; "BAD": some input data xvg files contained 
+    unparseable lines that were skipped; this can mean that the data became 
+    corrupted and caution should be used.
+directory
+    folder in which the simulations were stored
 """
+
 from __future__ import with_statement
 
 import os
@@ -55,10 +74,18 @@ def run_pow(directory, **kwargs):
 
     **Output file format:**
 
-        molecule   DeltaA0(kJ/mol)    log P_OW    directory
+        molecule   DeltaA0(kJ/mol)    log P_OW  wat_ok octa_ok  directory  
+
+    wat_ok and octa_ok are "OK" if no lines were skipped in the input data files due to
+    file corruption, and "BAD" otherwise.
 
     """
-    fmt = "%-8s %+8.2f  %+8.2f     %s\n"
+    fmt = "%-8s %+8.2f  %+8.2f   %3s %3s   %s\n"
+    _datastatus = {True: 'BAD',  # suspect file corruption
+                   False: 'OK'}
+
+    def datstat(g):
+        return _datastatus[g.contains_corrupted_xvgs()]
 
     gwat, goct = load_gsolv(directory, permissive=kwargs.pop('permissive',False))
     transferFE, pOW = mdpow.fep.pOW(goct, gwat)
@@ -66,7 +93,9 @@ def run_pow(directory, **kwargs):
     if kwargs.get('outfile', None):
         with mdpow.filelock.FileLock(kwargs['outfile'], timeout=2):
             with open(kwargs['outfile'], mode='a') as out:
-                out.write(fmt % (gwat.molecule, transferFE, pOW, directory))
+                out.write(fmt % (gwat.molecule, transferFE, pOW, 
+                                 datstat(gwat), datstat(goct),
+                                 directory))
             logger.info("Wrote results to %(outfile)r", kwargs)
         
     plotfile = kwargs.get('plotfile', None)
