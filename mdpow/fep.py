@@ -306,7 +306,7 @@ class Gsolv(object):
         logger.info("Using directories under %(dirname)r: %(component_dirs)r" % vars(self))
 
     def frombase(self, *args):
-        """Return path relative to the basedir."""
+        """Return path with :attr:`Gsolv.basedir` prefixed."""
         # wrap paths with frombase() and hopefully this allows us fairly
         # flexible use of the class, especially for analysis
         if self.basedir is None:
@@ -529,16 +529,25 @@ class Gsolv(object):
             *mode*
                  'w' for overwrite or 'a' for append ['w']
 
-        Format:
-                            ---------- kJ/mol -----------
+        Format::
+          .                 ---------- kJ/mol -----------
           molecule solvent  total  coulomb  vdw  stdstate
         """
-        fmt = "%-10s %-10s %+8.4f  %+8.4f  %+8.4f  %+8.4f\n"
-        DeltaA0 = self.results.DeltaA
         with open(filename, mode) as tab:
-            tab.write(fmt % (self.molecule, self.solvent_type,
-                             DeltaA0.total, DeltaA0.coulomb, DeltaA0.vdw,
-                             DeltaA0.standardstate))
+            tab.write(self.summary() + '\n')
+
+    def summary(self):
+        """Return a string that summarizes the energetics.
+
+        Format::
+          .                 ---------- kJ/mol -----------
+          molecule solvent  total  coulomb  vdw  stdstate
+        """
+        fmt = "%-10s %-10s %+8.2f  %+8.2f  %+8.2f  %+8.2f"
+        DeltaA0 = self.results.DeltaA
+        return fmt % (self.molecule, self.solvent_type,
+                      DeltaA0.total, DeltaA0.coulomb, DeltaA0.vdw,
+                      DeltaA0.standardstate)
 
     def log_DeltaA0(self):
         """Print the free energy contributions."""

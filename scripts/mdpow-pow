@@ -71,6 +71,8 @@ def run_pow(directory, **kwargs):
              name of a file to plot dV/dlambda graphs to
         *outfile*
              name of a file to append results to
+        *energyfile*
+             append individual energy terms to this file
 
     **Output file format:**
 
@@ -80,7 +82,8 @@ def run_pow(directory, **kwargs):
     file corruption, and "BAD" otherwise.
 
     """
-    fmt = "%-8s %+8.2f  %+8.2f   %3s %3s   %s\n"
+    fmt_result = "%-8s %+8.2f  %+8.2f   %3s %3s   %s\n"
+    fmt_energy = "%s  %+6.2f  %+6.2f  %s\n"
     _datastatus = {True: 'BAD',  # suspect file corruption
                    False: 'OK'}
 
@@ -93,10 +96,18 @@ def run_pow(directory, **kwargs):
     if kwargs.get('outfile', None):
         with mdpow.filelock.FileLock(kwargs['outfile'], timeout=2):
             with open(kwargs['outfile'], mode='a') as out:
-                out.write(fmt % (gwat.molecule, transferFE, pOW, 
-                                 datstat(gwat), datstat(goct),
-                                 directory))
+                out.write(fmt_result % (gwat.molecule, transferFE, pOW, 
+                                        datstat(gwat), datstat(goct),
+                                        directory))
             logger.info("Wrote results to %(outfile)r", kwargs)
+
+    if kwargs.get('energyfile', None):
+        with mdpow.filelock.FileLock(kwargs['energyfile'], timeout=2):
+            with open(kwargs['energyfile'], mode='a') as out:
+                for g in gwat, goct:
+                    out.write(fmt_energy % (g.summary(), transferFE, pOW, directory))
+            logger.info("Wrote solvation energy terms to %(energyfile)r", kwargs)
+        
         
     plotfile = kwargs.get('plotfile', None)
     if plotfile:
@@ -130,6 +141,19 @@ def activate_subplot(numPlot):
     numPlot -= 1  # index is 0-based, plots are 1-based
     return axes(gcf().get_axes()[numPlot])
 
+
+def parse_filename_option(fn):
+        if fn.lower() == "none":
+            fn = None
+        elif fn.lower() == "auto":
+            fn = "auto"
+        return fn
+            
+def realpath_or_none(fn):
+        if not fn is None:
+            fn = os.path.realpath(fn)
+        return fn
+
 if __name__ == "__main__":
     import sys
     import os.path
@@ -144,13 +168,18 @@ if __name__ == "__main__":
     parser.add_option('-o', '--outfile', dest="outfile",
                       help="append one-line results summary to FILE [%default]",
                       metavar="FILE")
+    parser.add_option('-e', '--energies', dest="energyfile",
+                      help="append solvation free energies to FILE [%default]",
+                      metavar="FILE")
     parser.add_option('--ignore-corrupted', dest="permissive",
                       action="store_true",
                       help="skip lines in the md.xvg files that cannot be parsed. "
                       "WARNING: Other lines in the file might have been corrupted in "
                       "such a way that they appear correct but are in fact wrong. "
                       "WRONG RESULTS CAN OCCUR! USE AT YOUR OWN RISK [%default]")
-    parser.set_defaults(plotfile="auto", outfile="pow.txt", permissive=False)
+    parser.set_defaults(plotfile="auto", 
+                        outfile="pow.txt", energyfile="energies.txt",
+                        permissive=False)
     opts,args = parser.parse_args()
 
     if len(args) == 0:
@@ -165,18 +194,14 @@ if __name__ == "__main__":
             logger.warn("Directory %r not found, skipping...", directory)
             continue
         logger.info("Analyzing directory %r... (can take a while)", directory)
-        if opts.plotfile.lower() == "none":
-            opts.plotfile = None
-        elif opts.plotfile.lower() == "auto":
-            opts.plotfile = "auto"
 
-        if opts.outfile is None:
-            outfile = None
-        else:
-            outfile = os.path.realpath(opts.outfile)
+        opts.plotfile = parse_filename_option(opts.plotfile)
 
         try:
-            run_pow(directory, plotfile=opts.plotfile, outfile=outfile, permissive=opts.permissive)
+            run_pow(directory, plotfile=opts.plotfile, 
+                    outfile=realpath_or_none(opts.outfile), 
+                    energyfile=realpath_or_none(opts.energyfile),
+                    permissive=opts.permissive)
         except (OSError, IOError), err:
             logger.error("Running analysis in directory %r failed: %s", directory, str(err))
 
