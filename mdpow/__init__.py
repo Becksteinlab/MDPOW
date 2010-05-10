@@ -279,22 +279,12 @@ The mdpow scripts
 =================
 
 Some tasks are simplified by using scripts, which are installed in a
-bin directory (or the directory pointed to by ``--install-scripts``).
+bin directory (or the directory pointed to by
+``--install-scripts``). See :doc:`scripts` for details.
 
-``mdpow-pow``
-    usage: ``mdpow-pow`` *DIRECTORY*
-
-   Run the free energy analysis for water and octanol in *DIRECTORY*``/FEP``
-   and return the octanol-water partition coefficient log *P_OW*. It relies on
-   files and directories being named according to the defaults. It requires
-   finished FEP simulations, with the Goct and Ghyd objects saved as
-   ``FEP/water/Ghyd.fep`` and ``FEP/octanol/Goct.fep``.
-
-   By default the script also produces a graph ``dVdl.pdf`` under *DIRECTORY*;
-   for more details see ``--help``.
  
 """
-VERSION = "0.1.1"
+VERSION = 0,1,2
 
 __all__ = ['fep', 'equil']
 
@@ -305,4 +295,8 @@ import config, fep, equil
 
 def get_version():
     """Return current package version as a string."""
-    return VERSION
+    return ".".join(map(str,VERSION))
+
+def get_version_tuple():
+    """Return current package version as a (MAJOR,MINOR,PATCHLEVEL)."""
+    return tuple(VERSION)
