@@ -5,13 +5,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>mdpow.fep – calculate free energy of solvation &mdash; MDpow v0.1.1 documentation</title>
+    <title>mdpow.fep – calculate free energy of solvation &mdash; MDpow v0.1.2 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '#',
-        VERSION:     '0.1.1',
+        VERSION:     '0.1.2',
         COLLAPSE_MODINDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -19,7 +19,7 @@
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="MDpow v0.1.1 documentation" href="index.html" />
+    <link rel="top" title="MDpow v0.1.2 documentation" href="index.html" />
     <link rel="next" title="Helper modules" href="utilities.html" />
     <link rel="prev" title="mdpow.equil — Setting up and running equilibrium MD" href="equil.html" /> 
   </head>
@@ -39,7 +39,7 @@
         <li class="right" >
           <a href="equil.html" title="mdpow.equil — Setting up and running equilibrium MD"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">MDpow v0.1.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow v0.1.2 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -134,6 +134,12 @@ file</p>
 <dt><em>basedir</em></dt>
 <dd><p class="first last">Prepend <em>basedir</em> to all filenames; <tt class="xref docutils literal"><span class="pre">None</span></tt> disables [.]</p>
 </dd>
+<dt><em>permissive</em></dt>
+<dd><p class="first last">Set to <tt class="xref docutils literal"><span class="pre">True</span></tt> if you want to read past corrupt data in output
+xvg files (see <a title="(in GromacsWrapper v0.1)" class="reference" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/formats.html#gromacs.formats.XVG"><tt class="xref docutils literal"><span class="pre">gromacs.formats.XVG</span></tt></a> for details); not that
+<em>permissive*=``True`` can lead to **wrong results*</em>. Overrides
+the value set in a loaded pickle file. [<tt class="xref docutils literal"><span class="pre">False</span></tt>]</p>
+</dd>
 <dt><em>kwargs</em></dt>
 <dd><p class="first last">other undocumented arguments (see source for the moment)</p>
 </dd>
@@ -204,6 +210,12 @@ file</p>
 </dd>
 <dt><em>basedir</em></dt>
 <dd><p class="first last">Prepend <em>basedir</em> to all filenames; <tt class="xref docutils literal"><span class="pre">None</span></tt> disables [.]</p>
+</dd>
+<dt><em>permissive</em></dt>
+<dd><p class="first last">Set to <tt class="xref docutils literal"><span class="pre">True</span></tt> if you want to read past corrupt data in output
+xvg files (see <a title="(in GromacsWrapper v0.1)" class="reference" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/formats.html#gromacs.formats.XVG"><tt class="xref docutils literal"><span class="pre">gromacs.formats.XVG</span></tt></a> for details); not that
+<em>permissive*=``True`` can lead to **wrong results*</em>. Overrides
+the value set in a loaded pickle file. [<tt class="xref docutils literal"><span class="pre">False</span></tt>]</p>
 </dd>
 <dt><em>kwargs</em></dt>
 <dd><p class="first last">other undocumented arguments (see source for the moment)</p>
@@ -286,6 +298,12 @@ file</p>
 <dt><em>basedir</em></dt>
 <dd><p class="first last">Prepend <em>basedir</em> to all filenames; <tt class="xref docutils literal"><span class="pre">None</span></tt> disables [.]</p>
 </dd>
+<dt><em>permissive</em></dt>
+<dd><p class="first last">Set to <tt class="xref docutils literal"><span class="pre">True</span></tt> if you want to read past corrupt data in output
+xvg files (see <a title="(in GromacsWrapper v0.1)" class="reference" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/formats.html#gromacs.formats.XVG"><tt class="xref docutils literal"><span class="pre">gromacs.formats.XVG</span></tt></a> for details); not that
+<em>permissive*=``True`` can lead to **wrong results*</em>. Overrides
+the value set in a loaded pickle file. [<tt class="xref docutils literal"><span class="pre">False</span></tt>]</p>
+</dd>
 <dt><em>kwargs</em></dt>
 <dd><p class="first last">other undocumented arguments (see source for the moment)</p>
 </dd>
@@ -362,9 +380,27 @@ energy change was computed.)</p>
 <dd>Collect dV/dl from output</dd></dl>
 
 <dl class="method">
+<dt id="mdpow.fep.Gsolv.contains_corrupted_xvgs">
+<tt class="descname">contains_corrupted_xvgs</tt><big>(</big><big>)</big><a class="headerlink" href="#mdpow.fep.Gsolv.contains_corrupted_xvgs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if any of the source datafiles had reported corrupted lines.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><tt class="xref docutils literal"><span class="pre">True</span></tt> if any of the xvg dgdl files were produced with the
+permissive=True flag and had skipped lines.</td>
+</tr>
+</tbody>
+</table>
+<p>For debugging purposes, the number of corrupted lines are stored in 
+<tt class="xref docutils literal"><span class="pre">Gsolv._corrupted</span></tt> as dicts of dicts with the component as
+primary and the lambda as secondary key.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="mdpow.fep.Gsolv.frombase">
 <tt class="descname">frombase</tt><big>(</big><em>*args</em><big>)</big><a class="headerlink" href="#mdpow.fep.Gsolv.frombase" title="Permalink to this definition">¶</a></dt>
-<dd>Return path relative to the basedir.</dd></dl>
+<dd>Return path with <tt class="xref docutils literal"><span class="pre">Gsolv.basedir</span></tt> prefixed.</dd></dl>
 
 <dl class="method">
 <dt id="mdpow.fep.Gsolv.has_dVdl">
@@ -390,6 +426,11 @@ energy change was computed.)</p>
 <dt id="mdpow.fep.Gsolv.load">
 <tt class="descname">load</tt><big>(</big><em>filename=None</em><big>)</big><a class="headerlink" href="#mdpow.fep.Gsolv.load" title="Permalink to this definition">¶</a></dt>
 <dd>Re-instantiate class from pickled file.</dd></dl>
+
+<dl class="method">
+<dt id="mdpow.fep.Gsolv.log_DeltaA0">
+<tt class="descname">log_DeltaA0</tt><big>(</big><big>)</big><a class="headerlink" href="#mdpow.fep.Gsolv.log_DeltaA0" title="Permalink to this definition">¶</a></dt>
+<dd>Print the free energy contributions.</dd></dl>
 
 <dl class="method">
 <dt id="mdpow.fep.Gsolv.plot">
@@ -441,6 +482,17 @@ Note: <em>runtime</em> is set from the constructor.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="mdpow.fep.Gsolv.summary">
+<tt class="descname">summary</tt><big>(</big><big>)</big><a class="headerlink" href="#mdpow.fep.Gsolv.summary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a string that summarizes the energetics.</p>
+<dl class="docutils">
+<dt>Format::</dt>
+<dd>.                 &#8212;&#8212;&#8212;- kJ/mol &#8212;&#8212;&#8212;&#8211;
+molecule solvent  total  coulomb  vdw  stdstate</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
 <dt id="mdpow.fep.Gsolv.tasklabel">
 <tt class="descname">tasklabel</tt><big>(</big><em>component</em>, <em>lmbda</em><big>)</big><a class="headerlink" href="#mdpow.fep.Gsolv.tasklabel" title="Permalink to this definition">¶</a></dt>
 <dd>Batch submission script name for a single task job.</dd></dl>
@@ -450,11 +502,38 @@ Note: <em>runtime</em> is set from the constructor.</p>
 <tt class="descname">wdir</tt><big>(</big><em>component</em>, <em>lmbda</em><big>)</big><a class="headerlink" href="#mdpow.fep.Gsolv.wdir" title="Permalink to this definition">¶</a></dt>
 <dd>Return path to the work directory for <em>component</em> and <em>lmbda</em>.</dd></dl>
 
+<dl class="method">
+<dt id="mdpow.fep.Gsolv.write_DeltaA0">
+<tt class="descname">write_DeltaA0</tt><big>(</big><em>filename</em>, <em>mode='w'</em><big>)</big><a class="headerlink" href="#mdpow.fep.Gsolv.write_DeltaA0" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write free energy components to a file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Arguments:</th><td class="field-body"><dl class="first last docutils">
+<dt><em>filename</em></dt>
+<dd><p class="first last">name of the text file</p>
+</dd>
+<dt><em>mode</em></dt>
+<dd><p class="first last">&#8216;w&#8217; for overwrite or &#8216;a&#8217; for append [&#8216;w&#8217;]</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="docutils">
+<dt>Format::</dt>
+<dd>.                 &#8212;&#8212;&#8212;- kJ/mol &#8212;&#8212;&#8212;&#8211;
+molecule solvent  total  coulomb  vdw  stdstate</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="function">
 <dt id="mdpow.fep.pOW">
-<tt class="descclassname">mdpow.fep.</tt><tt class="descname">pOW</tt><big>(</big><em>G1</em>, <em>G2</em><big>)</big><a class="headerlink" href="#mdpow.fep.pOW" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">mdpow.fep.</tt><tt class="descname">pOW</tt><big>(</big><em>G1</em>, <em>G2</em>, <em>force=False</em><big>)</big><a class="headerlink" href="#mdpow.fep.pOW" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute water-octanol partition coefficient from two <a title="mdpow.fep.Gsolv" class="reference" href="#mdpow.fep.Gsolv"><tt class="xref docutils literal"><span class="pre">Gsolv</span></tt></a> objects.</p>
 <blockquote>
 <dl class="docutils">
@@ -468,10 +547,19 @@ Note: <em>runtime</em> is set from the constructor.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Arguments:</th><td class="field-body"><em>G1</em> and <em>G2</em> should be a <a title="mdpow.fep.Ghyd" class="reference" href="#mdpow.fep.Ghyd"><tt class="xref docutils literal"><span class="pre">Ghyd</span></tt></a> and a <a title="mdpow.fep.Goct" class="reference" href="#mdpow.fep.Goct"><tt class="xref docutils literal"><span class="pre">Goct</span></tt></a> instance,
-but order does not matter</td>
+<tr class="field"><th class="field-name">Arguments:</th><td class="field-body"><dl class="first docutils">
+<dt><em>G1</em>, <em>G2</em></dt>
+<dd><p class="first last"><em>G1</em> and <em>G2</em> should be a <a title="mdpow.fep.Ghyd" class="reference" href="#mdpow.fep.Ghyd"><tt class="xref docutils literal"><span class="pre">Ghyd</span></tt></a> and a <a title="mdpow.fep.Goct" class="reference" href="#mdpow.fep.Goct"><tt class="xref docutils literal"><span class="pre">Goct</span></tt></a> instance,
+but order does not matter</p>
+</dd>
+<dt><em>force</em></dt>
+<dd><p class="first last">force rereading of data files even if some data were already stored [False]</p>
+</dd>
+</dl>
+</td>
 </tr>
-<tr class="field"><th class="field-name">Returns:</th><td class="field-body">(transfer free energy, water-octanol partition coefficient)</td>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">(transfer free energy, water-octanol partition coefficient)</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -589,7 +677,7 @@ use preprocessed topology from <tt class="docutils literal"><span class="pre">gr
         <li class="right" >
           <a href="equil.html" title="mdpow.equil — Setting up and running equilibrium MD"
              >previous</a> |</li>
-        <li><a href="index.html">MDpow v0.1.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow v0.1.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

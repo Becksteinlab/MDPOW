@@ -10,6 +10,7 @@ mdpow.fep.FEPschedule.mdp_dict attribute fep.html
 mdpow.config.templates data utilities.html
 mdpow.equil.Simulation.make_paths_relative method equil.html
 mdpow.fep.N_AVOGADRO data fep.html
+mdpow.fep.Gsolv.wdir method fep.html
 mdpow.equil.ITP data equil.html
 mdpow.config.includedir data utilities.html
 mdpow.equil.Simulation.MD_restrained method equil.html
@@ -17,7 +18,8 @@ mdpow.equil.DIST data equil.html
 mdpow.equil.Simulation.save method equil.html
 mdpow.config.get_template function utilities.html
 mdpow.fep.Gsolv.collect method fep.html
-mdpow.fep.Gsolv.wdir method fep.html
+mdpow.fep.Gsolv.write_DeltaA0 method fep.html
+mdpow.fep.Gsolv.summary method fep.html
 mdpow.fep.molar_to_nm3 function fep.html
 mdpow.equil.OctanolSimulation class equil.html
 mdpow.equil.Simulation class equil.html
@@ -33,6 +35,7 @@ mdpow.fep.Gsolv.label method fep.html
 mdpow.fep.Gsolv.save method fep.html
 mdpow.fep.Gsolv.frombase method fep.html
 mdpow.fep.Gsolv.plot method fep.html
+mdpow.fep.Gsolv.contains_corrupted_xvgs method fep.html
 mdpow.equil.Simulation.filekeys attribute equil.html
 mdpow.equil.Simulation.solvate method equil.html
 mdpow.fep.Gsolv.qsub method fep.html
@@ -51,6 +54,7 @@ mdpow.equil.WaterSimulation class equil.html
 mdpow.fep.Gsolv.analyze method fep.html
 mdpow.fep.FEPschedule class fep.html
 mdpow.fep.Gsolv class fep.html
+mdpow.fep.Gsolv.log_DeltaA0 method fep.html
 mdpow.fep.pOW function fep.html
 mdpow.fep.fep_templates data fep.html
 mdpow.equil.Simulation.load method equil.html

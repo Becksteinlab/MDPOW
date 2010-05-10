@@ -1,0 +1,150 @@
+The ``mdpow-*`` scripts
+=======================
+
+A number of python scripts are installed together with the
+:mod:`mdpow` package. They simplufy some common tasks (especially at
+the analysis stage) but they make some assumptions about directory
+layout and filenames. If one uses defaults for all directory and
+filename options then it should "just work".
+
+In particular, a directory hierarchy such as the following is
+assumed::
+
+  moleculename/
+       water.simulation
+       octanol.simulation
+       Equilibrium/
+             water/
+             octanol/
+       FEP/
+             water/
+                   Ghyd.fep
+                   Coulomb/
+                   VDW/
+             octanol/
+                   Goct.fep
+                   Coulomb/
+                   VDW/
+
+*moleculename* is, for instance, "benzene" or "amantadine".
+
+
+Running analysis
+----------------
+
+The :program:`mdpow-pow` script 
+
+* collects data from FEP simulations
+* calculates desolvation free energies for octanol --> vacuum and
+  water --> vacuum via thermodynamic integration (TI)
+* calculates transfer free energy water --> octanol
+* calculates log P_OW
+* plots dV/dlambda graphs
+* appends results to ``pow.txt`` and ``energies.txt`` (when the
+  default names are chosen)
+
+
+Usage of the command:
+
+   :program:`mdpow-pow` [options] DIRECTORY [DIRECTORY ...]
+
+   Run the free energy analysis for water and octanol in <DIRECTORY>/FEP
+   and return the octanol-water partition coefficient log P_ow.
+
+   DIRECTORY should contain all the files resulting from running
+   ``mdpow.fep.Goct.setup()`` and ``mdpow.fep.Goct.setup()`` and the results of
+   the MD FEP simulations. It relies on the canonical naming scheme (basically:
+   just use the defaults as in the tutorial).
+
+   The dV/dlambda plots can be produced automatically (--plot=auto). If multiple
+   DIRECTORY arguments are provided then one has to choose the auto option (or
+   None).
+
+   Results are *appended* to a data file with **Output file format**::
+
+      molecule   DeltaA0(kJ/mol)    log P_OW  wat_ok octa_ok  directory
+
+   molecule
+       molecule name as used in the itp
+   DeltaA0
+       transfer free energy water --> octanol, in kJ/mol
+   log P_OW
+       base-10 logarithm of the octanol-water partition coefficient; >0: partitions into
+       octanol, <0: partitions preferrably into water
+   wat_ok, octa_ok
+       "OK": input data was clean; "BAD": some input data xvg files contained
+       unparseable lines that were skipped; this can mean that the data became
+       corrupted and caution should be used.
+   directory
+       folder in which the simulations were stored
+
+
+   Options:
+     -h, --help            show this help message and exit
+     -p FILE, --plotfile=FILE
+			   plot dV/dlambda to FILE; use png or pdf suffix to
+			   determine the file type. 'auto' generates a pdf file
+			   DIRECTORY/dVdl.pdf and 'None' disables it [auto]
+     -o FILE, --outfile=FILE
+			   append one-line results summary to FILE [pow.txt]
+     -e FILE, --energies=FILE
+			   append solvation free energies to FILE [energies.txt]
+     --force               force rereading all data [False]
+     --ignore-corrupted    skip lines in the md.xvg files that cannot be parsed.
+			   WARNING: Other lines in the file might have been
+			   corrupted in such a way that they appear correct but
+			   are in fact wrong. WRONG RESULTS CAN OCCUR! USE AT
+			   YOUR OWN RISK [False]
+
+.. end
+
+
+Checking if the simulation is complete
+--------------------------------------
+
+Run :program:`mdpow-check` in order to check if all necessary files
+are available:
+
+   :program:`mdpow-check` [options] DIRECTORY [DIRECTORY ...]
+
+   Check status of the progress of the project in DIRECTORY.
+
+   Output is only written to the status file (``status.txt``). A quick way to find
+   problems is to do a ::
+
+     cat status.txt | gawk -F '|' '$2 !~ /OK/ {print $0}'
+
+
+
+   Options:
+     -h, --help            show this help message and exit
+     -o FILE, --outfile=FILE
+			   write status results to FILE [status.txt]
+
+.. end
+
+Re-building ``Ghyd.fep`` and ``Goct.fep``
+-----------------------------------------
+
+It can become necessary to recreate the fep pickle files (e.g. if the
+files became corrupted due to a software error or in order to change
+paths).
+
+Typically, one would execute the :program:`mdpow-rebuild-fep` command
+in the parent directory of *moleculename*.
+
+Usage:
+   :program:`mdpow-rebuild-fep` [options] DIRECTORY [DIRECTORY ...]
+
+   Re-create the ``Goct.fep`` or ``Ghyd.fep`` file using the appropriate 
+   equilibrium simulation file under *DIRECTORY*/FEP.
+
+   (This should only be necessary when the fep file was destroyed due to
+   a software error.)
+
+
+   Options:
+     -h, --help      show this help message and exit
+     --solvent=NAME  rebuild fep for 'water', 'octanol', or 'all' [all]
+
+.. end
