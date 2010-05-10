@@ -444,7 +444,7 @@ class Gsolv(object):
         primary and the lambda as secondary key.
         """
         from itertools import izip
-        def _len(xvg):
+        def _lencorrupted(xvg):
             try:
                 return len(xvg.corrupted_lineno)
             except AttributeError:  # backwards compatible (pre gw 0.1.10 are always ok)
@@ -454,8 +454,8 @@ class Gsolv(object):
         corrupted = {}
         self._corrupted = {}        # debugging ...
         for component, (lambdas, xvgs) in self.results.xvg.items():
-            corrupted[component] = numpy.any([(_len(xvg) > 0) for xvg in xvgs])
-            self._corrupted[component] = dict(((l, _len(xvg)) for l,xvg in izip(lambdas, xvgs)))
+            corrupted[component] = numpy.any([(_lencorrupted(xvg) > 0) for xvg in xvgs])
+            self._corrupted[component] = dict(((l, _lencorrupted(xvg)) for l,xvg in izip(lambdas, xvgs)))
         return numpy.any([x for x in corrupted.values()])
 
     def analyze(self, c0=1.0, force=False, autosave=True):
@@ -679,7 +679,7 @@ class Goct(Gsolv):
     solvent_default = "octanol"
 
 
-def pOW(G1, G2):
+def pOW(G1, G2, force=False):
     """Compute water-octanol partition coefficient from two :class:`Gsolv` objects.
 
        transfer free energy from water into octanol
@@ -691,6 +691,8 @@ def pOW(G1, G2):
        *G1*, *G2*
            *G1* and *G2* should be a :class:`Ghyd` and a :class:`Goct` instance,
            but order does not matter
+       *force*
+           force rereading of data files even if some data were already stored [False]
     :Returns: (transfer free energy, water-octanol partition coefficient)     
     """
 
@@ -712,11 +714,13 @@ def pOW(G1, G2):
         raise ValueError(errmsg)
 
     for G in Gsolvs.values():
+        if force:
+            G.analyze(force=force)
         try:
             G.results.DeltaA.total
             G.log_DeltaA0()
         except (KeyError, AttributeError):   # KeyError because results is a AttributeDict
-            G.analyze()
+            G.analyze(force=force)
 
     transferFE = Gsolvs['octanol'].results.DeltaA.total - Gsolvs['water'].results.DeltaA.total 
     pOW = -transferFE / (kBOLTZ * Gsolvs['octanol'].Temperature) * numpy.log10(numpy.e)
