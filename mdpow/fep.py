@@ -146,6 +146,7 @@ class Gsolv(object):
                              couple_lambda0='vdw-q', couple_lambda1='vdw',
                              sc_alpha=0,      # linear scaling for coulomb
                              lambdas=[0, 0.25, 0.5, 0.75, 1.0],  # default values
+                             #lambdas=[0, 0.125, 0.25, 0.5, 0.75, 1.0],  # default values + 0.125
                              ),
                  'vdw':
                  FEPschedule(name='vdw',
