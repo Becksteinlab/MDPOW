@@ -89,8 +89,14 @@ def plot_exp_vs_comp(a, **kwargs):
        *ymin*, *ymax*
            limits of the plot in the y direction (=computational results)
     """
-    from pylab import plot, legend, ylim
-    from matplotlib import colors, cm
+    from pylab import figure, plot, legend, ylim
+    from matplotlib import colors, cm, rc
+    import matplotlib
+
+    # need large figure for the plot
+    matplotlib.rc('figure', figsize=kwargs.pop('figsize', (8,10)))
+    # default font
+    matplotlib.rc('font', size=10)
 
     norm = colors.normalize(0,len(a))    
     for i, (mol,DeltaA0,comp,exp,name,comment) in enumerate(a.recarray):
@@ -98,7 +104,8 @@ def plot_exp_vs_comp(a, **kwargs):
         label = "%(name)s %(exp).1f/%(comp).1f" % vars()
         plot(exp,comp, marker='o', markersize=10, color=color, label=label)
 
-    legend(ncol=3, numpoints=1, loc='lower right', prop={'size':'small'})
-
+    legend(ncol=3, numpoints=1, loc='lower right', prop={'size':8})
     figname = _finish(**kwargs)
+
+    matplotlib.rcdefaults()  # restore defaults
     return figname
