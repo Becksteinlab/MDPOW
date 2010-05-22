@@ -109,7 +109,7 @@ Make a directory ``octanol`` and copy the ``octanol.itp`` and
 ``octanol.gro`` file into it. Launch :program:`ipython` from this
 directory and type::
 
-   import mdpow
+   import mdpow.equil
    S = mdpow.equil.WaterSimulation(molecule="OcOH")
    S.topology(itp="octanol.itp")
    S.solvate(struct="octanol.gro")
@@ -132,15 +132,16 @@ scripts.
 Hydration free energy
 .....................
 
-Reopen the python session (if you quit it you will have to ``import
-mdpow`` again) and set up a :class:`~mdpow.fep.Ghyd` object::
-
+Reopen the python session and set up a :class:`~mdpow.fep.Ghyd` object::
+   
+   import mdpow.fep
    gwat = mdpow.fep.Ghyd(molecule="OcOH", top="Equilibrium/water/top/system.top", struct="Equilibrium/water/MD_NPT/md.pdb", ndx="Equilibrium/water/solvation/main.ndx", runtime=100)
    
 Alternatively, one can save some typing if we continue the last session and use
 the :class:`mdpow.equil.Simulation` object (which we can re-load from its saved
 state file from disk)::
 
+  import mdpow.equil
   S = mdpow.equil.WaterSimulation(filename="water.simulation")  # only needed when quit
   gwat = mdpow.fep.Ghyd(simulation=S, runtime=100)
 
@@ -284,14 +285,14 @@ bin directory (or the directory pointed to by
 
  
 """
-VERSION = 0,1,2
+VERSION = 0,1,3
 
 __all__ = ['fep', 'equil']
 
 import log
 logger = log.create('mdpow', 'mdpow.log')
 
-import config, fep, equil
+import config
 
 def get_version():
     """Return current package version as a string."""
@@ -300,3 +301,7 @@ def get_version():
 def get_version_tuple():
     """Return current package version as a (MAJOR,MINOR,PATCHLEVEL)."""
     return tuple(VERSION)
+
+# commented out so that one can get at version without importing
+# GromacsWrapper etc
+#import fep, equil
