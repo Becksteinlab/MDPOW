@@ -464,8 +464,8 @@ class Gsolv(object):
 
         Thermodynamic integration (TI) is performed on the individual component
         window calculation (typically the Coulomb and the VDW part). The
-        dV/dlambda graphs are integrated with Simpson's rule (and averaging of
-        results if the number of datapoints is odd; see
+        dV/dlambda graphs are integrated with the composite Simpson's rule (and
+        averaging of results if the number of datapoints is odd; see
         :func:`scipy.integrate.simps` for details).
 
         The total standard hydration free energy is calculated by taking the

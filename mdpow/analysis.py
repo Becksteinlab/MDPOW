@@ -75,8 +75,8 @@ def plot_quick(a, **kwargs):
     """Quick hack to plot all exp_vs_comp data together."""
     from pylab import plot
     from numpy import array
-    kwargs.setdefault('ylim',None)
-    kwargs.setdefault('ymax',None)
+    kwargs.setdefault('ylim',None) # ??
+    kwargs.setdefault('ymax',None) # ??
     plot(a.recarray.exp, a.recarray.logP_OW, 'ro', **kwargs)  # data
     return _finish(**kwargs)
 

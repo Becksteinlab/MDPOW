@@ -9,7 +9,8 @@ a software error.)
 """
 
 import os
-import mdpow
+import mdpow.equil
+import mdpow.fep
 
 import logging
 logger = logging.getLogger('mdpow')
