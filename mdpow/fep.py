@@ -14,6 +14,7 @@ Required Input:
  - topology
  - equilibrated structure of the solvated molecule
 
+See the docs for :class:`Gsolv` for details.
 
 .. _Free Energy Tutorial:
    http://www.dillgroup.ucsf.edu/group/wiki/index.php?title=Free_Energy:_Tutorial
@@ -121,6 +122,44 @@ class FEPschedule(AttributeDict):
 
 class Gsolv(object):
     """Simulations to calculate and analyze the solvation free energy.
+
+    The simulations are run at constant volume so this is in fact a Helmholtz
+    solvation free energy, DeltaA(V). To compute the Gibbs solvation free
+    energy (which is the experimental quantity) at the standard state (1 M
+    solution and 1 M in the gas phase, also known as the "Ben-Naim standard
+    state"):
+
+           DeltaG* = DeltaA - kT ln V*/Vsim + p*(V* - Vsim)
+
+    The "expansion free energy" -kT ln V*/Vsim term assumes that the solute
+    behaves ideal at the range of concentrations 1/Vsim to 1/V*. The expansion
+    pressure work is *neglected* at the moment; with 1 bar = 0.06 kJ mol^-1
+    nm^-3 typical values of the term would be ~0.2 kJ/mol. Vsim is the constant
+    simulations box volume (taken from the last frame of the equilibrium
+    simulation that is the starting point for the FEP simulations.)
+
+    (We also neglect the negligible correction DeltaA = DeltaAsim -kT ln
+    Vx/Vsim where Vx is the volume of the system without the solute but the
+    same number of water molecules as in the fully interacting case [see
+    Michael Shirts Thesis, p82].)
+
+    DeltaA* is computed from the decharging and the decoupling step. With our
+    choice of lambda=0 being the fully interacting and lambda=1 the
+    non-interacting state, it is computed as
+
+            Delta A* = -(Delta A_coul + Delta A_vdw) + DeltaA_std
+
+    [Note: DeltaG* = DeltaA* + p*(V*-Vsim) ~ DeltaA*]  
+
+    The total standard hydration free energy is calculated by taking the change
+    to standard concentration from the simulation box volume into account:
+
+            DeltaA_std = A_0 - A_sim = -kT ln V0/Vsim = -kT ln 1/Vsim*c0*NA
+
+    where V0 is the standard volume of one molecule corresponding to the chosen
+    standard state at the standard concentration c0=1M (i.e. 1/(1mol/L *
+    N_Avogadro)); V0 == V* above.
+
 
     Typical work flow::
 
@@ -391,7 +430,7 @@ class Gsolv(object):
                       )
         gromacs.setup.MD(**kwargs)
 
-    def DeltaA0(self, c0=1.0, N=1):
+    def DeltaA_std(self, c0=1.0, N=1):
         """Standard state correction to the free energy.
 
         The total standard hydration free energy is calculated by taking the
@@ -463,10 +502,14 @@ class Gsolv(object):
         """Extract dV/dl from output and calculate dG by TI.
 
         Thermodynamic integration (TI) is performed on the individual component
-        window calculation (typically the Coulomb and the VDW part). The
-        dV/dlambda graphs are integrated with the composite Simpson's rule (and
-        averaging of results if the number of datapoints is odd; see
-        :func:`scipy.integrate.simps` for details).
+        window calculation (typically the Coulomb and the VDW part, DeltaA_coul
+        and DeltaA_vdw). DeltaA_coul is the free energy component of
+        discharging the molecule and DeltaA_vdw of decoupling (switching off LJ
+        interactions with the environment). The free energy components must be
+        interpreted in this way because we defined lambda=0 as interaction
+        switched on and lambda=1 as switched off.
+
+            Delta A = -(Delta A_coul + Delta A_vdw) + DeltaA_std
 
         The total standard hydration free energy is calculated by taking the
         change to standard concentration from the simulation box volume into
@@ -478,6 +521,19 @@ class Gsolv(object):
         energy change was computed.)
 
         Data are stored in :attr:`Gsolv.results`.
+
+        The dV/dlambda graphs are integrated with the composite Simpson's rule
+        (and averaging of results if the number of datapoints is odd; see
+        :func:`scipy.integrate.simps` for details). For the Coulomb part this
+        scheme has been shown to produce more accurate results than the
+        trapezoidal rule [Jorge2010]_.
+
+        .. [Jorge2010] M. Jorge, N.M. Garrido, A.J. Queimada, I.G. Economou,
+                       and E.A. Macedo. Effect of the integration method on the
+                       accuracy and computational efficiency of free energy
+                       calculations using thermodynamic integration. Journal of
+                       Chemical Theory and Computation, 6 (4):1018--1027,
+                       2010. 10.1021/ct900661c.
 
         :Keywords:
           *c0*
@@ -511,7 +567,7 @@ class Gsolv(object):
         self.results.DeltaA.total *= -1
 
         # standard state
-        self.results.DeltaA.total += self.DeltaA0(c0)
+        self.results.DeltaA.total += self.DeltaA_std(c0)
 
         if autosave:
             self.save()
