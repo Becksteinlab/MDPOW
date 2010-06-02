@@ -14,10 +14,51 @@ Required Input:
  - topology
  - equilibrated structure of the solvated molecule
 
-See the docs for :class:`Gsolv` for details.
+See the docs for :class:`Gsolv` for details on what is calculated.
+
 
 .. _Free Energy Tutorial:
    http://www.dillgroup.ucsf.edu/group/wiki/index.php?title=Free_Energy:_Tutorial
+
+Differences to published protocols
+----------------------------------
+
+Some notes on how the approach encoded here differs from what others
+(notabley Mobley) did:
+
+- We use Gromacs 4.x and use the new decoupling feature ::
+
+    couple-intramol = no
+
+  which indicates that "intra-molecular interactions remain". It should (as I
+  understand it) allow us to only calculate the free energy changes in solution
+  so that we do not have to do an extra calculation in vacuo.
+  http://www.mail-archive.com/gmx-users@gromacs.org/msg18803.html
+
+  Mobley does an extra discharging calculation in vacuo and calculates
+
+      DeltaA = DeltaA_coul(vac) - (DeltaA_coul(sol) + DeltaA_vdw(sol))
+
+  (but also annihilates the interactions on the solute, corresponding to
+  ``couple-intramol = yes``) whereas we do
+
+      DeltaA = - (DeltaA_coul(sol) + DeltaA_vdw(sol))
+
+- Pressure and Volume: Mobley scales the box size with an affine transformation
+  to the density corresponding to the average pressure of the equilibration
+  run. We simply take the last frame from the trajectory (and also assume that
+  the pressure is exactly what we set, namely 1 bar).
+
+  Arguably we should 
+
+  - obtain the actual pressure from the second half of the equilibrium
+    simulation (although the difference is probably on the order of 0.01 bar
+    and hence will not make a appreciable difference in the pdV term);
+  
+  - scale the box to the average volume obtained from the second half of the
+    simulation. This is potentially more important because the density of the
+    water has an effect on the interactions but we would need to run tests to
+    check how big the effect typically is.
 
 
 Example
@@ -138,17 +179,18 @@ class Gsolv(object):
 
            DeltaG* = DeltaA - kT ln V*/Vsim + p*(V* - Vsim)
 
-    The "expansion free energy" -kT ln V*/Vsim term assumes that the solute
-    behaves ideal at the range of concentrations 1/Vsim to 1/V*. The expansion
-    pressure work is *neglected* at the moment; with 1 bar = 0.06 kJ mol^-1
-    nm^-3 typical values of the term would be ~0.2 kJ/mol. Vsim is the constant
-    simulations box volume (taken from the last frame of the equilibrium
-    simulation that is the starting point for the FEP simulations.)
+    The "expansion free energy" (or "volume correction") -kT ln V*/Vsim term
+    assumes that the solute behaves ideal at the range of concentrations 1/Vsim
+    to 1/V* (see below). The expansion pressure work pdV is small but not
+    negligible; with 1 bar = 0.06 kJ mol^-1 nm^-3 typical values of the term
+    are ~1..3 kJ/mol. Vsim is the constant simulations box volume (taken from
+    the last frame of the equilibrium simulation that is the starting point for
+    the FEP simulations.)
 
-    (We also neglect the negligible correction DeltaA = DeltaAsim -kT ln
-    Vx/Vsim where Vx is the volume of the system without the solute but the
-    same number of water molecules as in the fully interacting case [see
-    Michael Shirts Thesis, p82].)
+    (We neglect the negligible correction DeltaA = DeltaAsim -kT ln Vx/Vsim
+    where Vx is the volume of the system without the solute but the same number
+    of water molecules as in the fully interacting case [see Michael Shirts'
+    Thesis, p82].)
 
     DeltaA* is computed from the decharging and the decoupling step. With our
     choice of lambda=0 being the fully interacting and lambda=1 the
@@ -156,16 +198,22 @@ class Gsolv(object):
 
             Delta A* = -(Delta A_coul + Delta A_vdw) + DeltaA_std
 
-    [Note: DeltaG* = DeltaA* + p*(V*-Vsim) ~ DeltaA*]  
+    The Gibbs free energy at the 1M/1M standard state is then calculated as
+    
+            DeltaG* = DeltaA* + p*(V*-Vsim)
 
-    The total standard hydration free energy is calculated by taking the change
-    to standard concentration from the simulation box volume into account:
+
+    **Note on the volume correction**
+
+    The standard hydration free energy is calculated by taking the change to
+    standard concentration from the simulation box volume into account, for an
+    ideal (non-interacting) solute:
 
             DeltaA_std = A_0 - A_sim = -kT ln V0/Vsim = -kT ln 1/Vsim*c0*NA
 
-    where V0 is the standard volume of one molecule corresponding to the chosen
-    standard state at the standard concentration c0=1M (i.e. 1/(1mol/L *
-    N_Avogadro)); V0 == V* above.
+    and where V0 is the standard volume of one molecule corresponding to the
+    chosen standard state at the standard concentration c0=1M (i.e. 1/(1mol/L *
+    N_Avogadro)); V0 == V* in the notation above.
 
 
     Typical work flow::
@@ -446,12 +494,9 @@ class Gsolv(object):
 
           DeltaA_std = Delta A_0 - Delta A = -kT ln V0/V = -kT ln 1/V*c0*N_A
 
-        where V is the volume of the simulation cell.
-        (This assumes that there is only a single molecule *N* = 1 for which the free
-        energy change was computed.)
-
-        .. Note:: This correction is not exact; see Michael Shirts' thesis for
-                  the correct one (but the difference should be small).        
+        where V is the volume of the simulation cell.  (The above assumes that
+        there is only a single molecule *N* = 1 for which the free energy
+        change was computed but this function also deals with *N*>1.)
         """
 
         V = gromacs.cbook.get_volume(self.frombase(self.struct))
@@ -547,24 +592,21 @@ class Gsolv(object):
         switched on and lambda=1 as switched off.
 
             Delta A* = -(Delta A_coul + Delta A_vdw) + DeltaA_std
+
             Delta_G* = Delta_A* + pdV
 
         The total standard hydration free energy is calculated by taking the
         change to standard concentration from the simulation box volume into
-        account:
-
-            DeltaA_std = A_0 - A_sim = -kT ln V0/Vsim = -kT ln 1/Vsim*c0*N_A
-
-        (This assumes that there is only a single molecule for which the free
-        energy change was computed.)
+        account as described for :meth:`~Gsolv.DeltaA_std`.
 
         Data are stored in :attr:`Gsolv.results`.
 
         The dV/dlambda graphs are integrated with the composite Simpson's rule
         (and averaging of results if the number of datapoints is odd; see
-        :func:`scipy.integrate.simps` for details). For the Coulomb part this
-        scheme has been shown to produce more accurate results than the
-        trapezoidal rule [Jorge2010]_.
+        :func:`scipy.integrate.simps` for details). For the Coulomb part using
+        Simpson's rule has been shown to produce more accurate results than the
+        trapezoidal rule [Jorge2010]_ (but the composite scheme was *not*
+        tested in the paper).
 
         .. [Jorge2010] M. Jorge, N.M. Garrido, A.J. Queimada, I.G. Economou,
                        and E.A. Macedo. Effect of the integration method on the
