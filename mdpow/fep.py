@@ -108,7 +108,7 @@ def bar_to_kJmolnm3(p):
 
     1 bar = 1e5 J m^-3
     """
-    return p / N_AVOGADRO * 1e-25
+    return p * N_AVOGADRO * 1e-25
 
 #: Template mdp files for different stages of the FEP protocol. (add equilibration, too?)
 fep_templates = {
@@ -491,7 +491,7 @@ class Gsolv(object):
         self.results.DeltaA.pdV = self.pressure*(V0-V)  # in kJ/mol
         logger.debug("pdV work input: V=%g nm^3  V0=%g nm^3 P=%g kJ mol^-1 nm^-3",
                      V, V0, self.pressure)
-        logger.info("pdV work for P=%g c0=%g M (dV = %.2f): "
+        logger.info("pdV work for P=%g bar c0=%g M (dV = %.2f nm^3): "
                     "-pdV = %+.2f kJ/mol", p, c0, V0-V, -self.results.DeltaA.pdV)
         return self.results.DeltaA.pdV
 
@@ -592,7 +592,8 @@ class Gsolv(object):
         else:
             logger.info("Analyzing stored data.")
         
-        self.results.DeltaA.Helmholtz = 0.0   # total free energy difference
+        self.results.DeltaA.Helmholtz = 0.0   # total free energy difference at const V
+        self.results.DeltaA.Gibbs = 0.0       # total free energy difference at const p
         for component, (lambdas, xvgs) in self.results.xvg.items():
             logger.info("[%s] Computing averages <dV/dl> for %d lambda values.",
                         component, len(lambdas))
@@ -612,7 +613,7 @@ class Gsolv(object):
 
         # Gibbs energy
         # (pdV stores +pdV!)
-        self.results.DeltaA.Gibbs = self.results.DeltaA.Helmholtz + self.results.DeltaA.pdV
+        self.results.DeltaA.Gibbs = self.results.DeltaA.Helmholtz + self.pdV(p=p,c0=c0)
 
         if autosave:
             self.save()
@@ -620,7 +621,7 @@ class Gsolv(object):
         # TODO: error estimate (e.g. from boot strapping from the raw data)
 
         self.log_DeltaA0()
-        return self.results.DeltaG
+        return self.results.DeltaA.Gibbs
 
     def write_DeltaA0(self, filename, mode='w'):
         """Write free energy components to a file.
@@ -632,8 +633,8 @@ class Gsolv(object):
                  'w' for overwrite or 'a' for append ['w']
 
         Format::
-          .                 ---------- kJ/mol -----------
-          molecule solvent  total  coulomb  vdw  stdstate
+          .                 ---------- kJ/mol ----------------
+          molecule solvent  total  coulomb  vdw  stdstate  pdV
         """
         with open(filename, mode) as tab:
             tab.write(self.summary() + '\n')
@@ -642,10 +643,10 @@ class Gsolv(object):
         """Return a string that summarizes the energetics.
 
         Format::
-          .                 ---------- kJ/mol -----------
-          molecule solvent  total  coulomb  vdw  stdstate pdV
+          .                 ---------- kJ/mol ----------------
+          molecule solvent  total  coulomb  vdw  stdstate  pdV
         """
-        fmt = "%-10s %-10s %+8.2f  %+8.2f  %+8.2f  %+8.2f"
+        fmt = "%-10s %-10s %+8.2f  %+8.2f  %+8.2f  %+8.2f  %+8.2f"
         DeltaA0 = self.results.DeltaA
         return fmt % (self.molecule, self.solvent_type,
                       DeltaA0.Gibbs, DeltaA0.coulomb, DeltaA0.vdw,
@@ -657,7 +658,7 @@ class Gsolv(object):
             logger.info("No DeltaA free energies computed yet.")
             return
 
-        logger.info("DeltaA0 = -(DeltaA_coul + DeltaA_vdw) + DeltaA_stdstate")
+        logger.info("DeltaG0 = -(DeltaA_coul + DeltaA_vdw) + DeltaA_stdstate + pdV")
         for component, value in self.results.DeltaA.items():
             logger.info("%s solvation free energy (%s) %g kJ/mol",
                         self.solvent_type.capitalize(), component, value)
