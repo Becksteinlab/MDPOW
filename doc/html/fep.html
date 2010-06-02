@@ -5,13 +5,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>mdpow.fep – calculate free energy of solvation &mdash; MDpow v0.1.4 documentation</title>
+    <title>mdpow.fep – calculate free energy of solvation &mdash; MDpow v0.2.0 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '#',
-        VERSION:     '0.1.4',
+        VERSION:     '0.2.0',
         COLLAPSE_MODINDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -19,7 +19,7 @@
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="MDpow v0.1.4 documentation" href="index.html" />
+    <link rel="top" title="MDpow v0.2.0 documentation" href="index.html" />
     <link rel="next" title="Helper modules" href="utilities.html" />
     <link rel="prev" title="mdpow.equil — Setting up and running equilibrium MD" href="equil.html" /> 
   </head>
@@ -39,7 +39,7 @@
         <li class="right" >
           <a href="equil.html" title="mdpow.equil — Setting up and running equilibrium MD"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">MDpow v0.1.4 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow v0.2.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -52,7 +52,7 @@
 <span id="module-mdpow.fep"></span><h1><tt class="xref docutils literal"><span class="pre">mdpow.fep</span></tt> &#8211; calculate free energy of solvation<a class="headerlink" href="#mdpow-fep-calculate-free-energy-of-solvation" title="Permalink to this headline">¶</a></h1>
 <p>Set up and run free energy perturbation (FEP) calculations to
 calculate the free energy of hydration of a solute in a solvent
-box. The protocol follows the works of D. Mobley (<a class="reference external" href="http://www.dillgroup.ucsf.edu/group/wiki/index.php?title=Free_Energy:_Tutorial">Free Energy
+box. The protocol follows the works of D. Mobley (<a class="reference" href="http://www.dillgroup.ucsf.edu/group/wiki/index.php?title=Free_Energy:_Tutorial">Free Energy
 Tutorial</a>) and M. Shirts, and uses Gromacs 4.0.x.</p>
 <p>Required Input:</p>
 <blockquote>
@@ -61,7 +61,7 @@ Tutorial</a>) and M. Shirts, and uses Gromacs 4.0.x.</p>
 <li>equilibrated structure of the solvated molecule</li>
 </ul>
 </blockquote>
-<p>See the docs for <a title="mdpow.fep.Gsolv" class="reference internal" href="#mdpow.fep.Gsolv"><tt class="xref docutils literal"><span class="pre">Gsolv</span></tt></a> for details on what is calculated.</p>
+<p>See the docs for <a title="mdpow.fep.Gsolv" class="reference" href="#mdpow.fep.Gsolv"><tt class="xref docutils literal"><span class="pre">Gsolv</span></tt></a> for details on what is calculated.</p>
 <div class="section" id="differences-to-published-protocols">
 <h2>Differences to published protocols<a class="headerlink" href="#differences-to-published-protocols" title="Permalink to this headline">¶</a></h2>
 <p>Some notes on how the approach encoded here differs from what others
@@ -74,7 +74,7 @@ Tutorial</a>) and M. Shirts, and uses Gromacs 4.0.x.</p>
 <p>which indicates that &#8220;intra-molecular interactions remain&#8221;. It should (as I
 understand it) allow us to only calculate the free energy changes in solution
 so that we do not have to do an extra calculation in vacuo.
-<a class="reference external" href="http://www.mail-archive.com/gmx-users&#64;gromacs.org/msg18803.html">http://www.mail-archive.com/gmx-users&#64;gromacs.org/msg18803.html</a></p>
+<a class="reference" href="http://www.mail-archive.com/gmx-users&#64;gromacs.org/msg18803.html">http://www.mail-archive.com/gmx-users&#64;gromacs.org/msg18803.html</a></p>
 <p>Mobley does an extra discharging calculation in vacuo and calculates</p>
 <blockquote>
 <p>DeltaA = DeltaA_coul(vac) - (DeltaA_coul(sol) + DeltaA_vdw(sol))</p>
@@ -104,16 +104,16 @@ check how big the effect typically is.</li>
 </div>
 <div class="section" id="example">
 <h2>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
-<p>see <a title="" class="reference external" href="init.html#module-mdpow"><tt class="xref docutils literal"><span class="pre">mdpow</span></tt></a></p>
+<p>see <a title="" class="reference" href="init.html#module-mdpow"><tt class="xref docutils literal"><span class="pre">mdpow</span></tt></a></p>
 </div>
 <div class="section" id="user-reference">
 <h2>User reference<a class="headerlink" href="#user-reference" title="Permalink to this headline">¶</a></h2>
 <p>Simulation setup and analysis of all FEP simulations is encapsulated
-by a <a title="mdpow.fep.Gsolv" class="reference internal" href="#mdpow.fep.Gsolv"><tt class="xref docutils literal"><span class="pre">mdpow.fep.Gsolv</span></tt></a> object. For the hydration free energy
-there is a special class <a title="mdpow.fep.Ghyd" class="reference internal" href="#mdpow.fep.Ghyd"><tt class="xref docutils literal"><span class="pre">Ghyd</span></tt></a> and for the
+by a <a title="mdpow.fep.Gsolv" class="reference" href="#mdpow.fep.Gsolv"><tt class="xref docutils literal"><span class="pre">mdpow.fep.Gsolv</span></tt></a> object. For the hydration free energy
+there is a special class <a title="mdpow.fep.Ghyd" class="reference" href="#mdpow.fep.Ghyd"><tt class="xref docutils literal"><span class="pre">Ghyd</span></tt></a> and for the
 solvation free energy in octanol there is
-<a title="mdpow.fep.Goct" class="reference internal" href="#mdpow.fep.Goct"><tt class="xref docutils literal"><span class="pre">Goct</span></tt></a>. See the description of
-<a title="mdpow.fep.Gsolv" class="reference internal" href="#mdpow.fep.Gsolv"><tt class="xref docutils literal"><span class="pre">Gsolv</span></tt></a> for methods common to both.</p>
+<a title="mdpow.fep.Goct" class="reference" href="#mdpow.fep.Goct"><tt class="xref docutils literal"><span class="pre">Goct</span></tt></a>. See the description of
+<a title="mdpow.fep.Gsolv" class="reference" href="#mdpow.fep.Gsolv"><tt class="xref docutils literal"><span class="pre">Gsolv</span></tt></a> for methods common to both.</p>
 <dl class="class">
 <dt id="mdpow.fep.Ghyd">
 <em class="property">class </em><tt class="descclassname">mdpow.fep.</tt><tt class="descname">Ghyd</tt><big>(</big><em>molecule=None</em>, <em>top=None</em>, <em>struct=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.fep.Ghyd" title="Permalink to this definition">¶</a></dt>
@@ -159,14 +159,14 @@ affect the simulations</p>
 </dd>
 <dt><em>qscript</em></dt>
 <dd><p class="first last">template or list of templates for queuing system scripts
-(see <a title="(in GromacsWrapper v0.1)" class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/config.html#gromacs.config.templates"><tt class="xref docutils literal"><span class="pre">gromacs.config.templates</span></tt></a> for details) [local.sh]</p>
+(see <a title="(in GromacsWrapper v0.1)" class="reference" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/config.html#gromacs.config.templates"><tt class="xref docutils literal"><span class="pre">gromacs.config.templates</span></tt></a> for details) [local.sh]</p>
 </dd>
 <dt><em>includes</em></dt>
 <dd><p class="first last">include directories</p>
 </dd>
 <dt><em>simulation</em></dt>
 <dd><p class="first last">Instead of providing the required arguments, obtain the input
-files from a <a title="mdpow.equil.Simulation" class="reference external" href="equil.html#mdpow.equil.Simulation"><tt class="xref docutils literal"><span class="pre">mdpow.equil.Simulation</span></tt></a> instance.</p>
+files from a <a title="mdpow.equil.Simulation" class="reference" href="equil.html#mdpow.equil.Simulation"><tt class="xref docutils literal"><span class="pre">mdpow.equil.Simulation</span></tt></a> instance.</p>
 </dd>
 <dt><em>filename</em></dt>
 <dd><p class="first last">Instead of providing the required arguments, load from pickle
@@ -177,7 +177,7 @@ file</p>
 </dd>
 <dt><em>permissive</em></dt>
 <dd><p class="first last">Set to <tt class="xref docutils literal"><span class="pre">True</span></tt> if you want to read past corrupt data in output
-xvg files (see <a title="(in GromacsWrapper v0.1)" class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/formats.html#gromacs.formats.XVG"><tt class="xref docutils literal"><span class="pre">gromacs.formats.XVG</span></tt></a> for details); not that
+xvg files (see <a title="(in GromacsWrapper v0.1)" class="reference" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/formats.html#gromacs.formats.XVG"><tt class="xref docutils literal"><span class="pre">gromacs.formats.XVG</span></tt></a> for details); not that
 <em>permissive*=``True`` can lead to **wrong results*</em>. Overrides
 the value set in a loaded pickle file. [<tt class="xref docutils literal"><span class="pre">False</span></tt>]</p>
 </dd>
@@ -236,14 +236,14 @@ affect the simulations</p>
 </dd>
 <dt><em>qscript</em></dt>
 <dd><p class="first last">template or list of templates for queuing system scripts
-(see <a title="(in GromacsWrapper v0.1)" class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/config.html#gromacs.config.templates"><tt class="xref docutils literal"><span class="pre">gromacs.config.templates</span></tt></a> for details) [local.sh]</p>
+(see <a title="(in GromacsWrapper v0.1)" class="reference" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/config.html#gromacs.config.templates"><tt class="xref docutils literal"><span class="pre">gromacs.config.templates</span></tt></a> for details) [local.sh]</p>
 </dd>
 <dt><em>includes</em></dt>
 <dd><p class="first last">include directories</p>
 </dd>
 <dt><em>simulation</em></dt>
 <dd><p class="first last">Instead of providing the required arguments, obtain the input
-files from a <a title="mdpow.equil.Simulation" class="reference external" href="equil.html#mdpow.equil.Simulation"><tt class="xref docutils literal"><span class="pre">mdpow.equil.Simulation</span></tt></a> instance.</p>
+files from a <a title="mdpow.equil.Simulation" class="reference" href="equil.html#mdpow.equil.Simulation"><tt class="xref docutils literal"><span class="pre">mdpow.equil.Simulation</span></tt></a> instance.</p>
 </dd>
 <dt><em>filename</em></dt>
 <dd><p class="first last">Instead of providing the required arguments, load from pickle
@@ -254,7 +254,7 @@ file</p>
 </dd>
 <dt><em>permissive</em></dt>
 <dd><p class="first last">Set to <tt class="xref docutils literal"><span class="pre">True</span></tt> if you want to read past corrupt data in output
-xvg files (see <a title="(in GromacsWrapper v0.1)" class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/formats.html#gromacs.formats.XVG"><tt class="xref docutils literal"><span class="pre">gromacs.formats.XVG</span></tt></a> for details); not that
+xvg files (see <a title="(in GromacsWrapper v0.1)" class="reference" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/formats.html#gromacs.formats.XVG"><tt class="xref docutils literal"><span class="pre">gromacs.formats.XVG</span></tt></a> for details); not that
 <em>permissive*=``True`` can lead to **wrong results*</em>. Overrides
 the value set in a loaded pickle file. [<tt class="xref docutils literal"><span class="pre">False</span></tt>]</p>
 </dd>
@@ -278,35 +278,26 @@ energy (which is the experimental quantity) at the standard state (1 M
 solution and 1 M in the gas phase, also known as the &#8220;Ben-Naim standard
 state&#8221;):</p>
 <blockquote>
-DeltaG* = DeltaA - kT ln V*/Vsim + p*(V* - Vsim)</blockquote>
-<p>The &#8220;expansion free energy&#8221; (or &#8220;volume correction&#8221;) -kT ln V*/Vsim term
-assumes that the solute behaves ideal at the range of concentrations 1/Vsim
-to 1/V* (see below). The expansion pressure work pdV is small but not
-negligible; with 1 bar = 0.06 kJ mol^-1 nm^-3 typical values of the term
-are ~1..3 kJ/mol. Vsim is the constant simulations box volume (taken from
-the last frame of the equilibrium simulation that is the starting point for
-the FEP simulations.)</p>
+DeltaG* = DeltaA + (p*-p)*Vsim</blockquote>
+<p>The pressure term is currently NOT IMPLEMENTED.
+1 bar = 0.06 kJ mol^-1 nm^-3 typical values of the term are XXX
+kJ/mol. Vsim is the constant simulations box volume (taken from
+the last frame of the equilibrium simulation that is the starting
+point for the FEP simulations.)</p>
 <p>(We neglect the negligible correction DeltaA = DeltaAsim -kT ln Vx/Vsim
 where Vx is the volume of the system without the solute but the same number
 of water molecules as in the fully interacting case [see Michael Shirts&#8217;
 Thesis, p82].)</p>
-<p>DeltaA* is computed from the decharging and the decoupling step. With our
+<p>DeltaA is computed from the decharging and the decoupling step. With our
 choice of lambda=0 being the fully interacting and lambda=1 the
 non-interacting state, it is computed as</p>
 <blockquote>
-Delta A* = -(Delta A_coul + Delta A_vdw) + DeltaA_std</blockquote>
-<p>The Gibbs free energy at the 1M/1M standard state is then calculated as</p>
-<blockquote>
-DeltaG* = DeltaA* + p*(V*-Vsim)</blockquote>
-<p><strong>Note on the volume correction</strong></p>
-<p>The standard hydration free energy is calculated by taking the change to
-standard concentration from the simulation box volume into account, for an
-ideal (non-interacting) solute:</p>
-<blockquote>
-DeltaA_std = A_0 - A_sim = -kT ln V0/Vsim = -kT ln 1/Vsim*c0*NA</blockquote>
-<p>and where V0 is the standard volume of one molecule corresponding to the
-chosen standard state at the standard concentration c0=1M (i.e. 1/(1mol/L *
-N_Avogadro)); V0 == V* in the notation above.</p>
+Delta A = -(Delta A_coul + Delta A_vdw)</blockquote>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Not clear how this is related to the standard state
+concentrations.</p>
+</div>
 <p>Typical work flow:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">G</span> <span class="o">=</span> <span class="n">Gsolv</span><span class="p">(</span><span class="n">simulation</span><span class="o">=</span><span class="s">&#39;drug.simulation&#39;</span><span class="p">)</span>           <span class="c"># continue from :mod:`mdpow.equil`</span>
 <span class="n">G</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">qscript</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;my_template.sge&#39;</span><span class="p">,</span> <span class="s">&#39;local.sh&#39;</span><span class="p">])</span>  <span class="c"># my_template.sge is user supplied</span>
@@ -315,8 +306,8 @@ N_Avogadro)); V0 == V* in the notation above.</p>
 <span class="n">G</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>See <a title="(in GromacsWrapper v0.1)" class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/qsub.html#module-gromacs.qsub"><tt class="xref docutils literal"><span class="pre">gromacs.qsub</span></tt></a> for notes on how to write templates for
-queuing system scripts (in particular <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/building_blocks.html?highlight=qsub#queuing-system-templates">queuing system templates</a>).</p>
+<p>See <a title="(in GromacsWrapper v0.1)" class="reference" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/qsub.html#module-gromacs.qsub"><tt class="xref docutils literal"><span class="pre">gromacs.qsub</span></tt></a> for notes on how to write templates for
+queuing system scripts (in particular <a class="reference" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/building_blocks.html?highlight=qsub#queuing-system-templates">queuing system templates</a>).</p>
 <p>Set up Gsolv from input files or a equilibrium simulation.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -358,14 +349,14 @@ affect the simulations</p>
 </dd>
 <dt><em>qscript</em></dt>
 <dd><p class="first last">template or list of templates for queuing system scripts
-(see <a title="(in GromacsWrapper v0.1)" class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/config.html#gromacs.config.templates"><tt class="xref docutils literal"><span class="pre">gromacs.config.templates</span></tt></a> for details) [local.sh]</p>
+(see <a title="(in GromacsWrapper v0.1)" class="reference" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/config.html#gromacs.config.templates"><tt class="xref docutils literal"><span class="pre">gromacs.config.templates</span></tt></a> for details) [local.sh]</p>
 </dd>
 <dt><em>includes</em></dt>
 <dd><p class="first last">include directories</p>
 </dd>
 <dt><em>simulation</em></dt>
 <dd><p class="first last">Instead of providing the required arguments, obtain the input
-files from a <a title="mdpow.equil.Simulation" class="reference external" href="equil.html#mdpow.equil.Simulation"><tt class="xref docutils literal"><span class="pre">mdpow.equil.Simulation</span></tt></a> instance.</p>
+files from a <a title="mdpow.equil.Simulation" class="reference" href="equil.html#mdpow.equil.Simulation"><tt class="xref docutils literal"><span class="pre">mdpow.equil.Simulation</span></tt></a> instance.</p>
 </dd>
 <dt><em>filename</em></dt>
 <dd><p class="first last">Instead of providing the required arguments, load from pickle
@@ -376,7 +367,7 @@ file</p>
 </dd>
 <dt><em>permissive</em></dt>
 <dd><p class="first last">Set to <tt class="xref docutils literal"><span class="pre">True</span></tt> if you want to read past corrupt data in output
-xvg files (see <a title="(in GromacsWrapper v0.1)" class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/formats.html#gromacs.formats.XVG"><tt class="xref docutils literal"><span class="pre">gromacs.formats.XVG</span></tt></a> for details); not that
+xvg files (see <a title="(in GromacsWrapper v0.1)" class="reference" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/formats.html#gromacs.formats.XVG"><tt class="xref docutils literal"><span class="pre">gromacs.formats.XVG</span></tt></a> for details); not that
 <em>permissive*=``True`` can lead to **wrong results*</em>. Overrides
 the value set in a loaded pickle file. [<tt class="xref docutils literal"><span class="pre">False</span></tt>]</p>
 </dd>
@@ -389,17 +380,39 @@ the value set in a loaded pickle file. [<tt class="xref docutils literal"><span 
 </tbody>
 </table>
 <dl class="method">
-<dt id="mdpow.fep.Gsolv.DeltaA_std">
-<tt class="descname">DeltaA_std</tt><big>(</big><em>c0=1.0</em>, <em>N=1</em><big>)</big><a class="headerlink" href="#mdpow.fep.Gsolv.DeltaA_std" title="Permalink to this definition">¶</a></dt>
-<dd><p>Standard state correction to the free energy.</p>
-<p>The total standard hydration free energy is calculated by taking the
-change to standard concentration <em>c0</em> from the simulation box volume into
-account:</p>
+<dt id="mdpow.fep.Gsolv.Vdp">
+<tt class="descname">Vdp</tt><big>(</big><em>p=1.0</em>, <em>c0=1.0</em>, <em>N=1</em><big>)</big><a class="headerlink" href="#mdpow.fep.Gsolv.Vdp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Vdp contribution to Gibbs free energy</p>
 <blockquote>
-DeltaA_std = Delta A_0 - Delta A = -kT ln V0/V = -kT ln 1/V*c0*N_A</blockquote>
-<p>where V is the volume of the simulation cell.  (The above assumes that
-there is only a single molecule <em>N</em> = 1 for which the free energy
-change was computed but this function also deals with <em>N</em>&gt;1.)</p>
+DeltaG = DeltaA + V*DeltaP     (for V=const)</blockquote>
+<p>Delta refers to</p>
+<blockquote>
+aq (fully coupled) &#8211;&gt; gaseous (decoupled)</blockquote>
+<p>NOT CLEAR HOW TO CALCULATE. Is p* the desired pressure and p
+the average calculated from the simulation at constant V? Need
+to pin this down properly.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Vsim*(p*-p)  [in kJ/mol]</p>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Arguments:</th><td class="field-body"><dl class="first last docutils">
+<dt><em>p</em></dt>
+<dd><p class="first last">constant pressure in bar [1.0]</p>
+</dd>
+<dt><em>c0</em></dt>
+<dd><p class="first last">standard state concentration in mol/l [1.0]</p>
+</dd>
+<dt><em>N</em></dt>
+<dd><p class="first last">number of solute molecules [1]</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -414,23 +427,20 @@ interactions with the environment). The free energy components must be
 interpreted in this way because we defined lambda=0 as interaction
 switched on and lambda=1 as switched off.</p>
 <blockquote>
-<p>Delta A* = -(Delta A_coul + Delta A_vdw) + DeltaA_std</p>
-<p>Delta_G* = Delta_A* + pdV</p>
+<p>Delta A* = -(Delta A_coul + Delta A_vdw)</p>
+<p>Delta_G* = Delta_A* + (p*-p)*V  [not implemented]</p>
 </blockquote>
-<p>The total standard hydration free energy is calculated by taking the
-change to standard concentration from the simulation box volume into
-account as described for <a title="mdpow.fep.Gsolv.DeltaA_std" class="reference internal" href="#mdpow.fep.Gsolv.DeltaA_std"><tt class="xref docutils literal"><span class="pre">DeltaA_std()</span></tt></a>.</p>
 <p>Data are stored in <tt class="xref docutils literal"><span class="pre">Gsolv.results</span></tt>.</p>
 <p>The dV/dlambda graphs are integrated with the composite Simpson&#8217;s rule
 (and averaging of results if the number of datapoints is odd; see
 <tt class="xref docutils literal"><span class="pre">scipy.integrate.simps()</span></tt> for details). For the Coulomb part using
 Simpson&#8217;s rule has been shown to produce more accurate results than the
-trapezoidal rule <a class="reference internal" href="#jorge2010">[Jorge2010]</a> (but the composite scheme was <em>not</em>
+trapezoidal rule <a class="reference" href="#jorge2010">[Jorge2010]</a> (but the composite scheme was <em>not</em>
 tested in the paper).</p>
 <table class="docutils citation" frame="void" id="jorge2010" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id1">[Jorge2010]</a></td><td>M. Jorge, N.M. Garrido, A.J. Queimada, I.G. Economou,
+<tr><td class="label"><a class="fn-backref" href="#id1" name="jorge2010">[Jorge2010]</a></td><td>M. Jorge, N.M. Garrido, A.J. Queimada, I.G. Economou,
 and E.A. Macedo. Effect of the integration method on the
 accuracy and computational efficiency of free energy
 calculations using thermodynamic integration. Journal of
@@ -505,7 +515,7 @@ primary and the lambda as secondary key.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field"><th class="field-name">Returns:</th><td class="field-body"><tt class="xref docutils literal"><span class="pre">True</span></tt> if the dV/dl data have bee aquired
-(<a title="mdpow.fep.Gsolv.collect" class="reference internal" href="#mdpow.fep.Gsolv.collect"><tt class="xref docutils literal"><span class="pre">Gsolv.collect()</span></tt></a>) for all FEP simulations.</td>
+(<a title="mdpow.fep.Gsolv.collect" class="reference" href="#mdpow.fep.Gsolv.collect"><tt class="xref docutils literal"><span class="pre">Gsolv.collect()</span></tt></a>) for all FEP simulations.</td>
 </tr>
 </tbody>
 </table>
@@ -527,42 +537,10 @@ primary and the lambda as secondary key.</p>
 <dd>Print the free energy contributions.</dd></dl>
 
 <dl class="method">
-<dt id="mdpow.fep.Gsolv.pdV">
-<tt class="descname">pdV</tt><big>(</big><em>p=1.0</em>, <em>c0=1.0</em>, <em>N=1</em><big>)</big><a class="headerlink" href="#mdpow.fep.Gsolv.pdV" title="Permalink to this definition">¶</a></dt>
-<dd><p>pdV contribution to Gibbs free energy</p>
-<p>Calculate the negative of the work required for changing from the
-simulation volume Vsim to the one corresponding to the standard state,
-V0 = 1/(c0*NA_); the work would be -pdV but for convenience this method
-stores and returns +pdV in <tt class="xref docutils literal"><span class="pre">Gsolv.DeltaA.pdV</span></tt>.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">p*(V0 - Vsim)  [in kJ/mol]</p>
-</td>
-</tr>
-<tr class="field"><th class="field-name">Arguments:</th><td class="field-body"><dl class="first last docutils">
-<dt><em>p</em></dt>
-<dd><p class="first last">constant pressure in bar [1.0]</p>
-</dd>
-<dt><em>c0</em></dt>
-<dd><p class="first last">standard state concentration in mol/l [1.0]</p>
-</dd>
-<dt><em>N</em></dt>
-<dd><p class="first last">number of solute molecules [1]</p>
-</dd>
-</dl>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
 <dt id="mdpow.fep.Gsolv.plot">
 <tt class="descname">plot</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.fep.Gsolv.plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot the TI data with error bars.</p>
-<p>Run <a title="mdpow.fep.Gsolv.analyze" class="reference internal" href="#mdpow.fep.Gsolv.analyze"><tt class="xref docutils literal"><span class="pre">mdpow.fep.Gsolv.analyze()</span></tt></a> first.</p>
+<p>Run <a title="mdpow.fep.Gsolv.analyze" class="reference" href="#mdpow.fep.Gsolv.analyze"><tt class="xref docutils literal"><span class="pre">mdpow.fep.Gsolv.analyze()</span></tt></a> first.</p>
 <p>All <em>kwargs</em> are passed on to <tt class="xref docutils literal"><span class="pre">pylab.errorbar()</span></tt>.</p>
 </dd></dl>
 
@@ -596,7 +574,7 @@ or saved to.</p>
 the templates are used that were supplied to the constructor.</p>
 </dd>
 <dt><em>kwargs</em></dt>
-<dd><p class="first last">Most kwargs are passed on to <a title="(in GromacsWrapper v0.1)" class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/setup.html#gromacs.setup.MD"><tt class="xref docutils literal"><span class="pre">gromacs.setup.MD()</span></tt></a> although some
+<dd><p class="first last">Most kwargs are passed on to <a title="(in GromacsWrapper v0.1)" class="reference" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/setup.html#gromacs.setup.MD"><tt class="xref docutils literal"><span class="pre">gromacs.setup.MD()</span></tt></a> although some
 are set to values that are required for the FEP functionality.
 Note: <em>runtime</em> is set from the constructor.</p>
 </dd>
@@ -613,8 +591,8 @@ Note: <em>runtime</em> is set from the constructor.</p>
 <dd><p>Return a string that summarizes the energetics.</p>
 <dl class="docutils">
 <dt>Format::</dt>
-<dd>.                 &#8212;&#8212;&#8212;- kJ/mol &#8212;&#8212;&#8212;&#8212;&#8212;-
-molecule solvent  total  coulomb  vdw  stdstate  pdV</dd>
+<dd>.                 &#8212;&#8212;&#8212;- kJ/mol &#8212;&#8212;
+molecule solvent  total  coulomb  vdw  Vdp</dd>
 </dl>
 </dd></dl>
 
@@ -650,8 +628,8 @@ molecule solvent  total  coulomb  vdw  stdstate  pdV</dd>
 </table>
 <dl class="docutils">
 <dt>Format::</dt>
-<dd>.                 &#8212;&#8212;&#8212;- kJ/mol &#8212;&#8212;&#8212;&#8212;&#8212;-
-molecule solvent  total  coulomb  vdw  stdstate  pdV</dd>
+<dd>.                 &#8212;&#8212;&#8212;- kJ/mol &#8212;&#8212;
+molecule solvent  total  coulomb  vdw  Vdp</dd>
 </dl>
 </dd></dl>
 
@@ -660,7 +638,7 @@ molecule solvent  total  coulomb  vdw  stdstate  pdV</dd>
 <dl class="function">
 <dt id="mdpow.fep.pOW">
 <tt class="descclassname">mdpow.fep.</tt><tt class="descname">pOW</tt><big>(</big><em>G1</em>, <em>G2</em>, <em>force=False</em><big>)</big><a class="headerlink" href="#mdpow.fep.pOW" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute water-octanol partition coefficient from two <a title="mdpow.fep.Gsolv" class="reference internal" href="#mdpow.fep.Gsolv"><tt class="xref docutils literal"><span class="pre">Gsolv</span></tt></a> objects.</p>
+<dd><p>Compute water-octanol partition coefficient from two <a title="mdpow.fep.Gsolv" class="reference" href="#mdpow.fep.Gsolv"><tt class="xref docutils literal"><span class="pre">Gsolv</span></tt></a> objects.</p>
 <blockquote>
 <dl class="docutils">
 <dt>transfer free energy from water into octanol</dt>
@@ -675,7 +653,7 @@ molecule solvent  total  coulomb  vdw  stdstate  pdV</dd>
 <tbody valign="top">
 <tr class="field"><th class="field-name">Arguments:</th><td class="field-body"><dl class="first docutils">
 <dt><em>G1</em>, <em>G2</em></dt>
-<dd><p class="first last"><em>G1</em> and <em>G2</em> should be a <a title="mdpow.fep.Ghyd" class="reference internal" href="#mdpow.fep.Ghyd"><tt class="xref docutils literal"><span class="pre">Ghyd</span></tt></a> and a <a title="mdpow.fep.Goct" class="reference internal" href="#mdpow.fep.Goct"><tt class="xref docutils literal"><span class="pre">Goct</span></tt></a> instance,
+<dd><p class="first last"><em>G1</em> and <em>G2</em> should be a <a title="mdpow.fep.Ghyd" class="reference" href="#mdpow.fep.Ghyd"><tt class="xref docutils literal"><span class="pre">Ghyd</span></tt></a> and a <a title="mdpow.fep.Goct" class="reference" href="#mdpow.fep.Goct"><tt class="xref docutils literal"><span class="pre">Goct</span></tt></a> instance,
 but order does not matter</p>
 </dd>
 <dt><em>force</em></dt>
@@ -695,9 +673,9 @@ but order does not matter</p>
 <div class="section" id="developer-notes">
 <h2>Developer notes<a class="headerlink" href="#developer-notes" title="Permalink to this headline">¶</a></h2>
 <p>A user really only needs to access classes derived from
-<a title="mdpow.fep.Gsolv" class="reference internal" href="#mdpow.fep.Gsolv"><tt class="xref docutils literal"><span class="pre">mdpow.fep.Gsolv</span></tt></a>; all other classes and functions are auxiliary and
+<a title="mdpow.fep.Gsolv" class="reference" href="#mdpow.fep.Gsolv"><tt class="xref docutils literal"><span class="pre">mdpow.fep.Gsolv</span></tt></a>; all other classes and functions are auxiliary and
 only of interest to developers.</p>
-<p>Additional objects that support <a title="mdpow.fep.Gsolv" class="reference internal" href="#mdpow.fep.Gsolv"><tt class="xref docutils literal"><span class="pre">mdpow.fep.Gsolv</span></tt></a>.</p>
+<p>Additional objects that support <a title="mdpow.fep.Gsolv" class="reference" href="#mdpow.fep.Gsolv"><tt class="xref docutils literal"><span class="pre">mdpow.fep.Gsolv</span></tt></a>.</p>
 <dl class="class">
 <dt id="mdpow.fep.FEPschedule">
 <em class="property">class </em><tt class="descclassname">mdpow.fep.</tt><tt class="descname">FEPschedule</tt><a class="headerlink" href="#mdpow.fep.FEPschedule" title="Permalink to this definition">¶</a></dt>
@@ -717,12 +695,12 @@ only of interest to developers.</p>
 <dl class="data">
 <dt id="mdpow.fep.N_AVOGADRO">
 <tt class="descclassname">mdpow.fep.</tt><tt class="descname">N_AVOGADRO</tt><a class="headerlink" href="#mdpow.fep.N_AVOGADRO" title="Permalink to this definition">¶</a></dt>
-<dd>Avogadro&#8217;s constant <em>N</em><sub>A</sub> in mol^-1 (<a class="reference external" href="http://physics.nist.gov/cgi-bin/cuu/Value?na">NA NIST value</a>).</dd></dl>
+<dd>Avogadro&#8217;s constant <em>N</em><sub>A</sub> in mol^-1 (<a class="reference" href="http://physics.nist.gov/cgi-bin/cuu/Value?na">NA NIST value</a>).</dd></dl>
 
 <dl class="data">
 <dt id="mdpow.fep.kBOLTZ">
 <tt class="descclassname">mdpow.fep.</tt><tt class="descname">kBOLTZ</tt><a class="headerlink" href="#mdpow.fep.kBOLTZ" title="Permalink to this definition">¶</a></dt>
-<dd>Boltzmann&#8217;s constant <em>k</em><sub>B</sub> in kJ mol^-1 (<a class="reference external" href="http://physics.nist.gov/cgi-bin/cuu/Value?k">kB NIST value</a>).</dd></dl>
+<dd>Boltzmann&#8217;s constant <em>k</em><sub>B</sub> in kJ mol^-1 (<a class="reference" href="http://physics.nist.gov/cgi-bin/cuu/Value?k">kB NIST value</a>).</dd></dl>
 
 <dl class="data">
 <dt id="mdpow.fep.fep_templates">
@@ -734,7 +712,7 @@ only of interest to developers.</p>
 <ul>
 <li><p class="first">run minimization, NVT-equil, NPT-equil prior to production (probably
 use preprocessed topology from <tt class="docutils literal"><span class="pre">grompp</span> <span class="pre">-pp</span></tt> for portability)</p>
-<p>See <a class="reference external" href="http://www.dillgroup.ucsf.edu/group/wiki/index.php?title=Free_Energy:_Tutorial">Free Energy Tutorial</a>.</p>
+<p>See <a class="reference" href="http://www.dillgroup.ucsf.edu/group/wiki/index.php?title=Free_Energy:_Tutorial">Free Energy Tutorial</a>.</p>
 </li>
 </ul>
 </div>
@@ -749,12 +727,12 @@ use preprocessed topology from <tt class="docutils literal"><span class="pre">gr
         <div class="sphinxsidebarwrapper">
             <h3><a href="index.html">Table Of Contents</a></h3>
             <ul>
-<li><a class="reference external" href="#"><tt class="docutils literal"><span class="pre">mdpow.fep</span></tt> &#8211; calculate free energy of solvation</a><ul>
-<li><a class="reference external" href="#differences-to-published-protocols">Differences to published protocols</a></li>
-<li><a class="reference external" href="#example">Example</a></li>
-<li><a class="reference external" href="#user-reference">User reference</a></li>
-<li><a class="reference external" href="#developer-notes">Developer notes</a><ul>
-<li><a class="reference external" href="#todo">TODO</a></li>
+<li><a class="reference" href="#"><tt class="docutils literal"><span class="pre">mdpow.fep</span></tt> &#8211; calculate free energy of solvation</a><ul>
+<li><a class="reference" href="#differences-to-published-protocols">Differences to published protocols</a></li>
+<li><a class="reference" href="#example">Example</a></li>
+<li><a class="reference" href="#user-reference">User reference</a></li>
+<li><a class="reference" href="#developer-notes">Developer notes</a><ul>
+<li><a class="reference" href="#todo">TODO</a></li>
 </ul>
 </li>
 </ul>
@@ -804,7 +782,7 @@ use preprocessed topology from <tt class="docutils literal"><span class="pre">gr
         <li class="right" >
           <a href="equil.html" title="mdpow.equil — Setting up and running equilibrium MD"
              >previous</a> |</li>
-        <li><a href="index.html">MDpow v0.1.4 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow v0.2.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

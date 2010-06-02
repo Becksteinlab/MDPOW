@@ -1,6 +1,6 @@
 # Sphinx inventory version 1
 # Project: MDpow
-# Version: 0.1
+# Version: 0.2
 mdpow.config mod utilities.html
 mdpow.log mod utilities.html
 mdpow mod init.html
@@ -12,7 +12,6 @@ mdpow.equil.Simulation.make_paths_relative method equil.html
 mdpow.fep.N_AVOGADRO data fep.html
 mdpow.fep.Gsolv.wdir method fep.html
 mdpow.equil.ITP data equil.html
-mdpow.fep.Gsolv.DeltaA_std method fep.html
 mdpow.config.includedir data utilities.html
 mdpow.equil.Simulation.MD_restrained method equil.html
 mdpow.equil.DIST data equil.html
@@ -28,6 +27,7 @@ mdpow.fep.Goct class fep.html
 mdpow.config.get_templates function utilities.html
 mdpow.fep.Ghyd class fep.html
 mdpow.fep.Gsolv.load method fep.html
+mdpow.fep.Gsolv.Vdp method fep.html
 mdpow.fep.Gsolv.arraylabel method fep.html
 mdpow.fep.Gsolv.setup method fep.html
 mdpow.equil.Simulation.get_last_structure method equil.html
@@ -57,5 +57,4 @@ mdpow.fep.Gsolv class fep.html
 mdpow.fep.Gsolv.log_DeltaA0 method fep.html
 mdpow.fep.pOW function fep.html
 mdpow.fep.fep_templates data fep.html
-mdpow.fep.Gsolv.pdV method fep.html
 mdpow.equil.Simulation.load method equil.html
