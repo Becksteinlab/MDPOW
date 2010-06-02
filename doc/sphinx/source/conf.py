@@ -202,8 +202,10 @@ latex_documents = [
 # Options for ext.intersphinx
 # ---------------------------
 # intersphinx: reference standard lib and GromacsWrapper
+# scipy should be linked but does not seem to be available
 # http://sphinx.pocoo.org/latest/ext/intersphinx.html
 intersphinx_mapping = {'http://docs.python.org/': None,
+                       'http://docs.scipy.org/doc/numpy/': None,
                        'http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/': None}
 
 
