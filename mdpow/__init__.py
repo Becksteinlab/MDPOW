@@ -234,7 +234,7 @@ difference.
 Calculate the free energy for transferring the solute from water to
 octanol and octanol-water partition coefficient log P_OW ::
 
- mdpow.fep.pOW(gwat, H)
+ mdpow.fep.pOW(gwat, goct)
 
 (see :func:`mdpow.fep.pOW` for details and definitions).
 
@@ -285,7 +285,7 @@ bin directory (or the directory pointed to by
 
  
 """
-VERSION = 0,1,4
+VERSION = 0,2,0
 
 __all__ = ['fep', 'equil']
 

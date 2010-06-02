@@ -27,6 +27,13 @@ def fixFEP(solvent, fepfile, simfile, basedir):
     # TODO: fix includedir
     # S.dirs.includes[0] = '/sansom/gfio/oliver/Projects/pow/lib/python/POW/mdpow/top'
     G = Gsolv[solvent](simulation=S, basedir=basedir, permissive=True)
+
+    # remove pre-0.2 standard-state correction (wrong!) and pdV (wrong)
+    for crap in ('standardstate', 'pdV'):
+        try:
+            del G.results.DeltaA0[crap]
+        except:
+            pass
     G.save(fepfile)
     logger.info("Re-created %(fepfile)r for basedir=%(basedir)r", vars())
     return G
@@ -62,5 +69,8 @@ if __name__ == "__main__":
             fepfile = os.path.join(directory, 'FEP', solvent, gsolvnames[solvent])
             logger.info("[%(solvent)8s] equilibrim simulation: %(simfile)s", vars())
             logger.info("[%(solvent)8s] fep simulations:       %(fepfile)s", vars())
-
-            G = fixFEP(solvent, fepfile, simfile, os.path.realpath(directory))
+            
+            try:
+                G = fixFEP(solvent, fepfile, simfile, os.path.realpath(directory))
+            except Exception,err:
+                logger.warning(str(err))

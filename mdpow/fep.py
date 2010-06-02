@@ -177,44 +177,27 @@ class Gsolv(object):
     solution and 1 M in the gas phase, also known as the "Ben-Naim standard
     state"):
 
-           DeltaG* = DeltaA - kT ln V*/Vsim + p*(V* - Vsim)
+           DeltaG* = DeltaA + (p*-p)*Vsim
 
-    The "expansion free energy" (or "volume correction") -kT ln V*/Vsim term
-    assumes that the solute behaves ideal at the range of concentrations 1/Vsim
-    to 1/V* (see below). The expansion pressure work pdV is small but not
-    negligible; with 1 bar = 0.06 kJ mol^-1 nm^-3 typical values of the term
-    are ~1..3 kJ/mol. Vsim is the constant simulations box volume (taken from
-    the last frame of the equilibrium simulation that is the starting point for
-    the FEP simulations.)
+    The pressure term is currently NOT IMPLEMENTED.
+    1 bar = 0.06 kJ mol^-1 nm^-3 typical values of the term are XXX
+    kJ/mol. Vsim is the constant simulations box volume (taken from
+    the last frame of the equilibrium simulation that is the starting
+    point for the FEP simulations.)
 
     (We neglect the negligible correction DeltaA = DeltaAsim -kT ln Vx/Vsim
     where Vx is the volume of the system without the solute but the same number
     of water molecules as in the fully interacting case [see Michael Shirts'
     Thesis, p82].)
 
-    DeltaA* is computed from the decharging and the decoupling step. With our
+    DeltaA is computed from the decharging and the decoupling step. With our
     choice of lambda=0 being the fully interacting and lambda=1 the
     non-interacting state, it is computed as
 
-            Delta A* = -(Delta A_coul + Delta A_vdw) + DeltaA_std
+            Delta A = -(Delta A_coul + Delta A_vdw)
 
-    The Gibbs free energy at the 1M/1M standard state is then calculated as
-    
-            DeltaG* = DeltaA* + p*(V*-Vsim)
-
-
-    **Note on the volume correction**
-
-    The standard hydration free energy is calculated by taking the change to
-    standard concentration from the simulation box volume into account, for an
-    ideal (non-interacting) solute:
-
-            DeltaA_std = A_0 - A_sim = -kT ln V0/Vsim = -kT ln 1/Vsim*c0*NA
-
-    and where V0 is the standard volume of one molecule corresponding to the
-    chosen standard state at the standard concentration c0=1M (i.e. 1/(1mol/L *
-    N_Avogadro)); V0 == V* in the notation above.
-
+    .. warning:: Not clear how this is related to the standard state
+                 concentrations.
 
     Typical work flow::
 
@@ -485,42 +468,24 @@ class Gsolv(object):
                       )
         gromacs.setup.MD(**kwargs)
 
-    def DeltaA_std(self, c0=1.0, N=1):
-        """Standard state correction to the free energy.
-
-        The total standard hydration free energy is calculated by taking the
-        change to standard concentration *c0* from the simulation box volume into
-        account:
-
-          DeltaA_std = Delta A_0 - Delta A = -kT ln V0/V = -kT ln 1/V*c0*N_A
-
-        where V is the volume of the simulation cell.  (The above assumes that
-        there is only a single molecule *N* = 1 for which the free energy
-        change was computed but this function also deals with *N*>1.)
-        """
-
-        V = gromacs.cbook.get_volume(self.frombase(self.struct))
-        V0 = float(N)/molar_to_nm3(c0)
-        self.results.DeltaA.standardstate = -kBOLTZ * \
-                                            self.Temperature * numpy.log(V0/V)
-        logger.debug("Standard state input: V=%g nm^3  V0=%g nm^3 T=%g K",
-                     V, V0, self.Temperature)
-        logger.info("Standard state correction for c0=%g M (V/V0 = %.2f): "
-                    "dA_std = %+.2f kJ/mol", c0, V/V0, self.results.DeltaA.standardstate)
-        return self.results.DeltaA.standardstate
 
     # TODO: c0 must be consistent between DeltaA_std and pdV
     # should get pressure from equil simulation
 
-    def pdV(self, p=1.0, c0=1.0, N=1):
-        """pdV contribution to Gibbs free energy
-        
-        Calculate the negative of the work required for changing from the
-        simulation volume Vsim to the one corresponding to the standard state,
-        V0 = 1/(c0*NA_); the work would be -pdV but for convenience this method
-        stores and returns +pdV in :attr:`Gsolv.DeltaA.pdV`.
+    def Vdp(self, p=1.0, c0=1.0, N=1):
+        """Vdp contribution to Gibbs free energy
 
-        :Returns:  p*(V0 - Vsim)  [in kJ/mol]
+          DeltaG = DeltaA + V*DeltaP     (for V=const)
+        
+        Delta refers to 
+
+          aq (fully coupled) --> gaseous (decoupled)
+
+        NOT CLEAR HOW TO CALCULATE. Is p* the desired pressure and p
+        the average calculated from the simulation at constant V? Need
+        to pin this down properly.
+
+        :Returns:  Vsim*(p*-p)  [in kJ/mol]
 
         :Arguments:
            *p*
@@ -530,15 +495,20 @@ class Gsolv(object):
            *N*
                number of solute molecules [1]
         """
-        self.pressure = bar_to_kJmolnm3(p)
-        V0 = float(N)/molar_to_nm3(c0)
-        V = gromacs.cbook.get_volume(self.frombase(self.struct))
-        self.results.DeltaA.pdV = self.pressure*(V0-V)  # in kJ/mol
-        logger.debug("pdV work input: V=%g nm^3  V0=%g nm^3 P=%g kJ mol^-1 nm^-3",
-                     V, V0, self.pressure)
-        logger.info("pdV work for P=%g bar c0=%g M (dV = %.2f nm^3): "
-                    "-pdV = %+.2f kJ/mol", p, c0, V0-V, -self.results.DeltaA.pdV)
-        return self.results.DeltaA.pdV
+        # TODO: implement this; currently use 0 to leave the logic in place
+        self.results.DeltaA.Vdp = 0  # in kJ/mol
+
+        # just left so that I can modify later
+#         self.pressure = bar_to_kJmolnm3(p)
+#         V0 = float(N)/molar_to_nm3(c0)
+#         V = gromacs.cbook.get_volume(self.frombase(self.struct))
+#         self.results.DeltaA.pdV = self.pressure*(V0-V)  # in kJ/mol
+#         logger.debug("pdV work input: V=%g nm^3  V0=%g nm^3 P=%g kJ mol^-1 nm^-3",
+#                      V, V0, self.pressure)
+#         logger.info("pdV work for P=%g bar c0=%g M (dV = %.2f nm^3): "
+#                     "-pdV = %+.2f kJ/mol", p, c0, V0-V, -self.results.DeltaA.pdV)
+        logger.warning("Vdp correction not implemented: uses 0")
+        return self.results.DeltaA.Vdp
 
     def collect(self, autosave=True):
         """Collect dV/dl from output"""
@@ -591,13 +561,9 @@ class Gsolv(object):
         interpreted in this way because we defined lambda=0 as interaction
         switched on and lambda=1 as switched off.
 
-            Delta A* = -(Delta A_coul + Delta A_vdw) + DeltaA_std
+            Delta A* = -(Delta A_coul + Delta A_vdw)
 
-            Delta_G* = Delta_A* + pdV
-
-        The total standard hydration free energy is calculated by taking the
-        change to standard concentration from the simulation box volume into
-        account as described for :meth:`~Gsolv.DeltaA_std`.
+            Delta_G* = Delta_A* + (p*-p)*V  [not implemented]
 
         Data are stored in :attr:`Gsolv.results`.
 
@@ -637,8 +603,8 @@ class Gsolv(object):
         self.results.DeltaA.Helmholtz = 0.0   # total free energy difference at const V
         self.results.DeltaA.Gibbs = 0.0       # total free energy difference at const p
         for component, (lambdas, xvgs) in self.results.xvg.items():
-            logger.info("[%s] Computing averages <dV/dl> for %d lambda values.",
-                        component, len(lambdas))
+            logger.info("[%s %s] Computing averages <dV/dl> for %d lambda values.",
+                        self.molecule, component, len(lambdas))
             # for TI just get the average dv/dl value (in array column 1; col 0 is the time)
             # (This can take a while if the XVG is now reading the array from disk first time)
             Y = numpy.array([x.array[1].mean() for x in xvgs])
@@ -650,12 +616,9 @@ class Gsolv(object):
         # hydration free energy Delta A = -(Delta A_coul + Delta A_vdw)
         self.results.DeltaA.Helmholtz *= -1
 
-        # standard state
-        self.results.DeltaA.Helmholtz += self.DeltaA_std(c0)
-
         # Gibbs energy
-        # (pdV stores +pdV!)
-        self.results.DeltaA.Gibbs = self.results.DeltaA.Helmholtz + self.pdV(p=p,c0=c0)
+        # TODO:  implement (currently just adds 0)
+        self.results.DeltaA.Gibbs = self.results.DeltaA.Helmholtz + self.Vdp()
 
         if autosave:
             self.save()
@@ -675,8 +638,8 @@ class Gsolv(object):
                  'w' for overwrite or 'a' for append ['w']
 
         Format::
-          .                 ---------- kJ/mol ----------------
-          molecule solvent  total  coulomb  vdw  stdstate  pdV
+          .                 ---------- kJ/mol ------
+          molecule solvent  total  coulomb  vdw  Vdp
         """
         with open(filename, mode) as tab:
             tab.write(self.summary() + '\n')
@@ -685,14 +648,14 @@ class Gsolv(object):
         """Return a string that summarizes the energetics.
 
         Format::
-          .                 ---------- kJ/mol ----------------
-          molecule solvent  total  coulomb  vdw  stdstate  pdV
+          .                 ---------- kJ/mol ------
+          molecule solvent  total  coulomb  vdw  Vdp
         """
-        fmt = "%-10s %-10s %+8.2f  %+8.2f  %+8.2f  %+8.2f  %+8.2f"
+        fmt = "%-10s %-10s %+8.2f  %+8.2f  %+8.2f  %+8.2f"
         DeltaA0 = self.results.DeltaA
         return fmt % (self.molecule, self.solvent_type,
                       DeltaA0.Gibbs, DeltaA0.coulomb, DeltaA0.vdw,
-                      DeltaA0.standardstate, DeltaA0.pdV)
+                      DeltaA0.Vdp)
 
     def log_DeltaA0(self):
         """Print the free energy contributions."""
@@ -700,10 +663,10 @@ class Gsolv(object):
             logger.info("No DeltaA free energies computed yet.")
             return
 
-        logger.info("DeltaG0 = -(DeltaA_coul + DeltaA_vdw) + DeltaA_stdstate + pdV")
+        logger.info("DeltaG0 = -(DeltaA_coul + DeltaA_vdw) + Vdp")
         for component, value in self.results.DeltaA.items():
-            logger.info("%s solvation free energy (%s) %g kJ/mol",
-                        self.solvent_type.capitalize(), component, value)
+            logger.info("[%s] %s solvation free energy (%s) %g kJ/mol",
+                        self.molecule, self.solvent_type.capitalize(), component, value)
 
     def has_dVdl(self):
         """Check if dV/dl data have already been collected.
@@ -870,8 +833,9 @@ def pOW(G1, G2, force=False):
     transferFE = Gsolvs['octanol'].results.DeltaA.Gibbs - Gsolvs['water'].results.DeltaA.Gibbs 
     pOW = -transferFE / (kBOLTZ * Gsolvs['octanol'].Temperature) * numpy.log10(numpy.e)
 
-    logger.info("Values at T = %g K", Gsolvs['octanol'].Temperature)
-    logger.info("Free energy of transfer wat --> oct: %g kJ/mol", transferFE)
-    logger.info("log P_ow: %g", pOW)
+    molecule = G1.molecule
+    logger.info("[%s] Values at T = %g K", molecule, Gsolvs['octanol'].Temperature)
+    logger.info("[%s] Free energy of transfer wat --> oct: %g kJ/mol", molecule, transferFE)
+    logger.info("[%s] log P_ow: %g", molecule, pOW)
 
     return transferFE, pOW
