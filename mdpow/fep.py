@@ -103,6 +103,13 @@ def molar_to_nm3(c):
     """Convert a concentration in Molar to nm^-3."""
     return c * N_AVOGADRO * 1e-24
 
+def bar_to_kJmolnm3(p):
+    """Convert pressure in bar to kJ mol^-1 nm^-3.
+
+    1 bar = 1e5 J m^-3
+    """
+    return p / N_AVOGADRO * 1e-25
+
 #: Template mdp files for different stages of the FEP protocol. (add equilibration, too?)
 fep_templates = {
     'production_mdp': resource_filename(__name__, 'templates/fep_opls.mdp'),
@@ -457,6 +464,36 @@ class Gsolv(object):
                     "dA_std = %+.2f kJ/mol", c0, V/V0, self.results.DeltaA.standardstate)
         return self.results.DeltaA.standardstate
 
+    # TODO: c0 must be consistent between DeltaA_std and pdV
+    # should get pressure from equil simulation
+
+    def pdV(self, p=1.0, c0=1.0, N=1):
+        """pdV contribution to Gibbs free energy
+        
+        Calculate the negative of the work required for changing from the
+        simulation volume Vsim to the one corresponding to the standard state,
+        V0 = 1/(c0*NA_); the work would be -pdV but for convenience this method
+        stores and returns +pdV in :attr:`Gsolv.DeltaA.pdV`.
+
+        :Returns:  p*(V0 - Vsim)  [in kJ/mol]
+
+        :Arguments:
+           *p*
+               constant pressure in bar [1.0]
+           *c0*
+               standard state concentration in mol/l [1.0]
+           *N*
+               number of solute molecules [1]
+        """
+        self.pressure = bar_to_kJmolnm3(p)
+        V0 = float(N)/molar_to_nm3(c0)
+        V = gromacs.cbook.get_volume(self.frombase(self.struct))
+        self.results.DeltaA.pdV = self.pressure*(V0-V)  # in kJ/mol
+        logger.debug("pdV work input: V=%g nm^3  V0=%g nm^3 P=%g kJ mol^-1 nm^-3",
+                     V, V0, self.pressure)
+        logger.info("pdV work for P=%g c0=%g M (dV = %.2f): "
+                    "-pdV = %+.2f kJ/mol", p, c0, V0-V, -self.results.DeltaA.pdV)
+        return self.results.DeltaA.pdV
 
     def collect(self, autosave=True):
         """Collect dV/dl from output"""
@@ -498,7 +535,7 @@ class Gsolv(object):
             self._corrupted[component] = dict(((l, _lencorrupted(xvg)) for l,xvg in izip(lambdas, xvgs)))
         return numpy.any([x for x in corrupted.values()])
 
-    def analyze(self, c0=1.0, force=False, autosave=True):
+    def analyze(self, c0=1.0, p=1.0, force=False, autosave=True):
         """Extract dV/dl from output and calculate dG by TI.
 
         Thermodynamic integration (TI) is performed on the individual component
@@ -509,7 +546,8 @@ class Gsolv(object):
         interpreted in this way because we defined lambda=0 as interaction
         switched on and lambda=1 as switched off.
 
-            Delta A = -(Delta A_coul + Delta A_vdw) + DeltaA_std
+            Delta A* = -(Delta A_coul + Delta A_vdw) + DeltaA_std
+            Delta_G* = Delta_A* + pdV
 
         The total standard hydration free energy is calculated by taking the
         change to standard concentration from the simulation box volume into
@@ -538,6 +576,9 @@ class Gsolv(object):
         :Keywords:
           *c0*
               standard state concentration in mol L^-1 (i.e. M) [1.0]
+          *p*
+              pressure in bar [1.0]
+              TODO: should be obtained from equilib sim 
           *force*
               reload raw data even though it is already loaded
           *autosave*
@@ -551,7 +592,7 @@ class Gsolv(object):
         else:
             logger.info("Analyzing stored data.")
         
-        self.results.DeltaA.total = 0.0   # total free energy difference
+        self.results.DeltaA.Helmholtz = 0.0   # total free energy difference
         for component, (lambdas, xvgs) in self.results.xvg.items():
             logger.info("[%s] Computing averages <dV/dl> for %d lambda values.",
                         component, len(lambdas))
@@ -561,13 +602,17 @@ class Gsolv(object):
             DY = numpy.array([x.array[1].std()  for x in xvgs])
             self.results.dvdl[component] = (lambdas, Y, DY)
             self.results.DeltaA[component] = scipy.integrate.simps(Y, x=lambdas) 
-            self.results.DeltaA.total += self.results.DeltaA[component]
+            self.results.DeltaA.Helmholtz += self.results.DeltaA[component]
 
         # hydration free energy Delta A = -(Delta A_coul + Delta A_vdw)
-        self.results.DeltaA.total *= -1
+        self.results.DeltaA.Helmholtz *= -1
 
         # standard state
-        self.results.DeltaA.total += self.DeltaA_std(c0)
+        self.results.DeltaA.Helmholtz += self.DeltaA_std(c0)
+
+        # Gibbs energy
+        # (pdV stores +pdV!)
+        self.results.DeltaA.Gibbs = self.results.DeltaA.Helmholtz + self.results.DeltaA.pdV
 
         if autosave:
             self.save()
@@ -575,7 +620,7 @@ class Gsolv(object):
         # TODO: error estimate (e.g. from boot strapping from the raw data)
 
         self.log_DeltaA0()
-        return self.results.DeltaA.total    
+        return self.results.DeltaG
 
     def write_DeltaA0(self, filename, mode='w'):
         """Write free energy components to a file.
@@ -598,13 +643,13 @@ class Gsolv(object):
 
         Format::
           .                 ---------- kJ/mol -----------
-          molecule solvent  total  coulomb  vdw  stdstate
+          molecule solvent  total  coulomb  vdw  stdstate pdV
         """
         fmt = "%-10s %-10s %+8.2f  %+8.2f  %+8.2f  %+8.2f"
         DeltaA0 = self.results.DeltaA
         return fmt % (self.molecule, self.solvent_type,
-                      DeltaA0.total, DeltaA0.coulomb, DeltaA0.vdw,
-                      DeltaA0.standardstate)
+                      DeltaA0.Gibbs, DeltaA0.coulomb, DeltaA0.vdw,
+                      DeltaA0.standardstate, DeltaA0.pdV)
 
     def log_DeltaA0(self):
         """Print the free energy contributions."""
@@ -643,7 +688,7 @@ class Gsolv(object):
         kwargs.setdefault('capsize', 0)
 
         try:
-            if self.results.DeltaA.total is None or len(self.results.dvdl) == 0:
+            if self.results.DeltaA.Helmholtz is None or len(self.results.dvdl) == 0:
                 raise KeyError
         except KeyError:
             logger.info("Data were not analyzed yet -- doing that now... patience.")
@@ -666,7 +711,7 @@ class Gsolv(object):
         title(r"Free energy difference $\Delta A^{0}_{\rm{%s}}$" % self.solvent_type)
         subplot(1, nplots, 2)        
         title(r"for %s: %.2f kJ/mol" %
-              (self.molecule, self.results.DeltaA.total))
+              (self.molecule, self.results.DeltaA.Helmholtz))
         
 
     def qsub(self, script=None):
@@ -774,12 +819,12 @@ def pOW(G1, G2, force=False):
         if force:
             G.analyze(force=force)
         try:
-            G.results.DeltaA.total
+            G.results.DeltaA.Helmholtz
             G.log_DeltaA0()
         except (KeyError, AttributeError):   # KeyError because results is a AttributeDict
             G.analyze(force=force)
 
-    transferFE = Gsolvs['octanol'].results.DeltaA.total - Gsolvs['water'].results.DeltaA.total 
+    transferFE = Gsolvs['octanol'].results.DeltaA.Gibbs - Gsolvs['water'].results.DeltaA.Gibbs 
     pOW = -transferFE / (kBOLTZ * Gsolvs['octanol'].Temperature) * numpy.log10(numpy.e)
 
     logger.info("Values at T = %g K", Gsolvs['octanol'].Temperature)
