@@ -8,35 +8,60 @@
 Simple functions to quickly plot data. Typically, it works best if ran
 interactively from the top level of the POW directory!
 
-Right now we only look at the data in :doc:`doc/results/exp_vs_comp.txt`.
+Experimental values are loaded from the targets list (``targets.csv``)
+and computed values from tthe table in ``pow.txt``. See
+:func:`plot_exp_vs_comp` for details.
 
 Usage
 -----
 
-Load the data file::
-
-   results = mdpow.analysis.load_data("doc/results/exp_vs_comp.txt")
-
 Plot results and save to a pdf file::
+   mdpow.analysis.plot_exp_vs_comp(figname="figs/run01/exp_vs_comp.pdf")
 
-   mdpow.analysis.plot_exp_vs_comp(results, figname="figs/run01/exp_vs_comp.pdf")
-
+Remove the bad runs from  ``pow.txt`` and save as ``pow_best.txt``. Then plot again::
+   pylab.clf()
+   mdpow.analysis.plot_exp_vs_comp(data="data/run01/pow_best.txt", figname='figs/run01/exp_vs_comp_best.pdf')
 
 Functions
 ---------
 
 .. autofunction:: load_data
+.. autofunction:: load_exp
 .. autofunction:: plot_exp_vs_comp
-.. autofunction:: plot_quick
 """
 
 import recsql
 import logging
 logger = logging.getLogger('mdpow.analysis')
 
-def load_data(filename="doc/results/exp_vs_comp.txt"):
-    """Load exp_vs_comp table and return :class:`recsql.SQLarray`."""
-    return recsql.SQLarray(filename=filename)
+DEFAULTS = {
+    'experiments': "experimental/targets.csv",
+    'data': "data/run01/pow.txt",
+    }
+
+def load_data(filename=DEFAULTS['data'], **kwargs):
+    """Load computed POW table and return :class:`recsql.SQLarray`.
+
+    The data file is typically ``pow.txt``. It *must* contain a proper
+    reST table. Use the ``_header`` and ``_footer`` files if you only
+    have the raw output from :program:`mdpow-pow`.
+
+    Furthermore, the column names are important because we use them
+    here.
+    """
+    kwargs['filename'] = filename
+    return recsql.SQLarray_fromfile(**kwargs)
+
+def load_exp(filename=DEFAULTS['experiments'], **kwargs):
+    """Load experimental values table and return :class:`recsql.SQLarray`.
+
+    To obtain ``targets.csv`` export ``targets.numbers`` in
+    :program:`Numbers` as **UTF-8** (important!) in the **CSV* format
+    (File->Export)
+    """
+    kwargs['filename'] = filename
+    return recsql.SQLarray_fromfile(**kwargs)
+
 
 def _plot_ideal(X=None, dy=0.5):
     from pylab import plot
@@ -80,10 +105,21 @@ def plot_quick(a, **kwargs):
     plot(a.recarray.exp, a.recarray.logP_OW, 'ro', **kwargs)  # data
     return _finish(**kwargs)
 
-def plot_exp_vs_comp(a, **kwargs):
+def plot_exp_vs_comp(**kwargs):
     """Plot individual data points with legend.
 
+    By default, the following should work:
+    - Run from the top mdpow directory.
+    - Prepare ``data/run01/pow.txt`` (must prepend header and append
+      footer so that it is proper table). See :func:`load_data`.
+    - Prepare ``experimental/targets.csv`` if it does not exist or if
+      something changed. See :func:`load_exp`
+
     :Keywords:
+       *experiments*
+           path to ``targets.csv``
+       *data*
+           path to ``pow.txt``
        *figname*
            write figure to *filename*; suffix determines file type
        *ymin*, *ymax*
@@ -93,15 +129,26 @@ def plot_exp_vs_comp(a, **kwargs):
     from matplotlib import colors, cm, rc
     import matplotlib
 
+    experimental = load_exp(filename=kwargs.pop('experiments', DEFAULTS['experiments']))
+    computed = load_data(filename=kwargs.pop('data', DEFAULTS['data']),
+                         name="logPow_computed", connection=experimental.connection)  # add to experimental db
+
+    # combined (matched on the itp_name!)
+    c = experimental.SELECT("CommonName AS name, directory AS comment, DeltaG0, "
+                            "__self__.logPow AS exp, C.logPow AS comp", 
+                            "LEFT JOIN logPow_computed AS C using(itp_name)")
+
     # need large figure for the plot
     matplotlib.rc('figure', figsize=kwargs.pop('figsize', (8,10)))
     # default font
     matplotlib.rc('font', size=10)
 
-    norm = colors.normalize(0,len(a))    
-    for i, (mol,DeltaA0,comp,exp,name,comment) in enumerate(a.recarray):
+    norm = colors.normalize(0,len(c))
+    for i, (name,comment,DeltaA0,exp,comp) in enumerate(c):
+        if exp is None or comp is None:
+            continue
         color = cm.jet(norm(i))
-        label = "%(name)s %(exp).1f/%(comp).1f" % vars()
+        label = "%(comment)s %(exp).1f/%(comp).1f" % vars()
         plot(exp,comp, marker='o', markersize=10, color=color, label=label)
 
     legend(ncol=3, numpoints=1, loc='lower right', prop={'size':8})
