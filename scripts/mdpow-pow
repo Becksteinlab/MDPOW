@@ -84,6 +84,8 @@ def run_pow(directory, **kwargs):
     file corruption, and "BAD" otherwise.
 
     """
+    import gc
+
     fmt_result = "%-8s %+8.2f  %+8.2f   %3s %3s   %s\n"
     fmt_energy = "%s  %+6.2f  %+6.2f  %s\n"
     _datastatus = {True: 'BAD',  # suspect file corruption
@@ -127,6 +129,11 @@ def run_pow(directory, **kwargs):
         title(r"$\log P_{OW} = %(pOW)g$" % vars())
         savefig(plotfile)
         logger.info("Wrote graph to %(plotfile)r", vars())
+
+    del gwat
+    del goct
+    gc.collect()  # try to free as much memory as possible
+    
 
 def auto_plotfile(directory, gsolv):
     return os.path.join(directory, "dVdl_%s.pdf" % gsolv.molecule)
