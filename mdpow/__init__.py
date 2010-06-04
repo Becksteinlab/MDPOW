@@ -55,7 +55,9 @@ phase):
   3. run these simulations on a cluster;
 
   4. analyze the output and combine the free energies to arrive at an
-     estimate of the octanol-water partition coefficient.
+     estimate of the octanol-water partition coefficient;
+
+  5. plot results using :func:`mdpow.analysis.plot_exp_vs_comp`.
 
 
 Customized submission scripts for queuing systems
@@ -285,7 +287,7 @@ bin directory (or the directory pointed to by
 
  
 """
-VERSION = 0,2,0
+VERSION = 0,2,1
 
 __all__ = ['fep', 'equil']
 

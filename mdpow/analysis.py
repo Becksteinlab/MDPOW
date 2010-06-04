@@ -16,9 +16,11 @@ Usage
 -----
 
 Plot results and save to a pdf file::
-   mdpow.analysis.plot_exp_vs_comp(figname="figs/run01/exp_vs_comp.pdf")
+
+  mdpow.analysis.plot_exp_vs_comp(figname="figs/run01/exp_vs_comp.pdf")
 
 Remove the bad runs from  ``pow.txt`` and save as ``pow_best.txt``. Then plot again::
+
    pylab.clf()
    mdpow.analysis.plot_exp_vs_comp(data="data/run01/pow_best.txt", figname='figs/run01/exp_vs_comp_best.pdf')
 
@@ -112,11 +114,12 @@ def plot_exp_vs_comp(**kwargs):
     """Plot individual data points with legend.
 
     By default, the following should work:
-    - Run from the top mdpow directory.
+
+    - Run from the top ``mdpow`` directory.
     - Prepare ``data/run01/pow.txt`` (must prepend header and append
       footer so that it is proper table). See :func:`load_data`.
     - Prepare ``experimental/targets.csv`` if it does not exist or if
-      something changed. See :func:`load_exp`
+      something changed. See :func:`load_exp` for details.
 
     :Keywords:
        *experiments*

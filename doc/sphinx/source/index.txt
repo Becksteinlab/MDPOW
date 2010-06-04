@@ -27,6 +27,7 @@ Contents:
    init
    equil
    fep
+   analysis
    utilities      
    scripts
 
