@@ -25,11 +25,14 @@ Remove the bad runs from  ``pow.txt`` and save as ``pow_best.txt``. Then plot ag
 Functions
 ---------
 
+.. autoclass:: ExpData
+.. autoclass:: ComputedData
 .. autofunction:: load_data
 .. autofunction:: load_exp
 .. autofunction:: plot_exp_vs_comp
 """
 
+import numpy
 import recsql
 import logging
 logger = logging.getLogger('mdpow.analysis')
@@ -125,18 +128,21 @@ def plot_exp_vs_comp(**kwargs):
        *ymin*, *ymax*
            limits of the plot in the y direction (=computational results)
     """
-    from pylab import figure, plot, legend, ylim
+    from pylab import figure, plot, legend, ylim, errorbar
     from matplotlib import colors, cm, rc
     import matplotlib
 
-    experimental = load_exp(filename=kwargs.pop('experiments', DEFAULTS['experiments']))
-    computed = load_data(filename=kwargs.pop('data', DEFAULTS['data']),
-                         name="logPow_computed", connection=experimental.connection)  # add to experimental db
+    experimental = ExpData(filename=kwargs.pop('experiments', DEFAULTS['experiments']))
+    computed = ComputedData(filename=kwargs.pop('data', DEFAULTS['data']),
+                            name="logPow_computed", 
+                            connection=experimental.data.connection)  # add to experimental db
 
     # combined (matched on the itp_name!)
-    c = experimental.SELECT("CommonName AS name, directory AS comment, DeltaG0, "
-                            "__self__.logPow AS exp, C.logPow AS comp", 
-                            "LEFT JOIN logPow_computed AS C using(itp_name)")
+    c = experimental.data.SELECT(
+        """CommonName AS name, directory AS comment, DeltaG0, """
+        """mean,std,min,max,"""
+        """__self__.logPow AS exp, C.logPow AS comp""", 
+        """LEFT JOIN logPow_computed AS C using(itp_name)""")
 
     # need large figure for the plot
     matplotlib.rc('figure', figsize=kwargs.pop('figsize', (8,10)))
@@ -144,15 +150,124 @@ def plot_exp_vs_comp(**kwargs):
     matplotlib.rc('font', size=10)
 
     norm = colors.normalize(0,len(c))
-    for i, (name,comment,DeltaA0,exp,comp) in enumerate(c):
+    for i, (name,comment,DeltaA0,xmean,xstd,xmin,xmax,exp,comp) in enumerate(c):
         if exp is None or comp is None:
             continue
         color = cm.jet(norm(i))
         label = "%(comment)s %(exp).1f/%(comp).1f" % vars()
-        plot(exp,comp, marker='o', markersize=10, color=color, label=label)
+        plot(exp,comp, marker='o', markersize=14, color=color, markeredgewidth=0, alpha=0.3)
+        plot(exp,comp, marker='o', markersize=5, color=color, label=label)
+        xerr = numpy.abs(numpy.array([[xmin],[xmax]]) - exp)
+        errorbar(exp,comp, xerr=xerr, color=color, linewidth=2, capsize=0)
 
     legend(ncol=3, numpoints=1, loc='lower right', prop={'size':8})
     figname = _finish(**kwargs)
 
     matplotlib.rcdefaults()  # restore defaults
     return figname
+
+def unpackCSlist(s, convertor=float):
+    """Unpack a comma-separated list in string form."""
+    try:
+        return map(convertor, s.split(','))
+    except:
+        return []
+
+class ExpData(object):
+    """Object that represents our experimental data.
+
+    Access the raw data via :attr:`ExpData.rawdata` and a table enriched
+    with statistics as :attr:`ExpData.data` (which is a
+    :class:`recsql.SQLarray`).
+    """
+    def __init__(self, filename=DEFAULTS['experiments'], **kwargs):
+        """Load experimental values table and return :class:`recsql.SQLarray`.
+
+        To obtain ``targets.csv`` export ``targets.numbers`` in
+        :program:`Numbers` as **UTF-8** (important!) in the **CSV* format
+        (File->Export)
+        """
+        kwargs['filename'] = filename
+        self.filename = filename
+        # load original data from the targets list and set up database
+        self.rawdata = recsql.SQLarray_fromfile(**kwargs)
+        self.statistics = {}
+        self.stats()  # generate stats and load statistics{}
+        # add 'stats' table to the main database (via connection)
+        # (must be kept around in self or the table gets gc/del'ed immediately again)
+        self.__statsdb = recsql.SQLarray(
+            name='__stats', records=list(self._stats_generator()), 
+            columns=self._stats_columns, connection=self.rawdata.connection)
+        # generate another table '__experiments' in the database
+        self.data = self.rawdata.selection(
+            """SELECT no,name,CommonName,itp_name,CAS_RN,logPow,mean,std,min,max """
+            """FROM __self__ NATURAL LEFT JOIN __stats""",
+            name="__experiments")
+
+        # access with
+        #   self.data.SELECT('*')
+        # or 
+        #   self.rawdata.selection('SELECT * FROM __experiments')
+
+    def stats(self):
+        """Statistics calculated from the experimental values.
+
+        :Arguments: *exp* is the database loaded with :func:`load_exp`.
+
+        :Returns: dictionary; each entry is a numpy.array with the order
+                  corresponding to the order of compounds listed n the key
+                  'names'
+         """
+        r = {}  # results
+        s = self.rawdata.SELECT("no,itp_name,logPow,other_logPow",
+                                "WHERE NOT itp_name ISNULL")
+        r['number'] = map(int, s.no)  # work around broken sqlite... int64 not good?!
+        r['itp_names'] = s.itp_name
+        r['logPow'] = s.logPow.astype(float)
+        # sort other values and add the main value to the list
+        # (note: indices correspond to columns in SELECT!)
+        all = [numpy.sort([row[2]] + unpackCSlist(row[3])) for row in s]
+        r['mean'] = numpy.array([a.mean() for a in all])
+        r['std'] =  numpy.array([a.std() for a in all])
+        r['min'] = numpy.array([a.min() for a in all])
+        r['max'] = numpy.array([a.max() for a in all])
+
+        self.statistics.update(r)
+        self.statistics['other_logPow'] = all
+    
+        # iterator for other things
+        columns = r.keys()
+        columns.sort()
+        def records_generator():
+            numrows = len(r['itp_names'])
+            lengths = numpy.array([len(r[c]) for c in columns])
+            if not numpy.all(lengths == numrows):
+                raise TypeError("entries of dict r have different lengths")
+            # could add a fix_type() wrapper-hack around each number that checks
+            # if the type is sqlite-incompatible and then casts to a pure python type
+            for i in xrange(numrows):
+                yield tuple([r[c][i] for c in columns])
+        self._stats_columns = columns
+        self._stats_generator = records_generator
+        return r
+
+class ComputedData(object):
+    """Object that represents computed data.
+
+    Access via :attr:`ComputedData.data`.
+    """
+
+    def __init__(self, filename=DEFAULTS['data'], **kwargs):
+        """Load computed POW table and return :class:`recsql.SQLarray`.
+
+        The data file is typically ``pow.txt``. It *must* contain a proper
+        reST table. Use the ``_header`` and ``_footer`` files if you only
+        have the raw output from :program:`mdpow-pow`.
+
+        Furthermore, the column names are important because we use them
+        here.
+        """
+        kwargs['filename'] = filename
+        self.filename = filename
+        self.rawdata = recsql.SQLarray_fromfile(**kwargs)
+        self.data = self.rawdata
