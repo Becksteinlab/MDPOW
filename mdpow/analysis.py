@@ -17,21 +17,24 @@ Usage
 
 Plot results and save to a pdf file::
 
-  mdpow.analysis.plot_exp_vs_comp(figname="figs/run01/exp_vs_comp.pdf")
+  mdpow.analysis.plot_exp_vs_comp(figname="figs/exp_vs_comp.pdf")
 
 Remove the bad runs from  ``pow.txt`` and save as ``pow_best.txt``. Then plot again::
 
    pylab.clf()
    mdpow.analysis.plot_exp_vs_comp(data="data/run01/pow_best.txt", figname='figs/run01/exp_vs_comp_best.pdf')
 
+By default we also include the SAMPL2 results,
+
 Functions
 ---------
-
+.. autofunction:: plot_exp_vs_comp
+.. autoclass:: ExpComp
 .. autoclass:: ExpData
 .. autoclass:: ComputedData
 .. autofunction:: load_data
 .. autofunction:: load_exp
-.. autofunction:: plot_exp_vs_comp
+
 """
 
 import numpy
@@ -41,10 +44,11 @@ logger = logging.getLogger('mdpow.analysis')
 
 DEFAULTS = {
     'experiments': "experimental/targets.csv",
-    'data': "data/run01/pow.txt",
+    'run01': "data/run01/pow.txt",
+    'SAMPL2': "data/SAMPL2/pow.txt",
     }
 
-def load_data(filename=DEFAULTS['data'], **kwargs):
+def load_data(filename=DEFAULTS['run01'], **kwargs):
     """Load computed POW table and return :class:`recsql.SQLarray`.
 
     The data file is typically ``pow.txt``. It *must* contain a proper
@@ -110,64 +114,89 @@ def plot_quick(a, **kwargs):
     plot(a.recarray.exp, a.recarray.logP_OW, 'ro', **kwargs)  # data
     return _finish(**kwargs)
 
+class ExpComp(object):
+    def __init__(self, **kwargs):
+        """
+        :Keywords:
+           *experiments*
+               path to ``targets.csv``
+           *data*, *data2*
+               path to ``pow.txt``
+        """
+        # data and data2 are quick hacks to load both SAMPL2/pow.txt and run01/pow.txt
+        experimental = ExpData(filename=kwargs.pop('experiments', DEFAULTS['experiments']))
+        computed = ComputedData(filename=kwargs.pop('data', DEFAULTS['run01']),
+                                name="logPow_computed", 
+                                connection=experimental.data.connection)  # add to experimental db
+        compute2 = ComputedData(filename=kwargs.pop('data2', DEFAULTS['SAMPL2']),
+                                name="logPow_data2", 
+                                connection=experimental.data.connection)  # add to experimental db
+        # merge compute2 into compute (will be dropped after init) via __del__
+        computed.data.merge_table("logPow_data2")
+
+        self.database = experimental
+        
+        # for debugging
+        self._experimental = experimental
+        self._computed = computed
+
+    def plot(self, **kwargs):
+        """Plot individual data points with legend.
+
+        By default, the following should work:
+
+        - Run from the top ``mdpow`` directory.
+        - Prepare ``data/run01/pow.txt`` (must prepend header and append
+          footer so that it is proper table). See :func:`load_data`.
+        - Prepare ``experimental/targets.csv`` if it does not exist or if
+          something changed. See :func:`load_exp` for details.
+
+           *figname*
+               write figure to *filename*; suffix determines file type
+           *ymin*, *ymax*
+               limits of the plot in the y direction (=computational results)
+        """
+        from pylab import figure, plot, legend, ylim, errorbar
+        from matplotlib import colors, cm, rc
+        import matplotlib
+
+        # combined (matched on the itp_name!)
+        c = self.database.data.SELECT(
+            """CommonName AS name, directory AS comment, DeltaG0, """
+            """mean,std,min,max,"""
+            """__self__.logPow AS exp, C.logPow AS comp""", 
+            """LEFT JOIN logPow_computed AS C using(itp_name) """
+            """WHERE NOT (comp ISNULL OR C.itp_name ISNULL) """
+            """GROUP BY comment ORDER BY no""")
+
+        # need large figure for the plot
+        matplotlib.rc('figure', figsize=kwargs.pop('figsize', (8,10)))
+        # default font
+        matplotlib.rc('font', size=10)
+
+        norm = colors.normalize(0,len(c))
+        for i, (name,comment,DeltaA0,xmean,xstd,xmin,xmax,exp,comp) in enumerate(c):
+            if exp is None or comp is None:
+                continue
+            color = cm.jet(norm(i))
+            label = "%(comment)s %(exp).1f/%(comp).1f" % vars()
+            plot(exp,comp, marker='o', markersize=14, color=color, markeredgewidth=0, alpha=0.3)
+            plot(exp,comp, marker='o', markersize=5, color=color, label=label)
+            xerr = numpy.abs(numpy.array([[xmin],[xmax]]) - exp)
+            errorbar(exp,comp, xerr=xerr, color=color, linewidth=2, capsize=0)
+
+        legend(ncol=3, numpoints=1, loc='lower right', prop={'size':8})
+        figname = _finish(**kwargs)
+
+        matplotlib.rcdefaults()  # restore defaults
+        return figname
+
+
 def plot_exp_vs_comp(**kwargs):
-    """Plot individual data points with legend.
-
-    By default, the following should work:
-
-    - Run from the top ``mdpow`` directory.
-    - Prepare ``data/run01/pow.txt`` (must prepend header and append
-      footer so that it is proper table). See :func:`load_data`.
-    - Prepare ``experimental/targets.csv`` if it does not exist or if
-      something changed. See :func:`load_exp` for details.
-
-    :Keywords:
-       *experiments*
-           path to ``targets.csv``
-       *data*
-           path to ``pow.txt``
-       *figname*
-           write figure to *filename*; suffix determines file type
-       *ymin*, *ymax*
-           limits of the plot in the y direction (=computational results)
-    """
-    from pylab import figure, plot, legend, ylim, errorbar
-    from matplotlib import colors, cm, rc
-    import matplotlib
-
-    experimental = ExpData(filename=kwargs.pop('experiments', DEFAULTS['experiments']))
-    computed = ComputedData(filename=kwargs.pop('data', DEFAULTS['data']),
-                            name="logPow_computed", 
-                            connection=experimental.data.connection)  # add to experimental db
-
-    # combined (matched on the itp_name!)
-    c = experimental.data.SELECT(
-        """CommonName AS name, directory AS comment, DeltaG0, """
-        """mean,std,min,max,"""
-        """__self__.logPow AS exp, C.logPow AS comp""", 
-        """LEFT JOIN logPow_computed AS C using(itp_name)""")
-
-    # need large figure for the plot
-    matplotlib.rc('figure', figsize=kwargs.pop('figsize', (8,10)))
-    # default font
-    matplotlib.rc('font', size=10)
-
-    norm = colors.normalize(0,len(c))
-    for i, (name,comment,DeltaA0,xmean,xstd,xmin,xmax,exp,comp) in enumerate(c):
-        if exp is None or comp is None:
-            continue
-        color = cm.jet(norm(i))
-        label = "%(comment)s %(exp).1f/%(comp).1f" % vars()
-        plot(exp,comp, marker='o', markersize=14, color=color, markeredgewidth=0, alpha=0.3)
-        plot(exp,comp, marker='o', markersize=5, color=color, label=label)
-        xerr = numpy.abs(numpy.array([[xmin],[xmax]]) - exp)
-        errorbar(exp,comp, xerr=xerr, color=color, linewidth=2, capsize=0)
-
-    legend(ncol=3, numpoints=1, loc='lower right', prop={'size':8})
-    figname = _finish(**kwargs)
-
-    matplotlib.rcdefaults()  # restore defaults
-    return figname
+    expcomp = ExpComp(experiments=kwargs.pop("experiments",DEFAULTS['experiments']),
+                      data=kwargs.pop("data",DEFAULTS['run01']),
+                      data2=kwargs.pop("data2",DEFAULTS['SAMPL2']))
+    return expcomp.plot(**kwargs)
 
 def unpackCSlist(s, convertor=float):
     """Unpack a comma-separated list in string form."""
@@ -221,10 +250,19 @@ class ExpData(object):
                   corresponding to the order of compounds listed n the key
                   'names'
          """
+        def int_or_zero(n):
+            try:
+                return int(n)
+            except TypeError:
+                return 0
+
         r = {}  # results
         s = self.rawdata.SELECT("no,itp_name,logPow,other_logPow",
-                                "WHERE NOT itp_name ISNULL")
-        r['number'] = map(int, s.no)  # work around broken sqlite... int64 not good?!
+                                "WHERE NOT (itp_name ISNULL OR no ISNULL OR logPow ISNULL)")
+        # explicit cast to a python int: work around broken sqlite... int64 not good?!
+        # int_or_zero(): deal with incomplete (empty) data column
+        #r['number'] = map(int_or_zero, s.no)
+        r['number'] = map(int, s.no)
         r['itp_names'] = s.itp_name
         r['logPow'] = s.logPow.astype(float)
         # sort other values and add the main value to the list
@@ -260,7 +298,7 @@ class ComputedData(object):
     Access via :attr:`ComputedData.data`.
     """
 
-    def __init__(self, filename=DEFAULTS['data'], **kwargs):
+    def __init__(self, filename=DEFAULTS['run01'], **kwargs):
         """Load computed POW table and return :class:`recsql.SQLarray`.
 
         The data file is typically ``pow.txt``. It *must* contain a proper
