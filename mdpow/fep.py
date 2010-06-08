@@ -151,6 +151,15 @@ def bar_to_kJmolnm3(p):
     """
     return p * N_AVOGADRO * 1e-25
 
+def kcal_to_kJ(x):
+    """Convert a energy in kcal to kJ."""
+    return 4.184 * x
+
+def kJ_to_kcal(x):
+    """Convert a energy in kJ to kcal."""
+    return x / 4.184
+
+
 #: Template mdp files for different stages of the FEP protocol. (add equilibration, too?)
 fep_templates = {
     'production_mdp': resource_filename(__name__, 'templates/fep_opls.mdp'),
@@ -752,6 +761,20 @@ class Gsolv(object):
 
         logger.info("[%r] Submitted jobs locally for %r", self.dirname, self.scripts.keys())
 
+    # analysis ... maybe move into a gromacs.analysis.plugin?
+    def correlationtime(self, nstep=100):
+        """Calculate the correlation time from the ACF.
+
+        The autocorrelation function is calculated via FFT on every *nstep* of
+        the data. It is assumed to decay exponentially, f(t) = exp(-t/tau) and
+        the decay constant is estimated as the integral of the ACF from the
+        start up to its first root.
+        """
+        from gromacs.collections import Collection
+        
+        
+        
+        
     def save(self, filename=None):
         """Save instance to a pickle file.
 
@@ -801,7 +824,7 @@ def pOW(G1, G2, force=False):
            but order does not matter
        *force*
            force rereading of data files even if some data were already stored [False]
-    :Returns: (transfer free energy, water-octanol partition coefficient)     
+    :Returns: (transfer free energy, log10 of the water-octanol partition coefficient = log Pow)     
     """
 
     args = (G1, G2)
@@ -831,11 +854,11 @@ def pOW(G1, G2, force=False):
             G.analyze(force=force)
 
     transferFE = Gsolvs['octanol'].results.DeltaA.Gibbs - Gsolvs['water'].results.DeltaA.Gibbs 
-    pOW = -transferFE / (kBOLTZ * Gsolvs['octanol'].Temperature) * numpy.log10(numpy.e)
+    logPow = -transferFE / (kBOLTZ * Gsolvs['octanol'].Temperature) * numpy.log10(numpy.e)
 
     molecule = G1.molecule
     logger.info("[%s] Values at T = %g K", molecule, Gsolvs['octanol'].Temperature)
     logger.info("[%s] Free energy of transfer wat --> oct: %g kJ/mol", molecule, transferFE)
-    logger.info("[%s] log P_ow: %g", molecule, pOW)
+    logger.info("[%s] log P_ow: %g", molecule, logPow)
 
-    return transferFE, pOW
+    return transferFE, logPow
