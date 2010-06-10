@@ -366,6 +366,7 @@ class Gsolv(object):
             self.results = AttributeDict(xvg=AttributeDict(),
                                          dvdl=AttributeDict(),
                                          DeltaA=AttributeDict(),
+                                         ErrorDeltaA=AttributeDict(),
                                          )
             #: Generated run scripts
             self.scripts = AttributeDict()
@@ -478,10 +479,10 @@ class Gsolv(object):
         gromacs.setup.MD(**kwargs)
 
 
-    # TODO: c0 must be consistent between DeltaA_std and pdV
+    # TODO: p must be consistent between DeltaA_std and pdV
     # should get pressure from equil simulation
 
-    def Vdp(self, p=1.0, c0=1.0, N=1):
+    def Vdp(self, p=1.0):
         """Vdp contribution to Gibbs free energy
 
           DeltaG = DeltaA + V*DeltaP     (for V=const)
@@ -499,13 +500,10 @@ class Gsolv(object):
         :Arguments:
            *p*
                constant pressure in bar [1.0]
-           *c0*
-               standard state concentration in mol/l [1.0]
-           *N*
-               number of solute molecules [1]
         """
         # TODO: implement this; currently use 0 to leave the logic in place
         self.results.DeltaA.Vdp = 0  # in kJ/mol
+        self.results.ErrorDeltaA.Vdp = 0
 
         # just left so that I can modify later
 #         self.pressure = bar_to_kJmolnm3(p)
@@ -517,7 +515,7 @@ class Gsolv(object):
 #         logger.info("pdV work for P=%g bar c0=%g M (dV = %.2f nm^3): "
 #                     "-pdV = %+.2f kJ/mol", p, c0, V0-V, -self.results.DeltaA.pdV)
         logger.warning("Vdp correction not implemented: uses 0")
-        return self.results.DeltaA.Vdp
+        return self.results.DeltaA.Vdp, self.results.ErrorDeltaA.Vdp
 
     def collect(self, autosave=True):
         """Collect dV/dl from output"""
@@ -559,7 +557,7 @@ class Gsolv(object):
             self._corrupted[component] = dict(((l, _lencorrupted(xvg)) for l,xvg in izip(lambdas, xvgs)))
         return numpy.any([x for x in corrupted.values()])
 
-    def analyze(self, c0=1.0, p=1.0, force=False, autosave=True):
+    def analyze(self, p=1.0, force=False, autosave=True):
         """Extract dV/dl from output and calculate dG by TI.
 
         Thermodynamic integration (TI) is performed on the individual component
@@ -577,11 +575,28 @@ class Gsolv(object):
         Data are stored in :attr:`Gsolv.results`.
 
         The dV/dlambda graphs are integrated with the composite Simpson's rule
-        (and averaging of results if the number of datapoints is odd; see
-        :func:`scipy.integrate.simps` for details). For the Coulomb part using
-        Simpson's rule has been shown to produce more accurate results than the
-        trapezoidal rule [Jorge2010]_ (but the composite scheme was *not*
-        tested in the paper).
+        (and if the number of datapoints are even, the first interval is
+        evaluated with the trapezoidal rule); see :func:`scipy.integrate.simps`
+        for details). Note that this implementation of Simpson's rule does not
+        require equidistant spacing on the lambda axis.
+
+        For the Coulomb part using Simpson's rule has been shown to produce
+        more accurate results than the trapezoidal rule [Jorge2010]_.
+
+        Errors are estimated from the errors of the individual <dV/dlambda>:
+
+         1. The error of the mean <dV/dlambda> is calculated via the decay time
+            of the fluctuation around the mean (see
+            :attr:`gromacs.formats.XVG.error`).
+
+         2. The error on the integral is calculated analytically via
+            propagation of errors through Simpson's rule (with the
+            approximation that all spacings are assumed to be equal; taken as
+            the average over all spacings).
+
+        .. Note:: For the Coulomb part, which typically only contains about 5
+           lambdas, it is recommended to have a odd number of lambda values to
+           fully benefit from the higher accuracy of the integration scheme.
 
         .. [Jorge2010] M. Jorge, N.M. Garrido, A.J. Queimada, I.G. Economou,
                        and E.A. Macedo. Effect of the integration method on the
@@ -591,8 +606,6 @@ class Gsolv(object):
                        2010. 10.1021/ct900661c.
 
         :Keywords:
-          *c0*
-              standard state concentration in mol L^-1 (i.e. M) [1.0]
           *p*
               pressure in bar [1.0]
               TODO: should be obtained from equilib sim 
@@ -611,31 +624,40 @@ class Gsolv(object):
         
         self.results.DeltaA.Helmholtz = 0.0   # total free energy difference at const V
         self.results.DeltaA.Gibbs = 0.0       # total free energy difference at const p
+        self.results.ErrorDeltaA.Helmholtz = 0.0
+        self.results.ErrorDeltaA.Gibbs = 0.0
         for component, (lambdas, xvgs) in self.results.xvg.items():
-            logger.info("[%s %s] Computing averages <dV/dl> for %d lambda values.",
+            logger.info("[%s %s] Computing averages <dV/dl> and errors for %d lambda values.",
                         self.molecule, component, len(lambdas))
             # for TI just get the average dv/dl value (in array column 1; col 0 is the time)
             # (This can take a while if the XVG is now reading the array from disk first time)
-            Y = numpy.array([x.array[1].mean() for x in xvgs])
-            DY = numpy.array([x.array[1].std()  for x in xvgs])
-            self.results.dvdl[component] = (lambdas, Y, DY)
-            self.results.DeltaA[component] = scipy.integrate.simps(Y, x=lambdas) 
+            # Use XVG class properties: first data in column 0!
+            Y = numpy.array([x.mean[0] for x in xvgs])
+            stdY = numpy.array([x.std[0]  for x in xvgs])
+            DY = numpy.array([x.error[0]  for x in xvgs])   # takes a while: computes correl.time
+            tc = numpy.array([x.tc[0]  for x in xvgs])
+            self.results.dvdl[component] = {'lambdas':lambdas, 'mean':Y, 'error':DY, 
+                                            'stddev':stdY, 'tcorrel':tc}
+            self.results.DeltaA[component] = scipy.integrate.simps(Y, x=lambdas, even='last') 
+            self.results.ErrorDeltaA[component] = \
+                gromacs.analysis.numkit.simps_error(DY, x=lambdas, even='last') 
             self.results.DeltaA.Helmholtz += self.results.DeltaA[component]
+            self.results.ErrorDeltaA.Helmholtz += self.results.ErrorDeltaA[component]**2
 
         # hydration free energy Delta A = -(Delta A_coul + Delta A_vdw)
         self.results.DeltaA.Helmholtz *= -1
+        self.results.ErrorDeltaA.Helmholtz = numpy.sqrt(self.results.ErrorDeltaA.Helmholtz)
 
         # Gibbs energy
         # TODO:  implement (currently just adds 0)
         self.results.DeltaA.Gibbs = self.results.DeltaA.Helmholtz + self.Vdp()
+        self.results.ErrorDeltaA.Gibbs = self.results.ErrorDeltaA.Helmholtz
 
         if autosave:
             self.save()
         
-        # TODO: error estimate (e.g. from boot strapping from the raw data)
-
         self.log_DeltaA0()
-        return self.results.DeltaA.Gibbs
+        return self.results.DeltaA.Gibbs, self.results.ErrorDeltaA.Gibbs
 
     def write_DeltaA0(self, filename, mode='w'):
         """Write free energy components to a file.
@@ -667,15 +689,16 @@ class Gsolv(object):
                       DeltaA0.Vdp)
 
     def log_DeltaA0(self):
-        """Print the free energy contributions."""
+        """Print the free energy contributions (errors in parentheses)."""
         if not 'DeltaA' in self.results or len(self.results.DeltaA) == 0:
             logger.info("No DeltaA free energies computed yet.")
             return
 
         logger.info("DeltaG0 = -(DeltaA_coul + DeltaA_vdw) + Vdp")
         for component, value in self.results.DeltaA.items():
-            logger.info("[%s] %s solvation free energy (%s) %g kJ/mol",
-                        self.molecule, self.solvent_type.capitalize(), component, value)
+            logger.info("[%s] %s solvation free energy (%s) %g (%.2f) kJ/mol",
+                        self.molecule, self.solvent_type.capitalize(), component, value,
+                        self.results.ErrorDeltaA[component])
 
     def has_dVdl(self):
         """Check if dV/dl data have already been collected.
@@ -712,11 +735,12 @@ class Gsolv(object):
         dvdl = self.results.dvdl
         nplots = len(dvdl)
         for i, component in enumerate(numpy.sort(dvdl.keys())):  # stable plot order
-            x,y,dy = dvdl[component]
+            x,y,dy = [dvdl[component][k] for k in ('lambdas', 'mean', 'error')]
             iplot = i+1
             subplot(1, nplots, iplot)
-            label = r"$\Delta A^{\rm{%s}}_{\rm{%s}} = %.2f$ kJ/mol" \
-                    % (component, self.solvent_type, self.results.DeltaA[component])
+            label = r"$\Delta A^{\rm{%s}}_{\rm{%s}} = %.2f\pm%.2f$ kJ/mol" \
+                    % (component, self.solvent_type, self.results.DeltaA[component],
+                       self.results.ErrorDeltaA[component])
             errorbar(x, y, yerr=dy, label=label, **kwargs)
             xlabel(r'$\lambda$')
             legend(loc='best')
@@ -725,8 +749,8 @@ class Gsolv(object):
         ylabel(r'$dV/d\lambda$ in kJ/mol')
         title(r"Free energy difference $\Delta A^{0}_{\rm{%s}}$" % self.solvent_type)
         subplot(1, nplots, 2)        
-        title(r"for %s: %.2f kJ/mol" %
-              (self.molecule, self.results.DeltaA.Helmholtz))
+        title(r"for %s: $%.2f\pm%.2f$ kJ/mol" %
+              (self.molecule, self.results.DeltaA.Helmholtz, self.results.ErrorDeltaA.Helmholtz))
         
 
     def qsub(self, script=None):
