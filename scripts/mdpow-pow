@@ -77,18 +77,19 @@ def run_pow(directory, **kwargs):
         *force*
              force rereading data files [False]
 
-    **Output file format:**
+    **Output file format (energies and lo P_ow with errors) :**
 
-        molecule   DeltaA0(kJ/mol)    log P_OW  wat_ok octa_ok  directory  
+        molecule   DeltaA0(kJ/mol)    log P_OW    directory
 
-    wat_ok and octa_ok are "OK" if no lines were skipped in the input data files due to
-    file corruption, and "BAD" otherwise.
+    Removed from output (>0.2.1):
+     * wat_ok and octa_ok are "OK" if no lines were skipped in the input data files due to
+       file corruption, and "BAD" otherwise.
 
     """
     import gc
 
-    fmt_result = "%-8s %+8.2f  %+8.2f   %3s %3s   %s\n"
-    fmt_energy = "%s  %+6.2f  %+6.2f  %s\n"
+    fmt_result = "%-8s %+8.2f %8.2f  %+8.2f %8.2f   %s\n"
+    fmt_energy = "%s  %+8.2f %8.2f   %+8.2f %8.2f  %s\n"
     _datastatus = {True: 'BAD',  # suspect file corruption
                    False: 'OK'}
 
@@ -96,24 +97,31 @@ def run_pow(directory, **kwargs):
         return _datastatus[g.contains_corrupted_xvgs()]
 
     gwat, goct = load_gsolv(directory, permissive=kwargs.pop('permissive',False),)
-    transferFE, pOW = mdpow.fep.pOW(goct, gwat, force=kwargs.pop('force', False))
+    transferFE, logPow = mdpow.fep.pOW(goct, gwat, force=kwargs.pop('force', False))
+
+    if datstat(gwat) == 'BAD' or datstat(goct) == 'BAD':
+            logger.warning("Possible file corruption: water:%s, octanol:%s",
+                           datstat(gwat), datstat(goct))
 
     if kwargs.get('outfile', None):
         with mdpow.filelock.FileLock(kwargs['outfile'], timeout=2):
             with open(kwargs['outfile'], mode='a') as out:
-                out.write(fmt_result % (gwat.molecule, transferFE, pOW, 
-                                        datstat(gwat), datstat(goct),
-                                        directory))
+                out.write(fmt_result % \
+                              (gwat.molecule, transferFE.value, transferFE.error,
+                               logPow.value, logPow.error, directory))
+                # removed (>0.2.1):
+                # datstat(gwat), datstat(goct) --> wat_ok octa_ok            
             logger.info("Wrote results to %(outfile)r", kwargs)
 
     if kwargs.get('energyfile', None):
         with mdpow.filelock.FileLock(kwargs['energyfile'], timeout=2):
             with open(kwargs['energyfile'], mode='a') as out:
                 for g in gwat, goct:
-                    out.write(fmt_energy % (g.summary(), transferFE, pOW, directory))
+                    out.write(fmt_energy % \
+                                  (g.summary(), transferFE.value, transferFE.error,
+                                   logPow.value, logPow.error,  directory))
             logger.info("Wrote solvation energy terms to %(energyfile)r", kwargs)
-        
-        
+                
     plotfile = kwargs.get('plotfile', None)
     if plotfile:
         if plotfile == 'auto':
@@ -125,9 +133,10 @@ def run_pow(directory, **kwargs):
         gwat.plot(color='k', ls='--')
         goct.plot(color='r', ls='-')
         activate_subplot(1)
-        title(r"[%s] $\Delta A^0 = %g$ kJ/mol" % (goct.molecule, transferFE))
+        title(r"[%s] $\Delta A^0 = %.2f\pm%.2f$ kJ/mol" % \
+                  (goct.molecule, transferFE.value, transferFE.error))
         activate_subplot(2)
-        title(r"$\log P_{OW} = %(pOW)g$" % vars())
+        title(r"$\log P_{OW} = %.2f\pm%.2f$" % logPow.astuple())
         savefig(plotfile)
         logger.info("Wrote graph to %(plotfile)r", vars())
 

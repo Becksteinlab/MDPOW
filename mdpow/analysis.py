@@ -9,8 +9,13 @@ Simple functions to quickly plot data. Typically, it works best if ran
 interactively from the top level of the POW directory!
 
 Experimental values are loaded from the targets list (``targets.csv``)
-and computed values from tthe table in ``pow.txt``. See
+and computed values from the table in ``pow.txt``. See
 :func:`plot_exp_vs_comp` for details.
+
+.. Note: The header templates in :file:`lib/templates/_pow_header.txt` and
+         :file:`lib/templates/_energies_header.txt` *define* the column names
+         that are used in the code here, in particular in :class:`ComputeData`
+         and :class:`ExpComp`.
 
 Usage
 -----
@@ -129,10 +134,10 @@ class ExpComp(object):
                                 name="logPow_computed", 
                                 connection=experimental.data.connection)  # add to experimental db
         compute2 = ComputedData(filename=kwargs.pop('data2', DEFAULTS['SAMPL2']),
-                                name="logPow_data2", 
+                                name="logPow_SAMPL2", 
                                 connection=experimental.data.connection)  # add to experimental db
         # merge compute2 into compute (will be dropped after init) via __del__
-        computed.data.merge_table("logPow_data2")
+        computed.data.merge_table("logPow_SAMPL2")
 
         self.database = experimental
         
@@ -164,7 +169,7 @@ class ExpComp(object):
         c = self.database.data.SELECT(
             """CommonName AS name, directory AS comment, DeltaG0, """
             """mean,std,min,max,"""
-            """__self__.logPow AS exp, C.logPow AS comp""", 
+            """__self__.logPow AS exp, C.logPow AS comp, C.errlogP AS errcomp""", 
             """LEFT JOIN logPow_computed AS C using(itp_name) """
             """WHERE NOT (comp ISNULL OR C.itp_name ISNULL) """
             """GROUP BY comment ORDER BY no""")
@@ -175,7 +180,7 @@ class ExpComp(object):
         matplotlib.rc('font', size=10)
 
         norm = colors.normalize(0,len(c))
-        for i, (name,comment,DeltaA0,xmean,xstd,xmin,xmax,exp,comp) in enumerate(c):
+        for i, (name,comment,DeltaA0,xmean,xstd,xmin,xmax,exp,comp,errcomp) in enumerate(c):
             if exp is None or comp is None:
                 continue
             color = cm.jet(norm(i))
@@ -183,7 +188,7 @@ class ExpComp(object):
             plot(exp,comp, marker='o', markersize=14, color=color, markeredgewidth=0, alpha=0.3)
             plot(exp,comp, marker='o', markersize=5, color=color, label=label)
             xerr = numpy.abs(numpy.array([[xmin],[xmax]]) - exp)
-            errorbar(exp,comp, xerr=xerr, color=color, linewidth=2, capsize=0)
+            errorbar(exp,comp, xerr=xerr, yerr=errcomp, color=color, linewidth=2, capsize=0)
 
         legend(ncol=3, numpoints=1, loc='lower right', prop={'size':8})
         figname = _finish(**kwargs)

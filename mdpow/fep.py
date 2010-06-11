@@ -128,6 +128,7 @@ import numpy
 
 import gromacs, gromacs.setup, gromacs.utilities
 from gromacs.utilities import asiterable, AttributeDict, in_dir
+from numkit.observables import QuantityWithError
 
 import logging
 logger = logging.getLogger('mdpow.fep')
@@ -365,8 +366,7 @@ class Gsolv(object):
             #: Results from the analysis
             self.results = AttributeDict(xvg=AttributeDict(),
                                          dvdl=AttributeDict(),
-                                         DeltaA=AttributeDict(),
-                                         ErrorDeltaA=AttributeDict(),
+                                         DeltaA=AttributeDict(),  # contains QuantityWithError
                                          )
             #: Generated run scripts
             self.scripts = AttributeDict()
@@ -502,20 +502,9 @@ class Gsolv(object):
                constant pressure in bar [1.0]
         """
         # TODO: implement this; currently use 0 to leave the logic in place
-        self.results.DeltaA.Vdp = 0  # in kJ/mol
-        self.results.ErrorDeltaA.Vdp = 0
-
-        # just left so that I can modify later
-#         self.pressure = bar_to_kJmolnm3(p)
-#         V0 = float(N)/molar_to_nm3(c0)
-#         V = gromacs.cbook.get_volume(self.frombase(self.struct))
-#         self.results.DeltaA.pdV = self.pressure*(V0-V)  # in kJ/mol
-#         logger.debug("pdV work input: V=%g nm^3  V0=%g nm^3 P=%g kJ mol^-1 nm^-3",
-#                      V, V0, self.pressure)
-#         logger.info("pdV work for P=%g bar c0=%g M (dV = %.2f nm^3): "
-#                     "-pdV = %+.2f kJ/mol", p, c0, V0-V, -self.results.DeltaA.pdV)
+        self.results.DeltaA.Vdp = QuantityWithError(0,0)  # in kJ/mol
         logger.warning("Vdp correction not implemented: uses 0")
-        return self.results.DeltaA.Vdp, self.results.ErrorDeltaA.Vdp
+        return self.results.DeltaA.Vdp
 
     def collect(self, autosave=True):
         """Collect dV/dl from output"""
@@ -616,16 +605,15 @@ class Gsolv(object):
         """
 
         import scipy.integrate
+        import numkit.integration
 
         if force or not self.has_dVdl():
             self.collect(autosave=False)
         else:
             logger.info("Analyzing stored data.")
         
-        self.results.DeltaA.Helmholtz = 0.0   # total free energy difference at const V
-        self.results.DeltaA.Gibbs = 0.0       # total free energy difference at const p
-        self.results.ErrorDeltaA.Helmholtz = 0.0
-        self.results.ErrorDeltaA.Gibbs = 0.0
+        Helmholtz = QuantityWithError(0,0)   # total free energy difference at const V
+
         for component, (lambdas, xvgs) in self.results.xvg.items():
             logger.info("[%s %s] Computing averages <dV/dl> and errors for %d lambda values.",
                         self.molecule, component, len(lambdas))
@@ -638,26 +626,27 @@ class Gsolv(object):
             tc = numpy.array([x.tc[0]  for x in xvgs])
             self.results.dvdl[component] = {'lambdas':lambdas, 'mean':Y, 'error':DY, 
                                             'stddev':stdY, 'tcorrel':tc}
-            self.results.DeltaA[component] = scipy.integrate.simps(Y, x=lambdas, even='last') 
-            self.results.ErrorDeltaA[component] = \
-                gromacs.analysis.numkit.simps_error(DY, x=lambdas, even='last') 
-            self.results.DeltaA.Helmholtz += self.results.DeltaA[component]
-            self.results.ErrorDeltaA.Helmholtz += self.results.ErrorDeltaA[component]**2
+            # Combined Simpson rule integration:
+            # even="last" because dV/dl is smoother at the beginning so using trapezoidal
+            # integration there makes less of an error (one hopes...)
+            a = scipy.integrate.simps(Y, x=lambdas, even='last') 
+            da = numkit.integration.simps_error(DY, x=lambdas, even='last') 
+            self.results.DeltaA[component] = QuantityWithError(a, da)
+            Helmholtz += self.results.DeltaA[component]  # error propagation is automagic!
 
         # hydration free energy Delta A = -(Delta A_coul + Delta A_vdw)
-        self.results.DeltaA.Helmholtz *= -1
-        self.results.ErrorDeltaA.Helmholtz = numpy.sqrt(self.results.ErrorDeltaA.Helmholtz)
-
+        Helmholtz *= -1
+        self.results.DeltaA.Helmholtz = Helmholtz
+        
         # Gibbs energy
         # TODO:  implement (currently just adds 0)
         self.results.DeltaA.Gibbs = self.results.DeltaA.Helmholtz + self.Vdp()
-        self.results.ErrorDeltaA.Gibbs = self.results.ErrorDeltaA.Helmholtz
 
         if autosave:
             self.save()
         
-        self.log_DeltaA0()
-        return self.results.DeltaA.Gibbs, self.results.ErrorDeltaA.Gibbs
+        self.logger_DeltaA0()
+        return self.results.DeltaA.Gibbs
 
     def write_DeltaA0(self, filename, mode='w'):
         """Write free energy components to a file.
@@ -678,27 +667,29 @@ class Gsolv(object):
     def summary(self):
         """Return a string that summarizes the energetics.
 
+        Each energy component is followed by its error.
+
         Format::
           .                 ---------- kJ/mol ------
           molecule solvent  total  coulomb  vdw  Vdp
         """
-        fmt = "%-10s %-10s %+8.2f  %+8.2f  %+8.2f  %+8.2f"
-        DeltaA0 = self.results.DeltaA
-        return fmt % (self.molecule, self.solvent_type,
-                      DeltaA0.Gibbs, DeltaA0.coulomb, DeltaA0.vdw,
-                      DeltaA0.Vdp)
+        fmt = "%-10s %-10s %+8.2f %8.2f  %+8.2f %8.2f  %+8.2f %8.2f  %+8.2f %8.2f"
+        d = self.results.DeltaA
+        return fmt % ((self.molecule, self.solvent_type) + \
+            d.Gibbs.astuple() +  d.coulomb.astuple() + \
+            d.vdw.astuple() +  d.Vdp.astuple())
 
-    def log_DeltaA0(self):
+    def logger_DeltaA0(self):
         """Print the free energy contributions (errors in parentheses)."""
         if not 'DeltaA' in self.results or len(self.results.DeltaA) == 0:
             logger.info("No DeltaA free energies computed yet.")
             return
 
         logger.info("DeltaG0 = -(DeltaA_coul + DeltaA_vdw) + Vdp")
-        for component, value in self.results.DeltaA.items():
+        for component, energy in self.results.DeltaA.items():
             logger.info("[%s] %s solvation free energy (%s) %g (%.2f) kJ/mol",
-                        self.molecule, self.solvent_type.capitalize(), component, value,
-                        self.results.ErrorDeltaA[component])
+                        self.molecule, self.solvent_type.capitalize(), component, 
+                        energy.value, energy.error)
 
     def has_dVdl(self):
         """Check if dV/dl data have already been collected.
@@ -724,6 +715,7 @@ class Gsolv(object):
 
         kwargs.setdefault('color', 'black')
         kwargs.setdefault('capsize', 0)
+        kwargs.setdefault('elinewidth', 2)
 
         try:
             if self.results.DeltaA.Helmholtz is None or len(self.results.dvdl) == 0:
@@ -738,9 +730,9 @@ class Gsolv(object):
             x,y,dy = [dvdl[component][k] for k in ('lambdas', 'mean', 'error')]
             iplot = i+1
             subplot(1, nplots, iplot)
+            energy = self.results.DeltaA[component]
             label = r"$\Delta A^{\rm{%s}}_{\rm{%s}} = %.2f\pm%.2f$ kJ/mol" \
-                    % (component, self.solvent_type, self.results.DeltaA[component],
-                       self.results.ErrorDeltaA[component])
+                    % (component, self.solvent_type, energy.value, energy.error)
             errorbar(x, y, yerr=dy, label=label, **kwargs)
             xlabel(r'$\lambda$')
             legend(loc='best')
@@ -750,7 +742,7 @@ class Gsolv(object):
         title(r"Free energy difference $\Delta A^{0}_{\rm{%s}}$" % self.solvent_type)
         subplot(1, nplots, 2)        
         title(r"for %s: $%.2f\pm%.2f$ kJ/mol" %
-              (self.molecule, self.results.DeltaA.Helmholtz, self.results.ErrorDeltaA.Helmholtz))
+              ((self.molecule,) + self.results.DeltaA.Helmholtz.astuple()))
         
 
     def qsub(self, script=None):
@@ -795,9 +787,7 @@ class Gsolv(object):
         start up to its first root.
         """
         from gromacs.collections import Collection
-        
-        
-        
+        raise NotImplementedError
         
     def save(self, filename=None):
         """Save instance to a pickle file.
@@ -872,17 +862,20 @@ def pOW(G1, G2, force=False):
         if force:
             G.analyze(force=force)
         try:
-            G.results.DeltaA.Helmholtz
-            G.log_DeltaA0()
+            G.results.DeltaA.Gibbs
+            G.logger_DeltaA0()
         except (KeyError, AttributeError):   # KeyError because results is a AttributeDict
             G.analyze(force=force)
 
+    # x.Gibbs are QuantityWithError so they do error propagation
     transferFE = Gsolvs['octanol'].results.DeltaA.Gibbs - Gsolvs['water'].results.DeltaA.Gibbs 
     logPow = -transferFE / (kBOLTZ * Gsolvs['octanol'].Temperature) * numpy.log10(numpy.e)
 
     molecule = G1.molecule
     logger.info("[%s] Values at T = %g K", molecule, Gsolvs['octanol'].Temperature)
-    logger.info("[%s] Free energy of transfer wat --> oct: %g kJ/mol", molecule, transferFE)
-    logger.info("[%s] log P_ow: %g", molecule, logPow)
+    logger.info("[%s] Free energy of transfer wat --> oct: %.3f (%.3f) kJ/mol", 
+                molecule, transferFE.value, transferFE.error)
+    logger.info("[%s] log P_ow: %.3f (%.3f)", 
+                molecule, logPow.value, logPow.error)
 
     return transferFE, logPow
