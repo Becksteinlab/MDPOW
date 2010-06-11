@@ -15,12 +15,13 @@ None).
 
 Results are *appended* to a data file with **Output file format**::
 
-   molecule   DeltaA0(kJ/mol)    log P_OW  wat_ok octa_ok  directory  
+ molecule  DeltaA0(kJ/mol) ErrorDeltaA0   log P_OW  Error logPow wat_ok octa_ok  directory  
 
 molecule
     molecule name as used in the itp
-DeltaA0
-    transfer free energy water --> octanol, in kJ/mol
+DeltaA0, ErrorDeltaA0
+    transfer free energy water --> octanol, in kJ/mol; error from correlation time
+    and error propagation through Simpson's rule (see :meth:`mdpow.fep.Gsolv`)
 log P_OW
     base-10 logarithm of the octanol-water partition coefficient; >0: partitions into
     octanol, <0: partitions preferrably into water
