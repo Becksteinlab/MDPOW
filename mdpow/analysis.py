@@ -195,11 +195,11 @@ class ExpComp(object):
                 xmax = xmean
 
             color = cm.jet(norm(i))
-            label = "%(comment)s %(exp).1f/%(comp).1f" % vars()
-            plot(exp,comp, marker='o', markersize=14, color=color, markeredgewidth=0, alpha=0.3)
+            label = r"%(comment)s %(exp).1f/%(comp).1f$\pm$%(errcomp).1f" % vars()
+            plot(exp,comp, marker='o', markersize=14, color=color, markeredgewidth=0, alpha=0.1)
             plot(exp,comp, marker='o', markersize=5, color=color, label=label)
             xerr = numpy.abs(numpy.array([[xmin],[xmax]]) - exp)
-            errorbar(exp,comp, xerr=xerr, yerr=errcomp, color=color, linewidth=2, capsize=0)
+            errorbar(exp,comp, xerr=xerr, yerr=errcomp, color=color, linewidth=1.5, capsize=0)
 
         legend(ncol=3, numpoints=1, loc='lower right', prop={'size':8})
         figname = _finish(**kwargs)
