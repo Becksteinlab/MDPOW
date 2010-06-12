@@ -29,11 +29,14 @@ def fixFEP(solvent, fepfile, simfile, basedir):
     G = Gsolv[solvent](simulation=S, basedir=basedir, permissive=True)
 
     # remove pre-0.2 standard-state correction (wrong!) and pdV (wrong)
-    for crap in ('standardstate', 'pdV'):
+    # total not used anymore since 0.3.0 
+    for crap in ('standardstate', 'pdV', 'total'):
         try:
             del G.results.DeltaA0[crap]
         except:
             pass
+    # do not save arrays (since 0.3.0)
+    G.savedata = False
     G.save(fepfile)
     logger.info("Re-created %(fepfile)r for basedir=%(basedir)r", vars())
     return G

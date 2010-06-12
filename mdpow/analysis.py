@@ -183,6 +183,17 @@ class ExpComp(object):
         for i, (name,comment,DeltaA0,xmean,xstd,xmin,xmax,exp,comp,errcomp) in enumerate(c):
             if exp is None or comp is None:
                 continue
+
+            # fix possibly missing values
+            if xmean is None:
+                xmean = comp
+            if xstd is None:
+                xstd = 0
+            if xmin is None:
+                xmin = xmean
+            if xmax is None:
+                xmax = xmean
+
             color = cm.jet(norm(i))
             label = "%(comment)s %(exp).1f/%(comp).1f" % vars()
             plot(exp,comp, marker='o', markersize=14, color=color, markeredgewidth=0, alpha=0.3)
