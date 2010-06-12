@@ -17,19 +17,44 @@ and computed values from the table in ``pow.txt``. See
          that are used in the code here, in particular in :class:`ComputeData`
          and :class:`ExpComp`.
 
-Usage
------
+Prepare data
+------------
 
-Plot results and save to a pdf file::
+First copy the **computed results**, the ``pow.txt`` and ``energies.txt`` files that
+are produced by :program:`mdpow-pow`, into the ``data`` directories.
+
+Then format them::
+
+   ./lib/scripts/make_tables.sh data/*
+
+The **experimental data** are taken from *targets,numbers*. In
+:program:`numbers` export the table as *UTF-8* in *CSV* format to
+``experimental/targets.csv``. This is only necessary if the experimental data
+were changed. We only plot entries for which
+
+ - a id number (first column *no*) is defined (should be unique)
+ - a *logPow* value exists
+ - a *itp_name* exists, which must correspond to the *molecule* name used in
+   :mod:`mdpow.fep.Gsolv`
+
+
+Making graphs
+-------------
+
+Plot results and save to a pdf file with :func:`plot_exp_vs_comp`::
 
   mdpow.analysis.plot_exp_vs_comp(figname="figs/exp_vs_comp.pdf")
 
-Remove the bad runs from  ``pow.txt`` and save as ``pow_best.txt``. Then plot again::
+By default we also include the SAMPL2 results.
+
+Remove the bad runs from ``pow.txt`` and save as ``pow_best.txt``. Then plot
+again (this time excluding the SAMPL2 results)::
 
    pylab.clf()
-   mdpow.analysis.plot_exp_vs_comp(data="data/run01/pow_best.txt", figname='figs/run01/exp_vs_comp_best.pdf')
+   mdpow.analysis.plot_exp_vs_comp(data="data/run01/pow_best.txt", data2=None, figname='figs/run01/exp_vs_comp_best.pdf')
 
-By default we also include the SAMPL2 results,
+Note that the SAMPL2 results are excluded by setting ``data2=None``.
+
 
 Functions
 ---------
@@ -125,19 +150,29 @@ class ExpComp(object):
         :Keywords:
            *experiments*
                path to ``targets.csv``
-           *data*, *data2*
-               path to ``pow.txt``
+           *data*
+               path to ``pow.txt`` of the test set ("run01")
+           *data2*
+               SAMPL2 data ``pow.txt``; set *data2* = ``False`` or ``None`` to
+               exclude set; unset chooses the default
         """
-        # data and data2 are quick hacks to load both SAMPL2/pow.txt and run01/pow.txt
-        experimental = ExpData(filename=kwargs.pop('experiments', DEFAULTS['experiments']))
-        computed = ComputedData(filename=kwargs.pop('data', DEFAULTS['run01']),
+
+        filename = kwargs.pop('experiments', DEFAULTS['experiments'])
+        experimental = ExpData(filename=filename)
+
+        # data and data2 are quick hacks to load both run01/pow.txt and SAMPL2/pow.txt
+        filename = kwargs.pop('data', DEFAULTS['run01'])
+        computed = ComputedData(filename=filename,
                                 name="logPow_computed", 
-                                connection=experimental.data.connection)  # add to experimental db
-        compute2 = ComputedData(filename=kwargs.pop('data2', DEFAULTS['SAMPL2']),
-                                name="logPow_SAMPL2", 
-                                connection=experimental.data.connection)  # add to experimental db
-        # merge compute2 into compute (will be dropped after init) via __del__
-        computed.data.merge_table("logPow_SAMPL2")
+                                connection=experimental.data.connection)
+                              # add to experimental db
+        filename = kwargs.get('data2', DEFAULTS['SAMPL2'])
+        if filename:
+            compute2 = ComputedData(filename=filename,
+                                    name="logPow_SAMPL2", 
+                                    connection=experimental.data.connection)  # add to experimental db
+            # merge compute2 into compute (will be dropped after init) via __del__
+            computed.data.merge_table("logPow_SAMPL2")
 
         self.database = experimental
         
