@@ -219,8 +219,8 @@ where DEFFNM is typically "md"; see the run ``local.sh`` script in
 each direcory for hints on what needs to be done.
 
 
-Analyze output
-~~~~~~~~~~~~~~
+Analyze output and logPow calculation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For the water and octanol FEPs do ::
 
@@ -234,7 +234,7 @@ The analyze step reports the estimate for the free energy
 difference. 
 
 Calculate the free energy for transferring the solute from water to
-octanol and octanol-water partition coefficient log P_OW ::
+octanol and *octanol-water partition coefficient* log P_OW ::
 
  mdpow.fep.pOW(gwat, goct)
 
@@ -246,20 +246,24 @@ All individual results can also accessed as a dictionary ::
 
 Free energy of transfer from water to octanol::
 
- goct.results.DeltaA.total - gwat.results.DeltaA.total
+ goct.results.DeltaA.Gibbs - gwat.results.DeltaA.Gibbs
 
 The individual components are
 
- total
-   total standard free energy difference in kJ/mol; 
-   DeltaA0 = (A_solv - A_vac) + DA_v
- standardstate
-   correction DA_v for the standard state concentration *c* (depends
-   on the volume of the simulation cell); in kJ/mol. Different *c* can
-   be supplied as an argument to analyze().
- coulomb
+ *Helmholtz*, *Gibbs*
+   total free energy difference of transfer from solvent to vacuum at the
+   Ben-Naim standard state (i.e. 1M solution/1M gas phase) in kJ/mol;
+
+      DeltaA0 = (A_solv - A_vac)
+
+   In principle, we calculate the Helmholtz free energy (at constant volume V).
+   In order to obtain the Gibbs free energy (at constant pressure) a small
+   correction Vdp is required. *This correction is currently ignored.*
+
+ *coulomb*
    contribution of the de-charging process to DeltaA
- vdw
+
+ *vdw*
    contribution of the de-coupling process to DeltaA
 
 To plot the data (de-charging and de-coupling)::
@@ -269,13 +273,43 @@ To plot the data (de-charging and de-coupling)::
  pylab.figure()
  goct.plot()
 
-The error data points are the average of dV/dl over each windows. The
-error bars are the standard deviations of the data points from the
-average.
+For comparison to experimental values see :mod:`mdpow.analysis`.
 
-If the graphs do not look smooth then a longer *runtime* is definitely
-required. It might also be necessary to add additional lambda values
-in regions where the function changes rapidly.
+
+Error analysis
+~~~~~~~~~~~~~~
+
+The data points are the (time) **average <A>** of A = dV/dl over each
+window. The **error bars** s_A are the error of the mean <A>. They are computed
+from the auto-correlation time of the fluctuations and the standard deviation
+(see Frenkel and Smit, p526 and :meth:`numkit.timeseries.tcorrel`)::
+
+  s_A**2 = 2*tc*acf(0)/T
+
+where tc is the decay time of the ACF of <(A-<A>)**2> (assumed to follow f(t) =
+exp(-t/tc) and hence calculated from the integral of the ACF to its first
+root); T is the total runtime.
+
+Errors on the energies are calculated via the propagation of the errors s_A
+through the thermodynamic integration and the subsequent thermodynamic sums
+(see :func:`numkit.integration.simps_error`
+:class:`numkit.observables.QuantityWithError` for details).
+
+* If the graphs do not look smooth or the errors are large then a longer
+  *runtime* is definitely required. It might also be necessary to add
+  additional lambda values in regions where the function changes rapidly.
+
+* The errors on the Coulomb and VDW free energies should be of similar
+  magnitude because there is no point in being very accurate in one if the
+  other is inaccurate.
+
+* For water the "canonical" lambda schedule produces errors <0.5 kJ/mol (or
+  sometimes much better) in the Coulomb and VDW free energy components.
+
+* For octanol the errors on the coulomb dis-charging free energy can become
+  large (up to 4 kJ/mol) and thus completely swamp the final
+  estimate. Additional lambdas 0.125 and 0.375 should improve the precision of
+  the calculations.
 
 
 The mdpow scripts
@@ -287,7 +321,7 @@ bin directory (or the directory pointed to by
 
  
 """
-VERSION = 0,3,0
+VERSION = 0,3,1
 
 __all__ = ['fep', 'equil']
 

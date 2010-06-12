@@ -30,7 +30,7 @@ octanol. It uses Gromacs (http://www.gromacs.org) for the molecular dynamics
       scripts = ['scripts/mdpow-pow', 'scripts/mdpow-check', 'scripts/mdpow-rebuild-fep'],
       package_data={'mdpow': ['top/*', 'templates/*'], },
       install_requires = ['numpy>=1.0', 'scipy',
-                          'GromacsWrapper>=0.1.12',
+                          'GromacsWrapper>=0.1.13',
                           'RecSQL>=0.7.3'],
       dependency_links = ["http://sbcb.bioch.ox.ac.uk/oliver/download/Python/"],
       zip_safe = True,
