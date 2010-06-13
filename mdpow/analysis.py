@@ -2,8 +2,8 @@
 # Copyright (c) 2010 Oliver Beckstein and Bogdan Iorga
 
 """
-:mod:`analysis` --- Collection of analysis and plotting functions
-=================================================================
+:mod:`mdpow.analysis` --- Collection of analysis and plotting functions
+=======================================================================
 
 Simple functions to quickly plot data. Typically, it works best if ran
 interactively from the top level of the POW directory!
@@ -20,14 +20,14 @@ and computed values from the table in ``pow.txt``. See
 Prepare data
 ------------
 
-First copy the **computed results**, the ``pow.txt`` and ``energies.txt`` files that
+First copy the **computed results** , the ``pow.txt`` and ``energies.txt`` files that
 are produced by :program:`mdpow-pow`, into the ``data`` directories.
 
 Then format them::
 
    ./lib/scripts/make_tables.sh data/*
 
-The **experimental data** are taken from *targets,numbers*. In
+The **experimental data** are taken from *targets.numbers*. In
 :program:`numbers` export the table as *UTF-8* in *CSV* format to
 ``experimental/targets.csv``. This is only necessary if the experimental data
 were changed. We only plot entries for which

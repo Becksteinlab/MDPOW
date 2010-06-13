@@ -1,7 +1,8 @@
 # mdpow: fep.py
 # Copyright (c) 2010 Oliver Beckstein
+
 """
-:mod:`mdpow.fep` -- calculate free energy of solvation
+:mod:`mdpow.fep` -- Calculate free energy of solvation
 ======================================================
 
 Set up and run free energy perturbation (FEP) calculations to
@@ -51,15 +52,12 @@ Some notes on how the approach encoded here differs from what others
 
   Arguably we should 
 
-  - obtain the actual pressure from the second half of the equilibrium
-    simulation (although the difference is probably on the order of 0.01 bar
-    and hence will not make a appreciable difference in the pdV term);
-  
   - scale the box to the average volume obtained from the second half of the
     simulation. This is potentially more important because the density of the
     water has an effect on the interactions but we would need to run tests to
     check how big the effect typically is.
 
+  - do a Vdp (?) correction (how?)
 
 Example
 -------
@@ -77,10 +75,10 @@ solvation free energy in octanol there is
 :class:`~mdpow.fep.Goct`. See the description of
 :class:`~mdpow.fep.Gsolv` for methods common to both.
 
-.. autoclass:: Ghyd
-.. autoclass:: Goct
 .. autoclass:: Gsolv
    :members:
+.. autoclass:: Ghyd
+.. autoclass:: Goct
 .. autofunction:: pOW
 
 
@@ -96,6 +94,8 @@ Additional objects that support :class:`mdpow.fep.Gsolv`.
 .. autoclass:: FEPschedule
    :members:
 .. autofunction:: molar_to_nm3
+.. autofunction:: kcal_to_kJ
+.. autofunction:: kJ_to_kcal
 
 .. autodata:: N_AVOGADRO
 .. autodata:: kBOLTZ
@@ -206,8 +206,9 @@ class Gsolv(object):
 
             Delta A = -(Delta A_coul + Delta A_vdw)
 
-    .. warning:: Not clear how this is related to the standard state
-                 concentrations.
+    With this protocol, the concentration in the liquid and in the gas phase
+    is the same. (Under the assumption of ideal solution/ideal gas behaviour
+    this seems to directly relate to the Ben-Naim 1M/1M standard state.)
 
     Typical work flow::
 
@@ -490,11 +491,12 @@ class Gsolv(object):
 
           aq (fully coupled) --> gaseous (decoupled)
 
-        NOT CLEAR HOW TO CALCULATE. Is p* the desired pressure and p
-        the average calculated from the simulation at constant V? Need
-        to pin this down properly.
+        .. warning:: Not implemented at the moment and simply set to 0 because
+           we cannot use the pressures directly from the simulation. In such a
+           small system they fluctuate too much and completely dominate all
+           thermodynamic calculations.
 
-        :Returns:  Vsim*(p*-p)  [in kJ/mol]
+        :Returns: 0 (although it should be something like Vsim*(p*-p))  [in kJ/mol]
 
         :Arguments:
            *p*
@@ -580,7 +582,8 @@ class Gsolv(object):
          2. The error on the integral is calculated analytically via
             propagation of errors through Simpson's rule (with the
             approximation that all spacings are assumed to be equal; taken as
-            the average over all spacings).
+            the average over all spacings as implemented in
+            :func:`numkit.integration.simps_error`).
 
         .. Note:: For the Coulomb part, which typically only contains about 5
            lambdas, it is recommended to have a odd number of lambda values to
