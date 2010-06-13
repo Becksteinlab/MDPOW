@@ -824,8 +824,6 @@ class Ghyd(Gsolv):
 class Goct(Gsolv):
     """Sets up and analyses MD to obtain the solvation free energy of a solute in octanol.
 
-    **NOT ENABLED YET**:
-
     The *coulomb* lambda schedule is enhanced compared to water as the initial
     part of the dV/dl curve is quite sensitive. By adding two additional points
     we hope to reduce the overall error on the dis-charging free energy.
@@ -838,8 +836,8 @@ class Goct(Gsolv):
                              label='Coul',
                              couple_lambda0='vdw-q', couple_lambda1='vdw',
                              sc_alpha=0,      # linear scaling for coulomb
-                             lambdas=[0, 0.25, 0.5, 0.75, 1.0],  # default
-                             #lambdas=[0, 0.125, 0.25, 0.375, 0.5, 0.75, 1.0],  # +0.125, 0.375 enhanced
+                             #lambdas=[0, 0.25, 0.5, 0.75, 1.0],  # default
+                             lambdas=[0, 0.125, 0.25, 0.375, 0.5, 0.75, 1.0],  # +0.125, 0.375 enhanced
                              ),
                  'vdw':
                  FEPschedule(name='vdw',
