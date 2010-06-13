@@ -5,13 +5,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>analysis — Collection of analysis and plotting functions &mdash; MDpow v0.2.1 documentation</title>
+    <title>mdpow.analysis — Collection of analysis and plotting functions &mdash; MDpow v0.3.1 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '#',
-        VERSION:     '0.2.1',
+        VERSION:     '0.3.1',
         COLLAPSE_MODINDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -19,9 +19,9 @@
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="MDpow v0.2.1 documentation" href="index.html" />
+    <link rel="top" title="MDpow v0.3.1 documentation" href="index.html" />
     <link rel="next" title="Helper modules" href="utilities.html" />
-    <link rel="prev" title="mdpow.fep – calculate free energy of solvation" href="fep.html" /> 
+    <link rel="prev" title="mdpow.fep – Calculate free energy of solvation" href="fep.html" /> 
   </head>
   <body>
     <div class="related">
@@ -37,9 +37,9 @@
           <a href="utilities.html" title="Helper modules"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="fep.html" title="mdpow.fep – calculate free energy of solvation"
+          <a href="fep.html" title="mdpow.fep – Calculate free energy of solvation"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">MDpow v0.2.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow v0.3.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -48,37 +48,90 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="analysis-collection-of-analysis-and-plotting-functions">
-<span id="module-mdpow.analysis"></span><h1><tt class="xref docutils literal"><span class="pre">analysis</span></tt> &#8212; Collection of analysis and plotting functions<a class="headerlink" href="#analysis-collection-of-analysis-and-plotting-functions" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="mdpow-analysis-collection-of-analysis-and-plotting-functions">
+<span id="module-mdpow.analysis"></span><h1><tt class="xref docutils literal"><span class="pre">mdpow.analysis</span></tt> &#8212; Collection of analysis and plotting functions<a class="headerlink" href="#mdpow-analysis-collection-of-analysis-and-plotting-functions" title="Permalink to this headline">¶</a></h1>
 <p>Simple functions to quickly plot data. Typically, it works best if ran
 interactively from the top level of the POW directory!</p>
 <p>Experimental values are loaded from the targets list (<tt class="docutils literal"><span class="pre">targets.csv</span></tt>)
-and computed values from tthe table in <tt class="docutils literal"><span class="pre">pow.txt</span></tt>. See
-<a title="mdpow.analysis.plot_exp_vs_comp" class="reference" href="#mdpow.analysis.plot_exp_vs_comp"><tt class="xref docutils literal"><span class="pre">plot_exp_vs_comp()</span></tt></a> for details.</p>
-<div class="section" id="usage">
-<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
-<p>Plot results and save to a pdf file:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">mdpow</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">plot_exp_vs_comp</span><span class="p">(</span><span class="n">figname</span><span class="o">=</span><span class="s">&quot;figs/run01/exp_vs_comp.pdf&quot;</span><span class="p">)</span>
+and computed values from the table in <tt class="docutils literal"><span class="pre">pow.txt</span></tt>. See
+<a title="mdpow.analysis.plot_exp_vs_comp" class="reference internal" href="#mdpow.analysis.plot_exp_vs_comp"><tt class="xref docutils literal"><span class="pre">plot_exp_vs_comp()</span></tt></a> for details.</p>
+<div class="section" id="prepare-data">
+<h2>Prepare data<a class="headerlink" href="#prepare-data" title="Permalink to this headline">¶</a></h2>
+<p>First copy the <strong>computed results</strong> , the <tt class="docutils literal"><span class="pre">pow.txt</span></tt> and <tt class="docutils literal"><span class="pre">energies.txt</span></tt> files that
+are produced by <strong>mdpow-pow</strong>, into the <tt class="docutils literal"><span class="pre">data</span></tt> directories.</p>
+<p>Then format them:</p>
+<div class="highlight-python"><pre>./lib/scripts/make_tables.sh data/*</pre>
+</div>
+<p>The <strong>experimental data</strong> are taken from <em>targets.numbers</em>. In
+<strong>numbers</strong> export the table as <em>UTF-8</em> in <em>CSV</em> format to
+<tt class="docutils literal"><span class="pre">experimental/targets.csv</span></tt>. This is only necessary if the experimental data
+were changed. We only plot entries for which</p>
+<blockquote>
+<ul class="simple">
+<li>a id number (first column <em>no</em>) is defined (should be unique)</li>
+<li>a <em>logPow</em> value exists</li>
+<li>a <em>itp_name</em> exists, which must correspond to the <em>molecule</em> name used in
+<tt class="xref docutils literal"><span class="pre">mdpow.fep.Gsolv</span></tt></li>
+</ul>
+</blockquote>
+</div>
+<div class="section" id="making-graphs">
+<h2>Making graphs<a class="headerlink" href="#making-graphs" title="Permalink to this headline">¶</a></h2>
+<p>Plot results and save to a pdf file with <a title="mdpow.analysis.plot_exp_vs_comp" class="reference internal" href="#mdpow.analysis.plot_exp_vs_comp"><tt class="xref docutils literal"><span class="pre">plot_exp_vs_comp()</span></tt></a>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">mdpow</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">plot_exp_vs_comp</span><span class="p">(</span><span class="n">figname</span><span class="o">=</span><span class="s">&quot;figs/exp_vs_comp.pdf&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Remove the bad runs from  <tt class="docutils literal"><span class="pre">pow.txt</span></tt> and save as <tt class="docutils literal"><span class="pre">pow_best.txt</span></tt>. Then plot again:</p>
+<p>By default we also include the SAMPL2 results.</p>
+<p>Remove the bad runs from <tt class="docutils literal"><span class="pre">pow.txt</span></tt> and save as <tt class="docutils literal"><span class="pre">pow_best.txt</span></tt>. Then plot
+again (this time excluding the SAMPL2 results):</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">pylab</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
-<span class="n">mdpow</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">plot_exp_vs_comp</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="s">&quot;data/run01/pow_best.txt&quot;</span><span class="p">,</span> <span class="n">figname</span><span class="o">=</span><span class="s">&#39;figs/run01/exp_vs_comp_best.pdf&#39;</span><span class="p">)</span>
+<span class="n">mdpow</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">plot_exp_vs_comp</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="s">&quot;data/run01/pow_best.txt&quot;</span><span class="p">,</span> <span class="n">data2</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">figname</span><span class="o">=</span><span class="s">&#39;figs/run01/exp_vs_comp_best.pdf&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>Note that the SAMPL2 results are excluded by setting <tt class="docutils literal"><span class="pre">data2=None</span></tt>.</p>
 </div>
 <div class="section" id="functions">
 <h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="mdpow.analysis.plot_exp_vs_comp">
+<tt class="descclassname">mdpow.analysis.</tt><tt class="descname">plot_exp_vs_comp</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.analysis.plot_exp_vs_comp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="mdpow.analysis.ExpComp">
+<em class="property">class </em><tt class="descclassname">mdpow.analysis.</tt><tt class="descname">ExpComp</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.analysis.ExpComp" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Keywords:</th><td class="field-body"><dl class="first last docutils">
+<dt><em>experiments</em></dt>
+<dd><p class="first last">path to <tt class="docutils literal"><span class="pre">targets.csv</span></tt></p>
+</dd>
+<dt><em>data</em></dt>
+<dd><p class="first last">path to <tt class="docutils literal"><span class="pre">pow.txt</span></tt> of the test set (&#8220;run01&#8221;)</p>
+</dd>
+<dt><em>data2</em></dt>
+<dd><p class="first last">SAMPL2 data <tt class="docutils literal"><span class="pre">pow.txt</span></tt>; set <em>data2</em> = <tt class="xref docutils literal"><span class="pre">False</span></tt> or <tt class="xref docutils literal"><span class="pre">None</span></tt> to
+exclude set; unset chooses the default</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="class">
 <dt id="mdpow.analysis.ExpData">
 <em class="property">class </em><tt class="descclassname">mdpow.analysis.</tt><tt class="descname">ExpData</tt><big>(</big><em>filename='experimental/targets.csv'</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.analysis.ExpData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Object that represents our experimental data.</p>
 <p>Access the raw data via <tt class="xref docutils literal"><span class="pre">ExpData.rawdata</span></tt> and a table enriched
 with statistics as <tt class="xref docutils literal"><span class="pre">ExpData.data</span></tt> (which is a
-<a title="(in RecSQL v0.7.3)" class="reference" href="http://sbcb.bioch.ox.ac.uk/oliver/software/RecSQL/html/users.html#recsql.SQLarray"><tt class="xref docutils literal"><span class="pre">recsql.SQLarray</span></tt></a>).</p>
-<p>Load experimental values table and return <a title="(in RecSQL v0.7.3)" class="reference" href="http://sbcb.bioch.ox.ac.uk/oliver/software/RecSQL/html/users.html#recsql.SQLarray"><tt class="xref docutils literal"><span class="pre">recsql.SQLarray</span></tt></a>.</p>
+<a title="(in RecSQL v0.7.3)" class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/RecSQL/html/users.html#recsql.SQLarray"><tt class="xref docutils literal"><span class="pre">recsql.SQLarray</span></tt></a>).</p>
+<p>Load experimental values table and return <a title="(in RecSQL v0.7.3)" class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/RecSQL/html/users.html#recsql.SQLarray"><tt class="xref docutils literal"><span class="pre">recsql.SQLarray</span></tt></a>.</p>
 <p>To obtain <tt class="docutils literal"><span class="pre">targets.csv</span></tt> export <tt class="docutils literal"><span class="pre">targets.numbers</span></tt> in
-<strong>Numbers</strong> as <strong>UTF-8</strong> (important!) in the <a href="#id1" name="id2"><span class="problematic" id="id2">**</span></a>CSV* format
+<strong>Numbers</strong> as <strong>UTF-8</strong> (important!) in the <a href="#id1"><span class="problematic" id="id2">**</span></a>CSV* format
 (File-&gt;Export)</p>
 </dd></dl>
 
@@ -87,7 +140,7 @@ with statistics as <tt class="xref docutils literal"><span class="pre">ExpData.d
 <em class="property">class </em><tt class="descclassname">mdpow.analysis.</tt><tt class="descname">ComputedData</tt><big>(</big><em>filename='data/run01/pow.txt'</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.analysis.ComputedData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Object that represents computed data.</p>
 <p>Access via <tt class="xref docutils literal"><span class="pre">ComputedData.data</span></tt>.</p>
-<p>Load computed POW table and return <a title="(in RecSQL v0.7.3)" class="reference" href="http://sbcb.bioch.ox.ac.uk/oliver/software/RecSQL/html/users.html#recsql.SQLarray"><tt class="xref docutils literal"><span class="pre">recsql.SQLarray</span></tt></a>.</p>
+<p>Load computed POW table and return <a title="(in RecSQL v0.7.3)" class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/RecSQL/html/users.html#recsql.SQLarray"><tt class="xref docutils literal"><span class="pre">recsql.SQLarray</span></tt></a>.</p>
 <p>The data file is typically <tt class="docutils literal"><span class="pre">pow.txt</span></tt>. It <em>must</em> contain a proper
 reST table. Use the <tt class="docutils literal"><span class="pre">_header</span></tt> and <tt class="docutils literal"><span class="pre">_footer</span></tt> files if you only
 have the raw output from <strong>mdpow-pow</strong>.</p>
@@ -98,7 +151,7 @@ here.</p>
 <dl class="function">
 <dt id="mdpow.analysis.load_data">
 <tt class="descclassname">mdpow.analysis.</tt><tt class="descname">load_data</tt><big>(</big><em>filename='data/run01/pow.txt'</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.analysis.load_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Load computed POW table and return <a title="(in RecSQL v0.7.3)" class="reference" href="http://sbcb.bioch.ox.ac.uk/oliver/software/RecSQL/html/users.html#recsql.SQLarray"><tt class="xref docutils literal"><span class="pre">recsql.SQLarray</span></tt></a>.</p>
+<dd><p>Load computed POW table and return <a title="(in RecSQL v0.7.3)" class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/RecSQL/html/users.html#recsql.SQLarray"><tt class="xref docutils literal"><span class="pre">recsql.SQLarray</span></tt></a>.</p>
 <p>The data file is typically <tt class="docutils literal"><span class="pre">pow.txt</span></tt>. It <em>must</em> contain a proper
 reST table. Use the <tt class="docutils literal"><span class="pre">_header</span></tt> and <tt class="docutils literal"><span class="pre">_footer</span></tt> files if you only
 have the raw output from <strong>mdpow-pow</strong>.</p>
@@ -109,46 +162,10 @@ here.</p>
 <dl class="function">
 <dt id="mdpow.analysis.load_exp">
 <tt class="descclassname">mdpow.analysis.</tt><tt class="descname">load_exp</tt><big>(</big><em>filename='experimental/targets.csv'</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.analysis.load_exp" title="Permalink to this definition">¶</a></dt>
-<dd><p>Load experimental values table and return <a title="(in RecSQL v0.7.3)" class="reference" href="http://sbcb.bioch.ox.ac.uk/oliver/software/RecSQL/html/users.html#recsql.SQLarray"><tt class="xref docutils literal"><span class="pre">recsql.SQLarray</span></tt></a>.</p>
+<dd><p>Load experimental values table and return <a title="(in RecSQL v0.7.3)" class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/RecSQL/html/users.html#recsql.SQLarray"><tt class="xref docutils literal"><span class="pre">recsql.SQLarray</span></tt></a>.</p>
 <p>To obtain <tt class="docutils literal"><span class="pre">targets.csv</span></tt> export <tt class="docutils literal"><span class="pre">targets.numbers</span></tt> in
-<strong>Numbers</strong> as <strong>UTF-8</strong> (important!) in the <a href="#id3" name="id4"><span class="problematic" id="id4">**</span></a>CSV* format
+<strong>Numbers</strong> as <strong>UTF-8</strong> (important!) in the <a href="#id3"><span class="problematic" id="id4">**</span></a>CSV* format
 (File-&gt;Export)</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="mdpow.analysis.plot_exp_vs_comp">
-<tt class="descclassname">mdpow.analysis.</tt><tt class="descname">plot_exp_vs_comp</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.analysis.plot_exp_vs_comp" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plot individual data points with legend.</p>
-<p>By default, the following should work:</p>
-<ul class="simple">
-<li>Run from the top <tt class="docutils literal"><span class="pre">mdpow</span></tt> directory.</li>
-<li>Prepare <tt class="docutils literal"><span class="pre">data/run01/pow.txt</span></tt> (must prepend header and append
-footer so that it is proper table). See <a title="mdpow.analysis.load_data" class="reference" href="#mdpow.analysis.load_data"><tt class="xref docutils literal"><span class="pre">load_data()</span></tt></a>.</li>
-<li>Prepare <tt class="docutils literal"><span class="pre">experimental/targets.csv</span></tt> if it does not exist or if
-something changed. See <a title="mdpow.analysis.load_exp" class="reference" href="#mdpow.analysis.load_exp"><tt class="xref docutils literal"><span class="pre">load_exp()</span></tt></a> for details.</li>
-</ul>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field"><th class="field-name">Keywords:</th><td class="field-body"><dl class="first last docutils">
-<dt><em>experiments</em></dt>
-<dd><p class="first last">path to <tt class="docutils literal"><span class="pre">targets.csv</span></tt></p>
-</dd>
-<dt><em>data</em></dt>
-<dd><p class="first last">path to <tt class="docutils literal"><span class="pre">pow.txt</span></tt></p>
-</dd>
-<dt><em>figname</em></dt>
-<dd><p class="first last">write figure to <em>filename</em>; suffix determines file type</p>
-</dd>
-<dt><em>ymin</em>, <em>ymax</em></dt>
-<dd><p class="first last">limits of the plot in the y direction (=computational results)</p>
-</dd>
-</dl>
-</td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
 </div>
@@ -162,16 +179,17 @@ something changed. See <a title="mdpow.analysis.load_exp" class="reference" href
         <div class="sphinxsidebarwrapper">
             <h3><a href="index.html">Table Of Contents</a></h3>
             <ul>
-<li><a class="reference" href="#"><tt class="docutils literal"><span class="pre">analysis</span></tt> &#8212; Collection of analysis and plotting functions</a><ul>
-<li><a class="reference" href="#usage">Usage</a></li>
-<li><a class="reference" href="#functions">Functions</a></li>
+<li><a class="reference external" href="#"><tt class="docutils literal"><span class="pre">mdpow.analysis</span></tt> &#8212; Collection of analysis and plotting functions</a><ul>
+<li><a class="reference external" href="#prepare-data">Prepare data</a></li>
+<li><a class="reference external" href="#making-graphs">Making graphs</a></li>
+<li><a class="reference external" href="#functions">Functions</a></li>
 </ul>
 </li>
 </ul>
 
             <h4>Previous topic</h4>
             <p class="topless"><a href="fep.html"
-                                  title="previous chapter"><tt class="docutils literal"><span class="pre">mdpow.fep</span></tt> &#8211; calculate free energy of solvation</a></p>
+                                  title="previous chapter"><tt class="docutils literal"><span class="pre">mdpow.fep</span></tt> &#8211; Calculate free energy of solvation</a></p>
             <h4>Next topic</h4>
             <p class="topless"><a href="utilities.html"
                                   title="next chapter">Helper modules</a></p>
@@ -210,9 +228,9 @@ something changed. See <a title="mdpow.analysis.load_exp" class="reference" href
           <a href="utilities.html" title="Helper modules"
              >next</a> |</li>
         <li class="right" >
-          <a href="fep.html" title="mdpow.fep – calculate free energy of solvation"
+          <a href="fep.html" title="mdpow.fep – Calculate free energy of solvation"
              >previous</a> |</li>
-        <li><a href="index.html">MDpow v0.2.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow v0.3.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
