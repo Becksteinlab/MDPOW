@@ -205,10 +205,10 @@ if __name__ == "__main__":
     opts,args = parser.parse_args()
 
     if len(args) == 0:
-        logger.error("A directory is required. See --help.")
+        logger.fatal("A directory is required. See --help.")
         sys.exit(1)
     elif len(args) > 1 and not opts.plotfile.lower() in ('none', 'auto'):
-        logger.error("Can only use --plotfile=None or --plotfile=auto with multiple directories.")
+        logger.fatal("Can only use --plotfile=None or --plotfile=auto with multiple directories.")
         sys.exit(1)
 
     for directory in args:
@@ -226,5 +226,7 @@ if __name__ == "__main__":
                     force=opts.force, permissive=opts.permissive)
         except (OSError, IOError), err:
             logger.error("Running analysis in directory %r failed: %s", directory, str(err))
-
-    
+        except Exception, err:
+            logger.fatal("Running analysis in directory %r failed", directory)
+            logger.exception("Catastrophic problem occurred, see the stack trace for hints.")
+            raise

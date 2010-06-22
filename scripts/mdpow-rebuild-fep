@@ -19,20 +19,31 @@ logger = logging.getLogger('mdpow')
 def fixFEP(solvent, fepfile, simfile, basedir):
     Gsolv = {'water': mdpow.fep.Ghyd,
              'octanol': mdpow.fep.Goct}
-    S = mdpow.equil.Simulation(filename=simfile)
-    # hack: need to explicitly add the Equilibrium/solvent dir to make it work
-    # (note: I am not fixing the include path at the moment, see log...)
-    simbasedir = os.path.join(basedir, 'Equilibrium', solvent)
-    S.make_paths_relative(simbasedir)
-    # TODO: fix includedir
-    # S.dirs.includes[0] = '/sansom/gfio/oliver/Projects/pow/lib/python/POW/mdpow/top'
-    G = Gsolv[solvent](simulation=S, basedir=basedir, permissive=True)
+    try:
+        S = mdpow.equil.Simulation(filename=simfile)
+        # hack: need to explicitly add the Equilibrium/solvent dir to make it work
+        # (note: I am not fixing the include path at the moment, see log...)
+        simbasedir = os.path.join(basedir, 'Equilibrium', solvent)
+        S.make_paths_relative(simbasedir)
+        # TODO: fix includedir
+        # S.dirs.includes[0] = '/sansom/gfio/oliver/Projects/pow/lib/python/POW/mdpow/top'
+        G = Gsolv[solvent](simulation=S, basedir=basedir, permissive=True)
+    except Exception, err:
+        logger.error(str(err))
+        logger.warn("Could not get the simulation pickle file %(simfile)r", vars())
+        logger.warn("The FEP pickle file will be fixed as it is (no path adjustments)")
+        G = Gsolv[solvent](filename=fepfile)
 
     # remove pre-0.2 standard-state correction (wrong!) and pdV (wrong)
     # total not used anymore since 0.3.0 
     for crap in ('standardstate', 'pdV', 'total'):
         try:
             del G.results.DeltaA0[crap]
+        except:
+            pass
+        # cannot remember if this was DeltaA0 (probably not) or DeltaA 
+        try:
+            del G.results.DeltaA[crap]
         except:
             pass
     # do not save arrays (since 0.3.0)
@@ -75,6 +86,9 @@ if __name__ == "__main__":
         qscript = None
 
     for directory in args:
+        if not os.path.isdir(directory):
+            logger.debug("%r is not a directory, skipping!", directory)
+            continue
         if not os.path.exists(directory):
             logger.warn("Directory %r not found, skipping!", directory)
             continue        
