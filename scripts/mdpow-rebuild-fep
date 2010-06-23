@@ -48,6 +48,12 @@ def fixFEP(solvent, fepfile, simfile, basedir):
             pass
     # do not save arrays (since 0.3.0)
     G.savedata = False
+    # stride default (since 0.3.2)
+    try:
+        if G.stride is None:
+            G.stride = 1
+    except AttributeError:
+        G.stride = 1
     G.save(fepfile)
     logger.info("Re-created %(fepfile)r for basedir=%(basedir)r", vars())
     return G

@@ -97,7 +97,8 @@ def run_pow(directory, **kwargs):
         return _datastatus[g.contains_corrupted_xvgs()]
 
     gwat, goct = load_gsolv(directory, permissive=kwargs.pop('permissive',False),)
-    transferFE, logPow = mdpow.fep.pOW(goct, gwat, force=kwargs.pop('force', False))
+    transferFE, logPow = mdpow.fep.pOW(goct, gwat, stride=kwargs.pop('stride', None), 
+                                       force=kwargs.pop('force', False))
 
     if datstat(gwat) == 'BAD' or datstat(goct) == 'BAD':
             logger.warning("Possible file corruption: water:%s, octanol:%s",
@@ -193,6 +194,11 @@ if __name__ == "__main__":
     parser.add_option('--force', dest='force',
                       action="store_true",
                       help="force rereading all data [%default]")
+    parser.add_option('-s', '--stride', dest="stride", type='int',
+                      help="Use every N-th datapoint from the original dV/dlambda data. "
+                      "Using a number larger than 1 can significantly reduce memory usage "
+                      "with little impact on the precision of the final output. [%default]",
+                      metavar="N")
     parser.add_option('--ignore-corrupted', dest="permissive",
                       action="store_true",
                       help="skip lines in the md.xvg files that cannot be parsed. "
@@ -201,7 +207,7 @@ if __name__ == "__main__":
                       "WRONG RESULTS CAN OCCUR! USE AT YOUR OWN RISK [%default]")
     parser.set_defaults(plotfile="auto", 
                         outfile="pow.txt", energyfile="energies.txt",
-                        force=False, permissive=False)
+                        force=False, stride=10, permissive=False)
     opts,args = parser.parse_args()
 
     if len(args) == 0:
@@ -223,7 +229,7 @@ if __name__ == "__main__":
             run_pow(directory, plotfile=opts.plotfile, 
                     outfile=realpath_or_none(opts.outfile), 
                     energyfile=realpath_or_none(opts.energyfile),
-                    force=opts.force, permissive=opts.permissive)
+                    force=opts.force, stride=opts.stride, permissive=opts.permissive)
         except (OSError, IOError), err:
             logger.error("Running analysis in directory %r failed: %s", directory, str(err))
         except Exception, err:

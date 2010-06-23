@@ -292,6 +292,8 @@ class Gsolv(object):
                xvg files (see :class:`gromacs.formats.XVG` for details); not that
                *permissive*=``True`` can lead to **wrong results**. Overrides
                the value set in a loaded pickle file. [``False``]
+           *stride*
+               collect every *stride* data line, see :meth:`Gsolv.collect` [1]
            *kwargs*
                other undocumented arguments (see source for the moment)
         """
@@ -347,7 +349,6 @@ class Gsolv(object):
             self.qscript = kwargs.pop('qscript', ['local.sh'])
             self.deffnm = kwargs.pop('deffnm', 'md')
 
-
             self.mdp = kwargs.pop('mdp', fep_templates['production_mdp'])
             self.lambdas = {
                 'coulomb': kwargs.pop('lambda_coulomb', self.schedules['coulomb'].lambdas),
@@ -361,6 +362,9 @@ class Gsolv(object):
 
             self.filename = filename or \
                             os.path.join(self.dirname, self.__class__.__name__ + '.fep')
+
+            # for analysis
+            self.stride = kwargs.pop('stride', 1)
 
             # other variables
             #: Results from the analysis
@@ -507,18 +511,30 @@ class Gsolv(object):
         logger.warning("Vdp correction not implemented: uses 0")
         return self.results.DeltaA.Vdp
 
-    def collect(self, autosave=True):
-        """Collect dV/dl from output"""
+    def collect(self, stride=None, autosave=True):
+        """Collect dV/dl from output.
+
+        :Keywords:
+           *stride*
+              read data every *stride* lines, ``None`` uses the class default
+           *autosave*
+              immediately save the class pickle fep file
+        """
         
         from gromacs.formats import XVG
         def dgdl_xvg(*args):
             return os.path.join(*args + (self.deffnm + '.xvg',))
 
-        logger.info("[%(dirname)s] Finding dgdl xvg files." % vars(self))
+        if not stride is None:
+            self.stride = stride
+
+        logger.info("[%(dirname)s] Finding dgdl xvg files, reading with "
+                    "stride=%(stride)d permissive=%(permissive)r." % vars(self))
         for component, lambdas in self.lambdas.items():
             xvg_files = [dgdl_xvg(self.wdir(component, l)) for l in lambdas]
             self.results.xvg[component] = (numpy.array(lambdas),
-                                           [XVG(xvg, permissive=self.permissive) for xvg in xvg_files])
+                                           [XVG(xvg, permissive=self.permissive, stride=self.stride) 
+                                            for xvg in xvg_files])
         if autosave:
             self.save()
 
@@ -547,7 +563,7 @@ class Gsolv(object):
             self._corrupted[component] = dict(((l, _lencorrupted(xvg)) for l,xvg in izip(lambdas, xvgs)))
         return numpy.any([x for x in corrupted.values()])
 
-    def analyze(self, p=1.0, force=False, autosave=True):
+    def analyze(self, p=1.0, force=False, stride=None, autosave=True):
         """Extract dV/dl from output and calculate dG by TI.
 
         Thermodynamic integration (TI) is performed on the individual component
@@ -602,6 +618,8 @@ class Gsolv(object):
               TODO: should be obtained from equilib sim 
           *force*
               reload raw data even though it is already loaded
+          *stride*
+              read data every *stride* lines, ``None`` uses the class default
           *autosave*
               save to the pickle file when results have been computed
         """
@@ -609,8 +627,10 @@ class Gsolv(object):
         import scipy.integrate
         import numkit.integration
 
+        stride = stride or self.stride
+
         if force or not self.has_dVdl():
-            self.collect(autosave=False)
+            self.collect(stride=stride, autosave=False)
         else:
             logger.info("Analyzing stored data.")
         
@@ -852,7 +872,7 @@ class Goct(Gsolv):
 
 
 
-def pOW(G1, G2, force=False):
+def pOW(G1, G2, **kwargs):
     """Compute water-octanol partition coefficient from two :class:`Gsolv` objects.
 
        transfer free energy from water into octanol
@@ -866,8 +886,12 @@ def pOW(G1, G2, force=False):
            but order does not matter
        *force*
            force rereading of data files even if some data were already stored [False]
+       *stride*
+           analyze every *stride*-th datapoint in the dV/dlambda files
     :Returns: (transfer free energy, log10 of the water-octanol partition coefficient = log Pow)     
     """
+
+    kwargs.setdefault('force', False)
 
     args = (G1, G2)
     if G1.molecule != G2.molecule:
@@ -887,13 +911,13 @@ def pOW(G1, G2, force=False):
         raise ValueError(errmsg)
 
     for G in Gsolvs.values():
-        if force:
-            G.analyze(force=force)
+        if kwargs['force']:
+            G.analyze(**kwargs)
         try:
             G.results.DeltaA.Gibbs
             G.logger_DeltaA0()
         except (KeyError, AttributeError):   # KeyError because results is a AttributeDict
-            G.analyze(force=force)
+            G.analyze(**kwargs)
 
     # x.Gibbs are QuantityWithError so they do error propagation
     transferFE = Gsolvs['octanol'].results.DeltaA.Gibbs - Gsolvs['water'].results.DeltaA.Gibbs 
