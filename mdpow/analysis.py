@@ -45,7 +45,7 @@ Plot results and save to a pdf file with :func:`plot_exp_vs_comp`::
 
   mdpow.analysis.plot_exp_vs_comp(figname="figs/exp_vs_comp.pdf")
 
-By default we also include the SAMPL2 results.
+By default we also include the *SAMPL2* and reference (*Ref*) set results.
 
 Remove the bad runs from ``pow.txt`` and save as ``pow_best.txt``. Then plot
 again (this time excluding the SAMPL2 results)::
@@ -72,10 +72,12 @@ import recsql
 import logging
 logger = logging.getLogger('mdpow.analysis')
 
+#: Defaults paths to ``pow.txt`` for *experiments*, *run01*, *SAMPL2*, and *Ref*.
 DEFAULTS = {
     'experiments': "experimental/targets.csv",
     'run01': "data/run01/pow.txt",
     'SAMPL2': "data/SAMPL2/pow.txt",
+    'Ref': "data/Ref/pow.txt",
     }
 
 def load_data(filename=DEFAULTS['run01'], **kwargs):
@@ -85,8 +87,8 @@ def load_data(filename=DEFAULTS['run01'], **kwargs):
     reST table. Use the ``_header`` and ``_footer`` files if you only
     have the raw output from :program:`mdpow-pow`.
 
-    Furthermore, the column names are important because we use them
-    here.
+    Furthermore, the column names (defined in the header and footer
+    files!) are important because we use them here.
     """
     kwargs['filename'] = filename
     return recsql.SQLarray_fromfile(**kwargs)
@@ -151,28 +153,28 @@ class ExpComp(object):
            *experiments*
                path to ``targets.csv``
            *data*
-               path to ``pow.txt`` of the test set ("run01")
-           *data2*
-               SAMPL2 data ``pow.txt``; set *data2* = ``False`` or ``None`` to
-               exclude set; unset chooses the default
+               list of ``pow.txt`` paths; default are the files for 
+               Ref, run01, SAMPL2 (stored in :data:`DEFAULTS`)
         """
 
         filename = kwargs.pop('experiments', DEFAULTS['experiments'])
         experimental = ExpData(filename=filename)
 
         # data and data2 are quick hacks to load both run01/pow.txt and SAMPL2/pow.txt
-        filename = kwargs.pop('data', DEFAULTS['run01'])
+        filenames = kwargs.pop('data', [DEFAULTS['Ref'], DEFAULTS['run01'], DEFAULTS['SAMPL2']])
+        filename = filenames[0]
+        # add to experimental db
         computed = ComputedData(filename=filename,
                                 name="logPow_computed", 
                                 connection=experimental.data.connection)
-                              # add to experimental db
-        filename = kwargs.get('data2', DEFAULTS['SAMPL2'])
-        if filename:
+
+        for num,filename in enumerate(filenames[1:]):
+            dbname = "logPow_compute_%d" % (num+1)
             compute2 = ComputedData(filename=filename,
-                                    name="logPow_SAMPL2", 
+                                    name=dbname, 
                                     connection=experimental.data.connection)  # add to experimental db
             # merge compute2 into compute (will be dropped after init) via __del__
-            computed.data.merge_table("logPow_SAMPL2")
+            computed.data.merge_table(dbname)
 
         self.database = experimental
         
@@ -244,9 +246,14 @@ class ExpComp(object):
 
 
 def plot_exp_vs_comp(**kwargs):
+    """Plot computed logPow against experimental values.
+
+    Experimental values are stored in the reST table referenced byt
+    the *experiments* keyword. *data* contains a list of ``pow.txt``
+    tables for the calculated values.
+    """
     expcomp = ExpComp(experiments=kwargs.pop("experiments",DEFAULTS['experiments']),
-                      data=kwargs.pop("data",DEFAULTS['run01']),
-                      data2=kwargs.pop("data2",DEFAULTS['SAMPL2']))
+                      data=kwargs.pop("data",[DEFAULTS['Ref'], DEFAULTS['run01'], DEFAULTS['SAMPL2']]))
     return expcomp.plot(**kwargs)
 
 def unpackCSlist(s, convertor=float):
