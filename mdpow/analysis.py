@@ -41,6 +41,9 @@ were changed. We only plot entries for which
 Making graphs
 -------------
 
+Octanol-water partition coefficients
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 Plot results and save to a pdf file with :func:`plot_exp_vs_comp`::
 
   mdpow.analysis.plot_exp_vs_comp(figname="figs/exp_vs_comp.pdf")
@@ -51,17 +54,66 @@ Remove the bad runs from ``pow.txt`` and save as ``pow_best.txt``. Then plot
 again (this time excluding the SAMPL2 results)::
 
    pylab.clf()
-   mdpow.analysis.plot_exp_vs_comp(data="data/run01/pow_best.txt", data2=None, figname='figs/run01/exp_vs_comp_best.pdf')
+   mdpow.analysis.plot_exp_vs_comp(data=["data/run01/pow_best.txt"], figname='figs/run01/exp_vs_comp_best.pdf')
 
-Note that the SAMPL2 results are excluded by setting ``data2=None``.
 
+Solvation energies
+~~~~~~~~~~~~~~~~~~
+
+Plots that compare experimental hydration and octanol-solvation free
+energies to computed values. DeltaG_hyd are only available for a few
+compounds so we only plot a subset of all the compounds that we have
+done.
+
+Experimemtal octanol solvation free energies are computed from
+experimental logPow and DeltaGhyd from
+
+  logPow = -(DeltaGoct-DeltaGhyd)/kT * log10(e)
+
+as
+
+  DeltaGoct = DeltaGhyd - kT*logPow / log10(e)
+
+.. Warning:: In principle the temperature T of the logPow measurement and the
+   DeltaGhyd measurement must be the same. For the time being we just *assume*
+   that both were done at T=300K. Also, the error on DeltaGoct is not
+   calculated properly at the moment, either, because the error on logPow is
+   hard to quantify (based on the logKow_ data). We are estimating the error on
+   kT*logPow/log10(e) error as 1 kcal/mol and combine it with the known
+   experimental error for DeltaGhyd.
+
+Plotting uses the :meth:`GsolvData.plot` method from :class:`GsolvData`::
+
+   from pylab import *
+   clf()
+   G = mdpow.analysis.GsolvData()
+   G.plot('hyd')
+   # adjust things such as manually increasing window ...
+   ylim(-160,20)
+   savefig("figs/ghyd.pdf")
+
+   clf()
+   G.plot('oct')
+   ylim(-140,20)
+   savefig("figs/goct.pdf")
+   
+Right now, the plots are a bit messy but I opted to include the legend to make
+it easier for us to understand the data. I had to manually increase the
+plotting window to make things fit properly.
+
+.. _logKow: http://logkow.cisti.nrc.ca/logkow/
 
 Functions
 ---------
 .. autofunction:: plot_exp_vs_comp
+.. autoclass:: GsolvData
+   :members:
 .. autoclass:: ExpComp
+   :members:
 .. autoclass:: ExpData
+   :members:
 .. autoclass:: ComputedData
+   :members:
 .. autofunction:: load_data
 .. autofunction:: load_exp
 
@@ -382,15 +434,32 @@ class ComputedData(object):
         self.data = self.rawdata
 
 
-# TODO: compute experimental Goct from Ghyd and logPow and compare to computed
-#       Will show clearly for which compounds we should try simulating longer.
+class GsolvData(object):
+    """Solvation energies organized as a database.
 
-class GhydData(object):
-    def __init__(self, exp=DEFAULTS_E['experiments'], 
-                 data=[DEFAULTS_E['Ref'], DEFAULTS_E['run01'], DEFAULTS_E['SAMPL2']],
-                 **kwargs):
+    Plot either "hyd" or "oct" with :meth:`GsolvData.plot`.
+    """
+
+    def __init__(self, exp=DEFAULTS_E['experiments'], **kwargs):
+        """Load experimental and simulation data.
+
+        The defaults load all the data generated in the project so
+        far. See :data:`DEFAULTS_E` in the python code.
+
+        :Keywords:
+         *exp*
+            path to the experimental ``targets.csv`` file
+         *data*
+            list of simulation results (typically stored as reST ``energies.txt``).
+         *temperature*
+            temperature at which experimental measurements of logPow
+            were presumed to be taken; needed for the calculations of
+            the experimental DeltaG_oct from logPow and experimental [300.0]
+            DeltaG_hyd.
+        """
         from mdpow import kBOLTZ
 
+        data = kwargs.pop('data', [DEFAULTS_E['Ref'], DEFAULTS_E['run01'], DEFAULTS_E['SAMPL2']])
         temperature = kwargs.pop('temperature', 300.0)  # in K, used to calculate exp G_oct
 
         experimental = recsql.SQLarray_fromfile(exp)
