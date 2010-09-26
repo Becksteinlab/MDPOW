@@ -5,13 +5,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>mdpow.analysis — Collection of analysis and plotting functions &mdash; MDpow v0.3.1 documentation</title>
+    <title>mdpow.analysis — Collection of analysis and plotting functions &mdash; MDpow v0.3.3 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '#',
-        VERSION:     '0.3.1',
+        URL_ROOT:    '',
+        VERSION:     '0.3.3',
         COLLAPSE_MODINDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -19,7 +19,7 @@
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="MDpow v0.3.1 documentation" href="index.html" />
+    <link rel="top" title="MDpow v0.3.3 documentation" href="index.html" />
     <link rel="next" title="Helper modules" href="utilities.html" />
     <link rel="prev" title="mdpow.fep – Calculate free energy of solvation" href="fep.html" /> 
   </head>
@@ -39,7 +39,7 @@
         <li class="right" >
           <a href="fep.html" title="mdpow.fep – Calculate free energy of solvation"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">MDpow v0.3.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow v0.3.3 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -77,25 +77,119 @@ were changed. We only plot entries for which</p>
 </div>
 <div class="section" id="making-graphs">
 <h2>Making graphs<a class="headerlink" href="#making-graphs" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="octanol-water-partition-coefficients">
+<h3>Octanol-water partition coefficients<a class="headerlink" href="#octanol-water-partition-coefficients" title="Permalink to this headline">¶</a></h3>
 <p>Plot results and save to a pdf file with <a title="mdpow.analysis.plot_exp_vs_comp" class="reference internal" href="#mdpow.analysis.plot_exp_vs_comp"><tt class="xref docutils literal"><span class="pre">plot_exp_vs_comp()</span></tt></a>:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">mdpow</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">plot_exp_vs_comp</span><span class="p">(</span><span class="n">figname</span><span class="o">=</span><span class="s">&quot;figs/exp_vs_comp.pdf&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>By default we also include the SAMPL2 results.</p>
+<p>By default we also include the <em>SAMPL2</em> and reference (<em>Ref</em>) set results.</p>
 <p>Remove the bad runs from <tt class="docutils literal"><span class="pre">pow.txt</span></tt> and save as <tt class="docutils literal"><span class="pre">pow_best.txt</span></tt>. Then plot
 again (this time excluding the SAMPL2 results):</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">pylab</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
-<span class="n">mdpow</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">plot_exp_vs_comp</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="s">&quot;data/run01/pow_best.txt&quot;</span><span class="p">,</span> <span class="n">data2</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">figname</span><span class="o">=</span><span class="s">&#39;figs/run01/exp_vs_comp_best.pdf&#39;</span><span class="p">)</span>
+<span class="n">mdpow</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">plot_exp_vs_comp</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="s">&quot;data/run01/pow_best.txt&quot;</span><span class="p">],</span> <span class="n">figname</span><span class="o">=</span><span class="s">&#39;figs/run01/exp_vs_comp_best.pdf&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Note that the SAMPL2 results are excluded by setting <tt class="docutils literal"><span class="pre">data2=None</span></tt>.</p>
+</div>
+<div class="section" id="solvation-energies">
+<h3>Solvation energies<a class="headerlink" href="#solvation-energies" title="Permalink to this headline">¶</a></h3>
+<p>Plots that compare experimental hydration and octanol-solvation free
+energies to computed values. DeltaG_hyd are only available for a few
+compounds so we only plot a subset of all the compounds that we have
+done.</p>
+<p>Experimemtal octanol solvation free energies are computed from
+experimental logPow and DeltaGhyd from</p>
+<blockquote>
+logPow = -(DeltaGoct-DeltaGhyd)/kT * log10(e)</blockquote>
+<p>as</p>
+<blockquote>
+DeltaGoct = DeltaGhyd - kT*logPow / log10(e)</blockquote>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">In principle the temperature T of the logPow measurement and the
+DeltaGhyd measurement must be the same. For the time being we just <em>assume</em>
+that both were done at T=300K. Also, the error on DeltaGoct is not
+calculated properly at the moment, either, because the error on logPow is
+hard to quantify (based on the <a class="reference external" href="http://logkow.cisti.nrc.ca/logkow/">logKow</a> data). We are estimating the error on
+kT*logPow/log10(e) error as 1 kcal/mol and combine it with the known
+experimental error for DeltaGhyd.</p>
+</div>
+<p>Plotting uses the <a title="mdpow.analysis.GsolvData.plot" class="reference internal" href="#mdpow.analysis.GsolvData.plot"><tt class="xref docutils literal"><span class="pre">GsolvData.plot()</span></tt></a> method from <a title="mdpow.analysis.GsolvData" class="reference internal" href="#mdpow.analysis.GsolvData"><tt class="xref docutils literal"><span class="pre">GsolvData</span></tt></a>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">pylab</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="n">clf</span><span class="p">()</span>
+<span class="n">G</span> <span class="o">=</span> <span class="n">mdpow</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">GsolvData</span><span class="p">()</span>
+<span class="n">G</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s">&#39;hyd&#39;</span><span class="p">)</span>
+<span class="c"># adjust things such as manually increasing window ...</span>
+<span class="n">ylim</span><span class="p">(</span><span class="o">-</span><span class="mi">160</span><span class="p">,</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">savefig</span><span class="p">(</span><span class="s">&quot;figs/ghyd.pdf&quot;</span><span class="p">)</span>
+
+<span class="n">clf</span><span class="p">()</span>
+<span class="n">G</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s">&#39;oct&#39;</span><span class="p">)</span>
+<span class="n">ylim</span><span class="p">(</span><span class="o">-</span><span class="mi">140</span><span class="p">,</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">savefig</span><span class="p">(</span><span class="s">&quot;figs/goct.pdf&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Right now, the plots are a bit messy but I opted to include the legend to make
+it easier for us to understand the data. I had to manually increase the
+plotting window to make things fit properly.</p>
+</div>
 </div>
 <div class="section" id="functions">
 <h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="mdpow.analysis.plot_exp_vs_comp">
 <tt class="descclassname">mdpow.analysis.</tt><tt class="descname">plot_exp_vs_comp</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.analysis.plot_exp_vs_comp" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Plot computed logPow against experimental values.</p>
+<p>Experimental values are stored in the reST table referenced byt
+the <em>experiments</em> keyword. <em>data</em> contains a list of <tt class="docutils literal"><span class="pre">pow.txt</span></tt>
+tables for the calculated values.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="mdpow.analysis.GsolvData">
+<em class="property">class </em><tt class="descclassname">mdpow.analysis.</tt><tt class="descname">GsolvData</tt><big>(</big><em>exp='experimental/targets.csv'</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.analysis.GsolvData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solvation energies organized as a database.</p>
+<p>Plot either &#8220;hyd&#8221; or &#8220;oct&#8221; with <a title="mdpow.analysis.GsolvData.plot" class="reference internal" href="#mdpow.analysis.GsolvData.plot"><tt class="xref docutils literal"><span class="pre">GsolvData.plot()</span></tt></a>.</p>
+<p>Load experimental and simulation data.</p>
+<p>The defaults load all the data generated in the project so
+far. See <tt class="xref docutils literal"><span class="pre">DEFAULTS_E</span></tt> in the python code.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Keywords:</th><td class="field-body"><dl class="first last docutils">
+<dt><em>exp</em></dt>
+<dd><p class="first last">path to the experimental <tt class="docutils literal"><span class="pre">targets.csv</span></tt> file</p>
+</dd>
+<dt><em>data</em></dt>
+<dd><p class="first last">list of simulation results (typically stored as reST <tt class="docutils literal"><span class="pre">energies.txt</span></tt>).</p>
+</dd>
+<dt><em>temperature</em></dt>
+<dd><p class="first last">temperature at which experimental measurements of logPow
+were presumed to be taken; needed for the calculations of
+the experimental DeltaG_oct from logPow and experimental [300.0]
+DeltaG_hyd.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="mdpow.analysis.GsolvData.plot">
+<tt class="descname">plot</tt><big>(</big><em>mode</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.analysis.GsolvData.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot individual data points with legend.</p>
+<dl class="docutils">
+<dt><em>mode</em></dt>
+<dd>&#8220;hyd&#8221; or &#8220;oct&#8221;</dd>
+<dt><em>figname</em></dt>
+<dd>write figure to <em>filename</em>; suffix determines file type</dd>
+<dt><em>ymin</em>, <em>ymax</em></dt>
+<dd>limits of the plot in the y direction (=computational results)</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
 
 <dl class="class">
 <dt id="mdpow.analysis.ExpComp">
@@ -109,17 +203,41 @@ again (this time excluding the SAMPL2 results):</p>
 <dd><p class="first last">path to <tt class="docutils literal"><span class="pre">targets.csv</span></tt></p>
 </dd>
 <dt><em>data</em></dt>
-<dd><p class="first last">path to <tt class="docutils literal"><span class="pre">pow.txt</span></tt> of the test set (&#8220;run01&#8221;)</p>
-</dd>
-<dt><em>data2</em></dt>
-<dd><p class="first last">SAMPL2 data <tt class="docutils literal"><span class="pre">pow.txt</span></tt>; set <em>data2</em> = <tt class="xref docutils literal"><span class="pre">False</span></tt> or <tt class="xref docutils literal"><span class="pre">None</span></tt> to
-exclude set; unset chooses the default</p>
+<dd><p class="first last">list of <tt class="docutils literal"><span class="pre">pow.txt</span></tt> paths; default are the files for 
+Ref, run01, SAMPL2 (stored in <tt class="xref docutils literal"><span class="pre">DEFAULTS_POW</span></tt>)</p>
 </dd>
 </dl>
 </td>
 </tr>
 </tbody>
 </table>
+<dl class="method">
+<dt id="mdpow.analysis.ExpComp.plot">
+<tt class="descname">plot</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.analysis.ExpComp.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot individual data points with legend.</p>
+<p>By default, the following should work:</p>
+<ul>
+<li><p class="first">Run from the top <tt class="docutils literal"><span class="pre">mdpow</span></tt> directory.</p>
+</li>
+<li><p class="first">Prepare <tt class="docutils literal"><span class="pre">data/run01/pow.txt</span></tt> (must prepend header and append
+footer so that it is proper table). See <a title="mdpow.analysis.load_data" class="reference internal" href="#mdpow.analysis.load_data"><tt class="xref docutils literal"><span class="pre">load_data()</span></tt></a>.</p>
+</li>
+<li><p class="first">Prepare <tt class="docutils literal"><span class="pre">experimental/targets.csv</span></tt> if it does not exist or if
+something changed. See <a title="mdpow.analysis.load_exp" class="reference internal" href="#mdpow.analysis.load_exp"><tt class="xref docutils literal"><span class="pre">load_exp()</span></tt></a> for details.</p>
+<blockquote>
+<dl class="docutils">
+<dt><em>figname</em></dt>
+<dd><p class="first last">write figure to <em>filename</em>; suffix determines file type</p>
+</dd>
+<dt><em>ymin</em>, <em>ymax</em></dt>
+<dd><p class="first last">limits of the plot in the y direction (=computational results)</p>
+</dd>
+</dl>
+</blockquote>
+</li>
+</ul>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="class">
@@ -155,8 +273,8 @@ here.</p>
 <p>The data file is typically <tt class="docutils literal"><span class="pre">pow.txt</span></tt>. It <em>must</em> contain a proper
 reST table. Use the <tt class="docutils literal"><span class="pre">_header</span></tt> and <tt class="docutils literal"><span class="pre">_footer</span></tt> files if you only
 have the raw output from <strong>mdpow-pow</strong>.</p>
-<p>Furthermore, the column names are important because we use them
-here.</p>
+<p>Furthermore, the column names (defined in the header and footer
+files!) are important because we use them here.</p>
 </dd></dl>
 
 <dl class="function">
@@ -181,7 +299,11 @@ here.</p>
             <ul>
 <li><a class="reference external" href="#"><tt class="docutils literal"><span class="pre">mdpow.analysis</span></tt> &#8212; Collection of analysis and plotting functions</a><ul>
 <li><a class="reference external" href="#prepare-data">Prepare data</a></li>
-<li><a class="reference external" href="#making-graphs">Making graphs</a></li>
+<li><a class="reference external" href="#making-graphs">Making graphs</a><ul>
+<li><a class="reference external" href="#octanol-water-partition-coefficients">Octanol-water partition coefficients</a></li>
+<li><a class="reference external" href="#solvation-energies">Solvation energies</a></li>
+</ul>
+</li>
 <li><a class="reference external" href="#functions">Functions</a></li>
 </ul>
 </li>
@@ -230,12 +352,12 @@ here.</p>
         <li class="right" >
           <a href="fep.html" title="mdpow.fep – Calculate free energy of solvation"
              >previous</a> |</li>
-        <li><a href="index.html">MDpow v0.3.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow v0.3.3 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
       &copy; Copyright 2010, Oliver Beckstein and Bogdan Iorga.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.7.
     </div>
   </body>
 </html>

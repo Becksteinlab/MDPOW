@@ -10,6 +10,7 @@ mdpow mod init.html
 mdpow.fep.FEPschedule.mdp_dict attribute fep.html
 mdpow.config.templates data utilities.html
 mdpow.fep.Gsolv.correlationtime method fep.html
+mdpow.analysis.ExpComp.plot method analysis.html
 mdpow.equil.Simulation.make_paths_relative method equil.html
 mdpow.fep.N_AVOGADRO data fep.html
 mdpow.fep.Gsolv.wdir method fep.html
@@ -51,6 +52,7 @@ mdpow.fep.Gsolv.tasklabel method fep.html
 mdpow.analysis.load_exp function analysis.html
 mdpow.equil.Simulation.energy_minimize method equil.html
 mdpow.fep.Gsolv.Vdp method fep.html
+mdpow.analysis.GsolvData.plot method analysis.html
 mdpow.config.topfiles data utilities.html
 mdpow.equil.Simulation.MD_relaxed method equil.html
 mdpow.fep.Goct class fep.html
@@ -62,6 +64,7 @@ mdpow.equil.WaterSimulation class equil.html
 mdpow.fep.Gsolv.analyze method fep.html
 mdpow.fep.FEPschedule class fep.html
 mdpow.fep.Gsolv class fep.html
+mdpow.analysis.GsolvData class analysis.html
 mdpow.fep.pOW function fep.html
 mdpow.config.get_templates function utilities.html
 mdpow.fep.Gsolv.logger_DeltaA0 method fep.html

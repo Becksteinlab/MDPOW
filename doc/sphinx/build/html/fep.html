@@ -5,13 +5,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>mdpow.fep – Calculate free energy of solvation &mdash; MDpow v0.3.1 documentation</title>
+    <title>mdpow.fep – Calculate free energy of solvation &mdash; MDpow v0.3.3 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '#',
-        VERSION:     '0.3.1',
+        URL_ROOT:    '',
+        VERSION:     '0.3.3',
         COLLAPSE_MODINDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -19,7 +19,7 @@
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="MDpow v0.3.1 documentation" href="index.html" />
+    <link rel="top" title="MDpow v0.3.3 documentation" href="index.html" />
     <link rel="next" title="mdpow.analysis — Collection of analysis and plotting functions" href="analysis.html" />
     <link rel="prev" title="mdpow.equil — Setting up and running equilibrium MD" href="equil.html" /> 
   </head>
@@ -39,7 +39,7 @@
         <li class="right" >
           <a href="equil.html" title="mdpow.equil — Setting up and running equilibrium MD"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">MDpow v0.3.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow v0.3.3 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -213,6 +213,9 @@ xvg files (see <a title="(in GromacsWrapper v0.1)" class="reference external" hr
 <em>permissive*=``True`` can lead to **wrong results*</em>. Overrides
 the value set in a loaded pickle file. [<tt class="xref docutils literal"><span class="pre">False</span></tt>]</p>
 </dd>
+<dt><em>stride</em></dt>
+<dd><p class="first last">collect every <em>stride</em> data line, see <a title="mdpow.fep.Gsolv.collect" class="reference internal" href="#mdpow.fep.Gsolv.collect"><tt class="xref docutils literal"><span class="pre">Gsolv.collect()</span></tt></a> [1]</p>
+</dd>
 <dt><em>kwargs</em></dt>
 <dd><p class="first last">other undocumented arguments (see source for the moment)</p>
 </dd>
@@ -257,7 +260,7 @@ thermodynamic calculations.</p>
 
 <dl class="method">
 <dt id="mdpow.fep.Gsolv.analyze">
-<tt class="descname">analyze</tt><big>(</big><em>p=1.0</em>, <em>force=False</em>, <em>autosave=True</em><big>)</big><a class="headerlink" href="#mdpow.fep.Gsolv.analyze" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">analyze</tt><big>(</big><em>p=1.0</em>, <em>force=False</em>, <em>stride=None</em>, <em>autosave=True</em><big>)</big><a class="headerlink" href="#mdpow.fep.Gsolv.analyze" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extract dV/dl from output and calculate dG by TI.</p>
 <p>Thermodynamic integration (TI) is performed on the individual component
 window calculation (typically the Coulomb and the VDW part, DeltaA_coul
@@ -273,7 +276,7 @@ switched on and lambda=1 as switched off.</p>
 <p>Data are stored in <tt class="xref docutils literal"><span class="pre">Gsolv.results</span></tt>.</p>
 <p>The dV/dlambda graphs are integrated with the composite Simpson&#8217;s rule
 (and if the number of datapoints are even, the first interval is
-evaluated with the trapezoidal rule); see <a title="(in SciPy v0.8.dev)" class="reference external" href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.simps.html#scipy.integrate.simps"><tt class="xref docutils literal"><span class="pre">scipy.integrate.simps()</span></tt></a>
+evaluated with the trapezoidal rule); see <tt class="xref docutils literal"><span class="pre">scipy.integrate.simps()</span></tt>
 for details). Note that this implementation of Simpson&#8217;s rule does not
 require equidistant spacing on the lambda axis.</p>
 <p>For the Coulomb part using Simpson&#8217;s rule has been shown to produce
@@ -320,6 +323,9 @@ TODO: should be obtained from equilib sim</p>
 <dt><em>force</em></dt>
 <dd><p class="first last">reload raw data even though it is already loaded</p>
 </dd>
+<dt><em>stride</em></dt>
+<dd><p class="first last">read data every <em>stride</em> lines, <tt class="xref docutils literal"><span class="pre">None</span></tt> uses the class default</p>
+</dd>
 <dt><em>autosave</em></dt>
 <dd><p class="first last">save to the pickle file when results have been computed</p>
 </dd>
@@ -337,8 +343,25 @@ TODO: should be obtained from equilib sim</p>
 
 <dl class="method">
 <dt id="mdpow.fep.Gsolv.collect">
-<tt class="descname">collect</tt><big>(</big><em>autosave=True</em><big>)</big><a class="headerlink" href="#mdpow.fep.Gsolv.collect" title="Permalink to this definition">¶</a></dt>
-<dd>Collect dV/dl from output</dd></dl>
+<tt class="descname">collect</tt><big>(</big><em>stride=None</em>, <em>autosave=True</em><big>)</big><a class="headerlink" href="#mdpow.fep.Gsolv.collect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collect dV/dl from output.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Keywords:</th><td class="field-body"><dl class="first last docutils">
+<dt><em>stride</em></dt>
+<dd><p class="first last">read data every <em>stride</em> lines, <tt class="xref docutils literal"><span class="pre">None</span></tt> uses the class default</p>
+</dd>
+<dt><em>autosave</em></dt>
+<dd><p class="first last">immediately save the class pickle fep file</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="mdpow.fep.Gsolv.contains_corrupted_xvgs">
@@ -570,6 +593,9 @@ xvg files (see <a title="(in GromacsWrapper v0.1)" class="reference external" hr
 <em>permissive*=``True`` can lead to **wrong results*</em>. Overrides
 the value set in a loaded pickle file. [<tt class="xref docutils literal"><span class="pre">False</span></tt>]</p>
 </dd>
+<dt><em>stride</em></dt>
+<dd><p class="first last">collect every <em>stride</em> data line, see <a title="mdpow.fep.Gsolv.collect" class="reference internal" href="#mdpow.fep.Gsolv.collect"><tt class="xref docutils literal"><span class="pre">Gsolv.collect()</span></tt></a> [1]</p>
+</dd>
 <dt><em>kwargs</em></dt>
 <dd><p class="first last">other undocumented arguments (see source for the moment)</p>
 </dd>
@@ -584,7 +610,6 @@ the value set in a loaded pickle file. [<tt class="xref docutils literal"><span 
 <dt id="mdpow.fep.Goct">
 <em class="property">class </em><tt class="descclassname">mdpow.fep.</tt><tt class="descname">Goct</tt><big>(</big><em>molecule=None</em>, <em>top=None</em>, <em>struct=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.fep.Goct" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets up and analyses MD to obtain the solvation free energy of a solute in octanol.</p>
-<p><strong>NOT ENABLED YET</strong>:</p>
 <p>The <em>coulomb</em> lambda schedule is enhanced compared to water as the initial
 part of the dV/dl curve is quite sensitive. By adding two additional points
 we hope to reduce the overall error on the dis-charging free energy.</p>
@@ -651,6 +676,9 @@ xvg files (see <a title="(in GromacsWrapper v0.1)" class="reference external" hr
 <em>permissive*=``True`` can lead to **wrong results*</em>. Overrides
 the value set in a loaded pickle file. [<tt class="xref docutils literal"><span class="pre">False</span></tt>]</p>
 </dd>
+<dt><em>stride</em></dt>
+<dd><p class="first last">collect every <em>stride</em> data line, see <a title="mdpow.fep.Gsolv.collect" class="reference internal" href="#mdpow.fep.Gsolv.collect"><tt class="xref docutils literal"><span class="pre">Gsolv.collect()</span></tt></a> [1]</p>
+</dd>
 <dt><em>kwargs</em></dt>
 <dd><p class="first last">other undocumented arguments (see source for the moment)</p>
 </dd>
@@ -663,7 +691,7 @@ the value set in a loaded pickle file. [<tt class="xref docutils literal"><span 
 
 <dl class="function">
 <dt id="mdpow.fep.pOW">
-<tt class="descclassname">mdpow.fep.</tt><tt class="descname">pOW</tt><big>(</big><em>G1</em>, <em>G2</em>, <em>force=False</em><big>)</big><a class="headerlink" href="#mdpow.fep.pOW" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">mdpow.fep.</tt><tt class="descname">pOW</tt><big>(</big><em>G1</em>, <em>G2</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.fep.pOW" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute water-octanol partition coefficient from two <a title="mdpow.fep.Gsolv" class="reference internal" href="#mdpow.fep.Gsolv"><tt class="xref docutils literal"><span class="pre">Gsolv</span></tt></a> objects.</p>
 <blockquote>
 <dl class="docutils">
@@ -684,6 +712,9 @@ but order does not matter</p>
 </dd>
 <dt><em>force</em></dt>
 <dd><p class="first last">force rereading of data files even if some data were already stored [False]</p>
+</dd>
+<dt><em>stride</em></dt>
+<dd><p class="first last">analyze every <em>stride</em>-th datapoint in the dV/dlambda files</p>
 </dd>
 </dl>
 </td>
@@ -818,12 +849,12 @@ use preprocessed topology from <tt class="docutils literal"><span class="pre">gr
         <li class="right" >
           <a href="equil.html" title="mdpow.equil — Setting up and running equilibrium MD"
              >previous</a> |</li>
-        <li><a href="index.html">MDpow v0.3.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow v0.3.3 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
       &copy; Copyright 2010, Oliver Beckstein and Bogdan Iorga.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.4.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.7.
     </div>
   </body>
 </html>
