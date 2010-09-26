@@ -338,6 +338,13 @@ def get_version_tuple():
     """Return current package version as a (MAJOR,MINOR,PATCHLEVEL)."""
     return tuple(VERSION)
 
+
+#: Avogadro's constant |NA| in mol^-1 (`NA NIST value`_).
+N_AVOGADRO = 6.02214179e23
+#: Boltzmann's constant |kB| in kJ mol^-1 (`kB NIST value`_).
+kBOLTZ = 1.3806504e-23 *1e-3 * N_AVOGADRO
+
+
 # commented out so that one can get at version without importing
 # GromacsWrapper etc
 #import fep, equil

@@ -97,8 +97,14 @@ Additional objects that support :class:`mdpow.fep.Gsolv`.
 .. autofunction:: kcal_to_kJ
 .. autofunction:: kJ_to_kcal
 
-.. autodata:: N_AVOGADRO
-.. autodata:: kBOLTZ
+.. data:: N_AVOGADRO
+
+          Avogadro's constant |NA| in mol^-1 (`NA NIST value`_).
+
+.. data:: kBOLTZ
+
+          Boltzmann's constant |kB| in kJ mol^-1 (`kB NIST value`_).
+
 .. autodata:: fep_templates
 
 .. |NA| replace:: *N*\ :sub:`A`
@@ -134,12 +140,7 @@ import logging
 logger = logging.getLogger('mdpow.fep')
 
 import config
-
-
-#: Avogadro's constant |NA| in mol^-1 (`NA NIST value`_).
-N_AVOGADRO = 6.02214179e23
-#: Boltzmann's constant |kB| in kJ mol^-1 (`kB NIST value`_).
-kBOLTZ = 1.3806504e-23 *1e-3 * N_AVOGADRO
+from mdpow import kBOLTZ, N_AVOGADRO
 
 def molar_to_nm3(c):
     """Convert a concentration in Molar to nm^-3."""

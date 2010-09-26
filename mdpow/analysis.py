@@ -381,9 +381,17 @@ class ComputedData(object):
         self.rawdata = recsql.SQLarray_fromfile(**kwargs)
         self.data = self.rawdata
 
+
+# TODO: compute experimental Goct from Ghyd and logPow and compare to computed
+#       Will show clearly for which compounds we should try simulating longer.
+
 class GhydData(object):
     def __init__(self, exp=DEFAULTS_E['experiments'], 
-                 data=[DEFAULTS_E['Ref'], DEFAULTS_E['run01'], DEFAULTS_E['SAMPL2']]):
+                 data=[DEFAULTS_E['Ref'], DEFAULTS_E['run01'], DEFAULTS_E['SAMPL2']],
+                 **kwargs):
+        from mdpow import kBOLTZ
+
+        temperature = kwargs.pop('temperature', 300.0)  # in K, used to calculate exp G_oct
 
         experimental = recsql.SQLarray_fromfile(exp)
 
@@ -406,16 +414,29 @@ class GhydData(object):
 
         # Table for all hydration free energies with experimental values (unit: kJ/mol)
         # note: converting Ghyd(kcal/mol) into kJ/mol !!!
+        # logPow = -(Goct-Ghyd)/kT * log10(e) ->   Goct = Ghyd - kT*logPow / log10(e)
+        #
+        # for error estimate I'd need the logPow error... but that requires _init_stats()...
+        # so for a start I estimate it as 1 kcal/mol...
+        kTlog10e = kBOLTZ*temperature/numpy.log10(numpy.e)
         self.database = self.rawdb.selection(
-            "SELECT no, CommonName, Ghyd * 4.18400 AS ExpGhyd, IFNULL(error_Ghyd, 0.0) * 4.18400 AS ExpErr, "
-            "       C.DeltaG0 AS CompGhyd, C.errDG0 AS CompErr, C.directory AS comment "
-            "FROM __self__ LEFT JOIN energies_computed AS C ON itp_name = C.molecule "
-            "WHERE C.solvent = 'water' AND NOT Ghyd ISNULL")
+            "SELECT no, CommonName, Ghyd * 4.184 AS ExpGhyd, IFNULL(error_Ghyd, 0.0) * 4.184 AS ExpGhydErr, "
+            "       Ghyd*4.184 - ? * E.logPow AS ExpGoct, E.logPow AS ExpLogPow, "
+            "       sqrt(pow(IFNULL(error_Ghyd, 0.0)*4.184,2) + pow(4.184,2))  AS ExpGoctErr, "
+            "       W.DeltaG0 AS CompGhyd, W.errDG0 AS CompGhydErr, "
+            "       O.DeltaG0 AS CompGoct, O.errDG0 AS CompGoctErr, "
+            "       W.directory AS comment "
+            "FROM __self__ AS E LEFT JOIN energies_computed AS W ON itp_name = W.molecule "
+            "                   LEFT JOIN energies_computed AS O ON itp_name = O.molecule "
+            "WHERE W.solvent = 'water' AND O.solvent = 'octanol' AND NOT E.Ghyd ISNULL",
+            (kTlog10e,))
 
-        
-    def plot(self, **kwargs):
+
+    def plot(self, mode, **kwargs):
         """Plot individual data points with legend.
 
+           *mode*
+               "hyd" or "oct"
            *figname*
                write figure to *filename*; suffix determines file type
            *ymin*, *ymax*
@@ -432,7 +453,12 @@ class GhydData(object):
         # default font
         matplotlib.rc('font', size=10)
 
-        c = self.database.SELECT("CommonName,comment,ExpGhyd,ExpErr,CompGhyd,CompErr")
+        mode = mode.lower()
+        if not mode in ("hyd","oct"):
+            raise ValueError("mode must be either 'hyd' or 'oct', not %r" % mode)
+        fields = "CommonName, comment, ExpG%(mode)s AS ExpG, ExpG%(mode)sErr AS ExpErr, CompG%(mode)s AS CompG, CompG%(mode)sErr AS CompErr" % vars()
+        c = self.database.SELECT(fields)
+        ExpG = "ExpG%(mode)s" % vars()
 
         norm = colors.normalize(0,len(c))
         for i, (name,comment,exp,errexp,comp,errcomp) in enumerate(c):
@@ -447,10 +473,11 @@ class GhydData(object):
 
         legend(ncol=3, numpoints=1, loc='lower right', prop={'size':8})
 
-        _plot_ideal(X=self.database.limits('ExpGhyd'), dy=kwargs.pop('dy', 4.184))
+        # 1 kcal/mol = 4.184 kJ/mol band
+        _plot_ideal(X=self.database.limits(ExpG), dy=kwargs.pop('dy', 4.184))
         
-        xlabel(r'experimental $\Delta G_{\rm hyd}$ (kJ/mol)')
-        ylabel(r'computed $\Delta G_{\rm hyd}$ (kJ/mol)')
+        xlabel(r'experimental $\Delta G_{\rm %(mode)s}$ (kJ/mol)' % vars())
+        ylabel(r'computed $\Delta G_{\rm %(mode)s}$ (kJ/mol)' % vars())
         if figname:
             savefig(figname)
             logger.info("Wrote plot to %r", figname)
