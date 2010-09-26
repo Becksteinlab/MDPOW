@@ -73,14 +73,22 @@ import logging
 logger = logging.getLogger('mdpow.analysis')
 
 #: Defaults paths to ``pow.txt`` for *experiments*, *run01*, *SAMPL2*, and *Ref*.
-DEFAULTS = {
+DEFAULTS_POW = {
     'experiments': "experimental/targets.csv",
     'run01': "data/run01/pow.txt",
     'SAMPL2': "data/SAMPL2/pow.txt",
     'Ref': "data/Ref/pow.txt",
     }
 
-def load_data(filename=DEFAULTS['run01'], **kwargs):
+DEFAULTS_E = {
+    'experiments': "experimental/targets.csv",
+    'run01': "data/run01/energies.txt",
+    'SAMPL2': "data/SAMPL2/energies.txt",
+    'Ref': "data/Ref/energies.txt",
+    }
+
+
+def load_data(filename=DEFAULTS_POW['run01'], **kwargs):
     """Load computed POW table and return :class:`recsql.SQLarray`.
 
     The data file is typically ``pow.txt``. It *must* contain a proper
@@ -93,7 +101,7 @@ def load_data(filename=DEFAULTS['run01'], **kwargs):
     kwargs['filename'] = filename
     return recsql.SQLarray_fromfile(**kwargs)
 
-def load_exp(filename=DEFAULTS['experiments'], **kwargs):
+def load_exp(filename=DEFAULTS_POW['experiments'], **kwargs):
     """Load experimental values table and return :class:`recsql.SQLarray`.
 
     To obtain ``targets.csv`` export ``targets.numbers`` in
@@ -110,6 +118,8 @@ def _plot_ideal(X=None, dy=0.5):
     # plot perfect agreement (solid) and 'within 0.5 units'
     if X is None:
         X = array([-6,9])
+    else:
+        X = numpy.asarray(X)
     Y = X
     plot(X, Y-dy, 'k--', X, Y+dy, 'k--', X,Y,'k-')
 
@@ -154,14 +164,13 @@ class ExpComp(object):
                path to ``targets.csv``
            *data*
                list of ``pow.txt`` paths; default are the files for 
-               Ref, run01, SAMPL2 (stored in :data:`DEFAULTS`)
+               Ref, run01, SAMPL2 (stored in :data:`DEFAULTS_POW`)
         """
 
-        filename = kwargs.pop('experiments', DEFAULTS['experiments'])
+        filename = kwargs.pop('experiments', DEFAULTS_POW['experiments'])
         experimental = ExpData(filename=filename)
 
-        # data and data2 are quick hacks to load both run01/pow.txt and SAMPL2/pow.txt
-        filenames = kwargs.pop('data', [DEFAULTS['Ref'], DEFAULTS['run01'], DEFAULTS['SAMPL2']])
+        filenames = kwargs.pop('data', [DEFAULTS_POW['Ref'], DEFAULTS_POW['run01'], DEFAULTS_POW['SAMPL2']])
         filename = filenames[0]
         # add to experimental db
         computed = ComputedData(filename=filename,
@@ -207,12 +216,12 @@ class ExpComp(object):
             """CommonName AS name, directory AS comment, DeltaG0, """
             """mean,std,min,max,"""
             """__self__.logPow AS exp, C.logPow AS comp, C.errlogP AS errcomp""", 
-            """LEFT JOIN logPow_computed AS C using(itp_name) """
+            """LEFT JOIN logPow_computed AS C USING(itp_name) """
             """WHERE NOT (comp ISNULL OR C.itp_name ISNULL) """
             """GROUP BY comment ORDER BY no""")
 
         # need large figure for the plot
-        matplotlib.rc('figure', figsize=kwargs.pop('figsize', (8,10)))
+        matplotlib.rc('figure', figsize=kwargs.pop('figsize', (8,12)))
         # default font
         matplotlib.rc('font', size=10)
 
@@ -252,8 +261,8 @@ def plot_exp_vs_comp(**kwargs):
     the *experiments* keyword. *data* contains a list of ``pow.txt``
     tables for the calculated values.
     """
-    expcomp = ExpComp(experiments=kwargs.pop("experiments",DEFAULTS['experiments']),
-                      data=kwargs.pop("data",[DEFAULTS['Ref'], DEFAULTS['run01'], DEFAULTS['SAMPL2']]))
+    expcomp = ExpComp(experiments=kwargs.pop("experiments",DEFAULTS_POW['experiments']),
+                      data=kwargs.pop("data",[DEFAULTS_POW['Ref'], DEFAULTS_POW['run01'], DEFAULTS_POW['SAMPL2']]))
     return expcomp.plot(**kwargs)
 
 def unpackCSlist(s, convertor=float):
@@ -270,7 +279,7 @@ class ExpData(object):
     with statistics as :attr:`ExpData.data` (which is a
     :class:`recsql.SQLarray`).
     """
-    def __init__(self, filename=DEFAULTS['experiments'], **kwargs):
+    def __init__(self, filename=DEFAULTS_POW['experiments'], **kwargs):
         """Load experimental values table and return :class:`recsql.SQLarray`.
 
         To obtain ``targets.csv`` export ``targets.numbers`` in
@@ -282,7 +291,7 @@ class ExpData(object):
         # load original data from the targets list and set up database
         self.rawdata = recsql.SQLarray_fromfile(**kwargs)
         self.statistics = {}
-        self.stats()  # generate stats and load statistics{}
+        self._init_stats()  # generate stats and load statistics{}
         # add 'stats' table to the main database (via connection)
         # (must be kept around in self or the table gets gc/del'ed immediately again)
         self.__statsdb = recsql.SQLarray(
@@ -299,10 +308,11 @@ class ExpData(object):
         # or 
         #   self.rawdata.selection('SELECT * FROM __experiments')
 
-    def stats(self):
+    def _init_stats(self):
         """Statistics calculated from the experimental values.
 
-        :Arguments: *exp* is the database loaded with :func:`load_exp`.
+        Sets :attr:`ExpData._stats_columns` and
+        :attr:`ExpData._stats_generator`.
 
         :Returns: dictionary; each entry is a numpy.array with the order
                   corresponding to the order of compounds listed n the key
@@ -356,7 +366,7 @@ class ComputedData(object):
     Access via :attr:`ComputedData.data`.
     """
 
-    def __init__(self, filename=DEFAULTS['run01'], **kwargs):
+    def __init__(self, filename=DEFAULTS_POW['run01'], **kwargs):
         """Load computed POW table and return :class:`recsql.SQLarray`.
 
         The data file is typically ``pow.txt``. It *must* contain a proper
@@ -370,3 +380,80 @@ class ComputedData(object):
         self.filename = filename
         self.rawdata = recsql.SQLarray_fromfile(**kwargs)
         self.data = self.rawdata
+
+class GhydData(object):
+    def __init__(self, exp=DEFAULTS_E['experiments'], 
+                 data=[DEFAULTS_E['Ref'], DEFAULTS_E['run01'], DEFAULTS_E['SAMPL2']]):
+
+        experimental = recsql.SQLarray_fromfile(exp)
+
+        # add to experimental db
+        computed = ComputedData(filename=data[0],
+                                name="energies_computed", 
+                                connection=experimental.connection)
+
+        self.computed = computed  # for testing ... needs o be kept against gc :-p
+
+        for num,filename in enumerate(data[1:]):
+            dbname = "energies_computed_%d" % (num+1)
+            compute2 = ComputedData(filename=filename,
+                                    name=dbname, 
+                                    connection=experimental.connection)  # add to experimental db
+            # merge compute2 into compute (will be dropped after init) via __del__
+            computed.data.merge_table(dbname)
+
+        self.rawdb = experimental  # all together
+
+        # Table for all hydration free energies with experimental values (unit: kJ/mol)
+        # note: converting Ghyd(kcal/mol) into kJ/mol !!!
+        self.database = self.rawdb.selection(
+            "SELECT no, CommonName, Ghyd * 4.18400 AS ExpGhyd, IFNULL(error_Ghyd, 0.0) * 4.18400 AS ExpErr, "
+            "       C.DeltaG0 AS CompGhyd, C.errDG0 AS CompErr, C.directory AS comment "
+            "FROM __self__ LEFT JOIN energies_computed AS C ON itp_name = C.molecule "
+            "WHERE C.solvent = 'water' AND NOT Ghyd ISNULL")
+
+        
+    def plot(self, **kwargs):
+        """Plot individual data points with legend.
+
+           *figname*
+               write figure to *filename*; suffix determines file type
+           *ymin*, *ymax*
+               limits of the plot in the y direction (=computational results)
+        """
+        from pylab import figure, plot, legend, ylim, errorbar, xlabel, ylabel, savefig
+        from matplotlib import colors, cm, rc
+        import matplotlib
+
+        figname = kwargs.pop('figname', None)
+
+        # need large figure for the plot
+        matplotlib.rc('figure', figsize=kwargs.pop('figsize', (8,12)))
+        # default font
+        matplotlib.rc('font', size=10)
+
+        c = self.database.SELECT("CommonName,comment,ExpGhyd,ExpErr,CompGhyd,CompErr")
+
+        norm = colors.normalize(0,len(c))
+        for i, (name,comment,exp,errexp,comp,errcomp) in enumerate(c):
+            if exp is None or comp is None:  # should not be necessary...
+                continue
+
+            color = cm.jet(norm(i))
+            label = r"%(comment)s %(exp).1f/%(comp).1f$\pm$%(errcomp).1f" % vars()
+            plot(exp,comp, marker='o', markersize=14, color=color, markeredgewidth=0, alpha=0.1)
+            plot(exp,comp, marker='o', markersize=5, color=color, label=label)
+            errorbar(exp,comp, xerr=errexp, yerr=errcomp, color=color, linewidth=1.5, capsize=0)
+
+        legend(ncol=3, numpoints=1, loc='lower right', prop={'size':8})
+
+        _plot_ideal(X=self.database.limits('ExpGhyd'), dy=kwargs.pop('dy', 4.184))
+        
+        xlabel(r'experimental $\Delta G_{\rm hyd}$ (kJ/mol)')
+        ylabel(r'computed $\Delta G_{\rm hyd}$ (kJ/mol)')
+        if figname:
+            savefig(figname)
+            logger.info("Wrote plot to %r", figname)
+
+        matplotlib.rcdefaults()  # restore defaults
+        return figname
