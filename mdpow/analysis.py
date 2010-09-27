@@ -164,25 +164,51 @@ def load_exp(filename=DEFAULTS_POW['experiments'], **kwargs):
     return recsql.SQLarray_fromfile(**kwargs)
 
 
-def _plot_ideal(X=None, dy=0.5):
-    from pylab import plot
-    from numpy import array
-    # plot perfect agreement (solid) and 'within 0.5 units'
-    if X is None:
-        X = array([-6,9])
-    else:
-        X = numpy.asarray(X)
-    Y = X
-    plot(X, Y-dy, 'k--', X, Y+dy, 'k--', X,Y,'k-')
+def _plot_ideal(X, dy=0.5, dy2=None, padding=0.05, filled=True):
+    """Plot lines perfect correlation (solid) and 'within *dy* units'.
 
-def _finish(**kwargs):
+    :param X:   array of *x* values to plot at
+    :param dy:  plot dashed line a +/-dy of the ideal
+    :param dy2: plot dotted line a +/-dy2 of the ideal
+    :param filled:  ``True`` us fancy alpha-blended solid bars, ``False`` uses dashed and dotted lines
+    :param padding: percentage of total extent in *X* that is added left and right
+    """
+    from pylab import plot, fill_between
+    from numpy import array
+    
+    X = numpy.asarray(X)
+    if len(X) < 2:
+        raise ValueError("X must contain at least 2 values.")
+    # add buffer
+    if padding:
+        dx = padding * numpy.abs(X[-1]-X[0])
+        X[0] -= dx
+        X[-1] += dx
+
+    Y = X
+
+    if filled:
+        alpha = 0.1
+        if dy2:
+            fill_between(X, Y-dy2, Y+dy2, color="black", alpha=alpha)
+        else:
+            alpha = 0.2
+        fill_between(X, Y-dy, Y+dy, color="black", alpha=alpha)
+    else:
+        plot(X, Y-dy, 'k--', X, Y+dy, 'k--')        
+        if dy2:
+            plot(X, Y-dy2, 'k.', X, Y+dy2, 'k.')
+
+    plot(X,Y,'k-')
+
+def _finish(X, **kwargs):
     """Add axes labels and save to *figname*"""
     from pylab import xlabel, ylabel, savefig, xlim, ylim, gca
     import matplotlib as mpl
 
     figname = kwargs.pop('figname', None)
 
-    _plot_ideal(dy=kwargs.pop('dy',0.5))
+    _plot_ideal(X, dy=kwargs.pop('dy',0.5))
     xlim(kwargs.pop('xmin', -6), kwargs.pop('xmax',10))
     ylim(kwargs.pop('ymin', -10), kwargs.pop('ymax',10))
 
@@ -206,7 +232,7 @@ def plot_quick(a, **kwargs):
     kwargs.setdefault('ylim',None) # ??
     kwargs.setdefault('ymax',None) # ??
     plot(a.recarray.exp, a.recarray.logP_OW, 'ro', **kwargs)  # data
-    return _finish(**kwargs)
+    return _finish([-6,9], **kwargs)  # default extent for our logPow :-p
 
 class ExpComp(object):
     def __init__(self, **kwargs):
@@ -300,7 +326,7 @@ class ExpComp(object):
             errorbar(exp,comp, xerr=xerr, yerr=errcomp, color=color, linewidth=1.5, capsize=0)
 
         legend(ncol=3, numpoints=1, loc='lower right', prop={'size':8})
-        figname = _finish(**kwargs)
+        figname = _finish(self.database.data.limits('logPow'), **kwargs)
 
         matplotlib.rcdefaults()  # restore defaults
         return figname
@@ -496,7 +522,7 @@ class GsolvData(object):
             "       O.DeltaG0 AS CompGoct, O.errDG0 AS CompGoctErr, "
             "       W.directory AS comment "
             "FROM __self__ AS E LEFT JOIN energies_computed AS W ON itp_name = W.molecule "
-            "                   LEFT JOIN energies_computed AS O ON itp_name = O.molecule "
+            "                   LEFT JOIN energies_computed AS O ON itp_name = O.molecule AND W.directory = O.directory "
             "WHERE W.solvent = 'water' AND O.solvent = 'octanol' AND NOT E.Ghyd ISNULL",
             (kTlog10e,))
 
@@ -518,9 +544,10 @@ class GsolvData(object):
         figname = kwargs.pop('figname', None)
 
         # need large figure for the plot
-        matplotlib.rc('figure', figsize=kwargs.pop('figsize', (8,12)))
+        matplotlib.rc('figure', figsize=kwargs.pop('figsize', (10.5,12)))
         # default font
         matplotlib.rc('font', size=10)
+        matplotlib.rc('mathtext', fontset='stixsans') # does not work?
 
         mode = mode.lower()
         if not mode in ("hyd","oct"):
@@ -543,8 +570,10 @@ class GsolvData(object):
         legend(ncol=3, numpoints=1, loc='lower right', prop={'size':8})
 
         # 1 kcal/mol = 4.184 kJ/mol band
-        _plot_ideal(X=self.database.limits(ExpG), dy=kwargs.pop('dy', 4.184))
-        
+        kcalmol = 4.184
+        dy = kwargs.pop('dy', kcalmol)
+        _plot_ideal(X=self.database.limits(ExpG), dy=dy, dy2=1.5*dy)        
+
         xlabel(r'experimental $\Delta G_{\rm %(mode)s}$ (kJ/mol)' % vars())
         ylabel(r'computed $\Delta G_{\rm %(mode)s}$ (kJ/mol)' % vars())
         if figname:
