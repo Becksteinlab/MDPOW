@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -12,12 +14,13 @@
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
         VERSION:     '0.3.3',
-        COLLAPSE_MODINDEX: false,
+        COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="MDpow v0.3.3 documentation" href="index.html" />
     <link rel="prev" title="Helper modules" href="utilities.html" /> 
@@ -30,8 +33,8 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="modindex.html" title="Global Module Index"
-             accesskey="M">modules</a> |</li>
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
         <li class="right" >
           <a href="utilities.html" title="Helper modules"
              accesskey="P">previous</a> |</li>
@@ -47,7 +50,7 @@
   <div class="section" id="the-mdpow-scripts">
 <h1>The <tt class="docutils literal"><span class="pre">mdpow-*</span></tt> scripts<a class="headerlink" href="#the-mdpow-scripts" title="Permalink to this headline">¶</a></h1>
 <p>A number of python scripts are installed together with the
-<a title="" class="reference external" href="init.html#module-mdpow"><tt class="xref docutils literal"><span class="pre">mdpow</span></tt></a> package. They simplufy some common tasks (especially at
+<a class="reference internal" href="init.html#module-mdpow" title="mdpow"><tt class="xref py py-mod docutils literal"><span class="pre">mdpow</span></tt></a> package. They simplufy some common tasks (especially at
 the analysis stage) but they make some assumptions about directory
 layout and filenames. If one uses defaults for all directory and
 filename options then it should &#8220;just work&#8221;.</p>
@@ -72,7 +75,7 @@ assumed:</p>
 <p><em>moleculename</em> is, for instance, &#8220;benzene&#8221; or &#8220;amantadine&#8221;.</p>
 <div class="section" id="running-analysis">
 <h2>Running analysis<a class="headerlink" href="#running-analysis" title="Permalink to this headline">¶</a></h2>
-<p>The <strong>mdpow-pow</strong> script</p>
+<p>The <strong class="program">mdpow-pow</strong> script</p>
 <ul class="simple">
 <li>collects data from FEP simulations</li>
 <li>calculates desolvation free energies for octanol &#8211;&gt; vacuum and
@@ -85,7 +88,7 @@ default names are chosen)</li>
 </ul>
 <p>Usage of the command:</p>
 <blockquote>
-<p><strong>mdpow-pow</strong> [options] DIRECTORY [DIRECTORY ...]</p>
+<p><strong class="program">mdpow-pow</strong> [options] DIRECTORY [DIRECTORY ...]</p>
 <p>Run the free energy analysis for water and octanol in &lt;DIRECTORY&gt;/FEP
 and return the octanol-water partition coefficient log P_ow.</p>
 <p>DIRECTORY should contain all the files resulting from running
@@ -153,10 +156,10 @@ YOUR OWN RISK [False]</td></tr>
 </div>
 <div class="section" id="checking-if-the-simulation-is-complete">
 <h2>Checking if the simulation is complete<a class="headerlink" href="#checking-if-the-simulation-is-complete" title="Permalink to this headline">¶</a></h2>
-<p>Run <strong>mdpow-check</strong> in order to check if all necessary files
+<p>Run <strong class="program">mdpow-check</strong> in order to check if all necessary files
 are available:</p>
 <blockquote>
-<p><strong>mdpow-check</strong> [options] DIRECTORY [DIRECTORY ...]</p>
+<p><strong class="program">mdpow-check</strong> [options] DIRECTORY [DIRECTORY ...]</p>
 <p>Check status of the progress of the project in DIRECTORY.</p>
 <p>Output is only written to the status file (<tt class="docutils literal"><span class="pre">status.txt</span></tt>). A quick way to find
 problems is to do a</p>
@@ -186,11 +189,11 @@ problems is to do a</p>
 <p>It can become necessary to recreate the fep pickle files (e.g. if the
 files became corrupted due to a software error or in order to change
 paths).</p>
-<p>Typically, one would execute the <strong>mdpow-rebuild-fep</strong> command
+<p>Typically, one would execute the <strong class="program">mdpow-rebuild-fep</strong> command
 in the parent directory of <em>moleculename</em>.</p>
 <dl class="docutils">
 <dt>Usage:</dt>
-<dd><p class="first"><strong>mdpow-rebuild-fep</strong> [options] DIRECTORY [DIRECTORY ...]</p>
+<dd><p class="first"><strong class="program">mdpow-rebuild-fep</strong> [options] DIRECTORY [DIRECTORY ...]</p>
 <p>Re-create the <tt class="docutils literal"><span class="pre">Goct.fep</span></tt> or <tt class="docutils literal"><span class="pre">Ghyd.fep</span></tt> file using the appropriate
 equilibrium simulation file under <em>DIRECTORY</em>/FEP.</p>
 <p>(This should only be necessary when the fep file was destroyed due to
@@ -222,37 +225,37 @@ a software error.)</p>
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
-            <h3><a href="index.html">Table Of Contents</a></h3>
-            <ul>
-<li><a class="reference external" href="#">The <tt class="docutils literal"><span class="pre">mdpow-*</span></tt> scripts</a><ul>
-<li><a class="reference external" href="#running-analysis">Running analysis</a></li>
-<li><a class="reference external" href="#checking-if-the-simulation-is-complete">Checking if the simulation is complete</a></li>
-<li><a class="reference external" href="#re-building-ghyd-fep-and-goct-fep">Re-building <tt class="docutils literal"><span class="pre">Ghyd.fep</span></tt> and <tt class="docutils literal"><span class="pre">Goct.fep</span></tt></a></li>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">The <tt class="docutils literal"><span class="pre">mdpow-*</span></tt> scripts</a><ul>
+<li><a class="reference internal" href="#running-analysis">Running analysis</a></li>
+<li><a class="reference internal" href="#checking-if-the-simulation-is-complete">Checking if the simulation is complete</a></li>
+<li><a class="reference internal" href="#re-building-ghyd-fep-and-goct-fep">Re-building <tt class="docutils literal"><span class="pre">Ghyd.fep</span></tt> and <tt class="docutils literal"><span class="pre">Goct.fep</span></tt></a></li>
 </ul>
 </li>
 </ul>
 
-            <h4>Previous topic</h4>
-            <p class="topless"><a href="utilities.html"
-                                  title="previous chapter">Helper modules</a></p>
-            <h3>This Page</h3>
-            <ul class="this-page-menu">
-              <li><a href="_sources/scripts.txt"
-                     rel="nofollow">Show Source</a></li>
-            </ul>
-          <div id="searchbox" style="display: none">
-            <h3>Quick search</h3>
-              <form class="search" action="search.html" method="get">
-                <input type="text" name="q" size="18" />
-                <input type="submit" value="Go" />
-                <input type="hidden" name="check_keywords" value="yes" />
-                <input type="hidden" name="area" value="default" />
-              </form>
-              <p class="searchtip" style="font-size: 90%">
-              Enter search terms or a module, class or function name.
-              </p>
-          </div>
-          <script type="text/javascript">$('#searchbox').show(0);</script>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="utilities.html"
+                        title="previous chapter">Helper modules</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/scripts.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -264,7 +267,7 @@ a software error.)</p>
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="modindex.html" title="Global Module Index"
+          <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
           <a href="utilities.html" title="Helper modules"
@@ -273,8 +276,8 @@ a software error.)</p>
       </ul>
     </div>
     <div class="footer">
-      &copy; Copyright 2010, Oliver Beckstein and Bogdan Iorga.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.7.
+        &copy; Copyright 2010, Oliver Beckstein and Bogdan Iorga.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.4.
     </div>
   </body>
 </html>
