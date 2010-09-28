@@ -46,15 +46,30 @@ Octanol-water partition coefficients
 
 Plot results and save to a pdf file with :func:`plot_exp_vs_comp`::
 
-  mdpow.analysis.plot_exp_vs_comp(figname="figs/exp_vs_comp.pdf")
+  mdpow.analysis.plot_exp_vs_comp(figname="figs/logPow.pdf")
 
 By default we also include the *SAMPL2* and reference (*Ref*) set results.
 
-Remove the bad runs from ``pow.txt`` and save as ``pow_best.txt``. Then plot
-again (this time excluding the SAMPL2 results)::
+Using a file named ``exclusions.txt`` in the same directory as the
+data file, one can exclude certain runs from appearing in the graph:
+set the *exclusions* keyword to `True``::
 
    pylab.clf()
-   mdpow.analysis.plot_exp_vs_comp(data=["data/run01/pow_best.txt"], figname='figs/run01/exp_vs_comp_best.pdf')
+   mdpow.analysis.plot_exp_vs_comp(exclusions=True, figname='figs/logPow_best.pdf')
+
+The **exclusions.txt** files must contain a table such as ::
+
+            Table[exclusions]: These sims are ignored.
+            ======== ===========================================
+            itp_name directory_regex
+            ======== ===========================================
+            AXX      .*
+            5FH      benzylhyd$
+            ======== ===========================================
+
+then any simulation of a *molecule* equalling *itp_name* and which is
+recorded with a *directory* matching the regular expression
+*directory_regex* will be excluded from the analysis.
 
 
 Solvation energies
@@ -79,7 +94,7 @@ as
    that both were done at T=300K. Also, the error on DeltaGoct is not
    calculated properly at the moment, either, because the error on logPow is
    hard to quantify (based on the logKow_ data). We are estimating the error on
-   kT*logPow/log10(e) error as 1 kcal/mol and combine it with the known
+   kT*logPow/log10(e) error as 0.5 kcal/mol and combine it with the known
    experimental error for DeltaGhyd.
 
 Plotting uses the :meth:`GsolvData.plot` method from :class:`GsolvData`::
@@ -101,6 +116,8 @@ Right now, the plots are a bit messy but I opted to include the legend to make
 it easier for us to understand the data. I had to manually increase the
 plotting window to make things fit properly.
 
+:class:`GsolvData` also honours the *exlusions* = ``True`` keywaord argument.
+
 .. _logKow: http://logkow.cisti.nrc.ca/logkow/
 
 Functions
@@ -118,13 +135,13 @@ Functions
 .. autofunction:: load_exp
 
 """
-
+import os.path
 import numpy
 import recsql
 import logging
 logger = logging.getLogger('mdpow.analysis')
 
-#: Defaults paths to ``pow.txt`` for *experiments*, *run01*, *SAMPL2*, and *Ref*.
+#: Default paths to ``pow.txt`` for *experiments*, *run01*, *SAMPL2*, and *Ref*.
 DEFAULTS_POW = {
     'experiments': "experimental/targets.csv",
     'run01': "data/run01/pow.txt",
@@ -132,6 +149,7 @@ DEFAULTS_POW = {
     'Ref': "data/Ref/pow.txt",
     }
 
+#: Default paths to ``energies.txt`` for *experiments*, *run01*, *SAMPL2*, and *Ref*.
 DEFAULTS_E = {
     'experiments': "experimental/targets.csv",
     'run01': "data/run01/energies.txt",
@@ -243,32 +261,85 @@ class ExpComp(object):
            *data*
                list of ``pow.txt`` paths; default are the files for 
                Ref, run01, SAMPL2 (stored in :data:`DEFAULTS_POW`)
+           *exclusions*
+              ``False`` does nothing special.
+              ``True``: look for `exceptions.txt` in same directory as each data file.
+              If it contains a table such as::
+                 Table[expceptions]: These sims are ignored.
+                 ======== ===========================================
+                 itp_name directory_regex
+                 ======== ===========================================
+                 AXX      .*
+                 5FH      benzylhyd$
+                 ======== ===========================================
+
+              then any simulation of a *molecule* equalling *itp_name*
+              and which is recorded with a *directory* matching the
+              regular expression *directory_regex* will be excluded from the analysis.
+              [``False``]
         """
 
         filename = kwargs.pop('experiments', DEFAULTS_POW['experiments'])
-        experimental = ExpData(filename=filename)
+        self.exclusions = kwargs.pop('exclusions', False)
+        data = kwargs.pop('data', [DEFAULTS_POW['Ref'], DEFAULTS_POW['run01'], DEFAULTS_POW['SAMPL2']])
 
-        filenames = kwargs.pop('data', [DEFAULTS_POW['Ref'], DEFAULTS_POW['run01'], DEFAULTS_POW['SAMPL2']])
-        filename = filenames[0]
+        experimental = ExpData(filename=filename).data
+
+        filename = data[0]
         # add to experimental db
+        energies_name = "logPow_computed"
+        exclusions_name = None
         computed = ComputedData(filename=filename,
-                                name="logPow_computed", 
-                                connection=experimental.data.connection)
+                                name=energies_name, 
+                                connection=experimental.connection)
 
-        for num,filename in enumerate(filenames[1:]):
-            dbname = "logPow_compute_%d" % (num+1)
+        for num,filename in enumerate(data[1:]):
+            dbname = "logPow_computed_%d" % (num+1)
             compute2 = ComputedData(filename=filename,
                                     name=dbname, 
-                                    connection=experimental.data.connection)  # add to experimental db
+                                    connection=experimental.connection)  # add to experimental db
             # merge compute2 into compute (will be dropped after init) via __del__
             computed.data.merge_table(dbname)
 
-        self.database = experimental
-        
-        # for debugging
-        self._experimental = experimental
-        self._computed = computed
+        if self.exclusions:
+            # exclusion.txt files are not guaranteed to exist, so remember the first found:
+            first_excl = None
+            for num,filename in enumerate(data):
+                exclusions = os.path.join(os.path.dirname(filename), 'exclusions.txt')
+                if not os.path.exists(exclusions):
+                    continue
+                logger.info("Loading exclusions from %(filename)r.", vars())
+                dbname = "exclusions_%d" % num
+                excl = recsql.SQLarray_fromfile(exclusions, connection=experimental.connection, name=dbname)
+                if first_excl:
+                    first_excl.merge_table(dbname)
+                else:
+                    first_excl = excl
+                    exclusions_name = dbname
 
+        self.rawdb = experimental
+
+        if self.exclusions and not exclusions_name is None:
+            energies = self.rawdb.selection(
+                """SELECT * FROM %(energies_name)s """
+                """WHERE NOT directory IN """
+                """(SELECT directory FROM %(energies_name)s """
+                """LEFT JOIN %(exclusions_name)s USING (itp_name) """
+                """WHERE directory MATCH directory_regex)""" % vars())
+            energies_name = energies.name     # switch to the reduced table
+
+        # combined (matched on the itp_name!)
+        self.database = self.rawdb.selection(
+            "SELECT "
+            """CommonName AS name, directory AS comment, DeltaG0, """
+            """mean,std,min,max,"""
+            """E.logPow AS exp, C.logPow AS comp, C.errlogP AS errcomp """
+            """FROM __self__ AS E """
+            """LEFT JOIN %(energies_name)s AS C USING(itp_name) """
+            """WHERE NOT (comp ISNULL OR C.itp_name ISNULL) """
+            """GROUP BY comment ORDER BY no""" % vars())
+
+        
     def plot(self, **kwargs):
         """Plot individual data points with legend.
 
@@ -280,6 +351,9 @@ class ExpComp(object):
         - Prepare ``experimental/targets.csv`` if it does not exist or if
           something changed. See :func:`load_exp` for details.
 
+           *compoundnames*
+               ``False`` puts the directory names in the legend, ``True`` uses the chemical
+               compound names; "auto" chooses ``True`` if exclusions were applied ["auto"]
            *figname*
                write figure to *filename*; suffix determines file type
            *ymin*, *ymax*
@@ -289,19 +363,23 @@ class ExpComp(object):
         from matplotlib import colors, cm, rc
         import matplotlib
 
-        # combined (matched on the itp_name!)
-        c = self.database.data.SELECT(
-            """CommonName AS name, directory AS comment, DeltaG0, """
-            """mean,std,min,max,"""
-            """__self__.logPow AS exp, C.logPow AS comp, C.errlogP AS errcomp""", 
-            """LEFT JOIN logPow_computed AS C USING(itp_name) """
-            """WHERE NOT (comp ISNULL OR C.itp_name ISNULL) """
-            """GROUP BY comment ORDER BY no""")
-
         # need large figure for the plot
         matplotlib.rc('figure', figsize=kwargs.pop('figsize', (8,12)))
         # default font
         matplotlib.rc('font', size=10)
+
+        compoundnames = kwargs.pop("compoundnames", "auto")
+        if compoundnames == "auto":
+            if self.exclusions:
+                compoundnames = True
+            else:
+                compoundnames = False
+        if compoundnames:
+            legendformat = r"%(name)s %(exp).1f/%(comp).1f$\pm$%(errcomp).1f"
+        else:
+            legendformat = r"%(comment)s %(exp).1f/%(comp).1f$\pm$%(errcomp).1f"
+
+        c = self.database.SELECT("*")
 
         norm = colors.normalize(0,len(c))
         for i, (name,comment,DeltaA0,xmean,xstd,xmin,xmax,exp,comp,errcomp) in enumerate(c):
@@ -319,28 +397,28 @@ class ExpComp(object):
                 xmax = xmean
 
             color = cm.jet(norm(i))
-            label = r"%(comment)s %(exp).1f/%(comp).1f$\pm$%(errcomp).1f" % vars()
+            label = legendformat % vars()
             plot(exp,comp, marker='o', markersize=14, color=color, markeredgewidth=0, alpha=0.1)
             plot(exp,comp, marker='o', markersize=5, color=color, label=label)
             xerr = numpy.abs(numpy.array([[xmin],[xmax]]) - exp)
             errorbar(exp,comp, xerr=xerr, yerr=errcomp, color=color, linewidth=1.5, capsize=0)
 
         legend(ncol=3, numpoints=1, loc='lower right', prop={'size':8})
-        figname = _finish(self.database.data.limits('logPow'), **kwargs)
+        figname = _finish(self.database.limits('exp'), **kwargs)
 
         matplotlib.rcdefaults()  # restore defaults
         return figname
 
 
 def plot_exp_vs_comp(**kwargs):
-    """Plot computed logPow against experimental values.
+    """Plot computed logPow against experimental values from default files.
 
     Experimental values are stored in the reST table referenced byt
     the *experiments* keyword. *data* contains a list of ``pow.txt``
     tables for the calculated values.
     """
-    expcomp = ExpComp(experiments=kwargs.pop("experiments",DEFAULTS_POW['experiments']),
-                      data=kwargs.pop("data",[DEFAULTS_POW['Ref'], DEFAULTS_POW['run01'], DEFAULTS_POW['SAMPL2']]))
+    logger.info("Plotting logPow.")
+    expcomp = ExpComp(exclusions=kwargs.pop('exclusions',False))
     return expcomp.plot(**kwargs)
 
 def unpackCSlist(s, convertor=float):
@@ -349,6 +427,7 @@ def unpackCSlist(s, convertor=float):
         return map(convertor, s.split(','))
     except:
         return []
+
 
 class ExpData(object):
     """Object that represents our experimental data.
@@ -364,6 +443,7 @@ class ExpData(object):
         :program:`Numbers` as **UTF-8** (important!) in the **CSV* format
         (File->Export)
         """
+        logger.info("Loading experimental data from %(filename)r", vars())
         kwargs['filename'] = filename
         self.filename = filename
         # load original data from the targets list and set up database
@@ -454,6 +534,7 @@ class ComputedData(object):
         Furthermore, the column names are important because we use them
         here.
         """
+        logger.info("Loading computed data from %(filename)r.", vars())
         kwargs['filename'] = filename
         self.filename = filename
         self.rawdata = recsql.SQLarray_fromfile(**kwargs)
@@ -482,20 +563,40 @@ class GsolvData(object):
             were presumed to be taken; needed for the calculations of
             the experimental DeltaG_oct from logPow and experimental [300.0]
             DeltaG_hyd.
+         *exclusions*
+            ``False`` does nothing special.
+            ``True``: look for `exceptions.txt` in same directory as each data file.
+            If it contains a table such as::
+               Table[expceptions]: These sims are ignored.
+               ======== ===========================================
+               itp_name directory_regex
+               ======== ===========================================
+               AXX      .*
+               5FH      benzylhyd$
+               ======== ===========================================
+
+            then any simulation of a *molecule* equalling *itp_name*
+            and which is recorded with a *directory* matching the
+            regular expression *directory_regex* will be excluded from the analysis.
+            [``False``]
         """
         from mdpow import kBOLTZ
 
         data = kwargs.pop('data', [DEFAULTS_E['Ref'], DEFAULTS_E['run01'], DEFAULTS_E['SAMPL2']])
         temperature = kwargs.pop('temperature', 300.0)  # in K, used to calculate exp G_oct
+        self.exclusions = kwargs.pop('exclusions', False)
 
+        logger.info("Loading experimental data from %(exp)r.", vars())
         experimental = recsql.SQLarray_fromfile(exp)
 
         # add to experimental db
+        energies_name = "energies_computed"
+        exclusions_name = None
         computed = ComputedData(filename=data[0],
-                                name="energies_computed", 
+                                name=energies_name, 
                                 connection=experimental.connection)
 
-        self.computed = computed  # for testing ... needs o be kept against gc :-p
+        self.computed = computed  # for testing ... needs to be kept against gc :-p
 
         for num,filename in enumerate(data[1:]):
             dbname = "energies_computed_%d" % (num+1)
@@ -505,25 +606,53 @@ class GsolvData(object):
             # merge compute2 into compute (will be dropped after init) via __del__
             computed.data.merge_table(dbname)
 
+        if self.exclusions:
+            # exclusion.txt files are not guaranteed to exist, so remember the first found:
+            first_excl = None
+            for num,filename in enumerate(data):
+                exclusions = os.path.join(os.path.dirname(filename), 'exclusions.txt')
+                if not os.path.exists(exclusions):
+                    continue
+                logger.info("Loading exclusions from %(filename)r.", vars())
+                dbname = "exclusions_%d" % num
+                excl = recsql.SQLarray_fromfile(exclusions, connection=experimental.connection, name=dbname)
+                if first_excl:
+                    first_excl.merge_table(dbname)
+                else:
+                    first_excl = excl
+                    exclusions_name = dbname
+
         self.rawdb = experimental  # all together
+
+        if self.exclusions and not exclusions_name is None:
+            # NOTE: change molecule --> itp_name so that I can use USING (itp_name)
+            energies = self.rawdb.selection(
+                """SELECT * FROM %(energies_name)s """
+                """WHERE NOT directory IN """
+                """(SELECT directory FROM %(energies_name)s """
+                """LEFT JOIN %(exclusions_name)s ON itp_name = molecule """
+                """WHERE directory MATCH directory_regex)""" % vars())
+            energies_name = energies.name     # switch to the reduced table
+
 
         # Table for all hydration free energies with experimental values (unit: kJ/mol)
         # note: converting Ghyd(kcal/mol) into kJ/mol !!!
         # logPow = -(Goct-Ghyd)/kT * log10(e) ->   Goct = Ghyd - kT*logPow / log10(e)
         #
         # for error estimate I'd need the logPow error... but that requires _init_stats()...
-        # so for a start I estimate it as 1 kcal/mol...
+        # so for a start I estimate it as 0.5 kcal/mol...
+        logger.warning("Errors on Delta G_oct are estimated!!! Needs to be done properly.")
         kTlog10e = kBOLTZ*temperature/numpy.log10(numpy.e)
         self.database = self.rawdb.selection(
             "SELECT no, CommonName, Ghyd * 4.184 AS ExpGhyd, IFNULL(error_Ghyd, 0.0) * 4.184 AS ExpGhydErr, "
             "       Ghyd*4.184 - ? * E.logPow AS ExpGoct, E.logPow AS ExpLogPow, "
-            "       sqrt(pow(IFNULL(error_Ghyd, 0.0)*4.184,2) + pow(4.184,2))  AS ExpGoctErr, "
+            "       sqrt(pow(IFNULL(error_Ghyd, 0.0)*4.184,2) + pow(0.5*4.184,2))  AS ExpGoctErr, "
             "       W.DeltaG0 AS CompGhyd, W.errDG0 AS CompGhydErr, "
             "       O.DeltaG0 AS CompGoct, O.errDG0 AS CompGoctErr, "
             "       W.directory AS comment "
-            "FROM __self__ AS E LEFT JOIN energies_computed AS W ON itp_name = W.molecule "
-            "                   LEFT JOIN energies_computed AS O ON itp_name = O.molecule AND W.directory = O.directory "
-            "WHERE W.solvent = 'water' AND O.solvent = 'octanol' AND NOT E.Ghyd ISNULL",
+            "FROM __self__ AS E LEFT JOIN %(energies_name)s AS W ON itp_name = W.molecule "
+            "                   LEFT JOIN %(energies_name)s AS O ON itp_name = O.molecule AND W.directory = O.directory "
+            "WHERE W.solvent = 'water' AND O.solvent = 'octanol' AND NOT E.Ghyd ISNULL" % vars(),
             (kTlog10e,))
 
 
@@ -532,6 +661,9 @@ class GsolvData(object):
 
            *mode*
                "hyd" or "oct"
+           *compoundnames*
+               ``False`` puts the directory names in the legend, ``True`` uses the chemical
+               compound names; "auto" chooses ``True`` if exclusions were applied ["auto"]
            *figname*
                write figure to *filename*; suffix determines file type
            *ymin*, *ymax*
@@ -542,6 +674,16 @@ class GsolvData(object):
         import matplotlib
 
         figname = kwargs.pop('figname', None)
+        compoundnames = kwargs.pop("compoundnames", "auto")
+        if compoundnames == "auto":
+            if self.exclusions:
+                compoundnames = True
+            else:
+                compoundnames = False
+        if compoundnames:
+            legendformat = r"%(name)s %(exp).1f/%(comp).1f$\pm$%(errcomp).1f"
+        else:
+            legendformat = r"%(comment)s %(exp).1f/%(comp).1f$\pm$%(errcomp).1f"
 
         # need large figure for the plot
         matplotlib.rc('figure', figsize=kwargs.pop('figsize', (10.5,12)))
@@ -562,7 +704,7 @@ class GsolvData(object):
                 continue
 
             color = cm.jet(norm(i))
-            label = r"%(comment)s %(exp).1f/%(comp).1f$\pm$%(errcomp).1f" % vars()
+            label = legendformat % vars()
             plot(exp,comp, marker='o', markersize=14, color=color, markeredgewidth=0, alpha=0.1)
             plot(exp,comp, marker='o', markersize=5, color=color, label=label)
             errorbar(exp,comp, xerr=errexp, yerr=errcomp, color=color, linewidth=1.5, capsize=0)
