@@ -133,13 +133,15 @@ Functions
    :members:
 .. autofunction:: load_data
 .. autofunction:: load_exp
-
+.. autofunction:: gsolv2logpow
 """
 import os.path
 import numpy
 import recsql
 import logging
 logger = logging.getLogger('mdpow.analysis')
+
+from mdpow import kBOLTZ
 
 #: Default paths to ``pow.txt`` for *experiments*, *run01*, *SAMPL2*, and *Ref*.
 DEFAULTS_POW = {
@@ -157,6 +159,30 @@ DEFAULTS_E = {
     'Ref': "data/Ref/energies.txt",
     }
 
+def gsolv2logpow(Gwat, Goct, unit='kcal/mol', temperature=300.):
+    """Calculate logPow from the solvation free energies.
+ 
+        logPow = -(Goct-Ghyd)/kT * log10(e)
+
+    .. Note:: Default unit is kcal/mol, unlike the rest of mdpow, which
+       uses kJ/mol. The reason is that most solvation free energies in
+       the literature are quoted in kcal/mol.
+
+    :Arguments:
+       *Gwat*
+           hydration free energy
+       *Goct*
+           octanol solvation free energy
+       *temperature*
+           temperature in K [300]
+       *unit*
+           unit of the energies, either "kcal/mol" or "kJ/mol";
+           ["kcal/mol"]
+    """
+    if unit == 'kcal/mol':
+        Gwat *= 4.184
+        Goct *= 4.184
+    return -(Goct-Gwat)/(kBOLTZ*temperature) * numpy.log10(numpy.e)
 
 def load_data(filename=DEFAULTS_POW['run01'], **kwargs):
     """Load computed POW table and return :class:`recsql.SQLarray`.
@@ -580,8 +606,6 @@ class GsolvData(object):
             regular expression *directory_regex* will be excluded from the analysis.
             [``False``]
         """
-        from mdpow import kBOLTZ
-
         data = kwargs.pop('data', [DEFAULTS_E['Ref'], DEFAULTS_E['run01'], DEFAULTS_E['SAMPL2']])
         temperature = kwargs.pop('temperature', 300.0)  # in K, used to calculate exp G_oct
         self.exclusions = kwargs.pop('exclusions', False)
