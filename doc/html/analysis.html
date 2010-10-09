@@ -344,6 +344,43 @@ files!) are important because we use them here.</p>
 (File-&gt;Export)</p>
 </dd></dl>
 
+<dl class="function">
+<dt id="mdpow.analysis.gsolv2logpow">
+<tt class="descclassname">mdpow.analysis.</tt><tt class="descname">gsolv2logpow</tt><big>(</big><em>Gwat</em>, <em>Goct</em>, <em>unit='kcal/mol'</em>, <em>temperature=300.0</em><big>)</big><a class="headerlink" href="#mdpow.analysis.gsolv2logpow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate logPow from the solvation free energies.</p>
+<blockquote>
+logPow = -(Goct-Ghyd)/kT * log10(e)</blockquote>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Default unit is kcal/mol, unlike the rest of mdpow, which
+uses kJ/mol. The reason is that most solvation free energies in
+the literature are quoted in kcal/mol.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Arguments :</th><td class="field-body"><dl class="first last docutils">
+<dt><em>Gwat</em></dt>
+<dd><p class="first last">hydration free energy</p>
+</dd>
+<dt><em>Goct</em></dt>
+<dd><p class="first last">octanol solvation free energy</p>
+</dd>
+<dt><em>temperature</em></dt>
+<dd><p class="first last">temperature in K [300]</p>
+</dd>
+<dt><em>unit</em></dt>
+<dd><p class="first last">unit of the energies, either &#8220;kcal/mol&#8221; or &#8220;kJ/mol&#8221;;
+[&#8220;kcal/mol&#8221;]</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
 </div>
 
