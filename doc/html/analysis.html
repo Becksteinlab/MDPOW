@@ -86,7 +86,14 @@ were changed. We only plot entries for which</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">mdpow</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">plot_exp_vs_comp</span><span class="p">(</span><span class="n">figname</span><span class="o">=</span><span class="s">&quot;figs/logPow.pdf&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>By default we also include the <em>SAMPL2</em> and reference (<em>Ref</em>) set results.</p>
+<p>By default we also include the <em>SAMPL2</em> and reference (<em>Ref</em>) set
+results. In practice some manual adjustments are required, e.g.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">mdpow</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">plot_exp_vs_comp</span><span class="p">()</span>
+<span class="c"># resize window so that (huge!) legend fits</span>
+<span class="n">ylim</span><span class="p">(</span><span class="o">-</span><span class="mi">22</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">savefig</span><span class="p">(</span><span class="s">&quot;figs/logPow.pdf&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 <p>Using a file named <tt class="docutils literal"><span class="pre">exclusions.txt</span></tt> in the same directory as the
 data file, one can exclude certain runs from appearing in the graph:
 set the <em>exclusions</em> keyword to <cite>True`</cite>:</p>
@@ -94,7 +101,13 @@ set the <em>exclusions</em> keyword to <cite>True`</cite>:</p>
 <span class="n">mdpow</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">plot_exp_vs_comp</span><span class="p">(</span><span class="n">exclusions</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">figname</span><span class="o">=</span><span class="s">&#39;figs/logPow_best.pdf&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The <strong>exclusions.txt</strong> files must contain a table such as</p>
+<dl class="docutils">
+<dt>In practice, manual fiddling is required such as resizing the graph::</dt>
+<dd>mdpow.analysis.plot_exp_vs_comp(exclusions=True)
+ylim(-14,10)
+savefig(&#8216;figs/logPow_best.pdf&#8217;)</dd>
+</dl>
+<p>The <tt class="docutils literal"><span class="pre">exclusions.txt</span></tt> files must contain a table such as</p>
 <div class="highlight-python"><pre>Table[exclusions]: These sims are ignored.
 ======== ===========================================
 itp_name directory_regex
@@ -113,11 +126,11 @@ recorded with a <em>directory</em> matching the regular expression
 energies to computed values. DeltaG_hyd are only available for a few
 compounds so we only plot a subset of all the compounds that we have
 done.</p>
-<p>Experimemtal octanol solvation free energies are computed from
+<p>Experimental octanol solvation free energies are computed from
 experimental logPow and DeltaGhyd from</p>
 <blockquote>
 logPow = -(DeltaGoct-DeltaGhyd)/kT * log10(e)</blockquote>
-<p>as</p>
+<p>(see also <a class="reference internal" href="#mdpow.analysis.gsolv2logpow" title="mdpow.analysis.gsolv2logpow"><tt class="xref py py-func docutils literal"><span class="pre">gsolv2logpow()</span></tt></a>) as</p>
 <blockquote>
 DeltaGoct = DeltaGhyd - kT*logPow / log10(e)</blockquote>
 <div class="admonition warning">
