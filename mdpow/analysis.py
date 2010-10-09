@@ -48,7 +48,13 @@ Plot results and save to a pdf file with :func:`plot_exp_vs_comp`::
 
   mdpow.analysis.plot_exp_vs_comp(figname="figs/logPow.pdf")
 
-By default we also include the *SAMPL2* and reference (*Ref*) set results.
+By default we also include the *SAMPL2* and reference (*Ref*) set
+results. In practice some manual adjustments are required, e.g. ::
+
+  mdpow.analysis.plot_exp_vs_comp()
+  # resize window so that (huge!) legend fits
+  ylim(-22,10)
+  savefig("figs/logPow.pdf")
 
 Using a file named ``exclusions.txt`` in the same directory as the
 data file, one can exclude certain runs from appearing in the graph:
@@ -57,7 +63,12 @@ set the *exclusions* keyword to `True``::
    pylab.clf()
    mdpow.analysis.plot_exp_vs_comp(exclusions=True, figname='figs/logPow_best.pdf')
 
-The **exclusions.txt** files must contain a table such as ::
+In practice, manual fiddling is required such as resizing the graph::
+   mdpow.analysis.plot_exp_vs_comp(exclusions=True)
+   ylim(-14,10)
+   savefig('figs/logPow_best.pdf')
+
+The ``exclusions.txt`` files must contain a table such as ::
 
             Table[exclusions]: These sims are ignored.
             ======== ===========================================
@@ -80,12 +91,12 @@ energies to computed values. DeltaG_hyd are only available for a few
 compounds so we only plot a subset of all the compounds that we have
 done.
 
-Experimemtal octanol solvation free energies are computed from
+Experimental octanol solvation free energies are computed from
 experimental logPow and DeltaGhyd from
 
   logPow = -(DeltaGoct-DeltaGhyd)/kT * log10(e)
 
-as
+(see also :func:`gsolv2logpow`) as
 
   DeltaGoct = DeltaGhyd - kT*logPow / log10(e)
 
