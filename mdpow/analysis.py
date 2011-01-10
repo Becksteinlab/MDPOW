@@ -60,13 +60,14 @@ Using a file named ``exclusions.txt`` in the same directory as the
 data file, one can exclude certain runs from appearing in the graph:
 set the *exclusions* keyword to `True``::
 
-   pylab.clf()
-   mdpow.analysis.plot_exp_vs_comp(exclusions=True, figname='figs/logPow_best.pdf')
+  pylab.clf()
+  mdpow.analysis.plot_exp_vs_comp(exclusions=True, figname='figs/logPow_best.pdf')
 
 In practice, manual fiddling is required such as resizing the graph::
-   mdpow.analysis.plot_exp_vs_comp(exclusions=True)
-   ylim(-14,10)
-   savefig('figs/logPow_best.pdf')
+
+  mdpow.analysis.plot_exp_vs_comp(exclusions=True)
+  ylim(-14,10)
+  savefig('figs/logPow_best.pdf')
 
 The ``exclusions.txt`` files must contain a table such as ::
 
@@ -127,7 +128,7 @@ Right now, the plots are a bit messy but I opted to include the legend to make
 it easier for us to understand the data. I had to manually increase the
 plotting window to make things fit properly.
 
-:class:`GsolvData` also honours the *exlusions* = ``True`` keywaord argument.
+:class:`GsolvData` also honours the *exlusions* = ``True`` keyword argument.
 
 .. _logKow: http://logkow.cisti.nrc.ca/logkow/
 
@@ -302,7 +303,7 @@ class ExpComp(object):
               ``False`` does nothing special.
               ``True``: look for `exceptions.txt` in same directory as each data file.
               If it contains a table such as::
-                 Table[expceptions]: These sims are ignored.
+                 Table[exclusions]: These sims are ignored.
                  ======== ===========================================
                  itp_name directory_regex
                  ======== ===========================================
@@ -345,7 +346,7 @@ class ExpComp(object):
                 exclusions = os.path.join(os.path.dirname(filename), 'exclusions.txt')
                 if not os.path.exists(exclusions):
                     continue
-                logger.info("Loading exclusions from %(filename)r.", vars())
+                logger.info("Loading exclusions from %(exclusions)r.", vars())
                 dbname = "exclusions_%d" % num
                 excl = recsql.SQLarray_fromfile(exclusions, connection=experimental.connection, name=dbname)
                 if first_excl:
@@ -440,7 +441,7 @@ class ExpComp(object):
             xerr = numpy.abs(numpy.array([[xmin],[xmax]]) - exp)
             errorbar(exp,comp, xerr=xerr, yerr=errcomp, color=color, linewidth=1.5, capsize=0)
 
-        legend(ncol=3, numpoints=1, loc='lower right', prop={'size':8})
+        legend(ncol=3, numpoints=1, loc='lower right', prop={'size':6})
         figname = _finish(self.database.limits('exp'), **kwargs)
 
         matplotlib.rcdefaults()  # restore defaults
@@ -604,7 +605,7 @@ class GsolvData(object):
             ``False`` does nothing special.
             ``True``: look for `exceptions.txt` in same directory as each data file.
             If it contains a table such as::
-               Table[expceptions]: These sims are ignored.
+               Table[exclusions]: These sims are ignored.
                ======== ===========================================
                itp_name directory_regex
                ======== ===========================================
@@ -744,7 +745,7 @@ class GsolvData(object):
             plot(exp,comp, marker='o', markersize=5, color=color, label=label)
             errorbar(exp,comp, xerr=errexp, yerr=errcomp, color=color, linewidth=1.5, capsize=0)
 
-        legend(ncol=3, numpoints=1, loc='lower right', prop={'size':8})
+        legend(ncol=3, numpoints=1, loc='lower right', prop={'size':6})
 
         # 1 kcal/mol = 4.184 kJ/mol band
         kcalmol = 4.184
