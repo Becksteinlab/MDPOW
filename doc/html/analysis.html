@@ -60,8 +60,8 @@ and computed values from the table in <tt class="docutils literal"><span class="
 <a class="reference internal" href="#mdpow.analysis.plot_exp_vs_comp" title="mdpow.analysis.plot_exp_vs_comp"><tt class="xref py py-func docutils literal"><span class="pre">plot_exp_vs_comp()</span></tt></a> for details.</p>
 <div class="section" id="prepare-data">
 <h2>Prepare data<a class="headerlink" href="#prepare-data" title="Permalink to this headline">¶</a></h2>
-<p>First copy the <strong>computed results</strong> , the <tt class="docutils literal"><span class="pre">pow.txt</span></tt> and <tt class="docutils literal"><span class="pre">energies.txt</span></tt> files that
-are produced by <strong class="program">mdpow-pow</strong>, into the <tt class="docutils literal"><span class="pre">data</span></tt> directories.</p>
+<p>First copy the <strong>computed results</strong> , the <tt class="docutils literal"><span class="pre">pow.txt</span></tt> and <tt class="docutils literal"><span class="pre">energies.txt</span></tt>
+files that are produced by <strong class="program">mdpow-pow</strong>, into the <tt class="docutils literal"><span class="pre">data</span></tt> directories.</p>
 <p>Then format them:</p>
 <div class="highlight-python"><pre>./lib/scripts/make_tables.sh data/*</pre>
 </div>
@@ -80,6 +80,10 @@ were changed. We only plot entries for which</p>
 </div>
 <div class="section" id="making-graphs">
 <h2>Making graphs<a class="headerlink" href="#making-graphs" title="Permalink to this headline">¶</a></h2>
+<p>For the following, import the module:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">mdpow.analysis</span>
+</pre></div>
+</div>
 <div class="section" id="octanol-water-partition-coefficients">
 <h3>Octanol-water partition coefficients<a class="headerlink" href="#octanol-water-partition-coefficients" title="Permalink to this headline">¶</a></h3>
 <p>Plot results and save to a pdf file with <a class="reference internal" href="#mdpow.analysis.plot_exp_vs_comp" title="mdpow.analysis.plot_exp_vs_comp"><tt class="xref py py-func docutils literal"><span class="pre">plot_exp_vs_comp()</span></tt></a>:</p>
@@ -96,17 +100,17 @@ results. In practice some manual adjustments are required, e.g.</p>
 </div>
 <p>Using a file named <tt class="docutils literal"><span class="pre">exclusions.txt</span></tt> in the same directory as the
 data file, one can exclude certain runs from appearing in the graph:
-set the <em>exclusions</em> keyword to <cite>True`</cite>:</p>
+set the <em>exclusions</em> keyword to <tt class="xref docutils literal"><span class="pre">True</span></tt>:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">pylab</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
 <span class="n">mdpow</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">plot_exp_vs_comp</span><span class="p">(</span><span class="n">exclusions</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">figname</span><span class="o">=</span><span class="s">&#39;figs/logPow_best.pdf&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<dl class="docutils">
-<dt>In practice, manual fiddling is required such as resizing the graph::</dt>
-<dd>mdpow.analysis.plot_exp_vs_comp(exclusions=True)
-ylim(-14,10)
-savefig(&#8216;figs/logPow_best.pdf&#8217;)</dd>
-</dl>
+<p>In practice, manual fiddling is required such as resizing the graph:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">mdpow</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">plot_exp_vs_comp</span><span class="p">(</span><span class="n">exclusions</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">ylim</span><span class="p">(</span><span class="o">-</span><span class="mi">14</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">savefig</span><span class="p">(</span><span class="s">&#39;figs/logPow_best.pdf&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
 <p>The <tt class="docutils literal"><span class="pre">exclusions.txt</span></tt> files must contain a table such as</p>
 <div class="highlight-python"><pre>Table[exclusions]: These sims are ignored.
 ======== ===========================================
@@ -161,7 +165,7 @@ experimental error for DeltaGhyd.</p>
 <p>Right now, the plots are a bit messy but I opted to include the legend to make
 it easier for us to understand the data. I had to manually increase the
 plotting window to make things fit properly.</p>
-<p><a class="reference internal" href="#mdpow.analysis.GsolvData" title="mdpow.analysis.GsolvData"><tt class="xref py py-class docutils literal"><span class="pre">GsolvData</span></tt></a> also honours the <em>exlusions</em> = <tt class="xref docutils literal"><span class="pre">True</span></tt> keywaord argument.</p>
+<p><a class="reference internal" href="#mdpow.analysis.GsolvData" title="mdpow.analysis.GsolvData"><tt class="xref py py-class docutils literal"><span class="pre">GsolvData</span></tt></a> also honours the <em>exlusions</em> = <tt class="xref docutils literal"><span class="pre">True</span></tt> keyword argument.</p>
 </div>
 </div>
 <div class="section" id="functions">
@@ -202,9 +206,9 @@ DeltaG_hyd.</p>
 </dd>
 <dt><em>exclusions</em></dt>
 <dd><p class="first"><tt class="xref docutils literal"><span class="pre">False</span></tt> does nothing special.
-<tt class="xref docutils literal"><span class="pre">True</span></tt>: look for <cite>exceptions.txt</cite> in same directory as each data file.
+<tt class="xref docutils literal"><span class="pre">True</span></tt>: look for <cite>exclusions.txt</cite> in same directory as each data file.
 If it contains a table such as:</p>
-<div class="highlight-python"><pre>Table[expceptions]: These sims are ignored.
+<div class="highlight-python"><pre>Table[exclusions]: These sims are ignored.
 ======== ===========================================
 itp_name directory_regex
 ======== ===========================================
@@ -258,9 +262,9 @@ Ref, run01, SAMPL2 (stored in <tt class="xref py py-data docutils literal"><span
 </dd>
 <dt><em>exclusions</em></dt>
 <dd><p class="first"><tt class="xref docutils literal"><span class="pre">False</span></tt> does nothing special.
-<tt class="xref docutils literal"><span class="pre">True</span></tt>: look for <cite>exceptions.txt</cite> in same directory as each data file.
+<tt class="xref docutils literal"><span class="pre">True</span></tt>: look for <cite>exclusions.txt</cite> in same directory as each data file.
 If it contains a table such as:</p>
-<div class="highlight-python"><pre>Table[expceptions]: These sims are ignored.
+<div class="highlight-python"><pre>Table[exclusions]: These sims are ignored.
 ======== ===========================================
 itp_name directory_regex
 ======== ===========================================
@@ -465,7 +469,7 @@ the literature are quoted in kcal/mol.</p>
     </div>
     <div class="footer">
         &copy; Copyright 2010, Oliver Beckstein and Bogdan Iorga.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.4.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.5.
     </div>
   </body>
 </html>
