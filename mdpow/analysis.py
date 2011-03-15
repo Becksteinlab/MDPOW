@@ -20,8 +20,8 @@ and computed values from the table in ``pow.txt``. See
 Prepare data
 ------------
 
-First copy the **computed results** , the ``pow.txt`` and ``energies.txt`` files that
-are produced by :program:`mdpow-pow`, into the ``data`` directories.
+First copy the **computed results** , the ``pow.txt`` and ``energies.txt``
+files that are produced by :program:`mdpow-pow`, into the ``data`` directories.
 
 Then format them::
 
@@ -41,6 +41,11 @@ were changed. We only plot entries for which
 Making graphs
 -------------
 
+For the following, import the module::
+
+  import mdpow.analysis
+
+
 Octanol-water partition coefficients
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -58,7 +63,7 @@ results. In practice some manual adjustments are required, e.g. ::
 
 Using a file named ``exclusions.txt`` in the same directory as the
 data file, one can exclude certain runs from appearing in the graph:
-set the *exclusions* keyword to `True``::
+set the *exclusions* keyword to ``True``::
 
   pylab.clf()
   mdpow.analysis.plot_exp_vs_comp(exclusions=True, figname='figs/logPow_best.pdf')
@@ -301,7 +306,7 @@ class ExpComp(object):
                Ref, run01, SAMPL2 (stored in :data:`DEFAULTS_POW`)
            *exclusions*
               ``False`` does nothing special.
-              ``True``: look for `exceptions.txt` in same directory as each data file.
+              ``True``: look for `exclusions.txt` in same directory as each data file.
               If it contains a table such as::
                  Table[exclusions]: These sims are ignored.
                  ======== ===========================================
@@ -604,7 +609,7 @@ class GsolvData(object):
             DeltaG_hyd.
          *exclusions*
             ``False`` does nothing special.
-            ``True``: look for `exceptions.txt` in same directory as each data file.
+            ``True``: look for `exclusions.txt` in same directory as each data file.
             If it contains a table such as::
                Table[exclusions]: These sims are ignored.
                ======== ===========================================
