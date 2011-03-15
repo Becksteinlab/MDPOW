@@ -753,7 +753,8 @@ class GsolvData(object):
 
             color = cm.jet(norm(i))
             label = legendformat % vars()
-            plot(exp,comp, marker='o', markersize=14, color=color, markeredgewidth=0, alpha=0.1)
+            #do not plot the aureola; pretty but does not contain information
+            #plot(exp,comp, marker='o', markersize=14, color=color, markeredgewidth=0, alpha=0.1)
             plot(exp,comp, marker='o', markersize=5, color=color, label=label)
             errorbar(exp,comp, xerr=errexp, yerr=errcomp, color=color, linewidth=1.5, capsize=0)
 
