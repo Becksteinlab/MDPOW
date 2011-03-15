@@ -402,7 +402,7 @@ class ExpComp(object):
            *ymin*, *ymax*
                limits of the plot in the y direction (=computational results)
         """
-        from pylab import figure, plot, legend, ylim, errorbar
+        from pylab import figure, subplot, plot, legend, ylim, errorbar
         from matplotlib import colors, cm, rc
         import matplotlib
 
@@ -424,6 +424,7 @@ class ExpComp(object):
 
         c = self.database.SELECT("*")
 
+        #subplot(121)
         norm = colors.normalize(0,len(c))
         for i, (name,comment,DeltaA0,xmean,xstd,xmin,xmax,exp,comp,errcomp) in enumerate(c):
             if exp is None or comp is None:
@@ -447,7 +448,10 @@ class ExpComp(object):
             xerr = numpy.abs(numpy.array([[xmin],[xmax]]) - exp)
             errorbar(exp,comp, xerr=xerr, yerr=errcomp, color=color, linewidth=1.5, capsize=0)
 
-        legend(ncol=3, numpoints=1, loc='lower right', prop={'size':6})
+        # legend outside figure with bbox_to_anchor instead of  loc='lower right'
+        #legend(ncol=3, numpoints=1, prop={'size':6}, bbox_to_anchor=(1.05,1), borderaxespad=0.)
+        legend(ncol=3, numpoints=1, prop={'size':6}, mode="expand", loc='lower right')
+
         figname = _finish(self.database.limits('exp'), **kwargs)
 
         matplotlib.rcdefaults()  # restore defaults
@@ -678,24 +682,25 @@ class GsolvData(object):
 
 
         # Table for all hydration free energies with experimental values (unit: kJ/mol)
-        # note: converting Ghyd(kcal/mol) into kJ/mol !!!
+        # note: converting original Ghyd (in kcal/mol) into kJ/mol by multiplying with 4.184 kJ/kcal !!!
         # logPow = -(Goct-Ghyd)/kT * log10(e) ->   Goct = Ghyd - kT*logPow / log10(e)
         #
         # for error estimate I'd need the logPow error... but that requires _init_stats()...
-        # so for a start I estimate it as 0.5 kcal/mol...
-        logger.warning("Errors on Delta G_oct are estimated!!! Needs to be done properly.")
-        kTlog10e = kBOLTZ*temperature/numpy.log10(numpy.e)
+        # so for a start I estimate the experimental logPow error as 0.5 log10 units.
+        estimated_error_logPow = 0.5  # kcal/mol ESTIMATE!!!
+        logger.warning("Errors on Delta G_oct use the estimated logPow error %(estimated_error_logPow)f (log10 units)!!! Needs to be done properly.", vars())
+        kTlog10e = kBOLTZ*temperature/numpy.log10(numpy.e)  # in kJ/mol !!
         self.database = self.rawdb.selection(
             "SELECT no, CommonName, Ghyd * 4.184 AS ExpGhyd, IFNULL(error_Ghyd, 0.0) * 4.184 AS ExpGhydErr, "
             "       Ghyd*4.184 - ? * E.logPow AS ExpGoct, E.logPow AS ExpLogPow, "
-            "       sqrt(pow(IFNULL(error_Ghyd, 0.0)*4.184,2) + pow(0.5*4.184,2))  AS ExpGoctErr, "
+            "       sqrt(pow(IFNULL(error_Ghyd, 0.0)*4.184,2) + pow(?*?,2))  AS ExpGoctErr, "
             "       W.DeltaG0 AS CompGhyd, W.errDG0 AS CompGhydErr, "
             "       O.DeltaG0 AS CompGoct, O.errDG0 AS CompGoctErr, "
             "       W.directory AS comment "
             "FROM __self__ AS E LEFT JOIN %(energies_name)s AS W ON itp_name = W.molecule "
             "                   LEFT JOIN %(energies_name)s AS O ON itp_name = O.molecule AND W.directory = O.directory "
             "WHERE W.solvent = 'water' AND O.solvent = 'octanol' AND NOT E.Ghyd ISNULL" % vars(),
-            (kTlog10e,))
+            (kTlog10e, kTlog10e, estimated_error_logPow))
 
 
     def plot(self, mode, **kwargs):
@@ -711,7 +716,7 @@ class GsolvData(object):
            *ymin*, *ymax*
                limits of the plot in the y direction (=computational results)
         """
-        from pylab import figure, plot, legend, ylim, errorbar, xlabel, ylabel, savefig
+        from pylab import figure, plot, subplot, legend, ylim, errorbar, xlabel, ylabel, savefig
         from matplotlib import colors, cm, rc
         import matplotlib
 
@@ -740,6 +745,7 @@ class GsolvData(object):
         c = self.database.SELECT(fields)
         ExpG = "ExpG%(mode)s" % vars()
 
+        #subplot(121)
         norm = colors.normalize(0,len(c))
         for i, (name,comment,exp,errexp,comp,errcomp) in enumerate(c):
             if exp is None or comp is None:  # should not be necessary...
@@ -751,7 +757,9 @@ class GsolvData(object):
             plot(exp,comp, marker='o', markersize=5, color=color, label=label)
             errorbar(exp,comp, xerr=errexp, yerr=errcomp, color=color, linewidth=1.5, capsize=0)
 
-        legend(ncol=3, numpoints=1, loc='lower right', prop={'size':6})
+        # legend outside figure with bbox_to_anchor instead of  loc='lower right'
+        #legend(ncol=3, numpoints=1, prop={'size':6}, bbox_to_anchor=(1.05,1), borderaxespad=0.)
+        legend(ncol=3, numpoints=1, prop={'size':6}, mode="expand", loc='lower right')
 
         # 1 kcal/mol = 4.184 kJ/mol band
         kcalmol = 4.184
