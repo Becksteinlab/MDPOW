@@ -3,8 +3,8 @@
 
 Check status of the progress of the project in DIRECTORY.
 
-Output is only written to the status file (``status.txt``). A quick way to find
-problems is to do a ::
+Output is written to the status file (``status.txt``) and standard
+error. A quick way to find problems is to do a ::
 
   cat status.txt | gawk -F '|' '$2 !~ /OK/ {print $0}'
 
@@ -28,7 +28,7 @@ if __name__ == "__main__":
                       metavar="FILE")
     parser.set_defaults(outfile="status.txt")
     opts,args = parser.parse_args()
-
+    
     logger.info("Writing status to %r", opts.outfile)
 
     # dir status type comment
@@ -37,6 +37,7 @@ if __name__ == "__main__":
         def swrite(*args):
             all_args = tuple([directory] + list(args))
             status.write(fmt % all_args) 
+            sys.stderr.write(fmt % all_args)
         for directory in args:
             score = 0
             if not os.path.isdir(directory):
