@@ -121,12 +121,12 @@ Plotting uses the :meth:`GsolvData.plot` method from :class:`GsolvData`::
    G = mdpow.analysis.GsolvData()
    G.plot('hyd')
    # adjust things such as manually increasing window ...
-   ylim(-160,20)
+   ylim(-180,20)
    savefig("figs/ghyd.pdf")
 
    clf()
    G.plot('oct')
-   ylim(-140,20)
+   ylim(-150,20)
    savefig("figs/goct.pdf")
    
 Right now, the plots are a bit messy but I opted to include the legend to make
