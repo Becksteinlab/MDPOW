@@ -75,7 +75,19 @@ sphinx_make () {
     make SPHINXBUILD=$SPHINXBUILD $*
 }
 
+# with BUILDIR=..
 make_sphinx () {
+    (cd doc/sphinx && \
+	sphinx_make clean && \
+	sphinx_make html) || die "Failed making sphinx docs"
+  echo "Created doc/html"
+  RSYNC -vrP --delete doc/html $DOCS
+}
+
+# with BUILDIR = build
+# --- makes sure that ONLY the html stuff is used
+# (via symlinks); not sure why I wanted to do this [oliver 2011-04-23]
+make_sphinx_OLD () {
     (cd doc/sphinx && \
 	sphinx_make clean && \
 	sphinx_make html) || die "Failed making sphinx docs"
