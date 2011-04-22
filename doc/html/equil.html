@@ -65,6 +65,12 @@ box of water or other solvent such as octanol.</p>
 </div></blockquote>
 <p>By default it uses the <em>OPLS/AA</em> forcefield and the <em>TIP4P</em> water
 model.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Other forcefields than OPLS/AA are currently not
+officially supported; it is not hard to do but requires tedious
+changes to a few paths in template scripts.</p>
+</div>
 <dl class="class">
 <dt id="mdpow.equil.Simulation">
 <em class="property">class </em><tt class="descclassname">mdpow.equil.</tt><tt class="descname">Simulation</tt><big>(</big><em>molecule=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.equil.Simulation" title="Permalink to this definition">¶</a></dt>
@@ -82,7 +88,7 @@ model.</p>
 <p class="first admonition-title">Note</p>
 <p class="last">The OPLS/AA force field and the TIP4P water molecule is the
 default; changing this is possible but will require provision of
-customized itp and mdp files at various stages.</p>
+customized itp, mdp and template top files at various stages.</p>
 </div>
 <p>Set up Simulation instance.</p>
 <p>The <em>molecule</em> of the compound molecule should be supplied. Existing files
@@ -398,10 +404,10 @@ the pickle file <em>filename</em>, which was generated with
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
   <p class="topless"><a href="init.html"
-                        title="previous chapter"><tt class="docutils literal"><span class="pre">mdpow</span></tt> &#8212; Computing the octanol/water partitioning coefficient</a></p>
+                        title="previous chapter"><tt class="docutils literal docutils literal"><span class="pre">mdpow</span></tt> &#8212; Computing the octanol/water partitioning coefficient</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="fep.html"
-                        title="next chapter"><tt class="docutils literal"><span class="pre">mdpow.fep</span></tt> &#8211; Calculate free energy of solvation</a></p>
+                        title="next chapter"><tt class="docutils literal docutils literal"><span class="pre">mdpow.fep</span></tt> &#8211; Calculate free energy of solvation</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/equil.txt"
@@ -443,7 +449,7 @@ the pickle file <em>filename</em>, which was generated with
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2010, Oliver Beckstein and Bogdan Iorga.
+        &copy; Copyright 2010–2011, Oliver Beckstein and Bogdan Iorga.
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
     </div>
   </body>

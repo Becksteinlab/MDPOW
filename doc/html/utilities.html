@@ -62,6 +62,34 @@ matplotlib&#8217;s rc system but right now it mostly serves to define which grom
 tools and other scripts are offered in the package and where template files are
 located. If the user wants to change anything they will still have to do it
 here in source until a better mechanism with rc files has been implemented.</p>
+<div class="section" id="force-field">
+<h3>Force field<a class="headerlink" href="#force-field" title="Permalink to this headline">¶</a></h3>
+<p>By default, MDPOW uses a collection of OPLS/AA force field files based on the
+Gromacs 4.5.3 distribution, with the following differences:</p>
+<ul class="simple">
+<li>For ions we use the new alkali and halide ion parameters from Table 2 in
+<a class="reference internal" href="#jensen2006">[Jensen2006]</a> which had shown some small improvements in the paper. They
+should only be used with the TIP4P water model.</li>
+<li>OPLS/AA parameters for 1-octanol were added. These parameters were validated
+against experimental data by computing the density (neat), hydration free
+energy and logP (the latter being a self consistentcy check).</li>
+</ul>
+<p>The force field files are found in the directory pointed to by the environment
+variable <span class="target" id="index-0"></span><tt class="xref std std-envvar docutils literal"><span class="pre">GMXLIB</span></tt>. By default, <a class="reference internal" href="#module-mdpow.config" title="mdpow.config"><tt class="xref py py-mod docutils literal"><span class="pre">mdpow.config</span></tt></a> sets
+<span class="target" id="index-1"></span><tt class="xref std std-envvar docutils literal"><span class="pre">GMXLIB</span></tt> to <a class="reference internal" href="#mdpow.config.includedir" title="mdpow.config.includedir"><tt class="xref py py-data docutils literal"><span class="pre">includedir</span></tt></a> unless <span class="target" id="index-2"></span><tt class="xref std std-envvar docutils literal"><span class="pre">GMXLIB</span></tt> has already been
+set. This mechanism allows the user to override the choice of location of force
+field.</p>
+<p>At the moment, only OPLS/AA is tested with MDPOW although in principle it is
+possible to use other force fields by supplying appropriately customized
+template files.</p>
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="jensen2006" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[Jensen2006]</a></td><td>Jensen &amp; Jorgensen JCTC 2 (2006), 1499.</td></tr>
+</tbody>
+</table>
+</div>
 <div class="section" id="location-of-template-files">
 <h3>Location of template files<a class="headerlink" href="#location-of-template-files" title="Permalink to this headline">¶</a></h3>
 <p><em>Template variables</em> list files in the package that can be used as
@@ -96,13 +124,16 @@ parameters that are legal in the current version of Gromacs.</p>
 <dl class="data">
 <dt id="mdpow.config.topfiles">
 <tt class="descclassname">mdpow.config.</tt><tt class="descname">topfiles</tt><a class="headerlink" href="#mdpow.config.topfiles" title="Permalink to this definition">¶</a></dt>
-<dd><p>List of all topology files that are included in the package.</p>
+<dd><p>List of all topology files that are included in the package.
+(includes force field files under <tt class="docutils literal"><span class="pre">top/oplsaa.ff</span></tt>)</p>
 </dd></dl>
 
 <dl class="data">
 <dt id="mdpow.config.includedir">
 <tt class="descclassname">mdpow.config.</tt><tt class="descname">includedir</tt><a class="headerlink" href="#mdpow.config.includedir" title="Permalink to this definition">¶</a></dt>
-<dd><p>The package&#8217;s include directory for <tt class="xref py py-func docutils literal"><span class="pre">gromacs.grompp()</span></tt>.</p>
+<dd><p>The package&#8217;s include directory for <tt class="xref py py-func docutils literal"><span class="pre">gromacs.grompp()</span></tt>; the
+environment variable <span class="target" id="index-3"></span><tt class="xref std std-envvar docutils literal"><span class="pre">GMXLIB</span></tt> is set to <a class="reference internal" href="#mdpow.config.includedir" title="mdpow.config.includedir"><tt class="xref py py-data docutils literal"><span class="pre">includedir</span></tt></a>
+so that the bundled version of the force field is picked up.</p>
 </dd></dl>
 
 </div>
@@ -165,6 +196,22 @@ be one of</p>
 </table>
 </dd></dl>
 
+<p class="rubric">Developer note</p>
+<p>Templates have to be extracted from the egg because they are used by external
+code. All template filenames are stored in <tt class="xref py py-data docutils literal"><span class="pre">config.templates</span></tt> or
+<tt class="xref py py-data docutils literal"><span class="pre">config.topfiles</span></tt>.</p>
+<p>Sub-directories are extracted (see <a class="reference external" href="http://packages.python.org/distribute/pkg_resources.html#resource-extraction">Resource extraction</a>) but the file names
+themselves will not appear in the template dict. Thus, only store files in
+subdirectories that don&#8217;t have to be explicitly found by the package (e.g. the
+Gromacs force field files are ok).</p>
+<dl class="function">
+<dt id="mdpow.config._generate_template_dict">
+<tt class="descclassname">mdpow.config.</tt><tt class="descname">_generate_template_dict</tt><big>(</big><em>dirname</em><big>)</big><a class="headerlink" href="#mdpow.config._generate_template_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a list of included top-level files <em>and</em> extract them to a temp space.</p>
+<p>Only lists files and directories at the <em>top level</em> of the <em>dirname</em>;
+however, all directories are extracted recursively and will be available.</p>
+</dd></dl>
+
 </div>
 </div>
 <span class="target" id="module-mdpow.log"></span><div class="section" id="mdpow-log-configure-logging-for-pow-analysis">
@@ -193,6 +240,7 @@ create the logger in <tt class="docutils literal"><span class="pre">__init__.py<
   <ul>
 <li><a class="reference internal" href="#">Helper modules</a><ul>
 <li><a class="reference internal" href="#mdpow-config-configuration-for-pow"><tt class="docutils literal"><span class="pre">mdpow.config</span></tt> &#8211; Configuration for POW</a><ul>
+<li><a class="reference internal" href="#force-field">Force field</a></li>
 <li><a class="reference internal" href="#location-of-template-files">Location of template files</a></li>
 <li><a class="reference internal" href="#functions">Functions</a></li>
 </ul>
@@ -249,7 +297,7 @@ create the logger in <tt class="docutils literal"><span class="pre">__init__.py<
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2010, Oliver Beckstein and Bogdan Iorga.
+        &copy; Copyright 2010–2011, Oliver Beckstein and Bogdan Iorga.
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
     </div>
   </body>
