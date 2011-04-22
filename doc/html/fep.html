@@ -7,13 +7,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>mdpow.fep – Calculate free energy of solvation &mdash; MDpow v0.3.3 documentation</title>
+    <title>mdpow.fep – Calculate free energy of solvation &mdash; MDpow v0.4.0 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.3.3',
+        VERSION:     '0.4.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -22,7 +22,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="MDpow v0.3.3 documentation" href="index.html" />
+    <link rel="top" title="MDpow v0.4.0 documentation" href="index.html" />
     <link rel="next" title="mdpow.analysis — Collection of analysis and plotting functions" href="analysis.html" />
     <link rel="prev" title="mdpow.equil — Setting up and running equilibrium MD" href="equil.html" /> 
   </head>
@@ -42,7 +42,7 @@
         <li class="right" >
           <a href="equil.html" title="mdpow.equil — Setting up and running equilibrium MD"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">MDpow v0.3.3 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow v0.4.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -59,11 +59,11 @@ box. The protocol follows the works of D. Mobley (<a class="reference external" 
 Tutorial</a>) and M. Shirts, and uses Gromacs 4.0.x.</p>
 <p>Required Input:</p>
 <blockquote>
-<ul class="simple">
+<div><ul class="simple">
 <li>topology</li>
 <li>equilibrated structure of the solvated molecule</li>
 </ul>
-</blockquote>
+</div></blockquote>
 <p>See the docs for <a class="reference internal" href="#mdpow.fep.Gsolv" title="mdpow.fep.Gsolv"><tt class="xref py py-class docutils literal"><span class="pre">Gsolv</span></tt></a> for details on what is calculated.</p>
 <div class="section" id="differences-to-published-protocols">
 <h2>Differences to published protocols<a class="headerlink" href="#differences-to-published-protocols" title="Permalink to this headline">¶</a></h2>
@@ -80,13 +80,13 @@ so that we do not have to do an extra calculation in vacuo.
 <a class="reference external" href="http://www.mail-archive.com/gmx-users&#64;gromacs.org/msg18803.html">http://www.mail-archive.com/gmx-users&#64;gromacs.org/msg18803.html</a></p>
 <p>Mobley does an extra discharging calculation in vacuo and calculates</p>
 <blockquote>
-<p>DeltaA = DeltaA_coul(vac) - (DeltaA_coul(sol) + DeltaA_vdw(sol))</p>
-</blockquote>
+<div><p>DeltaA = DeltaA_coul(vac) - (DeltaA_coul(sol) + DeltaA_vdw(sol))</p>
+</div></blockquote>
 <p>(but also annihilates the interactions on the solute, corresponding to
 <tt class="docutils literal"><span class="pre">couple-intramol</span> <span class="pre">=</span> <span class="pre">yes</span></tt>) whereas we do</p>
 <blockquote>
-<p>DeltaA = - (DeltaA_coul(sol) + DeltaA_vdw(sol))</p>
-</blockquote>
+<div><p>DeltaA = - (DeltaA_coul(sol) + DeltaA_vdw(sol))</p>
+</div></blockquote>
 </li>
 <li><p class="first">Pressure and Volume: Mobley scales the box size with an affine transformation
 to the density corresponding to the average pressure of the equilibration
@@ -125,7 +125,7 @@ energy (which is the experimental quantity) at the standard state (1 M
 solution and 1 M in the gas phase, also known as the &#8220;Ben-Naim standard
 state&#8221;):</p>
 <blockquote>
-DeltaG* = DeltaA + (p*-p)*Vsim</blockquote>
+<div>DeltaG* = DeltaA + (p*-p)*Vsim</div></blockquote>
 <p>The pressure term is currently NOT IMPLEMENTED.
 1 bar = 0.06 kJ mol^-1 nm^-3 typical values of the term are XXX
 kJ/mol. Vsim is the constant simulations box volume (taken from
@@ -139,7 +139,7 @@ Thesis, p82].)</p>
 choice of lambda=0 being the fully interacting and lambda=1 the
 non-interacting state, it is computed as</p>
 <blockquote>
-Delta A = -(Delta A_coul + Delta A_vdw)</blockquote>
+<div>Delta A = -(Delta A_coul + Delta A_vdw)</div></blockquote>
 <p>With this protocol, the concentration in the liquid and in the gas phase
 is the same. (Under the assumption of ideal solution/ideal gas behaviour
 this seems to directly relate to the Ben-Naim 1M/1M standard state.)</p>
@@ -151,7 +151,7 @@ this seems to directly relate to the Ben-Naim 1M/1M standard state.)</p>
 <span class="n">G</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>See <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/qsub.html#gromacs.qsub" title="(in GromacsWrapper v0.1)"><tt class="xref py py-mod docutils literal"><span class="pre">gromacs.qsub</span></tt></a> for notes on how to write templates for
+<p>See <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/qsub.html#gromacs.qsub" title="(in GromacsWrapper v0.2)"><tt class="xref py py-mod docutils literal"><span class="pre">gromacs.qsub</span></tt></a> for notes on how to write templates for
 queuing system scripts (in particular <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/building_blocks.html?highlight=qsub#queuing-system-templates">queuing system templates</a>).</p>
 <p>Set up Gsolv from input files or a equilibrium simulation.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -194,7 +194,7 @@ affect the simulations</p>
 </dd>
 <dt><em>qscript</em></dt>
 <dd><p class="first last">template or list of templates for queuing system scripts
-(see <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/config.html#gromacs.config.templates" title="(in GromacsWrapper v0.1)"><tt class="xref py py-data docutils literal"><span class="pre">gromacs.config.templates</span></tt></a> for details) [local.sh]</p>
+(see <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/config.html#gromacs.config.templates" title="(in GromacsWrapper v0.2)"><tt class="xref py py-data docutils literal"><span class="pre">gromacs.config.templates</span></tt></a> for details) [local.sh]</p>
 </dd>
 <dt><em>includes</em></dt>
 <dd><p class="first last">include directories</p>
@@ -212,7 +212,7 @@ file</p>
 </dd>
 <dt><em>permissive</em></dt>
 <dd><p class="first last">Set to <tt class="xref docutils literal"><span class="pre">True</span></tt> if you want to read past corrupt data in output
-xvg files (see <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/formats.html#gromacs.formats.XVG" title="(in GromacsWrapper v0.1)"><tt class="xref py py-class docutils literal"><span class="pre">gromacs.formats.XVG</span></tt></a> for details); not that
+xvg files (see <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/formats.html#gromacs.formats.XVG" title="(in GromacsWrapper v0.2)"><tt class="xref py py-class docutils literal"><span class="pre">gromacs.formats.XVG</span></tt></a> for details); not that
 <em>permissive*=``True`` can lead to **wrong results*</em>. Overrides
 the value set in a loaded pickle file. [<tt class="xref docutils literal"><span class="pre">False</span></tt>]</p>
 </dd>
@@ -232,10 +232,10 @@ the value set in a loaded pickle file. [<tt class="xref docutils literal"><span 
 <tt class="descname">Vdp</tt><big>(</big><em>p=1.0</em><big>)</big><a class="headerlink" href="#mdpow.fep.Gsolv.Vdp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Vdp contribution to Gibbs free energy</p>
 <blockquote>
-DeltaG = DeltaA + V*DeltaP     (for V=const)</blockquote>
+<div>DeltaG = DeltaA + V*DeltaP     (for V=const)</div></blockquote>
 <p>Delta refers to</p>
 <blockquote>
-aq (fully coupled) &#8211;&gt; gaseous (decoupled)</blockquote>
+<div>aq (fully coupled) &#8211;&gt; gaseous (decoupled)</div></blockquote>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
 <p class="last">Not implemented at the moment and simply set to 0 because
@@ -273,30 +273,30 @@ interactions with the environment). The free energy components must be
 interpreted in this way because we defined lambda=0 as interaction
 switched on and lambda=1 as switched off.</p>
 <blockquote>
-<p>Delta A* = -(Delta A_coul + Delta A_vdw)</p>
+<div><p>Delta A* = -(Delta A_coul + Delta A_vdw)</p>
 <p>Delta_G* = Delta_A* + (p*-p)*V  [not implemented]</p>
-</blockquote>
+</div></blockquote>
 <p>Data are stored in <a class="reference internal" href="#mdpow.fep.Gsolv.results" title="mdpow.fep.Gsolv.results"><tt class="xref py py-attr docutils literal"><span class="pre">Gsolv.results</span></tt></a>.</p>
 <p>The dV/dlambda graphs are integrated with the composite Simpson&#8217;s rule
 (and if the number of datapoints are even, the first interval is
-evaluated with the trapezoidal rule); see <a class="reference external" href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.simps.html#scipy.integrate.simps" title="(in SciPy v0.9.dev6665)"><tt class="xref py py-func docutils literal"><span class="pre">scipy.integrate.simps()</span></tt></a>
+evaluated with the trapezoidal rule); see <a class="reference external" href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.simps.html#scipy.integrate.simps" title="(in SciPy v0.10.dev)"><tt class="xref py py-func docutils literal"><span class="pre">scipy.integrate.simps()</span></tt></a>
 for details). Note that this implementation of Simpson&#8217;s rule does not
 require equidistant spacing on the lambda axis.</p>
 <p>For the Coulomb part using Simpson&#8217;s rule has been shown to produce
 more accurate results than the trapezoidal rule <a class="reference internal" href="#jorge2010">[Jorge2010]</a>.</p>
 <p>Errors are estimated from the errors of the individual &lt;dV/dlambda&gt;:</p>
 <blockquote>
-<ol class="arabic simple">
+<div><ol class="arabic simple">
 <li>The error of the mean &lt;dV/dlambda&gt; is calculated via the decay time
 of the fluctuation around the mean (see
-<a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/formats.html#gromacs.formats.XVG.error" title="(in GromacsWrapper v0.1)"><tt class="xref py py-attr docutils literal"><span class="pre">gromacs.formats.XVG.error</span></tt></a>).</li>
+<a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/formats.html#gromacs.formats.XVG.error" title="(in GromacsWrapper v0.2)"><tt class="xref py py-attr docutils literal"><span class="pre">gromacs.formats.XVG.error</span></tt></a>).</li>
 <li>The error on the integral is calculated analytically via
 propagation of errors through Simpson&#8217;s rule (with the
 approximation that all spacings are assumed to be equal; taken as
 the average over all spacings as implemented in
-<a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/numkit/integration.html#numkit.integration.simps_error" title="(in GromacsWrapper v0.1)"><tt class="xref py py-func docutils literal"><span class="pre">numkit.integration.simps_error()</span></tt></a>).</li>
+<a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/numkit/integration.html#numkit.integration.simps_error" title="(in GromacsWrapper v0.2)"><tt class="xref py py-func docutils literal"><span class="pre">numkit.integration.simps_error()</span></tt></a>).</li>
 </ol>
-</blockquote>
+</div></blockquote>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">For the Coulomb part, which typically only contains about 5
@@ -484,7 +484,7 @@ or saved to.</p>
 the templates are used that were supplied to the constructor.</p>
 </dd>
 <dt><em>kwargs</em></dt>
-<dd><p class="first last">Most kwargs are passed on to <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/setup.html#gromacs.setup.MD" title="(in GromacsWrapper v0.1)"><tt class="xref py py-func docutils literal"><span class="pre">gromacs.setup.MD()</span></tt></a> although some
+<dd><p class="first last">Most kwargs are passed on to <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/setup.html#gromacs.setup.MD" title="(in GromacsWrapper v0.2)"><tt class="xref py py-func docutils literal"><span class="pre">gromacs.setup.MD()</span></tt></a> although some
 are set to values that are required for the FEP functionality.
 Note: <em>runtime</em> is set from the constructor.</p>
 </dd>
@@ -593,7 +593,7 @@ affect the simulations</p>
 </dd>
 <dt><em>qscript</em></dt>
 <dd><p class="first last">template or list of templates for queuing system scripts
-(see <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/config.html#gromacs.config.templates" title="(in GromacsWrapper v0.1)"><tt class="xref py py-data docutils literal"><span class="pre">gromacs.config.templates</span></tt></a> for details) [local.sh]</p>
+(see <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/config.html#gromacs.config.templates" title="(in GromacsWrapper v0.2)"><tt class="xref py py-data docutils literal"><span class="pre">gromacs.config.templates</span></tt></a> for details) [local.sh]</p>
 </dd>
 <dt><em>includes</em></dt>
 <dd><p class="first last">include directories</p>
@@ -611,7 +611,7 @@ file</p>
 </dd>
 <dt><em>permissive</em></dt>
 <dd><p class="first last">Set to <tt class="xref docutils literal"><span class="pre">True</span></tt> if you want to read past corrupt data in output
-xvg files (see <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/formats.html#gromacs.formats.XVG" title="(in GromacsWrapper v0.1)"><tt class="xref py py-class docutils literal"><span class="pre">gromacs.formats.XVG</span></tt></a> for details); not that
+xvg files (see <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/formats.html#gromacs.formats.XVG" title="(in GromacsWrapper v0.2)"><tt class="xref py py-class docutils literal"><span class="pre">gromacs.formats.XVG</span></tt></a> for details); not that
 <em>permissive*=``True`` can lead to **wrong results*</em>. Overrides
 the value set in a loaded pickle file. [<tt class="xref docutils literal"><span class="pre">False</span></tt>]</p>
 </dd>
@@ -676,7 +676,7 @@ affect the simulations</p>
 </dd>
 <dt><em>qscript</em></dt>
 <dd><p class="first last">template or list of templates for queuing system scripts
-(see <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/config.html#gromacs.config.templates" title="(in GromacsWrapper v0.1)"><tt class="xref py py-data docutils literal"><span class="pre">gromacs.config.templates</span></tt></a> for details) [local.sh]</p>
+(see <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/config.html#gromacs.config.templates" title="(in GromacsWrapper v0.2)"><tt class="xref py py-data docutils literal"><span class="pre">gromacs.config.templates</span></tt></a> for details) [local.sh]</p>
 </dd>
 <dt><em>includes</em></dt>
 <dd><p class="first last">include directories</p>
@@ -694,7 +694,7 @@ file</p>
 </dd>
 <dt><em>permissive</em></dt>
 <dd><p class="first last">Set to <tt class="xref docutils literal"><span class="pre">True</span></tt> if you want to read past corrupt data in output
-xvg files (see <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/formats.html#gromacs.formats.XVG" title="(in GromacsWrapper v0.1)"><tt class="xref py py-class docutils literal"><span class="pre">gromacs.formats.XVG</span></tt></a> for details); not that
+xvg files (see <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/formats.html#gromacs.formats.XVG" title="(in GromacsWrapper v0.2)"><tt class="xref py py-class docutils literal"><span class="pre">gromacs.formats.XVG</span></tt></a> for details); not that
 <em>permissive*=``True`` can lead to **wrong results*</em>. Overrides
 the value set in a loaded pickle file. [<tt class="xref docutils literal"><span class="pre">False</span></tt>]</p>
 </dd>
@@ -716,13 +716,13 @@ the value set in a loaded pickle file. [<tt class="xref docutils literal"><span 
 <tt class="descclassname">mdpow.fep.</tt><tt class="descname">pOW</tt><big>(</big><em>G1</em>, <em>G2</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.fep.pOW" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute water-octanol partition coefficient from two <a class="reference internal" href="#mdpow.fep.Gsolv" title="mdpow.fep.Gsolv"><tt class="xref py py-class docutils literal"><span class="pre">Gsolv</span></tt></a> objects.</p>
 <blockquote>
-<dl class="docutils">
+<div><dl class="docutils">
 <dt>transfer free energy from water into octanol</dt>
 <dd>DeltaDeltaA0 = DeltaA0_oct - DeltaA0_water</dd>
 <dt>water-octanol partition coefficient</dt>
 <dd>log P_oct/wat =  log [X]_oct/[X]_wat</dd>
 </dl>
-</blockquote>
+</div></blockquote>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -840,7 +840,7 @@ use preprocessed topology from <tt class="docutils literal"><span class="pre">gr
                         title="previous chapter"><tt class="docutils literal docutils literal"><span class="pre">mdpow.equil</span></tt> &#8212; Setting up and running equilibrium MD</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="analysis.html"
-                        title="next chapter"><tt class="docutils literal docutils literal"><span class="pre">mdpow.analysis</span></tt> &#8212; Collection of analysis and plotting functions</a></p>
+                        title="next chapter"><tt class="docutils literal"><span class="pre">mdpow.analysis</span></tt> &#8212; Collection of analysis and plotting functions</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/fep.txt"
@@ -878,12 +878,12 @@ use preprocessed topology from <tt class="docutils literal"><span class="pre">gr
         <li class="right" >
           <a href="equil.html" title="mdpow.equil — Setting up and running equilibrium MD"
              >previous</a> |</li>
-        <li><a href="index.html">MDpow v0.3.3 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow v0.4.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, Oliver Beckstein and Bogdan Iorga.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.4.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
     </div>
   </body>
 </html>

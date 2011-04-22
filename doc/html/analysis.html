@@ -7,13 +7,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>mdpow.analysis — Collection of analysis and plotting functions &mdash; MDpow v0.3.3 documentation</title>
+    <title>mdpow.analysis — Collection of analysis and plotting functions &mdash; MDpow v0.4.0 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.3.3',
+        VERSION:     '0.4.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -22,9 +22,9 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="MDpow v0.3.3 documentation" href="index.html" />
+    <link rel="top" title="MDpow v0.4.0 documentation" href="index.html" />
     <link rel="next" title="Helper modules" href="utilities.html" />
-    <link rel="prev" title="mdpow.fep – Calculate free energy of solvation" href="fep.html" /> 
+    <link rel="prev" title="&lt;no title&gt;" href="fep.html" /> 
   </head>
   <body>
     <div class="related">
@@ -40,9 +40,9 @@
           <a href="utilities.html" title="Helper modules"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="fep.html" title="mdpow.fep – Calculate free energy of solvation"
+          <a href="fep.html" title="&lt;no title&gt;"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">MDpow v0.3.3 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow v0.4.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -70,13 +70,13 @@ files that are produced by <strong class="program">mdpow-pow</strong>, into the 
 <tt class="docutils literal"><span class="pre">experimental/targets.csv</span></tt>. This is only necessary if the experimental data
 were changed. We only plot entries for which</p>
 <blockquote>
-<ul class="simple">
+<div><ul class="simple">
 <li>a id number (first column <em>no</em>) is defined (should be unique)</li>
 <li>a <em>logPow</em> value exists</li>
 <li>a <em>itp_name</em> exists, which must correspond to the <em>molecule</em> name used in
-<a class="reference internal" href="fep.html#mdpow.fep.Gsolv" title="mdpow.fep.Gsolv"><tt class="xref py py-mod docutils literal"><span class="pre">mdpow.fep.Gsolv</span></tt></a></li>
+<tt class="xref py py-mod docutils literal"><span class="pre">mdpow.fep.Gsolv</span></tt></li>
 </ul>
-</blockquote>
+</div></blockquote>
 </div>
 <div class="section" id="making-graphs">
 <h2>Making graphs<a class="headerlink" href="#making-graphs" title="Permalink to this headline">¶</a></h2>
@@ -133,10 +133,10 @@ done.</p>
 <p>Experimental octanol solvation free energies are computed from
 experimental logPow and DeltaGhyd from</p>
 <blockquote>
-logPow = -(DeltaGoct-DeltaGhyd)/kT * log10(e)</blockquote>
+<div>logPow = -(DeltaGoct-DeltaGhyd)/kT * log10(e)</div></blockquote>
 <p>(see also <a class="reference internal" href="#mdpow.analysis.gsolv2logpow" title="mdpow.analysis.gsolv2logpow"><tt class="xref py py-func docutils literal"><span class="pre">gsolv2logpow()</span></tt></a>) as</p>
 <blockquote>
-DeltaGoct = DeltaGhyd - kT*logPow / log10(e)</blockquote>
+<div>DeltaGoct = DeltaGhyd - kT*logPow / log10(e)</div></blockquote>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
 <p class="last">In principle the temperature T of the logPow measurement and the
@@ -153,12 +153,12 @@ experimental error for DeltaGhyd.</p>
 <span class="n">G</span> <span class="o">=</span> <span class="n">mdpow</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">GsolvData</span><span class="p">()</span>
 <span class="n">G</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s">&#39;hyd&#39;</span><span class="p">)</span>
 <span class="c"># adjust things such as manually increasing window ...</span>
-<span class="n">ylim</span><span class="p">(</span><span class="o">-</span><span class="mi">160</span><span class="p">,</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">ylim</span><span class="p">(</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span><span class="mi">20</span><span class="p">)</span>
 <span class="n">savefig</span><span class="p">(</span><span class="s">&quot;figs/ghyd.pdf&quot;</span><span class="p">)</span>
 
 <span class="n">clf</span><span class="p">()</span>
 <span class="n">G</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s">&#39;oct&#39;</span><span class="p">)</span>
-<span class="n">ylim</span><span class="p">(</span><span class="o">-</span><span class="mi">140</span><span class="p">,</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">ylim</span><span class="p">(</span><span class="o">-</span><span class="mi">150</span><span class="p">,</span><span class="mi">20</span><span class="p">)</span>
 <span class="n">savefig</span><span class="p">(</span><span class="s">&quot;figs/goct.pdf&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -296,7 +296,7 @@ footer so that it is proper table). See <a class="reference internal" href="#mdp
 <li><p class="first">Prepare <tt class="docutils literal"><span class="pre">experimental/targets.csv</span></tt> if it does not exist or if
 something changed. See <a class="reference internal" href="#mdpow.analysis.load_exp" title="mdpow.analysis.load_exp"><tt class="xref py py-func docutils literal"><span class="pre">load_exp()</span></tt></a> for details.</p>
 <blockquote>
-<dl class="docutils">
+<div><dl class="docutils">
 <dt><em>compoundnames</em></dt>
 <dd><p class="first last"><tt class="xref docutils literal"><span class="pre">False</span></tt> puts the directory names in the legend, <tt class="xref docutils literal"><span class="pre">True</span></tt> uses the chemical
 compound names; &#8220;auto&#8221; chooses <tt class="xref docutils literal"><span class="pre">True</span></tt> if exclusions were applied [&#8220;auto&#8221;]</p>
@@ -308,7 +308,7 @@ compound names; &#8220;auto&#8221; chooses <tt class="xref docutils literal"><sp
 <dd><p class="first last">limits of the plot in the y direction (=computational results)</p>
 </dd>
 </dl>
-</blockquote>
+</div></blockquote>
 </li>
 </ul>
 </dd></dl>
@@ -366,7 +366,7 @@ files!) are important because we use them here.</p>
 <tt class="descclassname">mdpow.analysis.</tt><tt class="descname">gsolv2logpow</tt><big>(</big><em>Gwat</em>, <em>Goct</em>, <em>unit='kcal/mol'</em>, <em>temperature=300.0</em><big>)</big><a class="headerlink" href="#mdpow.analysis.gsolv2logpow" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate logPow from the solvation free energies.</p>
 <blockquote>
-logPow = -(Goct-Ghyd)/kT * log10(e)</blockquote>
+<div>logPow = -(Goct-Ghyd)/kT * log10(e)</div></blockquote>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">Default unit is kcal/mol, unlike the rest of mdpow, which
@@ -423,7 +423,7 @@ the literature are quoted in kcal/mol.</p>
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="fep.html"
-                        title="previous chapter"><tt class="docutils literal"><span class="pre">mdpow.fep</span></tt> &#8211; Calculate free energy of solvation</a></p>
+                        title="previous chapter">&lt;no title&gt;</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="utilities.html"
                         title="next chapter">Helper modules</a></p>
@@ -462,14 +462,14 @@ the literature are quoted in kcal/mol.</p>
           <a href="utilities.html" title="Helper modules"
              >next</a> |</li>
         <li class="right" >
-          <a href="fep.html" title="mdpow.fep – Calculate free energy of solvation"
+          <a href="fep.html" title="&lt;no title&gt;"
              >previous</a> |</li>
-        <li><a href="index.html">MDpow v0.3.3 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow v0.4.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, Oliver Beckstein and Bogdan Iorga.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.5.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
     </div>
   </body>
 </html>
