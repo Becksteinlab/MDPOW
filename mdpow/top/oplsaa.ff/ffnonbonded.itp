@@ -816,6 +816,8 @@
  opls_963   CT     6	12.01100     0.120       A    3.50000e-01  2.76144e-01
  opls_964   CT     6	12.01100     0.480       A    3.50000e-01  4.05848e-01
  opls_965   F      9	18.99840    -0.120       A    2.95000e-01  2.21752e-01
+
+
 ; special dummy-type particles
  MNH3       MNH3    0	0.00000     0.000       A    0.00000e+00  0.00000e+00
  MNH2       MNH2    0	0.00000     0.000       A    0.00000e+00  0.00000e+00
@@ -830,3 +832,17 @@
  Ar         Ar     18	39.94800     0.000       A    3.41000e-01  2.74580e-02
 ; Added by DvdS 05/2005 copied from GROMACS force field.       
  SI         SI     14	28.08000     0.000       A    3.38550e-01  2.44704e+00
+
+; new Jensen & Jorgensen alkali and halide OPLS parameters (recommended to only use with TIP4P)
+; Jensen & Jorgensen JCTC 2 (2006), 1499. Table 2
+; added by Oliver Beckstein 2010-02-04 [unknown opls numbers so I used opls_9xxx]
+ opls_9001  F-     9    18.99840    -1.000       A    3.05000e-01  2.97064e+00 
+ opls_9002  Cl-   17    35.45300    -1.000       A    4.02000e-01  2.97064e+00 
+ opls_9003  Br-   35    79.90400    -1.000       A    4.28000e-01  2.97064e+00 
+ opls_9004  I-    53   126.90450    -1.000       A    4.81000e-01  2.97064e+00 
+ opls_9005  Li+    3     6.94100     1.000       A    2.87000e-01  2.09200e-03 
+ opls_9006  Na+   11    22.98977     1.000       A    4.07000e-01  2.09200e-03 
+ opls_9007  K+    19    39.09830     1.000       A    5.17000e-01  2.09200e-03 
+ opls_9008  Rb+   37     5.46780     1.000       A    5.60000e-01  2.09200e-03 
+ opls_9009  Cs+   55   132.90540     1.000       A    6.20000e-01  2.09200e-03 
+ opls_9010  NH4+   7    18.03870     1.000       A    5.34000e-01  2.09200e-03 
