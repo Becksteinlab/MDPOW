@@ -17,6 +17,10 @@ It requires as input
 By default it uses the *OPLS/AA* forcefield and the *TIP4P* water
 model.
 
+.. warning:: Other forcefields than OPLS/AA are currently not
+   officially supported; it is not hard to do but requires tedious
+   changes to a few paths in template scripts.
+
 .. autoclass:: Simulation
    :members:
 .. autoclass:: WaterSimulation
@@ -64,20 +68,20 @@ class Simulation(object):
 
     .. Note:: The OPLS/AA force field and the TIP4P water molecule is the
               default; changing this is possible but will require provision of
-              customized itp and mdp files at various stages.
+              customized itp, mdp and template top files at various stages.
     """
 
     #: Keyword arguments to pre-set some file names; they are keys in :attr:`Simulation.files`.
-    filekeys = ('topology', 'processed_topology', 'structure', 'solvated', 'ndx', 
+    filekeys = ('topology', 'processed_topology', 'structure', 'solvated', 'ndx',
                 'energy_minimized', 'MD_relaxed', 'MD_restrained', 'MD_NPT')
     dirname_default = os.path.curdir
     solvent_default = 'water'
 
     #: Coordinate files of the full system in increasing order of advancement of
     #: the protocol; the later the better. The values are keys into :attr:`Simulation.files`.
-    coordinate_structures = ('solvated', 'energy_minimized', 'MD_relaxed',  
+    coordinate_structures = ('solvated', 'energy_minimized', 'MD_relaxed',
                              'MD_restrained', 'MD_NPT')
-    
+
     def __init__(self, molecule=None, **kwargs):
         """Set up Simulation instance.
 
@@ -99,7 +103,7 @@ class Simulation(object):
           *kwargs*
               advanced keywords for short-circuiting; see
               :data:`mdpow.equil.Simulation.filekeys`.
-              
+
         """
         filename = kwargs.pop('filename', None)
         dirname = kwargs.pop('dirname', self.dirname_default)
@@ -107,7 +111,7 @@ class Simulation(object):
         if molecule is None and not filename is None:
             # load from pickle file
             self.load(filename)
-            self.filename = filename            
+            self.filename = filename
             kwargs = {}    # for super
         else:
             self.molecule = molecule or 'DRUG'
@@ -154,14 +158,14 @@ class Simulation(object):
         with open(filename, 'wb') as f:
             cPickle.dump(self, f, protocol=cPickle.HIGHEST_PROTOCOL)
         logger.debug("Instance pickled to %(filename)r" % vars())
-        
+
     def load(self, filename=None):
         """Re-instantiate class from pickled file."""
         if filename is None:
             if self.filename is None:
                 self.filename = self.molecule.lower() + '.pickle'
                 logger.warning("No filename known, trying name %r", self.filename)
-            filename = self.filename        
+            filename = self.filename
         with open(filename, 'rb') as f:
             instance = cPickle.load(f)
         self.__dict__.update(instance.__dict__)
@@ -180,7 +184,7 @@ class Simulation(object):
             elif len(m) == 0:
                 return None
             return m
-        
+
         basedir = self.dirs.basedir
         for key, fn in self.files.items():
             try:
@@ -210,7 +214,7 @@ class Simulation(object):
         """
         dirname = kwargs.pop('dirname', self.BASEDIR('top'))
         self.dirs.topology = realpath(dirname)
-        
+
         top_template = config.get_template(kwargs.pop('top_template', 'system.top'))
         topol = kwargs.pop('topol', os.path.basename(top_template))
         itp = os.path.realpath(itp)
@@ -232,7 +236,7 @@ class Simulation(object):
         self.files.topology = realpath(dirname, topol)
         if not self.dirs.topology in self.dirs.includes:
             self.dirs.includes.append(self.dirs.topology)
-        
+
         return {'dirname': dirname, 'topol': topol}
 
 
@@ -265,7 +269,7 @@ class Simulation(object):
 
         # we can also make a processed topology right now
         self.processed_topology()
-        
+
         return params
 
     def processed_topology(self, **kwargs):
@@ -346,7 +350,7 @@ class Simulation(object):
                   compound itp file does indeed contain a ``[ posres ]``
                   section that is protected by a ``#ifdef POSRES`` clause.
         """
-        kwargs.setdefault('struct', 
+        kwargs.setdefault('struct',
                           self._lastnotempty([self.files.energy_minimized, self.files.MD_relaxed]))
         kwargs['MDfunc'] = gromacs.setup.MD_restrained
         return self._MD('MD_restrained', **kwargs)
@@ -379,7 +383,7 @@ class Simulation(object):
         # user structure or relaxed or restrained or solvated
         kwargs.setdefault('struct', self.get_last_structure())
         return self._MD('MD_NPT', **kwargs)
-        
+
 
     def _checknotempty(self, value, name):
         if value is None or value == "":

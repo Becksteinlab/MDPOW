@@ -1,5 +1,5 @@
 # POW: config.py
-# Copyright (c) 2010 Oliver Beckstein <orbeckst@gmail.com>
+# Copyright (c) 2010-2011 Oliver Beckstein <orbeckst@gmail.com>
 # Released under the GNU Public License 3 (or higher, your choice)
 # See the file COPYING for details.
 
@@ -13,6 +13,36 @@ matplotlib's rc system but right now it mostly serves to define which gromacs
 tools and other scripts are offered in the package and where template files are
 located. If the user wants to change anything they will still have to do it
 here in source until a better mechanism with rc files has been implemented.
+
+
+Force field
+-----------
+
+By default, MDPOW uses a collection of OPLS/AA force field files based on the
+Gromacs 4.5.3 distribution, with the following differences:
+
+* For ions we use the new alkali and halide ion parameters from Table 2 in
+  [Jensen2006]_ which had shown some small improvements in the paper. They
+  should only be used with the TIP4P water model.
+
+* OPLS/AA parameters for 1-octanol were added. These parameters were validated
+  against experimental data by computing the density (neat), hydration free
+  energy and logP (the latter being a self consistentcy check).
+
+The force field files are found in the directory pointed to by the environment
+variable :envvar:`GMXLIB`. By default, :mod:`mdpow.config` sets
+:envvar:`GMXLIB` to :data:`includedir` unless :envvar:`GMXLIB` has already been
+set. This mechanism allows the user to override the choice of location of force
+field.
+
+At the moment, only OPLS/AA is tested with MDPOW although in principle it is
+possible to use other force fields by supplying appropriately customized
+template files.
+
+.. rubric:: References
+
+.. [Jensen2006] Jensen & Jorgensen JCTC 2 (2006), 1499.
+
 
 
 Location of template files
@@ -36,23 +66,38 @@ The following functions can be used to access configuration data.
 .. autofunction:: get_template
 .. autofunction:: get_templates
 
+.. rubric:: Developer note
+
+Templates have to be extracted from the egg because they are used by external
+code. All template filenames are stored in :data:`config.templates` or
+:data:`config.topfiles`.
+
+Sub-directories are extracted (see `Resource extraction`_) but the file names
+themselves will not appear in the template dict. Thus, only store files in
+subdirectories that don't have to be explicitly found by the package (e.g. the
+Gromacs force field files are ok).
+
+.. _Resource extraction:
+   http://packages.python.org/distribute/pkg_resources.html#resource-extraction
+
+.. autofunction:: _generate_template_dict
+
 """
 
-import os
+import os, errno
 from pkg_resources import resource_filename, resource_listdir
 
+import logging
+logger = logging.getLogger("mdpow.config")
 
-
-# Location of template files
-# --------------------------
-
+# Functions to locate template files
+# ----------------------------------
 
 def _generate_template_dict(dirname):
-    """Generate a list of included files *and* extract them to a temp space.
+    """Generate a list of included top-level files *and* extract them to a temp space.
 
-    Templates have to be extracted from the egg because they are used
-    by external code. All template filenames are stored in
-    :data:`config.templates` or :data:`config.topfiles`.
+    Only lists files and directories at the *top level* of the *dirname*;
+    however, all directories are extracted recursively and will be available.
     """
     return dict((resource_basename(fn), resource_filename(__name__, dirname+'/'+fn))
                 for fn in resource_listdir(__name__, dirname)
@@ -64,43 +109,6 @@ def resource_basename(resource):
           resource = resource[:-1]
      parts = resource.split('/')
      return parts[-1]
-
-
-templates = _generate_template_dict('templates')
-"""*POW* comes with a number of templates for run input files
-and queuing system scripts. They are provided as a convenience and
-examples but **WITHOUT ANY GUARANTEE FOR CORRECTNESS OR SUITABILITY FOR
-ANY PURPOSE**.
-
-All template filenames are stored in
-:data:`gromacs.config.templates`. Templates have to be extracted from
-the GromacsWrapper python egg file because they are used by external
-code: find the actual file locations from this variable.
-
-**Gromacs mdp templates**
-
-   These are supplied as examples and there is *NO GUARANTEE THAT THEY
-   PRODUCE SENSIBLE OUTPUT* --- check for yourself!  Note that only
-   existing parameter names can be modified with
-   :func:`gromacs.cbook.edit_mdp` at the moment; if in doubt add the
-   parameter with its gromacs default value (or empty values) and
-   modify later with :func:`~gromacs.cbook.edit_mdp`.
-
-
-   The safest bet is to use one of the ``mdout.mdp`` files produced by
-   :func:`gromacs.grompp` as a template as this mdp contains all
-   parameters that are legal in the current version of Gromacs.
-"""
-
-#: List of all topology files that are included in the package.
-topfiles = _generate_template_dict('top')
-
-try:
-    #: The package's include directory for :func:`gromacs.grompp`.
-    includedir = os.path.dirname(topfiles['ffoplsaa.itp'])
-except KeyError:
-    raise ImportError("Missing required data files (ffoplsaa.itp). Check your installation.")
-
 
 
 # Functions to access configuration data
@@ -124,7 +132,7 @@ def get_template(t):
     :Arguments: *t* : template file or key (string or list of strings)
     :Returns:   os.path.realpath(*t*) (or a list thereof)
     :Raises:    :exc:`ValueError` if no file can be located.
-       
+
     """
     templates = [_get_template(s) for s in asiterable(t)]
     if len(templates) == 1:
@@ -145,9 +153,9 @@ def get_templates(t):
     The first match (in this order) is returned for each input argument.
 
     :Arguments: *t* : template file or key (string or list of strings)
-    :Returns:   list of os.path.realpath(*t*) 
+    :Returns:   list of os.path.realpath(*t*)
     :Raises:    :exc:`ValueError` if no file can be located.
-       
+
     """
     return [_get_template(s) for s in utilities.asiterable(t)]
 
@@ -184,10 +192,10 @@ def iterable(obj):
         return False    # avoid iterating over characters of a string
 
     if hasattr(obj, 'next'):
-        return True    # any iterator will do 
-    try: 
+        return True    # any iterator will do
+    try:
         len(obj)       # anything else that might work
-    except TypeError: 
+    except TypeError:
         return False
     return True
 
@@ -196,3 +204,67 @@ def asiterable(obj):
     if not iterable(obj):
         obj = [obj]
     return obj
+
+
+# Setting up configuration variables and paths
+#---------------------------------------------
+
+templates = _generate_template_dict('templates')
+"""*POW* comes with a number of templates for run input files
+and queuing system scripts. They are provided as a convenience and
+examples but **WITHOUT ANY GUARANTEE FOR CORRECTNESS OR SUITABILITY FOR
+ANY PURPOSE**.
+
+All template filenames are stored in
+:data:`gromacs.config.templates`. Templates have to be extracted from
+the GromacsWrapper python egg file because they are used by external
+code: find the actual file locations from this variable.
+
+**Gromacs mdp templates**
+
+   These are supplied as examples and there is *NO GUARANTEE THAT THEY
+   PRODUCE SENSIBLE OUTPUT* --- check for yourself!  Note that only
+   existing parameter names can be modified with
+   :func:`gromacs.cbook.edit_mdp` at the moment; if in doubt add the
+   parameter with its gromacs default value (or empty values) and
+   modify later with :func:`~gromacs.cbook.edit_mdp`.
+
+
+   The safest bet is to use one of the ``mdout.mdp`` files produced by
+   :func:`gromacs.grompp` as a template as this mdp contains all
+   parameters that are legal in the current version of Gromacs.
+"""
+
+#: List of all topology files that are included in the package.
+#: (includes force field files under ``top/oplsaa.ff``)
+topfiles = _generate_template_dict('top')
+topfiles.update(_generate_template_dict('top/oplsaa.ff'))  # added manually!
+
+# Find the top include dir by looking for an important file 'ffoplsaa.itp'.
+# Since Gromacs 4.5.x, force fields are ONLY found in
+# 1) the current directory
+# 2) the directory pointed to by the environment variable GMXLIB
+# 3) or the default Gromacs installation top directory
+try:
+    #: The package's include directory for :func:`gromacs.grompp`; the
+    #: environment variable :envvar:`GMXLIB` is set to :data:`includedir`
+    #: so that the bundled version of the force field is picked up.
+    includedir = os.path.dirname(topfiles['ffoplsaa.itp'])
+except KeyError:
+    errmsg = "Missing required data files (ffoplsaa.itp). Check your installation."
+    logger.fatal(errmsg)
+    raise ImportError(errmsg)
+
+if not 'GMXLIB' in os.environ:
+    if not os.path.exists(includedir):
+        errmsg = "Likely installation problem: cannot access the package GMXLIB " \
+            "directory (try re-installing): "
+        logger.fatal(errmsg + includedir)
+        raise OSError(errno.ENOENT, errmsg, includedir)
+    os.environ['GMXLIB'] = includedir
+    logger.info("MDPOW uses the bundled force fields from GMXLIB=%(includedir)r.", vars())
+    logger.info("If required, override this behaviour by setting the environment variable GMXLIB yourself")
+else:
+    logger.info("Using user-supplied environment variable GMXLIB=%(GMXLIB)r to find force fields",
+                os.environment)
+

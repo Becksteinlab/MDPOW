@@ -4,16 +4,16 @@
 ; NOTE: This file is processed with pow.equil.topology()
 
 ; Include forcefield parameters
-#include "ffoplsaa.itp"
+#include "oplsaa.ff/forcefield.itp"
 
 ; Include compound topology
 #include "compound.itp"
 
 ; Include solvent topology
-#include "tip4p.itp"
+#include "oplsaa.ff/tip4p.itp"
 
-; Include generic topology for ions
-#include "ions_opls.itp"
+; Include topology for OPLS/AA ions 
+#include "oplsaa.ff/ions_opls.itp"
 
 [ system ]
 ; Name

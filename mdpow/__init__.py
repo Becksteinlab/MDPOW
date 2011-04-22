@@ -81,10 +81,10 @@ section on `writing queuing system templates`_ . You will have to
     cd Equilibrium/water
     qsub my_script.sh
 
-.. _writing queuing system templates: 
+.. _writing queuing system templates:
    http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/qsub.html#queuing-system-templates
 
-    
+
 
 Example session: 1-octanol as a solute
 --------------------------------------
@@ -135,10 +135,10 @@ Hydration free energy
 .....................
 
 Reopen the python session and set up a :class:`~mdpow.fep.Ghyd` object::
-   
+
    import mdpow.fep
    gwat = mdpow.fep.Ghyd(molecule="OcOH", top="Equilibrium/water/top/system.top", struct="Equilibrium/water/MD_NPT/md.pdb", ndx="Equilibrium/water/solvation/main.ndx", runtime=100)
-   
+
 Alternatively, one can save some typing if we continue the last session and use
 the :class:`mdpow.equil.Simulation` object (which we can re-load from its saved
 state file from disk)::
@@ -202,7 +202,7 @@ Running the FEP simulations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The files are under the ``FEP/water`` and ``FEP/octanol`` directories
-in separate sub directories. 
+in separate sub directories.
 
 Either run job arrays that should have been generated from the
 ``my_script.sge`` template ::
@@ -231,7 +231,7 @@ For the water and octanol FEPs do ::
  goct.analyze()
 
 The analyze step reports the estimate for the free energy
-difference. 
+difference.
 
 Calculate the free energy for transferring the solute from water to
 octanol and *octanol-water partition coefficient* log P_OW ::
@@ -319,9 +319,9 @@ Some tasks are simplified by using scripts, which are installed in a
 bin directory (or the directory pointed to by
 ``--install-scripts``). See :doc:`scripts` for details.
 
- 
+
 """
-VERSION = 0,3,3
+VERSION = 0,4,0
 
 __all__ = ['fep', 'equil']
 

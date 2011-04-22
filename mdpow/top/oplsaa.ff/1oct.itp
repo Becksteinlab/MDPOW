@@ -1,8 +1,12 @@
-; OPLS/AA topology for 1-octanol
-; Do not use it as a solute when using it with POW 
+; topology for 1-octanol
 ; 
 ; The molecule is named SOL so that genbox automatically adds the
 ; numbers to the topology file. Otherwise it should be 1OCT...
+; (Copy and rename if it is to be used as a solute compound in POW.)
+
+
+#ifdef _FF_OPLS
+; optimized OPLS/AA parameters (density, hydration free energy, logP_OW)
 
 [ moleculetype ]
 ; Name            nrexcl
@@ -256,3 +260,5 @@ SOL                3
    22    23    27    24     3 
    22    23    27    25     3 
    22    23    27    26     3
+
+#endif
