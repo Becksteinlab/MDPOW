@@ -225,7 +225,7 @@ class Simulation(object):
             gromacs.cbook.edit_txt(top_template,
                                    [('#include +"compound\.itp"', 'compound\.itp', _itp),
                                     ('#include +"tip4p\.itp"', 'tip4p\.itp', self.solvent.itp),
-                                    ('Compound', 'solvent', self.solvent),
+                                    ('Compound', 'solvent', self.solvent_type),
                                     ('Compound', 'DRUG', self.molecule),
                                     ('DRUG\s*1', 'DRUG', self.molecule),
                                     ],
@@ -323,6 +323,12 @@ class Simulation(object):
         params =  MD(**kwargs)
         # params['struct'] is md.gro but could also be md.pdb --- depends entirely on qscript
         self.files[protocol] = params['struct']
+        # Gromacs 4.5.x 'mdrun -c PDB'  fails if it cannot find 'residuetypes.dat'
+        # so instead of fuffing with GMXLIB we just dump it into the directory
+        try:
+            shutil.copy(config.topfiles['residuetypes.dat'], self.dirs[protocol])
+        except:
+            logger.warn("Failed to copy 'residuetypes.dat': mdrun will likely fail to write a final structure")
         return params
 
     def MD_relaxed(self, **kwargs):
