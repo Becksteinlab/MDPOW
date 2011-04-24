@@ -128,7 +128,7 @@ Plotting uses the :meth:`GsolvData.plot` method from :class:`GsolvData`::
    G.plot('oct')
    ylim(-150,20)
    savefig("figs/goct.pdf")
-   
+
 Right now, the plots are a bit messy but I opted to include the legend to make
 it easier for us to understand the data. I had to manually increase the
 plotting window to make things fit properly.
@@ -178,7 +178,7 @@ DEFAULTS_E = {
 
 def gsolv2logpow(Gwat, Goct, unit='kcal/mol', temperature=300.):
     """Calculate logPow from the solvation free energies.
- 
+
         logPow = -(Goct-Ghyd)/kT * log10(e)
 
     .. Note:: Default unit is kcal/mol, unlike the rest of mdpow, which
@@ -236,7 +236,7 @@ def _plot_ideal(X, dy=0.5, dy2=None, padding=0.05, filled=True):
     """
     from pylab import plot, fill_between
     from numpy import array
-    
+
     X = numpy.asarray(X)
     if len(X) < 2:
         raise ValueError("X must contain at least 2 values.")
@@ -256,7 +256,7 @@ def _plot_ideal(X, dy=0.5, dy2=None, padding=0.05, filled=True):
             alpha = 0.2
         fill_between(X, Y-dy, Y+dy, color="black", alpha=alpha)
     else:
-        plot(X, Y-dy, 'k--', X, Y+dy, 'k--')        
+        plot(X, Y-dy, 'k--', X, Y+dy, 'k--')
         if dy2:
             plot(X, Y-dy2, 'k.', X, Y+dy2, 'k.')
 
@@ -302,7 +302,7 @@ class ExpComp(object):
            *experiments*
                path to ``targets.csv``
            *data*
-               list of ``pow.txt`` paths; default are the files for 
+               list of ``pow.txt`` paths; default are the files for
                Ref, run01, SAMPL2 (stored in :data:`DEFAULTS_POW`)
            *exclusions*
               ``False`` does nothing special.
@@ -333,13 +333,13 @@ class ExpComp(object):
         energies_name = "logPow_computed"
         exclusions_name = None
         computed = ComputedData(filename=filename,
-                                name=energies_name, 
+                                name=energies_name,
                                 connection=experimental.connection)
 
         for num,filename in enumerate(data[1:]):
             dbname = "logPow_computed_%d" % (num+1)
             compute2 = ComputedData(filename=filename,
-                                    name=dbname, 
+                                    name=dbname,
                                     connection=experimental.connection)  # add to experimental db
             # merge compute2 into compute (will be dropped after init) via __del__
             computed.data.merge_table(dbname)
@@ -382,7 +382,7 @@ class ExpComp(object):
             """WHERE NOT (comp ISNULL OR C.itp_name ISNULL) """
             """GROUP BY comment ORDER BY no""" % vars())
 
-        
+
     def plot(self, **kwargs):
         """Plot individual data points with legend.
 
@@ -501,7 +501,7 @@ class ExpData(object):
         # add 'stats' table to the main database (via connection)
         # (must be kept around in self or the table gets gc/del'ed immediately again)
         self.__statsdb = recsql.SQLarray(
-            name='__stats', records=list(self._stats_generator()), 
+            name='__stats', records=list(self._stats_generator()),
             columns=self._stats_columns, connection=self.rawdata.connection)
         # generate another table '__experiments' in the database
         self.data = self.rawdata.selection(
@@ -511,7 +511,7 @@ class ExpData(object):
 
         # access with
         #   self.data.SELECT('*')
-        # or 
+        # or
         #   self.rawdata.selection('SELECT * FROM __experiments')
 
     def _init_stats(self):
@@ -549,7 +549,7 @@ class ExpData(object):
 
         self.statistics.update(r)
         self.statistics['other_logPow'] = all
-    
+
         # iterator for other things
         columns = r.keys()
         columns.sort()
@@ -639,7 +639,7 @@ class GsolvData(object):
         energies_name = "energies_computed"
         exclusions_name = None
         computed = ComputedData(filename=data[0],
-                                name=energies_name, 
+                                name=energies_name,
                                 connection=experimental.connection)
 
         self.computed = computed  # for testing ... needs to be kept against gc :-p
@@ -647,7 +647,7 @@ class GsolvData(object):
         for num,filename in enumerate(data[1:]):
             dbname = "energies_computed_%d" % (num+1)
             compute2 = ComputedData(filename=filename,
-                                    name=dbname, 
+                                    name=dbname,
                                     connection=experimental.connection)  # add to experimental db
             # merge compute2 into compute (will be dropped after init) via __del__
             computed.data.merge_table(dbname)
@@ -659,7 +659,7 @@ class GsolvData(object):
                 exclusions = os.path.join(os.path.dirname(filename), 'exclusions.txt')
                 if not os.path.exists(exclusions):
                     continue
-                logger.info("Loading exclusions from %(filename)r.", vars())
+                logger.info("Loading exclusions from %(exclusions)r.", vars())
                 dbname = "exclusions_%d" % num
                 excl = recsql.SQLarray_fromfile(exclusions, connection=experimental.connection, name=dbname)
                 if first_excl:
@@ -765,7 +765,7 @@ class GsolvData(object):
         # 1 kcal/mol = 4.184 kJ/mol band
         kcalmol = 4.184
         dy = kwargs.pop('dy', kcalmol)
-        _plot_ideal(X=self.database.limits(ExpG), dy=dy, dy2=1.5*dy)        
+        _plot_ideal(X=self.database.limits(ExpG), dy=dy, dy2=1.5*dy)
 
         xlabel(r'experimental $\Delta G_{\rm %(mode)s}$ (kJ/mol)' % vars())
         ylabel(r'computed $\Delta G_{\rm %(mode)s}$ (kJ/mol)' % vars())
