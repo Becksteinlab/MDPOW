@@ -224,7 +224,7 @@ class Simulation(object):
             shutil.copy(itp, _itp)
             gromacs.cbook.edit_txt(top_template,
                                    [('#include +"compound\.itp"', 'compound\.itp', _itp),
-                                    ('#include +"tip4p\.itp"', 'tip4p\.itp', self.solvent.itp),
+                                    ('#include +"oplsaa\.ff/tip4p\.itp"', 'tip4p\.itp', self.solvent.itp),
                                     ('Compound', 'solvent', self.solvent_type),
                                     ('Compound', 'DRUG', self.molecule),
                                     ('DRUG\s*1', 'DRUG', self.molecule),

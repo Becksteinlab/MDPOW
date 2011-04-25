@@ -1,7 +1,10 @@
 ; system.top
 ; Part of the POW package.
+; Copyright (c) 2010-2011 Oliver Beckstein and Bogdan Iorga
 ; Template for simple Gromacs simulations of a compound in water
-; NOTE: This file is processed with pow.equil.topology()
+; NOTE: This file is processed with mdpow.equil.topology()
+;       which expects EXACTLY this file as input in order to be able
+;       to change it as needed. See the source mdpow/equil.py for details.
 
 ; Include forcefield parameters
 #include "oplsaa.ff/forcefield.itp"
