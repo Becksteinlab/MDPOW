@@ -368,7 +368,7 @@ class ExpComp(object):
                 """WHERE NOT directory IN """
                 """(SELECT directory FROM %(energies_name)s """
                 """LEFT JOIN %(exclusions_name)s USING (itp_name) """
-                """WHERE directory MATCH directory_regex)""" % vars())
+                """WHERE MATCH(directory_regex, directory))""" % vars())
             energies_name = energies.name     # switch to the reduced table
 
         # combined (matched on the itp_name!)
@@ -677,7 +677,7 @@ class GsolvData(object):
                 """WHERE NOT directory IN """
                 """(SELECT directory FROM %(energies_name)s """
                 """LEFT JOIN %(exclusions_name)s ON itp_name = molecule """
-                """WHERE directory MATCH directory_regex)""" % vars())
+                """WHERE MATCH(directory_regex, directory))""" % vars())
             energies_name = energies.name     # switch to the reduced table
 
 
