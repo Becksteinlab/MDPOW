@@ -50,7 +50,7 @@ Some notes on how the approach encoded here differs from what others
   run. We simply take the last frame from the trajectory (and also assume that
   the pressure is exactly what we set, namely 1 bar).
 
-  Arguably we should 
+  Arguably we should
 
   - scale the box to the average volume obtained from the second half of the
     simulation. This is potentially more important because the density of the
@@ -117,7 +117,7 @@ TODO
 
 - run minimization, NVT-equil, NPT-equil prior to production (probably
   use preprocessed topology from ``grompp -pp`` for portability)
-  
+
   See `Free Energy Tutorial`_.
 
 """
@@ -250,22 +250,22 @@ class Gsolv(object):
 
     def __init__(self, molecule=None, top=None, struct=None, **kwargs):
         """Set up Gsolv from input files or a equilibrium simulation.
-        
+
         :Arguments:
            *molecule*
-               name of the molecule for which the hydration free 
+               name of the molecule for which the hydration free
                energy is to be computed (as in the gromacs topology)
                [REQUIRED]
            *top*
                topology [REQUIRED]
-           *struct* 
+           *struct*
                solvated and equilibrated input structure [REQUIRED]
            *ndx*
                index file
            *dirname*
                directory to work under ['FEP/*solvent*']
            *solvent*
-               name of the solvent (only used for path names); will not 
+               name of the solvent (only used for path names); will not
                affect the simulations
            *lambda_coulomb*
                list of lambdas for discharging: q+vdw --> vdw
@@ -345,7 +345,7 @@ class Gsolv(object):
                 else:
                     logger.info("Found starting structure %r (instead of %r).", struct, self.struct)
                     self.struct = struct
-                        
+
             self.Temperature = kwargs.pop('temperature', 300.0)
             self.qscript = kwargs.pop('qscript', ['local.sh'])
             self.deffnm = kwargs.pop('deffnm', 'md')
@@ -427,23 +427,23 @@ class Gsolv(object):
 
         :Keywords:
            *qscript*
-               (List of) template(s) for batch submission scripts; if not set then 
+               (List of) template(s) for batch submission scripts; if not set then
                the templates are used that were supplied to the constructor.
            *kwargs*
                Most kwargs are passed on to :func:`gromacs.setup.MD` although some
                are set to values that are required for the FEP functionality.
                Note: *runtime* is set from the constructor.
         """
-        kwargs['mdrun_opts'] = " ".join([kwargs.pop('mdrun_opts',''), '-dgdl'])  # crucial for FEP!!        
-        kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.includes        
+        kwargs['mdrun_opts'] = " ".join([kwargs.pop('mdrun_opts',''), '-dgdl'])  # crucial for FEP!!
+        kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.includes
         qsubargs = kwargs.copy()
         qsubargs['dirname'] = self.dirname  # XXX: try and use frombase() here?
         # handle templates separately (necessary for array jobs)
         qscripts = qsubargs.pop('sge', None) or self.qscript
-        qscripts.extend(qsubargs.pop('qscript',[]))  # also allow canonical 'templates'        
+        qscripts.extend(qsubargs.pop('qscript',[]))  # also allow canonical 'templates'
         # make sure that the individual batch scripts are also written
         kwargs.setdefault('qscript', qscripts)
-        
+
         for component, lambdas in self.lambdas.items():
             for l in lambdas:
                 self._setup(component, l, **kwargs)
@@ -491,8 +491,8 @@ class Gsolv(object):
         """Vdp contribution to Gibbs free energy
 
           DeltaG = DeltaA + V*DeltaP     (for V=const)
-        
-        Delta refers to 
+
+        Delta refers to
 
           aq (fully coupled) --> gaseous (decoupled)
 
@@ -521,7 +521,7 @@ class Gsolv(object):
            *autosave*
               immediately save the class pickle fep file
         """
-        
+
         from gromacs.formats import XVG
         def dgdl_xvg(*args):
             return os.path.join(*args + (self.deffnm + '.xvg',))
@@ -534,7 +534,7 @@ class Gsolv(object):
         for component, lambdas in self.lambdas.items():
             xvg_files = [dgdl_xvg(self.wdir(component, l)) for l in lambdas]
             self.results.xvg[component] = (numpy.array(lambdas),
-                                           [XVG(xvg, permissive=self.permissive, stride=self.stride) 
+                                           [XVG(xvg, permissive=self.permissive, stride=self.stride)
                                             for xvg in xvg_files])
         if autosave:
             self.save()
@@ -545,7 +545,7 @@ class Gsolv(object):
         :Returns: ``True`` if any of the xvg dgdl files were produced with the
                   permissive=True flag and had skipped lines.
 
-        For debugging purposes, the number of corrupted lines are stored in 
+        For debugging purposes, the number of corrupted lines are stored in
         :attr:`Gsolv._corrupted` as dicts of dicts with the component as
         primary and the lambda as secondary key.
         """
@@ -616,7 +616,7 @@ class Gsolv(object):
         :Keywords:
           *p*
               pressure in bar [1.0]
-              TODO: should be obtained from equilib sim 
+              TODO: should be obtained from equilib sim
           *force*
               reload raw data even though it is already loaded
           *stride*
@@ -634,7 +634,7 @@ class Gsolv(object):
             self.collect(stride=stride, autosave=False)
         else:
             logger.info("Analyzing stored data.")
-        
+
         Helmholtz = QuantityWithError(0,0)   # total free energy difference at const V
 
         for component, (lambdas, xvgs) in self.results.xvg.items():
@@ -647,27 +647,27 @@ class Gsolv(object):
             stdY = numpy.array([x.std[0]  for x in xvgs])
             DY = numpy.array([x.error[0]  for x in xvgs])   # takes a while: computes correl.time
             tc = numpy.array([x.tc[0]  for x in xvgs])
-            self.results.dvdl[component] = {'lambdas':lambdas, 'mean':Y, 'error':DY, 
+            self.results.dvdl[component] = {'lambdas':lambdas, 'mean':Y, 'error':DY,
                                             'stddev':stdY, 'tcorrel':tc}
             # Combined Simpson rule integration:
             # even="last" because dV/dl is smoother at the beginning so using trapezoidal
             # integration there makes less of an error (one hopes...)
-            a = scipy.integrate.simps(Y, x=lambdas, even='last') 
-            da = numkit.integration.simps_error(DY, x=lambdas, even='last') 
+            a = scipy.integrate.simps(Y, x=lambdas, even='last')
+            da = numkit.integration.simps_error(DY, x=lambdas, even='last')
             self.results.DeltaA[component] = QuantityWithError(a, da)
             Helmholtz += self.results.DeltaA[component]  # error propagation is automagic!
 
         # hydration free energy Delta A = -(Delta A_coul + Delta A_vdw)
         Helmholtz *= -1
         self.results.DeltaA.Helmholtz = Helmholtz
-        
+
         # Gibbs energy
         # TODO:  implement (currently just adds 0)
         self.results.DeltaA.Gibbs = self.results.DeltaA.Helmholtz + self.Vdp()
 
         if autosave:
             self.save()
-        
+
         self.logger_DeltaA0()
         return self.results.DeltaA.Gibbs
 
@@ -693,8 +693,10 @@ class Gsolv(object):
         Each energy component is followed by its error.
 
         Format::
+
           .                 ---------- kJ/mol ------
           molecule solvent  total  coulomb  vdw  Vdp
+
         """
         fmt = "%-10s %-10s %+8.2f %8.2f  %+8.2f %8.2f  %+8.2f %8.2f  %+8.2f %8.2f"
         d = self.results.DeltaA
@@ -711,7 +713,7 @@ class Gsolv(object):
         logger.info("DeltaG0 = -(DeltaA_coul + DeltaA_vdw) + Vdp")
         for component, energy in self.results.DeltaA.items():
             logger.info("[%s] %s solvation free energy (%s) %g (%.2f) kJ/mol",
-                        self.molecule, self.solvent_type.capitalize(), component, 
+                        self.molecule, self.solvent_type.capitalize(), component,
                         energy.value, energy.error)
 
     def has_dVdl(self):
@@ -763,10 +765,10 @@ class Gsolv(object):
         subplot(1, nplots, 1)
         ylabel(r'$dV/d\lambda$ in kJ/mol')
         title(r"Free energy difference $\Delta A^{0}_{\rm{%s}}$" % self.solvent_type)
-        subplot(1, nplots, 2)        
+        subplot(1, nplots, 2)
         title(r"for %s: $%.2f\pm%.2f$ kJ/mol" %
               ((self.molecule,) + self.results.DeltaA.Helmholtz.astuple()))
-        
+
 
     def qsub(self, script=None):
         """Submit a batch script locally.
@@ -775,7 +777,7 @@ class Gsolv(object):
         one template was provided).
         """
         from gromacs.qsub import relpath
-        
+
         def choose_script_from(scripts):
             if script is None:
                 s = scripts[0]
@@ -811,7 +813,7 @@ class Gsolv(object):
         """
         from gromacs.collections import Collection
         raise NotImplementedError
-        
+
     def save(self, filename=None):
         """Save instance to a pickle file.
 
@@ -825,11 +827,11 @@ class Gsolv(object):
         with open(filename, 'wb') as f:
             cPickle.dump(self, f, protocol=cPickle.HIGHEST_PROTOCOL)
         logger.debug("Instance pickled to %(filename)r" % vars())
-        
+
     def load(self, filename=None):
         """Re-instantiate class from pickled file."""
         if filename is None:
-            filename = self.filename        
+            filename = self.filename
         with open(filename, 'rb') as f:
             instance = cPickle.load(f)
         self.__dict__.update(instance.__dict__)
@@ -889,7 +891,7 @@ def pOW(G1, G2, **kwargs):
            force rereading of data files even if some data were already stored [False]
        *stride*
            analyze every *stride*-th datapoint in the dV/dlambda files
-    :Returns: (transfer free energy, log10 of the water-octanol partition coefficient = log Pow)     
+    :Returns: (transfer free energy, log10 of the water-octanol partition coefficient = log Pow)
     """
 
     kwargs.setdefault('force', False)
@@ -921,14 +923,14 @@ def pOW(G1, G2, **kwargs):
             G.analyze(**kwargs)
 
     # x.Gibbs are QuantityWithError so they do error propagation
-    transferFE = Gsolvs['octanol'].results.DeltaA.Gibbs - Gsolvs['water'].results.DeltaA.Gibbs 
+    transferFE = Gsolvs['octanol'].results.DeltaA.Gibbs - Gsolvs['water'].results.DeltaA.Gibbs
     logPow = -transferFE / (kBOLTZ * Gsolvs['octanol'].Temperature) * numpy.log10(numpy.e)
 
     molecule = G1.molecule
     logger.info("[%s] Values at T = %g K", molecule, Gsolvs['octanol'].Temperature)
-    logger.info("[%s] Free energy of transfer wat --> oct: %.3f (%.3f) kJ/mol", 
+    logger.info("[%s] Free energy of transfer wat --> oct: %.3f (%.3f) kJ/mol",
                 molecule, transferFE.value, transferFE.error)
-    logger.info("[%s] log P_ow: %.3f (%.3f)", 
+    logger.info("[%s] log P_ow: %.3f (%.3f)",
                 molecule, logPow.value, logPow.error)
 
     return transferFE, logPow

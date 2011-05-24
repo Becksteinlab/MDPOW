@@ -35,7 +35,7 @@ import mdpow.filelock
 import logging
 logger = logging.getLogger('mdpow')
 
-def load_gsolv(directory, **kwargs):
+def load_gwat(directory, **kwargs):
     FEPdir = os.path.join(directory, "FEP")
 
     files = {'water': os.path.join(FEPdir, 'water', 'Ghyd.fep'),
@@ -49,7 +49,7 @@ def load_gsolv(directory, **kwargs):
     logger.info("Reading water data %(water)r", files)
     gwat = mdpow.fep.Ghyd(filename=files['water'], basedir=directory, permissive=permissive)
 
-    return gwat, None
+    return gwat
 
 
 def run_ghyd(directory, **kwargs):
@@ -80,12 +80,23 @@ def run_ghyd(directory, **kwargs):
     def datstat(g):
         return _datastatus[g.contains_corrupted_xvgs()]
 
-    gwat, goct = load_gsolv(directory, permissive=kwargs.pop('permissive',False),)
-    # goct == None !
+    gwat = load_gwat(directory, permissive=kwargs.pop('permissive',False),)
+
+    # do the analysis (only use keywords that are needed for FEP.analysis())
+    akw = {'stride': kwargs.pop('stride', None), 'force': kwargs.pop('force', False)}
+    if akw['force']:
+        logger.info("Forcing (re)analysis of hydration free energy data")
+        gwat.analyze(**akw)
+    # make sure that we have data
+    try:
+        gwat.results.DeltaA.Gibbs
+        gwat.logger_DeltaA0()
+    except (KeyError, AttributeError):   # KeyError because results is a AttributeDict
+        logger.info("Analyzing hydration free energy data for the first time")
+        gwat.analyze(**akw)
 
     if datstat(gwat) == 'BAD':
-            logger.warning("Possible file corruption: water:%s",
-                           datstat(gwat))
+        logger.warning("Possible file corruption: water:%s", datstat(gwat))
 
     if kwargs.get('energyfile', None):
         with mdpow.filelock.FileLock(kwargs['energyfile'], timeout=2):
@@ -109,7 +120,6 @@ def run_ghyd(directory, **kwargs):
         logger.info("Wrote graph to %(plotfile)r", vars())
 
     del gwat
-    del goct
     gc.collect()  # try to free as much memory as possible
 
 
@@ -130,16 +140,16 @@ def activate_subplot(numPlot):
 
 
 def parse_filename_option(fn):
-        if fn.lower() == "none":
-            fn = None
-        elif fn.lower() == "auto":
-            fn = "auto"
-        return fn
+    if fn.lower() == "none":
+        fn = None
+    elif fn.lower() == "auto":
+        fn = "auto"
+    return fn
 
 def realpath_or_none(fn):
-        if not fn is None:
-            fn = os.path.realpath(fn)
-        return fn
+    if not fn is None:
+        fn = os.path.realpath(fn)
+    return fn
 
 if __name__ == "__main__":
     import sys
