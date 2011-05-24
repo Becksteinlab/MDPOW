@@ -5,7 +5,7 @@ Run the free energy analysis for water  in <DIRECTORY>/FEP
 and return DeltaGhyd.
 
 DIRECTORY should contain all the files resulting from running
-``mdpow.fep.Goct.setup()`` and the results of the MD FEP
+``mdpow.fep.Ghyd.setup()`` and the results of the MD FEP
 simulations. It relies on the canonical naming scheme (basically: just
 use the defaults as in the tutorial).
 
@@ -13,17 +13,38 @@ The dV/dlambda plots can be produced automatically (--plot=auto). If multiple
 DIRECTORY arguments are provided then one has to choose the auto option (or
 None).
 
+The total solvation free energy is calculated as
+
+  DeltaG* = -(DeltaA_coul + DeltaA_vdw) + Vdp
+
+Note that the standard state refers to the "Ben-Naim" standard state
+of transferring 1 M of compound in the gas phase to 1 M in the aqueous
+phase.
+
 Results are *appended* to a data file with **Output file format**::
 
- molecule  DeltaA0(kJ/mol) ErrorDeltaA0   directory
+          .                 ---------- kJ/mol ------
+          molecule solvent  DeltaG*  coulomb  vdw  Vdp
+
+All observables are quoted with an error estimate, which is derived
+from the correlation time and error propagation through Simpson's rule
+(see :meth:`mdpow.fep.Gsolv`). It ultimately comes from the error on
+<dV/dlambda>, which is estimated as the error to determine the
+average.
 
 molecule
     molecule name as used in the itp
-DeltaA0, ErrorDeltaA0
-    transfer free energy water --> octanol, in kJ/mol; error from correlation time
-    and error propagation through Simpson's rule (see :meth:`mdpow.fep.Gsolv`)
+DeltaG*
+    hydration free energy vacuum --> water, in kJ/mol
+coulomb
+    discharging contribution to the DeltaG*
+vdw
+    decoupling contribution to the DeltaG*
+Vdp
+    pressure correction (NOT IMPLEMENTED, always 0)
 directory
     folder in which the simulations were stored
+
 """
 
 from __future__ import with_statement
@@ -46,11 +67,8 @@ def load_gwat(directory, **kwargs):
         raise OSError("Missing input files: %r" % files_not_found)
 
     permissive = kwargs.pop('permissive', False)
-    logger.info("Reading water data %(water)r", files)
-    gwat = mdpow.fep.Ghyd(filename=files['water'], basedir=directory, permissive=permissive)
-
-    return gwat
-
+    logger.info("[%s] Reading water data %r", directory, files['water'])
+    return mdpow.fep.Ghyd(filename=files['water'], basedir=directory, permissive=permissive)
 
 def run_ghyd(directory, **kwargs):
     """Do the Ghyd analysis
@@ -85,24 +103,25 @@ def run_ghyd(directory, **kwargs):
     # do the analysis (only use keywords that are needed for FEP.analysis())
     akw = {'stride': kwargs.pop('stride', None), 'force': kwargs.pop('force', False)}
     if akw['force']:
-        logger.info("Forcing (re)analysis of hydration free energy data")
+        logger.info("[%(directory)s] Forcing (re)analysis of hydration free energy data", vars())
         gwat.analyze(**akw)
     # make sure that we have data
     try:
         gwat.results.DeltaA.Gibbs
+        logger.info("[%(directory)s] Reading existing data from pickle file.", vars())
         gwat.logger_DeltaA0()
     except (KeyError, AttributeError):   # KeyError because results is a AttributeDict
-        logger.info("Analyzing hydration free energy data for the first time")
+        logger.info("[%(directory)s] Analyzing hydration free energy data for the first time", vars())
         gwat.analyze(**akw)
 
     if datstat(gwat) == 'BAD':
-        logger.warning("Possible file corruption: water:%s", datstat(gwat))
+        logger.warning("[%s] Possible file corruption: water:%s", directory, datstat(gwat))
 
     if kwargs.get('energyfile', None):
         with mdpow.filelock.FileLock(kwargs['energyfile'], timeout=2):
             with open(kwargs['energyfile'], mode='a') as out:
                 out.write(fmt_energy % (gwat.summary(), directory))
-            logger.info("Wrote solvation energy terms to %(energyfile)r", kwargs)
+            logger.info("[%s] Wrote solvation energy terms to %r", directory, kwargs['energyfile'])
 
     plotfile = kwargs.get('plotfile', None)
     if plotfile:
