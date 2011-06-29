@@ -231,7 +231,7 @@ def _plot_ideal(X, dy=0.5, dy2=None, padding=0.05, filled=True):
     :param X:   array of *x* values to plot at
     :param dy:  plot dashed line a +/-dy of the ideal
     :param dy2: plot dotted line a +/-dy2 of the ideal
-    :param filled:  ``True`` us fancy alpha-blended solid bars, ``False`` uses dashed and dotted lines
+    :param filled:  ``True`` use fancy alpha-blended solid bars, ``False`` uses dashed and dotted lines
     :param padding: percentage of total extent in *X* that is added left and right
     """
     from pylab import plot, fill_between

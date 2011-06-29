@@ -1,5 +1,5 @@
 # equil.py
-# Copyright (c) 2010 Oliver Beckstein
+# Copyright (c) 2010-2011 Oliver Beckstein
 
 """
 :mod:`mdpow.equil` --- Setting up and running equilibrium MD
@@ -320,6 +320,7 @@ class Simulation(object):
             else:
                 logger.info("Found starting structure %r (instead of %r).", struct, kwargs['struct'])
                 kwargs['struct'] = struct
+        # now setup the whole simulation:
         params =  MD(**kwargs)
         # params['struct'] is md.gro but could also be md.pdb --- depends entirely on qscript
         self.files[protocol] = params['struct']
@@ -337,6 +338,22 @@ class Simulation(object):
         Energy minimization does not always remove all problems and LINCS
         constraint errors occur. A very short *runtime* = 5 ps MD with very
         short integration time step *dt* tends to solve these problems.
+
+        .. See Also:: :func:`gromacs.setup.MD`
+
+        :Keywords:
+          *qscript*
+             list of queuing system submission scripts; probably a
+             good idea to always include the default "local.sh" even
+             if you have your own ["local.sh"]
+          *qname*
+             name of the job as shown in the queuing system
+          *startdir*
+             **advanced uses**: path of the directory on a remote
+             system, which will be hard-coded into the queuing system
+             script(s); see :func:`gromacs.setup.MD` and
+             :class:`gromacs.manager.Manager`
+
         """
         # user structure or restrained or solvated
         kwargs.setdefault('struct', self.files.energy_minimized)
@@ -355,6 +372,22 @@ class Simulation(object):
                   for :func:`gromacs.grompp`. Hence this will only work if the
                   compound itp file does indeed contain a ``[ posres ]``
                   section that is protected by a ``#ifdef POSRES`` clause.
+
+        .. See Also:: :func:`gromacs.setup.MD_restrained`
+
+        :Keywords:
+          *qscript*
+             list of queuing system submission scripts; probably a
+             good idea to always include the default "local.sh" even
+             if you have your own ["local.sh"]
+          *qname*
+             name of the job as shown in the queuing system
+          *startdir*
+             **advanced uses**: path of the directory on a remote
+             system, which will be hard-coded into the queuing system
+             script(s); see :func:`gromacs.setup.MD` and
+             :class:`gromacs.manager.Manager`
+
         """
         kwargs.setdefault('struct',
                           self._lastnotempty([self.files.energy_minimized, self.files.MD_relaxed]))
@@ -366,11 +399,13 @@ class Simulation(object):
 
         See documentation of :func:`gromacs.setup.MD` for details such
         as *runtime* or specific queuing system options. The following
-        keywords can not be changed: top, mdp, ndx, mainselection.
+        keywords can not be changed: *top*, *mdp*, *ndx*, *mainselection*.
 
         .. Note:: If the system crashes (with LINCS errors), try initial
                   equilibration with timestep *dt* = 0.0001 ps (0.1 fs instead
-                  of 2 fs) and *runtime* = 5 ps.
+                  of 2 fs) and *runtime* = 5 ps as done in :meth:`~Simulation.MD_relaxed`
+
+        .. See Also:: :func:`gromacs.setup.MD` and :meth:`Simulation.MD_relaxed`
 
         :Keywords:
           *struct*
@@ -385,6 +420,14 @@ class Simulation(object):
                in :data:`gromacs.config.templates` or you can provide your own
                filename(s) in the current directory (see :mod:`gromacs.qsub` for
                the format of the templates)
+          *qname*
+             name of the job as shown in the queuing system
+          *startdir*
+             **advanced uses**: path of the directory on a remote
+             system, which will be hard-coded into the queuing system
+             script(s); see :func:`gromacs.setup.MD` and
+             :class:`gromacs.manager.Manager`
+
         """
         # user structure or relaxed or restrained or solvated
         kwargs.setdefault('struct', self.get_last_structure())

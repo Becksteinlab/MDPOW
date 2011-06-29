@@ -73,8 +73,14 @@ epsilon_surface          = 0
 optimize_fft             = yes
 
 ; OPTIONS FOR WEAK COUPLING ALGORITHMS
-; Temperature coupling (use Langevin)
+; Temperature coupling (use Langevin for free energy calculations, see
+; Mobley and Shirt papers)
 Tcoupl                   = no
+; Note that we have the SD integrator AND set bd_fric=0 hence the
+; friction coefficient is particle-dependent: mass/tau_t
+; (There wasn't really a compelling reason for doing this instead of
+; setting bd_fric = 10 apart from the fact that bd_fric=0/tau_t=0.1
+; was the default setting in Gromacs. -- OB 2011-06-29)
 tau_t                    = 0.1
 tc-grps                  = System
 ref_t                    = 300
@@ -88,6 +94,9 @@ gen_seed                 = 173545
 ; Generate a random starting seed for Langevin
 ; (required for restarts, according to the manual)
 ld_seed                  = -1
+; Brownian dynamics friction coefficient [amu/ps]. When bd_fric=0, the friction
+; coefficient for each particle is calculated as mass/tau_t.
+bd_fric                  =  0
 
 ; OPTIONS FOR BONDS    
 constraints              = h-bonds
