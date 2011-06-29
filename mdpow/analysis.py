@@ -296,6 +296,8 @@ def plot_quick(a, **kwargs):
     return _finish([-6,9], **kwargs)  # default extent for our logPow :-p
 
 class ExpComp(object):
+    """Database combining experimental with computed values."""
+
     def __init__(self, **kwargs):
         """
         :Keywords:
@@ -305,21 +307,24 @@ class ExpComp(object):
                list of ``pow.txt`` paths; default are the files for
                Ref, run01, SAMPL2 (stored in :data:`DEFAULTS_POW`)
            *exclusions*
-              ``False`` does nothing special.
-              ``True``: look for `exclusions.txt` in same directory as each data file.
-              If it contains a table such as::
-                 Table[exclusions]: These sims are ignored.
-                 ======== ===========================================
-                 itp_name directory_regex
-                 ======== ===========================================
-                 AXX      .*
-                 5FH      benzylhyd$
-                 ======== ===========================================
+               ``False``
+                   Does nothing special.
+               ``True``
+                   Look for `exclusions.txt` in same directory as each data file.
+                   If it contains a table such as::
 
-              then any simulation of a *molecule* equalling *itp_name*
-              and which is recorded with a *directory* matching the
-              regular expression *directory_regex* will be excluded from the analysis.
-              [``False``]
+                      Table[exclusions]: These sims are ignored.
+                      ======== ===========================================
+                      itp_name directory_regex
+                      ======== ===========================================
+                      AXX      .*
+                      5FH      benzylhyd$
+                      ======== ===========================================
+
+                   then any simulation of a *molecule* equalling *itp_name*
+                   and which is recorded with a *directory* matching the
+                   regular expression *directory_regex* will be excluded from the analysis.
+                   [``False``]
         """
 
         filename = kwargs.pop('experiments', DEFAULTS_POW['experiments'])
@@ -422,7 +427,8 @@ class ExpComp(object):
         else:
             legendformat = r"%(comment)s %(exp).1f/%(comp).1f$\pm$%(errcomp).1f"
 
-        c = self.database.SELECT("*")
+        # explicitly list columns so that we can safely expand the db with new columns
+        c = self.database.SELECT("name,comment,DeltaG0,mean,std,min,max,exp,comp,errcomp")
 
         #subplot(121)
         norm = colors.normalize(0,len(c))
