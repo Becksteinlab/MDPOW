@@ -8,7 +8,6 @@ use_setuptools()
 from setuptools import setup, find_packages
 
 # Dynamically calculate the version based on VERSION.
-# (not that smart because that also loads GromacsWrapper etc...)
 version = __import__('mdpow').get_version()
 
 setup(name="POW",
@@ -31,7 +30,7 @@ octanol. It uses Gromacs (http://www.gromacs.org) for the molecular dynamics
                  'scripts/mdpow-check', 'scripts/mdpow-rebuild-fep'],
       package_data={'mdpow': ['top/*', 'templates/*'], },
       install_requires = ['numpy>=1.0', 'scipy',
-                          'GromacsWrapper>=0.1.14',
+                          'GromacsWrapper>=0.2.2',
                           'RecSQL>=0.7.5'],
       dependency_links = ["http://sbcb.bioch.ox.ac.uk/oliver/download/Python/"],
       zip_safe = True,

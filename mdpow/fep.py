@@ -133,7 +133,7 @@ import cPickle
 import numpy
 
 import gromacs, gromacs.setup, gromacs.utilities
-from gromacs.utilities import asiterable, AttributeDict, in_dir
+from gromacs.utilities import asiterable, AttributeDict, in_dir, openany
 from numkit.observables import QuantityWithError
 
 import logging
@@ -512,7 +512,7 @@ class Gsolv(object):
         logger.warning("Vdp correction not implemented: uses 0")
         return self.results.DeltaA.Vdp
 
-    def collect(self, stride=None, autosave=True):
+    def collect(self, stride=None, autosave=True, autocompress=True):
         """Collect dV/dl from output.
 
         :Keywords:
@@ -520,11 +520,26 @@ class Gsolv(object):
               read data every *stride* lines, ``None`` uses the class default
            *autosave*
               immediately save the class pickle fep file
+           *autocompress*
+              compress the xvg file with bzip2 (saves >80% of space)
         """
 
         from gromacs.formats import XVG
+        EXTENSIONS = ('', os.path.extsep+'bz2', os.path.extsep+'gz')
         def dgdl_xvg(*args):
-            return os.path.join(*args + (self.deffnm + '.xvg',))
+            """Return filename of the dgdl XVG file.
+
+            :Returns: Checks if a compressed file exists and returns
+                      the appropriate filename.
+            :Raises:
+            """
+            root = os.path.join(*args + (self.deffnm + '.xvg',))
+            for ext in EXTENSIONS:
+                fn = root + ext
+                if os.path.exists(fn):
+                    return fn
+            logger.error("Missing dgdl.xvg file %(root)r.", vars())
+            raise IOError(errno.ENOENT, "Missing dgdl.xvg file", root)
 
         if not stride is None:
             self.stride = stride
@@ -536,6 +551,22 @@ class Gsolv(object):
             self.results.xvg[component] = (numpy.array(lambdas),
                                            [XVG(xvg, permissive=self.permissive, stride=self.stride)
                                             for xvg in xvg_files])
+
+        if autocompress:
+            for component, lambdas in self.lambdas.items():
+                xvg_files = [dgdl_xvg(self.wdir(component, l)) for l in lambdas]
+                for xvg in xvgfiles:
+                    root,ext = os.path.splitext(xvg)
+                    if ext == os.path.extsep+"xvg":
+                        fnbz2 = xvg + os.path.extsep + "bz2"
+                        logger.info("[%s] Compressing dgdl file %r with bzip2", self.dirname, xvg)
+                        # speed is similar to 'bzip2 -9 FILE' (using a 1Mo buffer)
+                        with open(xvg, 'r', buffering=1024**2) as source:
+                            with openany(fnbz2, 'w', buffering=1024**2) as target:
+                                target.writelines(source)
+                        if os.path.exists(fnbz2) and os.path.exists(xvg):
+                            os.unlink(xvg)
+                        logger.info("[%s] Compression complete: %r", self.dirname, fnbz2)
         if autosave:
             self.save()
 
