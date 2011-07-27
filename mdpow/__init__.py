@@ -321,7 +321,7 @@ bin directory (or the directory pointed to by
 
 
 """
-VERSION = 0,4,1
+VERSION = 0,4,2
 
 __all__ = ['fep', 'equil']
 
