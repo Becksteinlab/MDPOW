@@ -512,6 +512,34 @@ class Gsolv(object):
         logger.warning("Vdp correction not implemented: uses 0")
         return self.results.DeltaA.Vdp
 
+
+    def dgdl_xvg(self, *args):
+        """Return filename of the dgdl XVG file.
+
+        Recognizes uncompressed, gzipped (gz), and bzip2ed (bz2)
+        files.
+g
+        :Arguments:
+           *args*
+               joins the arguments into a path and adds the default
+               filename for the dvdl file
+
+        :Returns: Checks if a compressed file exists and returns
+                  the appropriate filename.
+
+        :Raises: :exc:`IOError` with error code ENOENT if no file
+                 could be found
+
+         """
+        EXTENSIONS = ('', os.path.extsep+'bz2', os.path.extsep+'gz')
+        root = os.path.join(*args + (self.deffnm + '.xvg',))
+        for ext in EXTENSIONS:
+            fn = root + ext
+            if os.path.exists(fn):
+                return fn
+        logger.error("Missing dgdl.xvg file %(root)r.", vars())
+        raise IOError(errno.ENOENT, "Missing dgdl.xvg file", root)
+
     def collect(self, stride=None, autosave=True, autocompress=True):
         """Collect dV/dl from output.
 
@@ -521,54 +549,56 @@ class Gsolv(object):
            *autosave*
               immediately save the class pickle fep file
            *autocompress*
-              compress the xvg file with bzip2 (saves >80% of space)
+              compress the xvg file with bzip2 (saves >70% of space)
         """
 
         from gromacs.formats import XVG
-        EXTENSIONS = ('', os.path.extsep+'bz2', os.path.extsep+'gz')
-        def dgdl_xvg(*args):
-            """Return filename of the dgdl XVG file.
-
-            :Returns: Checks if a compressed file exists and returns
-                      the appropriate filename.
-            :Raises:
-            """
-            root = os.path.join(*args + (self.deffnm + '.xvg',))
-            for ext in EXTENSIONS:
-                fn = root + ext
-                if os.path.exists(fn):
-                    return fn
-            logger.error("Missing dgdl.xvg file %(root)r.", vars())
-            raise IOError(errno.ENOENT, "Missing dgdl.xvg file", root)
 
         if not stride is None:
             self.stride = stride
 
+        if autocompress:
+            # must be done before adding to results.xvg or we will not find the file later
+            self.compress_dgdl_xvg()
+
         logger.info("[%(dirname)s] Finding dgdl xvg files, reading with "
                     "stride=%(stride)d permissive=%(permissive)r." % vars(self))
+
         for component, lambdas in self.lambdas.items():
-            xvg_files = [dgdl_xvg(self.wdir(component, l)) for l in lambdas]
+            xvg_files = [self.dgdl_xvg(self.wdir(component, l)) for l in lambdas]
             self.results.xvg[component] = (numpy.array(lambdas),
                                            [XVG(xvg, permissive=self.permissive, stride=self.stride)
                                             for xvg in xvg_files])
-
-        if autocompress:
-            for component, lambdas in self.lambdas.items():
-                xvg_files = [dgdl_xvg(self.wdir(component, l)) for l in lambdas]
-                for xvg in xvg_files:
-                    root,ext = os.path.splitext(xvg)
-                    if ext == os.path.extsep+"xvg":
-                        fnbz2 = xvg + os.path.extsep + "bz2"
-                        logger.info("[%s] Compressing dgdl file %r with bzip2", self.dirname, xvg)
-                        # speed is similar to 'bzip2 -9 FILE' (using a 1Mo buffer)
-                        with open(xvg, 'r', buffering=1024**2) as source:
-                            with openany(fnbz2, 'w', buffering=1024**2) as target:
-                                target.writelines(source)
-                        if os.path.exists(fnbz2) and os.path.exists(xvg):
-                            os.unlink(xvg)
-                        logger.info("[%s] Compression complete: %r", self.dirname, fnbz2)
         if autosave:
             self.save()
+
+    def compress_dgdl_xvg(self):
+        """Compress *all* dgdl xvg files with bzip2.
+
+        .. Note:: After running this method you might want to run
+           :meth:`collect` to ensure that the results in :attr:`results.xvg`
+           point to the *compressed* files. Otherwise :exc:`IOError` might
+           occur which fail to find a `md.xvg` file.
+
+        """
+        for component, lambdas in self.lambdas.items():
+            xvg_files = [self.dgdl_xvg(self.wdir(component, l)) for l in lambdas]
+            for xvg in xvg_files:
+                root,ext = os.path.splitext(xvg)
+                if ext == os.path.extsep+"xvg":
+                    fnbz2 = xvg + os.path.extsep + "bz2"
+                    logger.info("[%s] Compressing dgdl file %r with bzip2", self.dirname, xvg)
+                    # speed is similar to 'bzip2 -9 FILE' (using a 1 Mio buffer)
+                    with open(xvg, 'r', buffering=1048576) as source:
+                        with openany(fnbz2, 'w', buffering=1048576) as target:
+                            target.writelines(source)
+                    if os.path.exists(fnbz2) and os.path.exists(xvg):
+                        os.unlink(xvg)
+                    if not os.path.exists(fnbz2):
+                        logger.error("[%s] Failed to compress %r --- mysterious!", self.dirname, fnbz2)
+                    else:
+                        logger.info("[%s] Compression complete: %r", self.dirname, fnbz2)
+
 
     def contains_corrupted_xvgs(self):
         """Check if any of the source datafiles had reported corrupted lines.
