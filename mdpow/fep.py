@@ -555,7 +555,7 @@ class Gsolv(object):
         if autocompress:
             for component, lambdas in self.lambdas.items():
                 xvg_files = [dgdl_xvg(self.wdir(component, l)) for l in lambdas]
-                for xvg in xvgfiles:
+                for xvg in xvg_files:
                     root,ext = os.path.splitext(xvg)
                     if ext == os.path.extsep+"xvg":
                         fnbz2 = xvg + os.path.extsep + "bz2"
