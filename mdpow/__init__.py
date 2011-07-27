@@ -328,8 +328,6 @@ __all__ = ['fep', 'equil']
 import log
 logger = log.create('mdpow', 'mdpow.log')
 
-import config
-
 def get_version():
     """Return current package version as a string."""
     return ".".join(map(str,VERSION))
@@ -338,6 +336,16 @@ def get_version_tuple():
     """Return current package version as a (MAJOR,MINOR,PATCHLEVEL)."""
     return tuple(VERSION)
 
+def log_banner():
+    """Log program name and licence at INFO level."""
+    logger.info("MDPOW %s starting.", get_version())
+    logger.info("Copyright (c) 2010-2011 Oliver Beckstein and Bogdan Iorga")
+    logger.info("Released under the GNU Public Licence, version 3.")
+
+
+log_banner()
+
+import config
 
 #: Avogadro's constant |NA| in mol^-1 (`NA NIST value`_).
 N_AVOGADRO = 6.02214179e23
@@ -348,3 +356,4 @@ kBOLTZ = 1.3806504e-23 *1e-3 * N_AVOGADRO
 # commented out so that one can get at version without importing
 # GromacsWrapper etc
 #import fep, equil
+

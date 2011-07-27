@@ -262,9 +262,9 @@ if not 'GMXLIB' in os.environ:
         logger.fatal(errmsg + includedir)
         raise OSError(errno.ENOENT, errmsg, includedir)
     os.environ['GMXLIB'] = includedir
-    logger.info("MDPOW uses the bundled force fields from GMXLIB=%(includedir)r.", vars())
-    logger.info("If required, override this behaviour by setting the environment variable GMXLIB yourself")
+    logger.info("Using the bundled force fields from GMXLIB=%(includedir)r.", vars())
+    logger.info("If required, override this behaviour by setting the environment variable GMXLIB yourself.")
 else:
-    logger.info("Using user-supplied environment variable GMXLIB=%(GMXLIB)r to find force fields",
-                os.environment)
+    logger.warn("Using user-supplied environment variable GMXLIB=%r to find force fields", os.environ['GMXLIB'])
+    logger.info("(You can use the MDPOW default by executing 'unset GMXLIB' in your shell before running MDPOW.)")
 
