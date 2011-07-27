@@ -23,7 +23,7 @@ In modules simply use::
 import logging
 
 def create(logname, logfile):
-    """Create a top level Ligands logger.
+    """Create a top level logger.
 
     - The file logger logs everything (including DEBUG).
     - The console logger only logs INFO and above.
@@ -44,7 +44,6 @@ def create(logname, logfile):
     # set a format which is simpler for console use
     formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
     console.setFormatter(formatter)
-    # configure for Mhp1 only
     logger.addHandler(console)
 
     return logger

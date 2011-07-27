@@ -327,6 +327,8 @@ __all__ = ['fep', 'equil']
 
 import log
 logger = log.create('mdpow', 'mdpow.log')
+log.create('numkit', 'mdpow.log')   # capture numkit messages to same file
+log.create('gromacs', 'mdpow.log')  # and the GromacsWrapper messages
 
 def get_version():
     """Return current package version as a string."""
