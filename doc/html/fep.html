@@ -7,13 +7,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>mdpow.fep – Calculate free energy of solvation &mdash; MDpow v0.4.0 documentation</title>
+    <title>mdpow.fep – Calculate free energy of solvation &mdash; MDpow v0.4.2 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.4.0',
+        VERSION:     '0.4.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -22,7 +22,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="MDpow v0.4.0 documentation" href="index.html" />
+    <link rel="top" title="MDpow v0.4.2 documentation" href="index.html" />
     <link rel="next" title="mdpow.analysis — Collection of analysis and plotting functions" href="analysis.html" />
     <link rel="prev" title="mdpow.equil — Setting up and running equilibrium MD" href="equil.html" /> 
   </head>
@@ -42,7 +42,7 @@
         <li class="right" >
           <a href="equil.html" title="mdpow.equil — Setting up and running equilibrium MD"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">MDpow v0.4.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow v0.4.2 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -160,14 +160,14 @@ queuing system scripts (in particular <a class="reference external" href="http:/
 <tbody valign="top">
 <tr class="field"><th class="field-name">Arguments :</th><td class="field-body"><dl class="first last docutils">
 <dt><em>molecule</em></dt>
-<dd><p class="first last">name of the molecule for which the hydration free 
+<dd><p class="first last">name of the molecule for which the hydration free
 energy is to be computed (as in the gromacs topology)
 [REQUIRED]</p>
 </dd>
 <dt><em>top</em></dt>
 <dd><p class="first last">topology [REQUIRED]</p>
 </dd>
-<dt><em>struct</em> </dt>
+<dt><em>struct</em></dt>
 <dd><p class="first last">solvated and equilibrated input structure [REQUIRED]</p>
 </dd>
 <dt><em>ndx</em></dt>
@@ -177,7 +177,7 @@ energy is to be computed (as in the gromacs topology)
 <dd><p class="first last">directory to work under [&#8216;FEP/<em>solvent</em>&#8216;]</p>
 </dd>
 <dt><em>solvent</em></dt>
-<dd><p class="first last">name of the solvent (only used for path names); will not 
+<dd><p class="first last">name of the solvent (only used for path names); will not
 affect the simulations</p>
 </dd>
 <dt><em>lambda_coulomb</em></dt>
@@ -347,7 +347,7 @@ TODO: should be obtained from equilib sim</p>
 
 <dl class="method">
 <dt id="mdpow.fep.Gsolv.collect">
-<tt class="descname">collect</tt><big>(</big><em>stride=None</em>, <em>autosave=True</em><big>)</big><a class="headerlink" href="#mdpow.fep.Gsolv.collect" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">collect</tt><big>(</big><em>stride=None</em>, <em>autosave=True</em>, <em>autocompress=True</em><big>)</big><a class="headerlink" href="#mdpow.fep.Gsolv.collect" title="Permalink to this definition">¶</a></dt>
 <dd><p>Collect dV/dl from output.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -360,11 +360,27 @@ TODO: should be obtained from equilib sim</p>
 <dt><em>autosave</em></dt>
 <dd><p class="first last">immediately save the class pickle fep file</p>
 </dd>
+<dt><em>autocompress</em></dt>
+<dd><p class="first last">compress the xvg file with bzip2 (saves &gt;70% of space)</p>
+</dd>
 </dl>
 </td>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mdpow.fep.Gsolv.compress_dgdl_xvg">
+<tt class="descname">compress_dgdl_xvg</tt><big>(</big><big>)</big><a class="headerlink" href="#mdpow.fep.Gsolv.compress_dgdl_xvg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compress <em>all</em> dgdl xvg files with bzip2.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">After running this method you might want to run
+<a class="reference internal" href="#mdpow.fep.Gsolv.collect" title="mdpow.fep.Gsolv.collect"><tt class="xref py py-meth docutils literal"><span class="pre">collect()</span></tt></a> to ensure that the results in <tt class="xref py py-attr docutils literal"><span class="pre">results.xvg</span></tt>
+point to the <em>compressed</em> files. Otherwise <tt class="xref py py-exc docutils literal"><span class="pre">IOError</span></tt> might
+occur which fail to find a <cite>md.xvg</cite> file.</p>
+</div>
 </dd></dl>
 
 <dl class="method">
@@ -380,7 +396,7 @@ permissive=True flag and had skipped lines.</td>
 </tr>
 </tbody>
 </table>
-<p>For debugging purposes, the number of corrupted lines are stored in 
+<p>For debugging purposes, the number of corrupted lines are stored in
 <tt class="xref py py-attr docutils literal"><span class="pre">Gsolv._corrupted</span></tt> as dicts of dicts with the component as
 primary and the lambda as secondary key.</p>
 </dd></dl>
@@ -393,6 +409,41 @@ primary and the lambda as secondary key.</p>
 the data. It is assumed to decay exponentially, f(t) = exp(-t/tau) and
 the decay constant is estimated as the integral of the ACF from the
 start up to its first root.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mdpow.fep.Gsolv.dgdl_xvg">
+<tt class="descname">dgdl_xvg</tt><big>(</big><em>*args</em><big>)</big><a class="headerlink" href="#mdpow.fep.Gsolv.dgdl_xvg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return filename of the dgdl XVG file.</p>
+<blockquote>
+<div>Recognizes uncompressed, gzipped (gz), and bzip2ed (bz2)
+files.</div></blockquote>
+<dl class="docutils">
+<dt>g</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Arguments:</th><td class="field-body"><dl class="first docutils">
+<dt><em>args</em></dt>
+<dd><p class="first last">joins the arguments into a path and adds the default
+filename for the dvdl file</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Checks if a compressed file exists and returns
+the appropriate filename.</p>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><tt class="xref py py-exc docutils literal"><span class="pre">IOError</span></tt> with error code ENOENT if no file
+could be found</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
@@ -480,7 +531,7 @@ or saved to.</p>
 <tbody valign="top">
 <tr class="field"><th class="field-name">Keywords :</th><td class="field-body"><dl class="first last docutils">
 <dt><em>qscript</em></dt>
-<dd><p class="first last">(List of) template(s) for batch submission scripts; if not set then 
+<dd><p class="first last">(List of) template(s) for batch submission scripts; if not set then
 the templates are used that were supplied to the constructor.</p>
 </dd>
 <dt><em>kwargs</em></dt>
@@ -500,11 +551,10 @@ Note: <em>runtime</em> is set from the constructor.</p>
 <tt class="descname">summary</tt><big>(</big><big>)</big><a class="headerlink" href="#mdpow.fep.Gsolv.summary" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a string that summarizes the energetics.</p>
 <p>Each energy component is followed by its error.</p>
-<dl class="docutils">
-<dt>Format::</dt>
-<dd>.                 &#8212;&#8212;&#8212;- kJ/mol &#8212;&#8212;
-molecule solvent  total  coulomb  vdw  Vdp</dd>
-</dl>
+<p>Format:</p>
+<div class="highlight-python"><pre>.                 ---------- kJ/mol ------
+molecule solvent  total  coulomb  vdw  Vdp</pre>
+</div>
 </dd></dl>
 
 <dl class="method">
@@ -559,14 +609,14 @@ molecule solvent  total  coulomb  vdw  Vdp</dd>
 <tbody valign="top">
 <tr class="field"><th class="field-name">Arguments :</th><td class="field-body"><dl class="first last docutils">
 <dt><em>molecule</em></dt>
-<dd><p class="first last">name of the molecule for which the hydration free 
+<dd><p class="first last">name of the molecule for which the hydration free
 energy is to be computed (as in the gromacs topology)
 [REQUIRED]</p>
 </dd>
 <dt><em>top</em></dt>
 <dd><p class="first last">topology [REQUIRED]</p>
 </dd>
-<dt><em>struct</em> </dt>
+<dt><em>struct</em></dt>
 <dd><p class="first last">solvated and equilibrated input structure [REQUIRED]</p>
 </dd>
 <dt><em>ndx</em></dt>
@@ -576,7 +626,7 @@ energy is to be computed (as in the gromacs topology)
 <dd><p class="first last">directory to work under [&#8216;FEP/<em>solvent</em>&#8216;]</p>
 </dd>
 <dt><em>solvent</em></dt>
-<dd><p class="first last">name of the solvent (only used for path names); will not 
+<dd><p class="first last">name of the solvent (only used for path names); will not
 affect the simulations</p>
 </dd>
 <dt><em>lambda_coulomb</em></dt>
@@ -642,14 +692,14 @@ we hope to reduce the overall error on the dis-charging free energy.</p>
 <tbody valign="top">
 <tr class="field"><th class="field-name">Arguments :</th><td class="field-body"><dl class="first last docutils">
 <dt><em>molecule</em></dt>
-<dd><p class="first last">name of the molecule for which the hydration free 
+<dd><p class="first last">name of the molecule for which the hydration free
 energy is to be computed (as in the gromacs topology)
 [REQUIRED]</p>
 </dd>
 <dt><em>top</em></dt>
 <dd><p class="first last">topology [REQUIRED]</p>
 </dd>
-<dt><em>struct</em> </dt>
+<dt><em>struct</em></dt>
 <dd><p class="first last">solvated and equilibrated input structure [REQUIRED]</p>
 </dd>
 <dt><em>ndx</em></dt>
@@ -659,7 +709,7 @@ energy is to be computed (as in the gromacs topology)
 <dd><p class="first last">directory to work under [&#8216;FEP/<em>solvent</em>&#8216;]</p>
 </dd>
 <dt><em>solvent</em></dt>
-<dd><p class="first last">name of the solvent (only used for path names); will not 
+<dd><p class="first last">name of the solvent (only used for path names); will not
 affect the simulations</p>
 </dd>
 <dt><em>lambda_coulomb</em></dt>
@@ -878,7 +928,7 @@ use preprocessed topology from <tt class="docutils literal"><span class="pre">gr
         <li class="right" >
           <a href="equil.html" title="mdpow.equil — Setting up and running equilibrium MD"
              >previous</a> |</li>
-        <li><a href="index.html">MDpow v0.4.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow v0.4.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

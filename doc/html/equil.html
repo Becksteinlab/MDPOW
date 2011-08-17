@@ -7,13 +7,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>mdpow.equil — Setting up and running equilibrium MD &mdash; MDpow v0.4.0 documentation</title>
+    <title>mdpow.equil — Setting up and running equilibrium MD &mdash; MDpow v0.4.2 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.4.0',
+        VERSION:     '0.4.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -22,7 +22,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="MDpow v0.4.0 documentation" href="index.html" />
+    <link rel="top" title="MDpow v0.4.2 documentation" href="index.html" />
     <link rel="next" title="mdpow.fep – Calculate free energy of solvation" href="fep.html" />
     <link rel="prev" title="mdpow — Computing the octanol/water partitioning coefficient" href="init.html" /> 
   </head>
@@ -42,7 +42,7 @@
         <li class="right" >
           <a href="init.html" title="mdpow — Computing the octanol/water partitioning coefficient"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">MDpow v0.4.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow v0.4.2 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -128,12 +128,12 @@ the pickle file <em>filename</em>, which was generated with
 <dd><p>Short NPT MD simulation.</p>
 <p>See documentation of <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/setup.html#gromacs.setup.MD" title="(in GromacsWrapper v0.2)"><tt class="xref py py-func docutils literal"><span class="pre">gromacs.setup.MD()</span></tt></a> for details such
 as <em>runtime</em> or specific queuing system options. The following
-keywords can not be changed: top, mdp, ndx, mainselection.</p>
+keywords can not be changed: <em>top</em>, <em>mdp</em>, <em>ndx</em>, <em>mainselection</em>.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">If the system crashes (with LINCS errors), try initial
 equilibration with timestep <em>dt</em> = 0.0001 ps (0.1 fs instead
-of 2 fs) and <em>runtime</em> = 5 ps.</p>
+of 2 fs) and <em>runtime</em> = 5 ps as done in <a class="reference internal" href="#mdpow.equil.Simulation.MD_relaxed" title="mdpow.equil.Simulation.MD_relaxed"><tt class="xref py py-meth docutils literal"><span class="pre">MD_relaxed()</span></tt></a></p>
 </div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -155,6 +155,64 @@ in <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/softwar
 filename(s) in the current directory (see <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/qsub.html#gromacs.qsub" title="(in GromacsWrapper v0.2)"><tt class="xref py py-mod docutils literal"><span class="pre">gromacs.qsub</span></tt></a> for
 the format of the templates)</p>
 </dd>
+<dt><em>qname</em></dt>
+<dd><p class="first last">name of the job as shown in the queuing system</p>
+</dd>
+<dt><em>startdir</em></dt>
+<dd><p class="first last"><strong>advanced uses</strong>: path of the directory on a remote
+system, which will be hard-coded into the queuing system
+script(s); see <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/setup.html#gromacs.setup.MD" title="(in GromacsWrapper v0.2)"><tt class="xref py py-func docutils literal"><span class="pre">gromacs.setup.MD()</span></tt></a> and
+<a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/manager.html#gromacs.manager.Manager" title="(in GromacsWrapper v0.2)"><tt class="xref py py-class docutils literal"><span class="pre">gromacs.manager.Manager</span></tt></a></p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mdpow.equil.Simulation.MD_NPT">
+<tt class="descname">MD_NPT</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.equil.Simulation.MD_NPT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Short NPT MD simulation.</p>
+<p>See documentation of <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/setup.html#gromacs.setup.MD" title="(in GromacsWrapper v0.2)"><tt class="xref py py-func docutils literal"><span class="pre">gromacs.setup.MD()</span></tt></a> for details such
+as <em>runtime</em> or specific queuing system options. The following
+keywords can not be changed: <em>top</em>, <em>mdp</em>, <em>ndx</em>, <em>mainselection</em>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If the system crashes (with LINCS errors), try initial
+equilibration with timestep <em>dt</em> = 0.0001 ps (0.1 fs instead
+of 2 fs) and <em>runtime</em> = 5 ps as done in <a class="reference internal" href="#mdpow.equil.Simulation.MD_relaxed" title="mdpow.equil.Simulation.MD_relaxed"><tt class="xref py py-meth docutils literal"><span class="pre">MD_relaxed()</span></tt></a></p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Keywords :</th><td class="field-body"><dl class="first last docutils">
+<dt><em>struct</em></dt>
+<dd><p class="first last">starting conformation; by default, the <em>struct</em> is the last frame
+from the position restraints run, or, if this file cannot be
+found (e.g. because <a class="reference internal" href="#mdpow.equil.Simulation.MD_restrained" title="mdpow.equil.Simulation.MD_restrained"><tt class="xref py py-meth docutils literal"><span class="pre">Simulation.MD_restrained()</span></tt></a> was not run)
+it falls back to the relaxed and then the solvated system.</p>
+</dd>
+<dt><em>runtime</em></dt>
+<dd><p class="first last">total run time in ps</p>
+</dd>
+<dt><em>qscript</em></dt>
+<dd><p class="first last">list of queuing system scripts to prepare; available values are
+in <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/config.html#gromacs.config.templates" title="(in GromacsWrapper v0.2)"><tt class="xref py py-data docutils literal"><span class="pre">gromacs.config.templates</span></tt></a> or you can provide your own
+filename(s) in the current directory (see <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/qsub.html#gromacs.qsub" title="(in GromacsWrapper v0.2)"><tt class="xref py py-mod docutils literal"><span class="pre">gromacs.qsub</span></tt></a> for
+the format of the templates)</p>
+</dd>
+<dt><em>qname</em></dt>
+<dd><p class="first last">name of the job as shown in the queuing system</p>
+</dd>
+<dt><em>startdir</em></dt>
+<dd><p class="first last"><strong>advanced uses</strong>: path of the directory on a remote
+system, which will be hard-coded into the queuing system
+script(s); see <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/setup.html#gromacs.setup.MD" title="(in GromacsWrapper v0.2)"><tt class="xref py py-func docutils literal"><span class="pre">gromacs.setup.MD()</span></tt></a> and
+<a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/manager.html#gromacs.manager.Manager" title="(in GromacsWrapper v0.2)"><tt class="xref py py-class docutils literal"><span class="pre">gromacs.manager.Manager</span></tt></a></p>
+</dd>
 </dl>
 </td>
 </tr>
@@ -169,6 +227,30 @@ the format of the templates)</p>
 <p>Energy minimization does not always remove all problems and LINCS
 constraint errors occur. A very short <em>runtime</em> = 5 ps MD with very
 short integration time step <em>dt</em> tends to solve these problems.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Keywords :</th><td class="field-body"><dl class="first last docutils">
+<dt><em>qscript</em></dt>
+<dd><p class="first last">list of queuing system submission scripts; probably a
+good idea to always include the default &#8220;local.sh&#8221; even
+if you have your own [&#8220;local.sh&#8221;]</p>
+</dd>
+<dt><em>qname</em></dt>
+<dd><p class="first last">name of the job as shown in the queuing system</p>
+</dd>
+<dt><em>startdir</em></dt>
+<dd><p class="first last"><strong>advanced uses</strong>: path of the directory on a remote
+system, which will be hard-coded into the queuing system
+script(s); see <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/setup.html#gromacs.setup.MD" title="(in GromacsWrapper v0.2)"><tt class="xref py py-func docutils literal"><span class="pre">gromacs.setup.MD()</span></tt></a> and
+<a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/manager.html#gromacs.manager.Manager" title="(in GromacsWrapper v0.2)"><tt class="xref py py-class docutils literal"><span class="pre">gromacs.manager.Manager</span></tt></a></p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -185,6 +267,30 @@ for <tt class="xref py py-func docutils literal"><span class="pre">gromacs.gromp
 compound itp file does indeed contain a <tt class="docutils literal"><span class="pre">[</span> <span class="pre">posres</span> <span class="pre">]</span></tt>
 section that is protected by a <tt class="docutils literal"><span class="pre">#ifdef</span> <span class="pre">POSRES</span></tt> clause.</p>
 </div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Keywords :</th><td class="field-body"><dl class="first last docutils">
+<dt><em>qscript</em></dt>
+<dd><p class="first last">list of queuing system submission scripts; probably a
+good idea to always include the default &#8220;local.sh&#8221; even
+if you have your own [&#8220;local.sh&#8221;]</p>
+</dd>
+<dt><em>qname</em></dt>
+<dd><p class="first last">name of the job as shown in the queuing system</p>
+</dd>
+<dt><em>startdir</em></dt>
+<dd><p class="first last"><strong>advanced uses</strong>: path of the directory on a remote
+system, which will be hard-coded into the queuing system
+script(s); see <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/setup.html#gromacs.setup.MD" title="(in GromacsWrapper v0.2)"><tt class="xref py py-func docutils literal"><span class="pre">gromacs.setup.MD()</span></tt></a> and
+<a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/manager.html#gromacs.manager.Manager" title="(in GromacsWrapper v0.2)"><tt class="xref py py-class docutils literal"><span class="pre">gromacs.manager.Manager</span></tt></a></p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
@@ -216,6 +322,12 @@ previously all the defaults should just work.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="mdpow.equil.Simulation.get_protocol">
+<tt class="descname">get_protocol</tt><big>(</big><em>protocol</em><big>)</big><a class="headerlink" href="#mdpow.equil.Simulation.get_protocol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return method for <em>protocol</em>.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="mdpow.equil.Simulation.load">
 <tt class="descname">load</tt><big>(</big><em>filename=None</em><big>)</big><a class="headerlink" href="#mdpow.equil.Simulation.load" title="Permalink to this definition">¶</a></dt>
 <dd><p>Re-instantiate class from pickled file.</p>
@@ -237,6 +349,13 @@ manually if necessary.</p>
 <dt id="mdpow.equil.Simulation.processed_topology">
 <tt class="descname">processed_topology</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.equil.Simulation.processed_topology" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a portable topology file from the topology and the solvated system.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mdpow.equil.Simulation.protocols">
+<tt class="descname">protocols</tt><a class="headerlink" href="#mdpow.equil.Simulation.protocols" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check list of all methods that can be run as an independent protocol; see also
+<a class="reference internal" href="#mdpow.equil.Simulation.get_protocol" title="mdpow.equil.Simulation.get_protocol"><tt class="xref py py-meth docutils literal"><span class="pre">Simulation.get_protocol()</span></tt></a>.</p>
 </dd></dl>
 
 <dl class="method">
@@ -445,7 +564,7 @@ the pickle file <em>filename</em>, which was generated with
         <li class="right" >
           <a href="init.html" title="mdpow — Computing the octanol/water partitioning coefficient"
              >previous</a> |</li>
-        <li><a href="index.html">MDpow v0.4.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow v0.4.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

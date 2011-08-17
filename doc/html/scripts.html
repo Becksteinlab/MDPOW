@@ -7,13 +7,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>The mdpow-* scripts &mdash; MDpow v0.4.0 documentation</title>
+    <title>The mdpow-* scripts &mdash; MDpow v0.4.2 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.4.0',
+        VERSION:     '0.4.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -22,7 +22,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="MDpow v0.4.0 documentation" href="index.html" />
+    <link rel="top" title="MDpow v0.4.2 documentation" href="index.html" />
     <link rel="prev" title="Helper modules" href="utilities.html" /> 
   </head>
   <body>
@@ -38,7 +38,7 @@
         <li class="right" >
           <a href="utilities.html" title="Helper modules"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">MDpow v0.4.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow v0.4.2 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -50,7 +50,7 @@
   <div class="section" id="the-mdpow-scripts">
 <h1>The <tt class="docutils literal"><span class="pre">mdpow-*</span></tt> scripts<a class="headerlink" href="#the-mdpow-scripts" title="Permalink to this headline">¶</a></h1>
 <p>A number of python scripts are installed together with the
-<a class="reference internal" href="init.html#module-mdpow" title="mdpow"><tt class="xref py py-mod docutils literal"><span class="pre">mdpow</span></tt></a> package. They simplufy some common tasks (especially at
+<a class="reference internal" href="init.html#module-mdpow" title="mdpow"><tt class="xref py py-mod docutils literal"><span class="pre">mdpow</span></tt></a> package. They simplify some common tasks (especially at
 the analysis stage) but they make some assumptions about directory
 layout and filenames. If one uses defaults for all directory and
 filename options then it should &#8220;just work&#8221;.</p>
@@ -73,6 +73,63 @@ assumed:</p>
                  VDW/</pre>
 </div>
 <p><em>moleculename</em> is, for instance, &#8220;benzene&#8221; or &#8220;amantadine&#8221;.</p>
+<div class="section" id="equilibrium-simulations">
+<h2>Equilibrium simulations<a class="headerlink" href="#equilibrium-simulations" title="Permalink to this headline">¶</a></h2>
+<p>The <strong class="program">mdpow-equilibrium</strong> script</p>
+<ul class="simple">
+<li>sets up equilibrium MD simulations for the solvents <em>water</em> or
+<em>octanol</em></li>
+<li>runs <strong>energy minimization</strong>, <strong>MD_relaxed</strong>, and <strong>MD_NPT</strong>
+protocols; the user can choose if she wants to launch
+<strong class="program">mdrun</strong> herself (e.g. on a cluster) or let the script do it
+locally on the workstation</li>
+</ul>
+<p>The script runs essentially the same steps as described in the tutorial
+<a class="reference internal" href="init.html#example-octanol-label"><em>Example session: 1-octanol as a solute</em></a>.</p>
+<p>It requires as input</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>at least Gromacs 4.0.5 ready to run (check that all commands can
+be found)</li>
+<li>a structure file (PDB, GRO) for the compound</li>
+<li>a Gromacs ITP file for the compound (OPLS/AA force field)</li>
+</ol>
+</div></blockquote>
+<p>Usage of the command:</p>
+<blockquote>
+<div><p>Usage: <strong class="program">mdpow-equilibrium</strong> [options] <em>RUNFILE</em></p>
+<p>Set up (and possibly run) the equilibration equilibrium simulation
+for one compound and one solvent. All parameters except the solvent
+are specified in the <em>RUNFILE</em>. See the documentation or the example
+file in <tt class="docutils literal"><span class="pre">doc/example/equilibrium.cfg</span></tt>.</p>
+<dl class="docutils">
+<dt>Options:</dt>
+<dd><table class="first last docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd><span class="option">-h</span>, <span class="option">--help</span></kbd></td>
+<td>show this help message and exit</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-S <var>NAME</var></span>, <span class="option">--solvent=<var>NAME</var></span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>solvent NAME for compound, &#8216;water&#8217; or &#8216;octanol&#8217;
+[water]</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-d <var>DIRECTORY</var></span>, <span class="option">--dirname=<var>DIRECTORY</var></span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>generate files and directories in DIRECTORY, which
+is created if it does not already exist. The default
+is to use the <em>molecule</em> identifier from the run
+input file [<em>molecule</em>]</td></tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</div></blockquote>
+<p>For an example of a <em>RUNFILE</em> see <a class="reference download internal" href="_downloads/benzene_runinput.cfg"><tt class="xref download docutils literal"><span class="pre">benzene_runinput.cfg</span></tt></a>.</p>
+</div>
 <div class="section" id="running-analysis">
 <h2>Running analysis<a class="headerlink" href="#running-analysis" title="Permalink to this headline">¶</a></h2>
 <p>The <strong class="program">mdpow-pow</strong> script</p>
@@ -228,6 +285,7 @@ a software error.)</p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">The <tt class="docutils literal"><span class="pre">mdpow-*</span></tt> scripts</a><ul>
+<li><a class="reference internal" href="#equilibrium-simulations">Equilibrium simulations</a></li>
 <li><a class="reference internal" href="#running-analysis">Running analysis</a></li>
 <li><a class="reference internal" href="#checking-if-the-simulation-is-complete">Checking if the simulation is complete</a></li>
 <li><a class="reference internal" href="#re-building-ghyd-fep-and-goct-fep">Re-building <tt class="docutils literal"><span class="pre">Ghyd.fep</span></tt> and <tt class="docutils literal"><span class="pre">Goct.fep</span></tt></a></li>
@@ -272,7 +330,7 @@ a software error.)</p>
         <li class="right" >
           <a href="utilities.html" title="Helper modules"
              >previous</a> |</li>
-        <li><a href="index.html">MDpow v0.4.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow v0.4.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
