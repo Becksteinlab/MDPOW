@@ -56,8 +56,13 @@ Usage of the command:
 
    Set up (and possibly run) the equilibration equilibrium simulation
    for one compound and one solvent. All parameters except the solvent
-   are specified in the *RUNFILE*. See the documentation or the example
-   file in ``doc/example/equilibrium.cfg``.
+   are specified in the *RUNFILE*. 
+
+   For an example of a *RUNFILE* see :download:`benzene_runinput.cfg
+   <../../examples/benzene_runinput.cfg>`. It is recommended to use absolute
+   paths to file names. The run input file uses :mod:`ConfigParser`, which
+   describes the syntax of the file.
+
 
    Options:
      -h, --help            show this help message and exit
@@ -67,12 +72,11 @@ Usage of the command:
      -d DIRECTORY, --dirname=DIRECTORY
 			   generate files and directories in DIRECTORY, which
 			   is created if it does not already exist. The default
-			   is to use the *molecule* identifier from the run
-			   input file [*molecule*]
+			   is to use the *molecule name* from the run
+			   input file [*molecule name*]
 
 .. end
 
-For an example of a *RUNFILE* see :download:`benzene_runinput.cfg <../../examples/benzene_runinput.cfg>`.
 
 
 
