@@ -2,7 +2,7 @@ The ``mdpow-*`` scripts
 =======================
 
 A number of python scripts are installed together with the
-:mod:`mdpow` package. They simplufy some common tasks (especially at
+:mod:`mdpow` package. They simplify some common tasks (especially at
 the analysis stage) but they make some assumptions about directory
 layout and filenames. If one uses defaults for all directory and
 filename options then it should "just work".
@@ -27,6 +27,53 @@ assumed::
                    VDW/
 
 *moleculename* is, for instance, "benzene" or "amantadine".
+
+Equilibrium simulations
+-----------------------
+
+The :program:`mdpow-equilibrium` script
+
+* sets up equilibrium MD simulations for the solvents *water* or
+  *octanol*
+* runs **energy minimization**, **MD_relaxed**, and **MD_NPT**
+  protocols; the user can choose if she wants to launch
+  :program:`mdrun` herself (e.g. on a cluster) or let the script do it
+  locally on the workstation
+
+The script runs essentially the same steps as described in the tutorial
+:ref:`example_octanol-label`.
+
+It requires as input
+
+  1. at least Gromacs 4.0.5 ready to run (check that all commands can
+     be found)
+  2. a structure file (PDB, GRO) for the compound
+  3. a Gromacs ITP file for the compound (OPLS/AA force field)
+
+Usage of the command:
+
+   Usage: :program:`mdpow-equilibrium` [options] *RUNFILE*
+
+   Set up (and possibly run) the equilibration equilibrium simulation
+   for one compound and one solvent. All parameters except the solvent
+   are specified in the *RUNFILE*. See the documentation or the example
+   file in ``doc/example/equilibrium.cfg``.
+
+   Options:
+     -h, --help            show this help message and exit
+     -S NAME, --solvent=NAME
+			   solvent NAME for compound, 'water' or 'octanol'
+			   [water]
+     -d DIRECTORY, --dirname=DIRECTORY
+			   generate files and directories in DIRECTORY, which
+			   is created if it does not already exist. The default
+			   is to use the *molecule* identifier from the run
+			   input file [*molecule*]
+
+.. end
+
+For an example of a *RUNFILE* see :download:`benzene_runinput.cfg <../../examples/benzene_runinput.cfg>`.
+
 
 
 Running analysis

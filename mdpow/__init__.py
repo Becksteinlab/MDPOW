@@ -85,6 +85,7 @@ section on `writing queuing system templates`_ . You will have to
    http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/qsub.html#queuing-system-templates
 
 
+.. _example_octanol-label:
 
 Example session: 1-octanol as a solute
 --------------------------------------

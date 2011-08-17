@@ -74,6 +74,7 @@ class Simulation(object):
     #: Keyword arguments to pre-set some file names; they are keys in :attr:`Simulation.files`.
     filekeys = ('topology', 'processed_topology', 'structure', 'solvated', 'ndx',
                 'energy_minimized', 'MD_relaxed', 'MD_restrained', 'MD_NPT')
+    topdir_default = "Equilibrium"
     dirname_default = os.path.curdir
     solvent_default = 'water'
 
@@ -81,6 +82,10 @@ class Simulation(object):
     #: the protocol; the later the better. The values are keys into :attr:`Simulation.files`.
     coordinate_structures = ('solvated', 'energy_minimized', 'MD_relaxed',
                              'MD_restrained', 'MD_NPT')
+
+    #: Check list of all methods that can be run as an independent protocol; see also
+    #: :meth:`Simulation.get_protocol`.
+    protocols = ("MD_NPT", "MD_relaxed", "M_restrained", "energy_minimze", "solvate", "topology")
 
     def __init__(self, molecule=None, **kwargs):
         """Set up Simulation instance.
@@ -394,7 +399,7 @@ class Simulation(object):
         kwargs['MDfunc'] = gromacs.setup.MD_restrained
         return self._MD('MD_restrained', **kwargs)
 
-    def MD(self, **kwargs):
+    def MD_NPT(self, **kwargs):
         """Short NPT MD simulation.
 
         See documentation of :func:`gromacs.setup.MD` for details such
@@ -433,6 +438,8 @@ class Simulation(object):
         kwargs.setdefault('struct', self.get_last_structure())
         return self._MD('MD_NPT', **kwargs)
 
+    # for convenience and compatibility
+    MD = MD_NPT
 
     def _checknotempty(self, value, name):
         if value is None or value == "":
@@ -448,13 +455,19 @@ class Simulation(object):
         """Returns the coordinates of the most advanced step in the protocol."""
         return self._lastnotempty([self.files[name] for name in self.coordinate_structures])
 
+    def get_protocol(self, protocol):
+        """Return method for *protocol*."""
+        if not protocol in self.protocols:
+            raise ValueError("%r: protocol must be one of %r" % (protocol, self.protocols))
+        return self.__getattribute__(protocol)
+
 class WaterSimulation(Simulation):
     """Equilibrium MD of a solute in a box of water."""
-    dirname_default = os.path.join('Equilibrium/water')
     solvent_default = 'water'
+    dirname_default = os.path.join(Simulation.topdir_default, solvent_default)
 
 class OctanolSimulation(Simulation):
     """Equilibrium MD of a solute in a box of octanol."""
-    dirname_default = os.path.join('Equilibrium/octanol')
     solvent_default = 'octanol'
+    dirname_default = os.path.join(Simulation.topdir_default, solvent_default)
 

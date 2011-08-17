@@ -3,3 +3,4 @@
 *.egg-info
 install_devel_kauha.sh
 dist
+example/benzene/Equilibrium
