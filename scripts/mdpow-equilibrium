@@ -3,8 +3,10 @@
 
 Set up (and possibly run) the equilibration equilibrium simulation for one
 compound and one solvent. All parameters except the solvent are specified in
-the RUNFILE. See the documentation (TO BE WRITTEN) or the example file in
-``doc/example/equilibrium.cfg``.
+the RUNFILE. See the online documentation or the example file in
+``doc/examples/benzene_runinput.cfg``. It is recommended to use absolute paths
+to file names. The run input file uses Python's :mod:`ConfigParser`, which
+describes the syntax of the file.
 
 You will require:
 
@@ -147,7 +149,7 @@ def equilibrium_simulation(cfg, solvent, **kwargs):
     # generate a canonical path under dirname
     topdir = kwargs.get("dirname", None)
     if topdir is None:
-        topdir = cfg.get("setup", "molecule")
+        topdir = cfg.get("setup", "name")
     dirname = os.path.join(topdir, Simulation.dirname_default)
     savefilename = os.path.join(topdir, "%(solvent)s.simulation" % vars())
 
@@ -178,7 +180,7 @@ if __name__ == "__main__":
                       metavar="DIRECTORY",
                       help="generate files and directories in DIRECTORY, which is created "
                       "if it does not already exist. The default is to use the molecule "
-                      "identifier fom the run input file.")
+                      "name from the run input file.")
     parser.add_option('--force', dest='force',
                       action="store_true",
                       help="XXX force re-reading all data [%default]")
