@@ -141,7 +141,7 @@ def equilibrium_simulation(cfg, solvent, **kwargs):
                 logger.critical("Failed %(protocol)s, investigate manually.", vars())
                 sys.exit(1)
         else:
-            logger.info("Now go and run %(protocol)s in the MD_relaxed dir %r.", protocol, S.dirs[protocol])
+            logger.info("Now go and run %s in directory %r.", protocol, S.dirs[protocol])
             logger.warn("You will have to complete the whole thing manually until proper checkpointing is implemented")
             sys.exit(0)
         return simulation_done
