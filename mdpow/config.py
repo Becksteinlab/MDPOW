@@ -56,7 +56,7 @@ completely transparent to the user.
 .. autodata:: templates
 .. autodata:: topfiles
 .. autodata:: includedir
-
+.. autodata:: defaults
 
 Functions
 ---------
@@ -65,6 +65,7 @@ The following functions can be used to access configuration data.
 
 .. autofunction:: get_template
 .. autofunction:: get_templates
+.. autofunction:: get_configuration
 
 .. rubric:: Developer note
 
@@ -86,9 +87,53 @@ Gromacs force field files are ok).
 
 import os, errno
 from pkg_resources import resource_filename, resource_listdir
+from ConfigParser import SafeConfigParser
 
 import logging
 logger = logging.getLogger("mdpow.config")
+
+
+# Reading of configuration files
+# ------------------------------
+
+#: Locations of default run input files and configurations.
+defaults = {
+    "runinput": resource_filename(__name__, "templates/runinput.cfg"),
+    }
+
+class POWConfigParser(SafeConfigParser):
+    def get(self, section, option):
+        """Return option as string, unless its "None/NONE/none" --> ``None``"""
+        value = SafeConfigParser.get(self, section, option)
+        if value.lower() == "none":
+            return None
+        return value
+    def getpath(self, section, option):
+        """Return option as an expanded path."""
+        return os.path.expanduser(os.path.expandvars(self.get(section, option)))
+    def getlist(self, section, option):
+        """Return option as a list of strings.
+
+        *option* must be comma-separated; leading/trailing whitespace
+        is stripped and quotes are treated verbatim.
+        """
+        return [x.strip() for x in str(self.get(section, option)).split(",")]
+
+def get_configuration(filename=None):
+    """Reads and parses a run input config file.
+
+    Uses the package-bundled defaults as a basis.
+    """
+    cfg = POWConfigParser()
+    cfg.readfp(open(defaults["runinput"]))
+    logger.debug("Loaded runinput defaults from %r", defaults["runinput"])
+    if not filename is None:
+        cfg.readfp(open(filename))   # override package defaults
+        logger.debug("Loaded user runinput from %r", filename)
+    else:
+        logger.warning("Running with package defaults for the run; you should supply a runinput file!")
+    return cfg
+
 
 # Functions to locate template files
 # ----------------------------------

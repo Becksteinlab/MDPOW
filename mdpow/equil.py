@@ -44,6 +44,7 @@ from gromacs.utilities import in_dir, realpath, asiterable, AttributeDict
 import gromacs.utilities
 
 import config
+from restart import Journal
 
 logger = logging.getLogger('mdpow.equil')
 
@@ -84,8 +85,11 @@ class Simulation(object):
                              'MD_restrained', 'MD_NPT')
 
     #: Check list of all methods that can be run as an independent protocol; see also
-    #: :meth:`Simulation.get_protocol`.
-    protocols = ("MD_NPT", "MD_relaxed", "M_restrained", "energy_minimze", "solvate", "topology")
+    #: :meth:`Simulation.get_protocol` and :class:`restart.Journal`
+    protocols = ("MD_NPT", "MD_NPT_run",                 # *_run as dummies for the ...
+                 "MD_relaxed", "MD_relaxed_run",         # ...checkpointing logic
+                 "MD_restrained", "MD_restrained_run",
+                 "energy_minimize", "solvate", "topology")
 
     def __init__(self, molecule=None, **kwargs):
         """Set up Simulation instance.
@@ -141,6 +145,7 @@ class Simulation(object):
                 raise ValueError("solvent must be one of %r" % ITP.keys())
 
             self.filename = filename or self.solvent_type+'.simulation'
+            self.journal = Journal(self.protocols)
 
         super(Simulation, self).__init__(**kwargs)
 
@@ -217,6 +222,8 @@ class Simulation(object):
             *kwargs*
                see source for *top_template*, *topol*
         """
+        self.journal.start('topology')
+
         dirname = kwargs.pop('dirname', self.BASEDIR('top'))
         self.dirs.topology = realpath(dirname)
 
@@ -242,6 +249,7 @@ class Simulation(object):
         if not self.dirs.topology in self.dirs.includes:
             self.dirs.includes.append(self.dirs.topology)
 
+        self.journal.completed('topology')
         return {'dirname': dirname, 'topol': topol}
 
 
@@ -258,6 +266,8 @@ class Simulation(object):
               All other arguments are passed on to :func:`gromacs.setup.solvate`, but
               set to sensible default values. *top* and *water* are always fixed.
         """
+        self.journal.start('solvate')
+
         self.dirs.solvation = realpath(kwargs.setdefault('dirname', self.BASEDIR('solvation')))
         kwargs['struct'] = self._checknotempty(struct or self.files.structure, 'struct')
         kwargs['top'] = self._checknotempty(self.files.topology, 'top')
@@ -275,6 +285,7 @@ class Simulation(object):
         # we can also make a processed topology right now
         self.processed_topology()
 
+        self.journal.completed('solvate')
         return params
 
     def processed_topology(self, **kwargs):
@@ -292,6 +303,8 @@ class Simulation(object):
         :meth:`~mdpow.equil.Simulation.solvate` step has been carried out
         previously all the defaults should just work.
         """
+        self.journal.start('energy_minimize')
+
         self.dirs.energy_minimization = realpath(kwargs.setdefault('dirname', self.BASEDIR('em')))
         kwargs['top'] = self.files.topology
         kwargs.setdefault('struct', self.files.solvated)
@@ -301,11 +314,14 @@ class Simulation(object):
         params = gromacs.setup.energy_minimize(**kwargs)
 
         self.files.energy_minimized = params['struct']
+
+        self.journal.completed('energy_minimize')
         return params
 
     def _MD(self, protocol, **kwargs):
         """Basic MD driver for this Simulation. Do not call directly."""
         assert protocol in self.filekeys    # simple check (XXX: should only check a subset,not all keys)
+        self.journal.start(protocol)
 
         kwargs.setdefault('dirname', self.BASEDIR(protocol))
         self.dirs[protocol] = realpath(kwargs['dirname'])
@@ -335,6 +351,8 @@ class Simulation(object):
             shutil.copy(config.topfiles['residuetypes.dat'], self.dirs[protocol])
         except:
             logger.warn("Failed to copy 'residuetypes.dat': mdrun will likely fail to write a final structure")
+
+        self.journal.completed(protocol)
         return params
 
     def MD_relaxed(self, **kwargs):
@@ -459,7 +477,23 @@ class Simulation(object):
         """Return method for *protocol*."""
         if not protocol in self.protocols:
             raise ValueError("%r: protocol must be one of %r" % (protocol, self.protocols))
-        return self.__getattribute__(protocol)
+        try:
+            return self.__getattribute__(protocol)
+        except AttributeError:
+            # catch *_run dummy protocols and have the user provide the function
+            return self._journalled_func(protocol)
+
+    def _journalled_func(self, protocol):
+        def dummy_protocol(*args, **kwargs):
+            """Wrap call to func(args) in journaling."""
+            assert len(args) > 1, "f(func, *args, **kwargs) --> func(*args,**kwargs)"
+            func = args[0]
+            self.journal.start(protocol)
+            success = func(*args[1:], **kwargs)
+            if success:
+                self.journal.completed(protocol)
+            return success
+        return dummy_protocol
 
 class WaterSimulation(Simulation):
     """Equilibrium MD of a solute in a box of water."""
