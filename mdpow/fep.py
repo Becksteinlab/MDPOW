@@ -226,6 +226,8 @@ class Gsolv(object):
        http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/building_blocks.html?highlight=qsub#queuing-system-templates
     """
 
+    topdir_default = "FEP"
+    dirname_default = os.path.curdir
     solvent_default = "water"
 
     schedules = {'coulomb':
@@ -246,6 +248,9 @@ class Gsolv(object):
                                       0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1],
                              ),
                  }
+    #: Check list of all methods that can be run as an independent protocol; see also
+    #: :meth:`Simulation.get_protocol` and :class:`restart.Journal`
+    protocols = ["setup", "fep_run"]
 
 
     def __init__(self, molecule=None, top=None, struct=None, **kwargs):
@@ -356,13 +361,13 @@ class Gsolv(object):
                 'vdw':     kwargs.pop('lambda_vdw', self.schedules['vdw'].lambdas),
                 }
             self.runtime = kwargs.pop('runtime', 5000.0)   # ps
-            self.dirname = kwargs.pop('dirname', os.path.join('FEP', self.solvent_type))
+            self.dirname = kwargs.pop('dirname', self.dirname_default)
             self.includes = list(asiterable(kwargs.pop('includes',[]))) + [config.includedir]
             self.component_dirs = {'coulomb': os.path.join(self.dirname, 'Coulomb'),
                                    'vdw': os.path.join(self.dirname, 'VDW')}
 
-            self.filename = filename or \
-                            os.path.join(self.dirname, self.__class__.__name__ + '.fep')
+            self.filename = filename or os.path.join(self.dirname,
+                                                     self.__class__.__name__ + os.extsep + 'fep')
 
             # for analysis
             self.stride = kwargs.pop('stride', 1)
@@ -375,6 +380,9 @@ class Gsolv(object):
                                          )
             #: Generated run scripts
             self.scripts = AttributeDict()
+
+            #: restarting
+            self.journal = Journal(self.protocols)
 
             # sanity checks
             if os.path.exists(self.dirname):
@@ -898,12 +906,35 @@ g
         self.__dict__.update(instance.__dict__)
         logger.debug("Instance loaded from %(filename)r" % vars())
 
+    def get_protocol(self, protocol):
+        """Return method for *protocol*."""
+        if not protocol in self.protocols:
+            raise ValueError("%r: protocol must be one of %r" % (protocol, self.protocols))
+        try:
+            return self.__getattribute__(protocol)
+        except AttributeError:
+            # catch *_run dummy protocols and have the user provide the function
+            return self._journalled_func(protocol)
+
+    def _journalled_func(self, protocol):
+        def dummy_protocol(*args, **kwargs):
+            """Wrap call to func(args) in journaling."""
+            assert len(args) > 1, "f(func, *args, **kwargs) --> func(*args,**kwargs)"
+            func = args[0]
+            self.journal.start(protocol)
+            success = func(*args[1:], **kwargs)
+            if success:
+                self.journal.completed(protocol)
+            return success
+        return dummy_protocol
+
     def __repr__(self):
         return "%s(filename=%r)" % (self.__class__.__name__, self.filename)
 
 class Ghyd(Gsolv):
     """Sets up and analyses MD to obtain the hydration free energy of a solute."""
     solvent_default = "water"
+    dirname_default = os.path.join(Gsolv.topdir_default, solvent_default)
 
 class Goct(Gsolv):
     """Sets up and analyses MD to obtain the solvation free energy of a solute in octanol.
@@ -913,6 +944,7 @@ class Goct(Gsolv):
     we hope to reduce the overall error on the dis-charging free energy.
     """
     solvent_default = "octanol"
+    dirname_default = os.path.join(Gsolv.topdir_default, solvent_default)
 
     schedules = {'coulomb':
                  FEPschedule(name='coulomb',

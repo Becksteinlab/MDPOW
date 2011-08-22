@@ -1,0 +1,71 @@
+#!/usr/bin/env python
+"""%prog [options] RUNFILE
+
+Set up (and possibly run) the free energy perturbation (FEP)
+simulations for one compound and one solvent. All parameters except
+the solvent are specified in the RUNFILE. See the online documentation
+or the example file in ``doc/examples/benzene_runinput.cfg``. It is
+recommended to use absolute paths to file names. The run input file
+uses Python's :mod:`ConfigParser`, which describes the syntax of the
+file.
+
+You will require:
+
+  1. at least Gromacs 4.0.5 ready to run (check that all commands can
+     be found)
+  2. the results from a previous complete run of mdpow-equilibrium
+
+"""
+
+# TODO:
+#
+#  1) Implement checkpointing so that one can stop the script, run simulation
+#     (e.g. on cluster) then start script again at the stage where it uses the
+#     newly generated files.
+#
+#     Will require
+#       - unique identifier for the run
+#       - some sort of journal to mark state
+#       - storing of state information (Simulation pickle file -- already usable)
+#
+#  2) Default config file in user's home dir.
+
+from mdpow.run import fep_simulation
+
+import logging
+logger = logging.getLogger('mdpow')
+
+if __name__ == "__main__":
+    import sys
+    import os.path
+    from optparse import OptionParser
+
+    parser = OptionParser(usage=__doc__)
+    parser.add_option('--solvent', '-S', dest='solvent',
+                      metavar="NAME",
+                      help="solvent NAME for compound, 'water' or 'octanol' [%default]")
+    parser.add_option('--dirname', '-d', dest='dirname',
+                      metavar="DIRECTORY",
+                      help="generate files and directories in DIRECTORY, which is created "
+                      "if it does not already exist. The default is to use the molecule "
+                      "name from the run input file.")
+    parser.add_option('--force', dest='force',
+                      action="store_true",
+                      help="XXX force re-reading all data [%default]")
+    parser.set_defaults(solvent="water", dirname=None, force=False, permissive=False)
+    opts,args = parser.parse_args()
+
+    if len(args) == 0:
+        logger.fatal("A run input file is required See --help.")
+        sys.exit(1)
+
+    runfile = args[0]
+    if not os.path.exists(runfile):
+            logger.fatal("Run input file %r not found...", runfile)
+            sys.exit(1)
+
+    cfg = get_configuration(runfile)
+    S = equilibrium_simulation(cfg, opts.solvent, dirname=opts.dirname)
+
+
+
