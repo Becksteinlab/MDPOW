@@ -127,12 +127,13 @@ def equilibrium_simulation(cfg, solvent, **kwargs):
         S = Simulation(molecule=cfg.get("setup", "molecule"), dirname=dirname)
 
     if S.journal.has_not_completed("energy_minimize"):
+        maxwarn = cfg.getint("setup", "maxwarn") or None
         S.topology(itp=cfg.getpath("setup", "itp"))
-        S.solvate(struct=cfg.getpath("setup", "structure"))
-        S.energy_minimize()
+        S.solvate(struct=cfg.getpath("setup", "structure"), maxwarn=maxwarn)
+        S.energy_minimize(maxwarn=maxwarn)
         checkpoint('energy_minize', S, savefilename)
     else:
-        logger.info("Fast-forwarding: setup + energy_minimze done")
+        logger.info("Fast-forwarding: setup + energy_minimize done")
 
     if S.journal.has_not_completed("MD_relaxed"):
         params = setupMD(S, "MD_relaxed", cfg)

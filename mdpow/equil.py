@@ -283,7 +283,7 @@ class Simulation(object):
         self.files.ndx = params['ndx']
 
         # we can also make a processed topology right now
-        self.processed_topology()
+        self.processed_topology(**kwargs)
 
         self.journal.completed('solvate')
         return params
@@ -292,8 +292,10 @@ class Simulation(object):
         """Create a portable topology file from the topology and the solvated system."""
         if self.files.solvated is None or not os.path.exists(self.files.solvated):
             self.solvate(**kwargs)
-        self.files.processed_topology = gromacs.cbook.create_portable_topology(
-            self.files.topology, self.files.solvated, includes=self.dirs.includes)
+        kwargs['topol'] = self.files.topology
+        kwargs['struct'] = self.files.solvated
+        kwargs['includes'] = self.dirs.includes
+        self.files.processed_topology = gromacs.cbook.create_portable_topology(**kwargs)
         return self.files.processed_topology
 
     def energy_minimize(self, **kwargs):

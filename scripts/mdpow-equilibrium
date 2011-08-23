@@ -3,7 +3,8 @@
 
 Set up (and possibly run) the equilibration equilibrium simulation for one
 compound and one solvent. All parameters except the solvent are specified in
-the RUNFILE. See the online documentation or the example file in
+the RUNFILE. A template RUNFILE can be generated with --get-template. See the
+online documentation or the commented example file in
 ``doc/examples/benzene_runinput.cfg``. It is recommended to use absolute paths
 to file names. The run input file uses Python's :mod:`ConfigParser`, which
 describes the syntax of the file.
@@ -19,15 +20,6 @@ You will require:
 
 # TODO:
 #
-#  1) Implement checkpointing so that one can stop the script, run simulation
-#     (e.g. on cluster) then start script again at the stage where it uses the
-#     newly generated files.
-#
-#     Will require
-#       - unique identifier for the run
-#       - some sort of journal to mark state
-#       - storing of state information (Simulation pickle file -- already usable)
-#
 #  2) Default config file in user's home dir.
 
 from mdpow.run import equilibrium_simulation
@@ -42,6 +34,9 @@ if __name__ == "__main__":
     from optparse import OptionParser
 
     parser = OptionParser(usage=__doc__)
+    parser.add_option('--get-template', dest='gettemplate',
+                      action='store_true',
+                      help="generate a template RUNFILE and exit")
     parser.add_option('--solvent', '-S', dest='solvent',
                       metavar="NAME",
                       help="solvent NAME for compound, 'water' or 'octanol' [%default]")
@@ -61,9 +56,16 @@ if __name__ == "__main__":
         sys.exit(1)
 
     runfile = args[0]
+
+    if opts.gettemplate:
+        cfg = get_configuration()
+        cfg.write(open(runfile, "w"))
+        logger.info("Generated template runfile %r. Edit it!", runfile)
+        sys.exit(0)
+
     if not os.path.exists(runfile):
-            logger.fatal("Run input file %r not found...", runfile)
-            sys.exit(1)
+        logger.fatal("Run input file %r not found...", runfile)
+        sys.exit(1)
 
     cfg = get_configuration(runfile)
     S = equilibrium_simulation(cfg, opts.solvent, dirname=opts.dirname)
