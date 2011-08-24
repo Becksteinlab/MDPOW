@@ -1,3 +1,6 @@
+.. |Pow| replace:: *P*\ :sub:`OW`
+.. _mdpow-scripts-label:
+
 The ``mdpow-*`` scripts
 =======================
 
@@ -26,7 +29,9 @@ assumed::
                    Coulomb/
                    VDW/
 
-*moleculename* is, for instance, "benzene" or "amantadine".
+*moleculename* is, for instance, "benzene" or "amantadine"; in the run
+input file (see `Equilibrium simulations`_) is the value of the
+variable ``name`` in the ``[setup]`` section.
 
 
 Equilibrium simulations
@@ -116,7 +121,7 @@ The :program:`mdpow-pow` script
 * calculates desolvation free energies for octanol --> vacuum and
   water --> vacuum via thermodynamic integration (TI)
 * calculates transfer free energy water --> octanol
-* calculates log P_OW
+* calculates log |Pow|
 * plots dV/dlambda graphs
 * appends results to ``pow.txt`` and ``energies.txt`` (when the
   default names are chosen)
@@ -129,7 +134,7 @@ Usage of the command:
 :program:`mdpow-pow` [options] *DIRECTORY* [*DIRECTORY* ...]
 
 Run the free energy analysis for water and octanol in *DIRECTORY*/FEP and
-return the octanol-water partition coefficient log P_ow.
+return the octanol-water partition coefficient log |Pow|.
 
 *DIRECTORY* should contain all the files resulting from running
 :meth:`mdpow.fep.Goct.setup` and :meth:`mdpow.fep.Goct.setup` and the results

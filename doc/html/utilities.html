@@ -23,7 +23,6 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="MDpow v0.4.2 documentation" href="index.html" />
-    <link rel="next" title="The mdpow-* scripts" href="scripts.html" />
     <link rel="prev" title="mdpow.analysis — Collection of analysis and plotting functions" href="analysis.html" /> 
   </head>
   <body>
@@ -36,9 +35,6 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="right" >
-          <a href="scripts.html" title="The mdpow-* scripts"
-             accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="analysis.html" title="mdpow.analysis — Collection of analysis and plotting functions"
              accesskey="P">previous</a> |</li>
@@ -417,6 +413,77 @@ or saved to.</p>
 </dd></dl>
 
 </div>
+<span class="target" id="module-mdpow.run"></span><div class="section" id="mdpow-run-performing-complete-simulation-protocols">
+<h2><a class="reference internal" href="#module-mdpow.run" title="mdpow.run"><tt class="xref py py-mod docutils literal"><span class="pre">mdpow.run</span></tt></a> &#8212; Performing complete simulation protocols<a class="headerlink" href="#mdpow-run-performing-complete-simulation-protocols" title="Permalink to this headline">¶</a></h2>
+<p>The module provides building blocks for complete simulation protocols
+(or pipelines). Each protocol is written as a function that takes a
+run input file and the solvent type as input.</p>
+<p><a class="reference internal" href="scripts.html#mdpow-scripts-label"><em>The mdpow-* scripts</em></a> make use of the building blocks.</p>
+<div class="section" id="protocols">
+<h3>Protocols<a class="headerlink" href="#protocols" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="mdpow.run.equilibrium_simulation">
+<tt class="descclassname">mdpow.run.</tt><tt class="descname">equilibrium_simulation</tt><big>(</big><em>cfg</em>, <em>solvent</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.run.equilibrium_simulation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set up and run equilibrium simulation.</p>
+<p>See tutorial for the individual steps.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Depending on the settings in the run input file
+(<tt class="docutils literal"><span class="pre">runlocal</span></tt>), <strong class="program">mdrun</strong> is executed at various stages,
+and hence this process can take a while.</p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="mdpow.run.fep_simulation">
+<tt class="descclassname">mdpow.run.</tt><tt class="descname">fep_simulation</tt><big>(</big><em>cfg</em>, <em>solvent</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.run.fep_simulation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set up and run FEP simulation.</p>
+<p>See tutorial for the individual steps.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Depending on the settings in the run input file
+(<tt class="docutils literal"><span class="pre">runlocal</span></tt>), <strong class="program">mdrun</strong> is executed sequemtially for
+all windows and hence this can take a long time. It is
+recommended to use <tt class="docutils literal"><span class="pre">runocal</span> <span class="pre">=</span> <span class="pre">False</span></tt> in the run input file
+and submit all window simulations to a cluster.</p>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="support">
+<h3>Support<a class="headerlink" href="#support" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="mdpow.run.MDrunnerSimple">
+<em class="property">class </em><tt class="descclassname">mdpow.run.</tt><tt class="descname">MDrunnerSimple</tt><big>(</big><em>dirname='.'</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.run.MDrunnerSimple" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gromacs mdrun.</p>
+<p>Use Gromacs 4.5.x with threaded mdrun to get max performance and
+just leave everything as it is. For older version you can change
+the name and add a mpiexec binary to launch a multiprocessor
+job. See <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/simulation.html#gromacs.run" title="(in GromacsWrapper v0.2)"><tt class="xref py py-mod docutils literal"><span class="pre">gromacs.run</span></tt></a> for details.</p>
+<p>Set up a simple run with <tt class="docutils literal"><span class="pre">mdrun</span></tt>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Keywords :</th><td class="field-body"><dl class="first last docutils">
+<dt><em>dirname</em></dt>
+<dd><p class="first last">Change to this directory before launching the job. Input
+files must be supplied relative to this directory.</p>
+</dd>
+<dt><em>keywords</em></dt>
+<dd><p class="first last">All other keword arguments are used to construct the
+<tt class="xref py py-class docutils literal"><span class="pre">mdrun</span></tt> commandline. Note that only
+keyword arguments are allowed.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
 </div>
 
 
@@ -436,16 +503,18 @@ or saved to.</p>
 </li>
 <li><a class="reference internal" href="#mdpow-log-configure-logging-for-pow-analysis"><tt class="docutils literal"><span class="pre">mdpow.log</span></tt> &#8212; Configure logging for POW analysis</a></li>
 <li><a class="reference internal" href="#mdpow-restart-restarting-and-checkpointing"><tt class="docutils literal"><span class="pre">mdpow.restart</span></tt> &#8212; Restarting and checkpointing</a></li>
+<li><a class="reference internal" href="#mdpow-run-performing-complete-simulation-protocols"><tt class="docutils literal"><span class="pre">mdpow.run</span></tt> &#8212; Performing complete simulation protocols</a><ul>
+<li><a class="reference internal" href="#protocols">Protocols</a></li>
+<li><a class="reference internal" href="#support">Support</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="analysis.html"
-                        title="previous chapter"><tt class="docutils literal docutils literal docutils literal"><span class="pre">mdpow.analysis</span></tt> &#8212; Collection of analysis and plotting functions</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="scripts.html"
-                        title="next chapter">The <tt class="docutils literal docutils literal"><span class="pre">mdpow-*</span></tt> scripts</a></p>
+                        title="previous chapter"><tt class="docutils literal"><span class="pre">mdpow.analysis</span></tt> &#8212; Collection of analysis and plotting functions</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/utilities.txt"
@@ -477,9 +546,6 @@ or saved to.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="right" >
-          <a href="scripts.html" title="The mdpow-* scripts"
-             >next</a> |</li>
         <li class="right" >
           <a href="analysis.html" title="mdpow.analysis — Collection of analysis and plotting functions"
              >previous</a> |</li>

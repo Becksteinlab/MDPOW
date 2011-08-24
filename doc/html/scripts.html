@@ -23,7 +23,8 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="MDpow v0.4.2 documentation" href="index.html" />
-    <link rel="prev" title="Helper modules" href="utilities.html" /> 
+    <link rel="next" title="mdpow.equil — Setting up and running equilibrium MD" href="equil.html" />
+    <link rel="prev" title="mdpow — Computing the octanol/water partitioning coefficient" href="init.html" /> 
   </head>
   <body>
     <div class="related">
@@ -36,7 +37,10 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="utilities.html" title="Helper modules"
+          <a href="equil.html" title="mdpow.equil — Setting up and running equilibrium MD"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="init.html" title="mdpow — Computing the octanol/water partitioning coefficient"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">MDpow v0.4.2 documentation</a> &raquo;</li> 
       </ul>
@@ -48,7 +52,7 @@
           <div class="body">
             
   <div class="section" id="the-mdpow-scripts">
-<h1>The <tt class="docutils literal"><span class="pre">mdpow-*</span></tt> scripts<a class="headerlink" href="#the-mdpow-scripts" title="Permalink to this headline">¶</a></h1>
+<span id="mdpow-scripts-label"></span><h1>The <tt class="docutils literal"><span class="pre">mdpow-*</span></tt> scripts<a class="headerlink" href="#the-mdpow-scripts" title="Permalink to this headline">¶</a></h1>
 <p>A number of python scripts are installed together with the
 <a class="reference internal" href="init.html#module-mdpow" title="mdpow"><tt class="xref py py-mod docutils literal"><span class="pre">mdpow</span></tt></a> package. They simplify some common tasks (especially at
 the analysis stage) but they make some assumptions about directory
@@ -72,7 +76,9 @@ assumed:</p>
                  Coulomb/
                  VDW/</pre>
 </div>
-<p><em>moleculename</em> is, for instance, &#8220;benzene&#8221; or &#8220;amantadine&#8221;.</p>
+<p><em>moleculename</em> is, for instance, &#8220;benzene&#8221; or &#8220;amantadine&#8221;; in the run
+input file (see <a class="reference internal" href="#equilibrium-simulations">Equilibrium simulations</a>) is the value of the
+variable <tt class="docutils literal"><span class="pre">name</span></tt> in the <tt class="docutils literal"><span class="pre">[setup]</span></tt> section.</p>
 <div class="section" id="equilibrium-simulations">
 <h2>Equilibrium simulations<a class="headerlink" href="#equilibrium-simulations" title="Permalink to this headline">¶</a></h2>
 <p>The <strong class="program">mdpow-equilibrium</strong> script</p>
@@ -99,7 +105,7 @@ be found). The required <strong>input</strong> is</p>
 </div></blockquote>
 <p>A template <em>RUNFILE</em> can be generated with
 <a class="reference internal" href="#cmdoption-mdpow-equilibrium--get-template"><em class="xref std std-option">mdpow-equilibrium --get-template</em></a>.</p>
-<p>For an example of a <em>RUNFILE</em> see <a class="reference download internal" href="_downloads/benzene_runinput1.cfg"><tt class="xref download docutils literal"><span class="pre">benzene_runinput.cfg</span></tt></a>. It is recommended to use absolute paths
+<p>For an example of a <em>RUNFILE</em> see <a class="reference download internal" href="_downloads/benzene_runinput4.cfg"><tt class="xref download docutils literal"><span class="pre">benzene_runinput.cfg</span></tt></a>. It is recommended to use absolute paths
 to file names. The run input file uses <a class="reference external" href="http://docs.python.org/library/configparser.html#module-ConfigParser" title="(in Python v2.7)"><tt class="xref py py-mod docutils literal"><span class="pre">ConfigParser</span></tt></a>, which describes the
 syntax of the file.</p>
 <p>The script keeps track of the stages of the simulation protocol and allows the
@@ -155,7 +161,7 @@ file [<em>molecule name</em>]</p>
 <li>calculates desolvation free energies for octanol &#8211;&gt; vacuum and
 water &#8211;&gt; vacuum via thermodynamic integration (TI)</li>
 <li>calculates transfer free energy water &#8211;&gt; octanol</li>
-<li>calculates log P_OW</li>
+<li>calculates log <em>P</em><sub>OW</sub></li>
 <li>plots dV/dlambda graphs</li>
 <li>appends results to <tt class="docutils literal"><span class="pre">pow.txt</span></tt> and <tt class="docutils literal"><span class="pre">energies.txt</span></tt> (when the
 default names are chosen)</li>
@@ -163,7 +169,7 @@ default names are chosen)</li>
 <p>Usage of the command:</p>
 <p><strong class="program">mdpow-pow</strong> [options] <em>DIRECTORY</em> [<em>DIRECTORY</em> ...]</p>
 <p>Run the free energy analysis for water and octanol in <em>DIRECTORY</em>/FEP and
-return the octanol-water partition coefficient log P_ow.</p>
+return the octanol-water partition coefficient log <em>P</em><sub>OW</sub>.</p>
 <p><em>DIRECTORY</em> should contain all the files resulting from running
 <tt class="xref py py-meth docutils literal"><span class="pre">mdpow.fep.Goct.setup()</span></tt> and <tt class="xref py py-meth docutils literal"><span class="pre">mdpow.fep.Goct.setup()</span></tt> and the results
 of the MD FEP simulations. It relies on the canonical naming scheme (basically:
@@ -314,8 +320,11 @@ the paths stored in the <tt class="file docutils literal"><em><span class="pre">
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="utilities.html"
-                        title="previous chapter">Helper modules</a></p>
+  <p class="topless"><a href="init.html"
+                        title="previous chapter"><tt class="docutils literal"><span class="pre">mdpow</span></tt> &#8212; Computing the octanol/water partitioning coefficient</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="equil.html"
+                        title="next chapter"><tt class="docutils literal"><span class="pre">mdpow.equil</span></tt> &#8212; Setting up and running equilibrium MD</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/scripts.txt"
@@ -348,7 +357,10 @@ the paths stored in the <tt class="file docutils literal"><em><span class="pre">
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="utilities.html" title="Helper modules"
+          <a href="equil.html" title="mdpow.equil — Setting up and running equilibrium MD"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="init.html" title="mdpow — Computing the octanol/water partitioning coefficient"
              >previous</a> |</li>
         <li><a href="index.html">MDpow v0.4.2 documentation</a> &raquo;</li> 
       </ul>
