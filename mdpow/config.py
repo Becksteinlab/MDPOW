@@ -8,11 +8,11 @@
 ==========================================================
 
 The config module provides configurable options for the whole package;
-eventually it might grow into a sophisticated configuration system such as
-matplotlib's rc system but right now it mostly serves to define which gromacs
-tools and other scripts are offered in the package and where template files are
-located. If the user wants to change anything they will still have to do it
-here in source until a better mechanism with rc files has been implemented.
+eventually it might grow into a more sophisticated configuration system but
+right now it mostly serves to define which gromacs tools and other scripts are
+offered in the package and where template files are located. If the user wants
+to change anything they will still have to do it here in source until a better
+mechanism with a global configuration file has been implemented.
 
 
 Force field
@@ -27,7 +27,9 @@ Gromacs 4.5.3 distribution, with the following differences:
 
 * OPLS/AA parameters for 1-octanol were added. These parameters were validated
   against experimental data by computing the density (neat), hydration free
-  energy and logP (the latter being a self consistentcy check).
+  energy and logP (the latter being a self consistency check).
+
+  .. TODO add the results of the checks
 
 The force field files are found in the directory pointed to by the environment
 variable :envvar:`GMXLIB`. By default, :mod:`mdpow.config` sets
@@ -41,7 +43,10 @@ template files.
 
 .. rubric:: References
 
-.. [Jensen2006] Jensen & Jorgensen JCTC 2 (2006), 1499.
+.. [Jensen2006] K.P. Jensen and W.L. Jorgensen, *J Comp Theor Comput* **2**
+                (2006), 1499.  doi:`10.1021/ct600252r`_
+
+.. _`10.1021/ct600252r`: http://dx.doi.org/10.1021/ct600252r
 
 
 

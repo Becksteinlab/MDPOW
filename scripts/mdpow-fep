@@ -44,9 +44,9 @@ if __name__ == "__main__":
                       help="generate files and directories in DIRECTORY, which is created "
                       "if it does not already exist. The default is to use the molecule "
                       "name from the run input file.")
-    parser.add_option('--force', dest='force',
-                      action="store_true",
-                      help="XXX force re-reading all data [%default]")
+    #parser.add_option('--force', dest='force',
+    #                  action="store_true",
+    #                  help="XXX force re-reading all data [%default]")
     parser.set_defaults(solvent="water", dirname=None, force=False, permissive=False)
     opts,args = parser.parse_args()
 

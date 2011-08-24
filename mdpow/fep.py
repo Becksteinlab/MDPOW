@@ -140,6 +140,7 @@ import logging
 logger = logging.getLogger('mdpow.fep')
 
 import config
+from restart import Journalled
 from mdpow import kBOLTZ, N_AVOGADRO
 
 def molar_to_nm3(c):
@@ -179,7 +180,7 @@ class FEPschedule(AttributeDict):
         return dict(((k,v) for k,v in self.items() if k in self.mdp_keywords))
 
 
-class Gsolv(object):
+class Gsolv(Journalled):
     """Simulations to calculate and analyze the solvation free energy.
 
     The simulations are run at constant volume so this is in fact a Helmholtz
@@ -381,9 +382,6 @@ class Gsolv(object):
             #: Generated run scripts
             self.scripts = AttributeDict()
 
-            #: restarting
-            self.journal = Journal(self.protocols)
-
             # sanity checks
             if os.path.exists(self.dirname):
                 wmsg = "Directory %(dirname)r already exists --- will overwrite " \
@@ -400,11 +398,11 @@ class Gsolv(object):
         # on a case-by-case basis
         self.permissive = kwargs.pop('permissive', False)
 
-        super(Gsolv, self).__init__(**kwargs)
-
         logger.info("Solvation free energy calculation for molecule "
                     "%(molecule)s in solvent %(solvent_type)s." % vars(self))
         logger.info("Using directories under %(dirname)r: %(component_dirs)r" % vars(self))
+
+        super(Gsolv, self).__init__(**kwargs)
 
     def frombase(self, *args):
         """Return path with :attr:`Gsolv.basedir` prefixed."""
@@ -442,6 +440,8 @@ class Gsolv(object):
                are set to values that are required for the FEP functionality.
                Note: *runtime* is set from the constructor.
         """
+        self.journal.start('setup')
+
         kwargs['mdrun_opts'] = " ".join([kwargs.pop('mdrun_opts',''), '-dgdl'])  # crucial for FEP!!
         kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.includes
         qsubargs = kwargs.copy()
@@ -463,6 +463,7 @@ class Gsolv(object):
             logger.info("[%s] Wrote array job scripts %r", component, self.scripts[component])
 
         self.save(self.filename)
+        self.journal.completed('setup')
         logger.info("Saved state information to %r; reload later with G = %r.", self.filename, self)
         logger.info("Finished setting up all individual simulations. Now run them...")
 
@@ -882,51 +883,6 @@ g
         """
         from gromacs.collections import Collection
         raise NotImplementedError
-
-    def save(self, filename=None):
-        """Save instance to a pickle file.
-
-        The default filename is the name of the file that was last loaded from
-        or saved to.
-        """
-        if filename is None:
-            filename = self.filename
-        else:
-            self.filename = filename
-        with open(filename, 'wb') as f:
-            cPickle.dump(self, f, protocol=cPickle.HIGHEST_PROTOCOL)
-        logger.debug("Instance pickled to %(filename)r" % vars())
-
-    def load(self, filename=None):
-        """Re-instantiate class from pickled file."""
-        if filename is None:
-            filename = self.filename
-        with open(filename, 'rb') as f:
-            instance = cPickle.load(f)
-        self.__dict__.update(instance.__dict__)
-        logger.debug("Instance loaded from %(filename)r" % vars())
-
-    def get_protocol(self, protocol):
-        """Return method for *protocol*."""
-        if not protocol in self.protocols:
-            raise ValueError("%r: protocol must be one of %r" % (protocol, self.protocols))
-        try:
-            return self.__getattribute__(protocol)
-        except AttributeError:
-            # catch *_run dummy protocols and have the user provide the function
-            return self._journalled_func(protocol)
-
-    def _journalled_func(self, protocol):
-        def dummy_protocol(*args, **kwargs):
-            """Wrap call to func(args) in journaling."""
-            assert len(args) > 1, "f(func, *args, **kwargs) --> func(*args,**kwargs)"
-            func = args[0]
-            self.journal.start(protocol)
-            success = func(*args[1:], **kwargs)
-            if success:
-                self.journal.completed(protocol)
-            return success
-        return dummy_protocol
 
     def __repr__(self):
         return "%s(filename=%r)" % (self.__class__.__name__, self.filename)

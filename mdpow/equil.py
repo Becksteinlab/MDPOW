@@ -36,7 +36,6 @@ from __future__ import with_statement
 import os, errno
 import shutil
 import cPickle
-import logging
 
 import gromacs.setup
 import gromacs.cbook
@@ -44,8 +43,9 @@ from gromacs.utilities import in_dir, realpath, asiterable, AttributeDict
 import gromacs.utilities
 
 import config
-from restart import Journal
+from restart import Journalled
 
+import logging
 logger = logging.getLogger('mdpow.equil')
 
 #: itp files are picked up via include dirs
@@ -55,7 +55,7 @@ BOX = {'water': 'tip4p.gro', 'octanol': config.topfiles['1oct.gro']}
 #: minimum distance between solute and box surface (in nm)
 DIST = {'water': 1.0, 'octanol': 1.5}
 
-class Simulation(object):
+class Simulation(Journalled):
     """Simple MD simulation of a single compound molecule in water.
 
     Typical use ::
@@ -145,7 +145,6 @@ class Simulation(object):
                 raise ValueError("solvent must be one of %r" % ITP.keys())
 
             self.filename = filename or self.solvent_type+'.simulation'
-            self.journal = Journal(self.protocols)
 
         super(Simulation, self).__init__(**kwargs)
 
@@ -474,28 +473,6 @@ class Simulation(object):
     def get_last_structure(self):
         """Returns the coordinates of the most advanced step in the protocol."""
         return self._lastnotempty([self.files[name] for name in self.coordinate_structures])
-
-    def get_protocol(self, protocol):
-        """Return method for *protocol*."""
-        if not protocol in self.protocols:
-            raise ValueError("%r: protocol must be one of %r" % (protocol, self.protocols))
-        try:
-            return self.__getattribute__(protocol)
-        except AttributeError:
-            # catch *_run dummy protocols and have the user provide the function
-            return self._journalled_func(protocol)
-
-    def _journalled_func(self, protocol):
-        def dummy_protocol(*args, **kwargs):
-            """Wrap call to func(args) in journaling."""
-            assert len(args) > 1, "f(func, *args, **kwargs) --> func(*args,**kwargs)"
-            func = args[0]
-            self.journal.start(protocol)
-            success = func(*args[1:], **kwargs)
-            if success:
-                self.journal.completed(protocol)
-            return success
-        return dummy_protocol
 
 class WaterSimulation(Simulation):
     """Equilibrium MD of a solute in a box of water."""
