@@ -195,7 +195,7 @@ def fep_simulation(cfg, solvent, **kwargs):
         'octanol': mdpow.equil.OctanolSimulation,
         }
     try:
-        EquilSimulation = Simulations[solvent]
+        EquilSimulation = EquilSimulations[solvent]
     except KeyError:
         raise ValueError("solvent must be 'water' or 'octanol'")
 
@@ -223,44 +223,22 @@ def fep_simulation(cfg, solvent, **kwargs):
         S = Simulation(simulation=equil_S, runtime=cfg.getfloat("FEP", "runtime"),
                        dirname=dirname)
 
-#####
-    if S.journal.has_not_completed("energy_minimize"):
-        S.topology(itp=cfg.getpath("setup", "itp"))
-        S.solvate(struct=cfg.getpath("setup", "structure"))
-        S.energy_minimize()
-        checkpoint('energy_minize', S, savefilename)
-    else:
-        logger.info("Fast-forwarding: setup + energy_minimze done")
-
-    if S.journal.has_not_completed("MD_relaxed"):
-        params = setupMD(S, "MD_relaxed", cfg)
-        checkpoint("MD_relaxed", S, savefilename)
+    if S.journal.has_not_completed("setup"):
+        params = S.setup(qscript=cfg.getlist("FEP", "qscript"))
+        checkpoint("setup", S, savefilename)
     else:
         # need to fudge params for the moment!!! (deffnm = md hard coded in mdpow...)
         params = {'deffnm': 'md'}
-        logger.info("Fast-forwarding: MD_relaxed (setup) done")
+        logger.info("Fast-forwarding: FEP setup done")
 
-    if S.journal.has_not_completed("MD_relaxed_run"):
-        wrapper = S.get_protocol("MD_relaxed_run")
-        success = wrapper(runMD_or_exit, S, "MD_relaxed", params, cfg)  # note: MD_relaxed!
-        checkpoint("MD_relaxed_run", S, savefilename)
-    else:
-        logger.info("Fast-forwarding: MD_relaxed (run) done")
+#    if S.journal.has_not_completed("fep_run"):
+#        wrapper = S.get_protocol("fep_run")
+#        success = wrapper(runFEP_or_exit, S, "setup", params, cfg)   # note: setup!
+#        checkpoint("fep_run", S, savefilename)
+#    else:
+#        logger.info("Fast-forwarding: fep (run) done")
 
-    if S.journal.has_not_completed("MD_NPT"):
-        params = setupMD(S, "MD_NPT", cfg)
-        checkpoint("MD_NPT", S, savefilename)
-    else:
-        logger.info("Fast-forwarding: MD_NPT (setup) done")
-
-    if S.journal.has_not_completed("MD_NPT_run"):
-        wrapper = S.get_protocol("MD_NPT_run")
-        success = wrapper(runMD_or_exit, S, "MD_NPT", params, cfg)   # note: MD_NPT
-        checkpoint("MD_NPT_run", S, savefilename)
-    else:
-        logger.info("Fast-forwarding: MD_NPT (run) done")
-
-    logger.info("Equilibrium simulation phase complete, use %(savefilename)r to continue.",
+    logger.info("FEP simulation phase complete, use %(savefilename)r to continue.",
                 vars())
     return savefilename
 

@@ -128,7 +128,6 @@ import errno
 from subprocess import call
 import warnings
 from pkg_resources import resource_filename
-import cPickle
 
 import numpy
 
@@ -428,6 +427,12 @@ class Gsolv(Journalled):
         """Batch submission script name for a job array."""
         return self.molecule[:3]+'_'+self.schedules[component].label
 
+    def fep_dirs(self):
+        """Generator for all simulation sub directories"""
+        for component, lambdas in self.lambdas.items():
+            for l in lambdas:
+                yield self.wdir(component, l)
+    
     def setup(self, **kwargs):
         """Prepare the input files for all Gromacs runs.
 

@@ -23,6 +23,7 @@ restartable simulation protocols (for example :program:`mdpow-equilibrium`).
 """
 
 import os, errno
+import cPickle
 
 import logging
 logger = logging.getLogger('mdpow.checkpoint')
@@ -146,6 +147,9 @@ class Journal(object):
         """Reset incomplete status and current stage"""
         del self.incomplete
         del self.current
+
+    def __repr__(self):
+        return "%s(%r)" % (self.__class__.__name__, self.stages)
 
 class Journalled(object):
     """A base class providing methods for journalling and restarts.
