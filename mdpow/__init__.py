@@ -318,7 +318,7 @@ The mdpow scripts
 
 Some tasks are simplified by using scripts, which are installed in a
 bin directory (or the directory pointed to by
-``--install-scripts``). See :doc:`scripts` for details.
+``python setup.py --install-scripts``). See :doc:`scripts` for details.
 
 
 """

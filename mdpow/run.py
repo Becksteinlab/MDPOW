@@ -5,9 +5,11 @@
 :mod:`mdpow.run` --- Performing complete simulation protocols
 =============================================================
 
-mdpow-* scripts can make use of the complete building blocks in this
-module. Each protocol is written as a function that takes a run input
-file and the solvent type as input.
+The module provides building blocks for complete simulation protocols
+(or pipelines). Each protocol is written as a function that takes a
+run input file and the solvent type as input.
+
+:ref:`mdpow-scripts-label` make use of the building blocks.
 
 Protocols
 ---------
