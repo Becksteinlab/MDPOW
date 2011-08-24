@@ -28,6 +28,7 @@ assumed::
 
 *moleculename* is, for instance, "benzene" or "amantadine".
 
+
 Equilibrium simulations
 -----------------------
 
@@ -41,42 +42,68 @@ The :program:`mdpow-equilibrium` script
   locally on the workstation
 
 The script runs essentially the same steps as described in the tutorial
-:ref:`example_octanol-label`.
+:ref:`example_octanol-label` but it gathers all required parameters from a run
+input file and it allows one to stop and continue and the protocol
+transparently.
 
-It requires as input
+It requires as at least Gromacs 4.0.5 ready to run (check that all commands can
+be found). The required **input** is
 
-  1. at least Gromacs 4.0.5 ready to run (check that all commands can
-     be found)
-  2. a structure file (PDB, GRO) for the compound
+  1. a run configuration file;
+  2. a structure file (PDB or GRO) for the compound
   3. a Gromacs ITP file for the compound (OPLS/AA force field)
+
+A template *RUNFILE* can be generated with 
+:option:`mdpow-equilibrium --get-template`.
+
+For an example of a *RUNFILE* see :download:`benzene_runinput.cfg
+<../../examples/benzene_runinput.cfg>`. It is recommended to use absolute paths
+to file names. The run input file uses :mod:`ConfigParser`, which describes the
+syntax of the file.
+
+The script keeps track of the stages of the simulation protocol and allows the
+user to **restart from the last completed stage**. For instance, one can use the
+script to set up a simulation, then run the simulation on a cluster, transfer
+back the generated files, and start :program:`mdpow-equilibrium` again with the
+exact same input to finish the protocol. Since Gromacs 4.5 it is also possible
+to interrupt a running :program:`mdrun` process (e.g. with :kbd:`Control-c`)
+and then resume the simulation at the last saved trajectory checkpoint by
+running :program:`mdpow-equilibrium` again.
+
+If in doubt, just try running :program:`mdpow-equilibrium` running again and
+let it figure out the best course of action. Look at the log file to see what
+has been done. Lines reading "Fast forwarding: *stage*" indicate that results
+from *stage* are available.
 
 Usage of the command:
 
-   Usage: :program:`mdpow-equilibrium` [options] *RUNFILE*
+.. program:: mdpow-equilibrium
 
-   Set up (and possibly run) the equilibration equilibrium simulation
-   for one compound and one solvent. All parameters except the solvent
-   are specified in the *RUNFILE*. 
+:program:`mdpow-equilibrium` [options] *RUNFILE*
 
-   For an example of a *RUNFILE* see :download:`benzene_runinput.cfg
-   <../../examples/benzene_runinput.cfg>`. It is recommended to use absolute
-   paths to file names. The run input file uses :mod:`ConfigParser`, which
-   describes the syntax of the file.
+Set up (and possibly run) the equilibration equilibrium simulation for one
+compound and one solvent. All parameters except the solvent are specified in
+the *RUNFILE*.
 
+Options:
 
-   Options:
-     -h, --help            show this help message and exit
-     -S NAME, --solvent=NAME
-			   solvent NAME for compound, 'water' or 'octanol'
-			   [water]
-     -d DIRECTORY, --dirname=DIRECTORY
-			   generate files and directories in DIRECTORY, which
-			   is created if it does not already exist. The default
-			   is to use the *molecule name* from the run
-			   input file [*molecule name*]
+.. cmdoption:: -h, --help
 
-.. end
+   show this help message and exit
 
+.. cmdoption:: --get-template
+
+   generate a template RUNFILE and exit
+
+.. cmdoption:: -S <NAME>, --solvent=<NAME>
+
+   solvent NAME for compound, 'water' or 'octanol' [water]
+
+.. cmdoption:: -d <DIRECTORY>, --dirname=<DIRECTORY>
+
+   generate files and directories in DIRECTORY, which is created if it does not
+   already exist. The default is to use the *molecule name* from the run input
+   file [*molecule name*]
 
 
 
@@ -97,24 +124,27 @@ The :program:`mdpow-pow` script
 
 Usage of the command:
 
-   :program:`mdpow-pow` [options] DIRECTORY [DIRECTORY ...]
+.. program:: mdpow-pow
 
-   Run the free energy analysis for water and octanol in <DIRECTORY>/FEP
-   and return the octanol-water partition coefficient log P_ow.
+:program:`mdpow-pow` [options] *DIRECTORY* [*DIRECTORY* ...]
 
-   DIRECTORY should contain all the files resulting from running
-   ``mdpow.fep.Goct.setup()`` and ``mdpow.fep.Goct.setup()`` and the results of
-   the MD FEP simulations. It relies on the canonical naming scheme (basically:
-   just use the defaults as in the tutorial).
+Run the free energy analysis for water and octanol in *DIRECTORY*/FEP and
+return the octanol-water partition coefficient log P_ow.
 
-   The dV/dlambda plots can be produced automatically (--plot=auto). If multiple
-   DIRECTORY arguments are provided then one has to choose the auto option (or
-   None).
+*DIRECTORY* should contain all the files resulting from running
+:meth:`mdpow.fep.Goct.setup` and :meth:`mdpow.fep.Goct.setup` and the results
+of the MD FEP simulations. It relies on the canonical naming scheme (basically:
+just use the defaults as in the tutorial).
 
-   Results are *appended* to a data file with **Output file format**::
+The dV/dlambda plots can be produced automatically (:option:`mdpow-pow
+-p` auto). If multiple *DIRECTORY* arguments are provided then one has to
+choose the auto option (or ``None``).
+
+Results are *appended* to a data file with **Output file format**::
 
       molecule   DeltaA0(kJ/mol)    log P_OW  wat_ok octa_ok  directory
 
+Explanation of the columns of the output file:  
    molecule
        molecule name as used in the itp
    DeltaA0
@@ -130,24 +160,42 @@ Usage of the command:
        folder in which the simulations were stored
 
 
-   Options:
-     -h, --help            show this help message and exit
-     -p FILE, --plotfile=FILE
-			   plot dV/dlambda to FILE; use png or pdf suffix to
-			   determine the file type. 'auto' generates a pdf file
-			   DIRECTORY/dVdl.pdf and 'None' disables it [auto]
-     -o FILE, --outfile=FILE
-			   append one-line results summary to FILE [pow.txt]
-     -e FILE, --energies=FILE
-			   append solvation free energies to FILE [energies.txt]
-     --force               force rereading all data [False]
-     --ignore-corrupted    skip lines in the md.xvg files that cannot be parsed.
-			   WARNING: Other lines in the file might have been
-			   corrupted in such a way that they appear correct but
-			   are in fact wrong. WRONG RESULTS CAN OCCUR! USE AT
-			   YOUR OWN RISK [False]
+Options:
 
-.. end
+.. cmdoption:: -h, --help
+
+   show this help message and exit
+
+.. cmdoption:: -p <FILE>, --plotfile=<FILE>
+
+   plot dV/dlambda to :file:`{FILE}`; use png or pdf suffix to determine the
+   file type. 'auto' generates a pdf file :file:`{DIRECTORY}/dVdl.pdf` and
+   'None' disables it [auto]
+
+.. cmdoption:: -o <FILE>, --outfile=<FILE>
+
+   append one-line results summary to FILE [:file:`pow.txt`]
+
+.. cmdoption:: -e <FILE>, --energies=<FILE>
+
+   append solvation free energies to FILE [:file:`energies.txt`]
+
+.. cmdoption:: --force
+
+   force rereading all data [False]
+
+.. cmdoption:: --ignore-corrupted
+
+   skip lines in the md.xvg files that cannot be parsed, perhaps because to an
+   intermittent file system problem. In order to salvage the existing data,
+   this option is provided for diagnostic purposes.  [False]
+
+   .. Warning:: Only use this option with care; skipped lines can indicate that
+      other parts of the file have been corrupted but still pass the line
+      corruption test. USE AT YOUR OWN RISK. 
+
+   It is recommended to simply rerun the affected simulation(s).
+
 
 
 Checking if the simulation is complete
@@ -156,46 +204,59 @@ Checking if the simulation is complete
 Run :program:`mdpow-check` in order to check if all necessary files
 are available:
 
-   :program:`mdpow-check` [options] DIRECTORY [DIRECTORY ...]
+.. program:: mdpow-check
 
-   Check status of the progress of the project in DIRECTORY.
+:program:`mdpow-check` [options] *DIRECTORY* [*DIRECTORY* ...]
 
-   Output is only written to the status file (``status.txt``). A quick way to find
-   problems is to do a ::
+Check status of the progress of the project in *DIRECTORY*.
+
+Output is only written to the status file (:file:`status.txt`). A quick way to find
+problems is to do a ::
 
      cat status.txt | gawk -F '|' '$2 !~ /OK/ {print $0}'
 
+Options:
+
+.. cmdoption:: -h, --help
+
+   show this help message and exit
+
+.. cmdoption:: -o <FILE>, --outfile=<FILE>
+
+   write status results to :file:`{FILE}` [:file:`status.txt`]
 
 
-   Options:
-     -h, --help            show this help message and exit
-     -o FILE, --outfile=FILE
-			   write status results to FILE [status.txt]
+Re-building :file:`Ghyd.fep` and :file:`Goct.fep`
+-------------------------------------------------
 
-.. end
-
-Re-building ``Ghyd.fep`` and ``Goct.fep``
------------------------------------------
-
-It can become necessary to recreate the fep pickle files (e.g. if the
-files became corrupted due to a software error or in order to change
-paths).
+It can become necessary to recreate the :file:`{name}.fep` status/checkpoint
+files (e.g. if the files became corrupted due to a software error or in order
+to change paths).
 
 Typically, one would execute the :program:`mdpow-rebuild-fep` command
 in the parent directory of *moleculename*.
 
 Usage:
-   :program:`mdpow-rebuild-fep` [options] DIRECTORY [DIRECTORY ...]
 
-   Re-create the ``Goct.fep`` or ``Ghyd.fep`` file using the appropriate 
-   equilibrium simulation file under *DIRECTORY*/FEP.
+.. program:: mdpow-rebuild-fep
 
-   (This should only be necessary when the fep file was destroyed due to
-   a software error.)
+:program:`mdpow-rebuild-fep` [options] *DIRECTORY* [*DIRECTORY* ...]
+
+Re-create the :file:`Goct.fep` or :file:`Ghyd.fep` file using the appropriate
+equilibrium simulation file under *DIRECTORY*/FEP.
+
+This should only be necessary when the fep file was destroyed due to a software
+error or when the files are transferred to a different file system and some of
+the paths stored in the :file:`{name}.fep` files have to be changed.
+
+Options:
+
+.. cmdoption:: -h, --help
+
+   show this help message and exit
+
+.. cmdoption:: --solvent=<NAME>
+
+   rebuild fep for 'water', 'octanol', or 'all' [all]
 
 
-   Options:
-     -h, --help      show this help message and exit
-     --solvent=NAME  rebuild fep for 'water', 'octanol', or 'all' [all]
-
-.. end

@@ -57,11 +57,11 @@
 <span class="target" id="module-mdpow.config"></span><div class="section" id="mdpow-config-configuration-for-pow">
 <h2><a class="reference internal" href="#module-mdpow.config" title="mdpow.config"><tt class="xref py py-mod docutils literal"><span class="pre">mdpow.config</span></tt></a> &#8211; Configuration for POW<a class="headerlink" href="#mdpow-config-configuration-for-pow" title="Permalink to this headline">¶</a></h2>
 <p>The config module provides configurable options for the whole package;
-eventually it might grow into a sophisticated configuration system such as
-matplotlib&#8217;s rc system but right now it mostly serves to define which gromacs
-tools and other scripts are offered in the package and where template files are
-located. If the user wants to change anything they will still have to do it
-here in source until a better mechanism with rc files has been implemented.</p>
+eventually it might grow into a more sophisticated configuration system but
+right now it mostly serves to define which gromacs tools and other scripts are
+offered in the package and where template files are located. If the user wants
+to change anything they will still have to do it here in source until a better
+mechanism with a global configuration file has been implemented.</p>
 <div class="section" id="force-field">
 <h3>Force field<a class="headerlink" href="#force-field" title="Permalink to this headline">¶</a></h3>
 <p>By default, MDPOW uses a collection of OPLS/AA force field files based on the
@@ -72,7 +72,7 @@ Gromacs 4.5.3 distribution, with the following differences:</p>
 should only be used with the TIP4P water model.</li>
 <li>OPLS/AA parameters for 1-octanol were added. These parameters were validated
 against experimental data by computing the density (neat), hydration free
-energy and logP (the latter being a self consistentcy check).</li>
+energy and logP (the latter being a self consistency check).</li>
 </ul>
 <p>The force field files are found in the directory pointed to by the environment
 variable <span class="target" id="index-0"></span><tt class="xref std std-envvar docutils literal"><span class="pre">GMXLIB</span></tt>. By default, <a class="reference internal" href="#module-mdpow.config" title="mdpow.config"><tt class="xref py py-mod docutils literal"><span class="pre">mdpow.config</span></tt></a> sets
@@ -86,7 +86,8 @@ template files.</p>
 <table class="docutils citation" frame="void" id="jensen2006" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id1">[Jensen2006]</a></td><td>Jensen &amp; Jorgensen JCTC 2 (2006), 1499.</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id1">[Jensen2006]</a></td><td>K.P. Jensen and W.L. Jorgensen, <em>J Comp Theor Comput</em> <strong>2</strong>
+(2006), 1499.  doi:<a class="reference external" href="http://dx.doi.org/10.1021/ct600252r">10.1021/ct600252r</a></td></tr>
 </tbody>
 </table>
 </div>
@@ -134,6 +135,12 @@ parameters that are legal in the current version of Gromacs.</p>
 <dd><p>The package&#8217;s include directory for <tt class="xref py py-func docutils literal"><span class="pre">gromacs.grompp()</span></tt>; the
 environment variable <span class="target" id="index-3"></span><tt class="xref std std-envvar docutils literal"><span class="pre">GMXLIB</span></tt> is set to <a class="reference internal" href="#mdpow.config.includedir" title="mdpow.config.includedir"><tt class="xref py py-data docutils literal"><span class="pre">includedir</span></tt></a>
 so that the bundled version of the force field is picked up.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="mdpow.config.defaults">
+<tt class="descclassname">mdpow.config.</tt><tt class="descname">defaults</tt><a class="headerlink" href="#mdpow.config.defaults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Locations of default run input files and configurations.</p>
 </dd></dl>
 
 </div>
@@ -196,6 +203,13 @@ be one of</p>
 </table>
 </dd></dl>
 
+<dl class="function">
+<dt id="mdpow.config.get_configuration">
+<tt class="descclassname">mdpow.config.</tt><tt class="descname">get_configuration</tt><big>(</big><em>filename=None</em><big>)</big><a class="headerlink" href="#mdpow.config.get_configuration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads and parses a run input config file.</p>
+<p>Uses the package-bundled defaults as a basis.</p>
+</dd></dl>
+
 <p class="rubric">Developer note</p>
 <p>Templates have to be extracted from the egg because they are used by external
 code. All template filenames are stored in <tt class="xref py py-data docutils literal"><span class="pre">config.templates</span></tt> or
@@ -228,6 +242,181 @@ create the logger in <tt class="docutils literal"><span class="pre">__init__.py<
 </pre></div>
 </div>
 </div>
+<span class="target" id="module-mdpow.restart"></span><div class="section" id="mdpow-restart-restarting-and-checkpointing">
+<h2><a class="reference internal" href="#module-mdpow.restart" title="mdpow.restart"><tt class="xref py py-mod docutils literal"><span class="pre">mdpow.restart</span></tt></a> &#8212; Restarting and checkpointing<a class="headerlink" href="#mdpow-restart-restarting-and-checkpointing" title="Permalink to this headline">¶</a></h2>
+<p>The module provides classes and functions to keep track of which stages of a
+simulation protocol have been completed. It uses a <a class="reference internal" href="#mdpow.restart.Journal" title="mdpow.restart.Journal"><tt class="xref py py-class docutils literal"><span class="pre">Journal</span></tt></a> class for
+the book-keeping. Together with saving the current state of a protocol to a
+checkpoint file (using <a class="reference internal" href="#mdpow.restart.Journalled.save" title="mdpow.restart.Journalled.save"><tt class="xref py py-meth docutils literal"><span class="pre">Journalled.save()</span></tt></a>) it is possible to implement
+restartable simulation protocols (for example <strong class="program">mdpow-equilibrium</strong>).</p>
+<dl class="exception">
+<dt id="mdpow.restart.JournalSequenceError">
+<em class="property">exception </em><tt class="descclassname">mdpow.restart.</tt><tt class="descname">JournalSequenceError</tt><a class="headerlink" href="#mdpow.restart.JournalSequenceError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised when a stage is started without another one having been completed.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="mdpow.restart.Journal">
+<em class="property">class </em><tt class="descclassname">mdpow.restart.</tt><tt class="descname">Journal</tt><big>(</big><em>stages</em><big>)</big><a class="headerlink" href="#mdpow.restart.Journal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class that keeps track of the stage in a protocol.</p>
+<p>Transaction blocks have to be bracketed by calls to <a class="reference internal" href="#mdpow.restart.Journal.start" title="mdpow.restart.Journal.start"><tt class="xref py py-meth docutils literal"><span class="pre">start()</span></tt></a>
+and <a class="reference internal" href="#mdpow.restart.Journal.completed" title="mdpow.restart.Journal.completed"><tt class="xref py py-meth docutils literal"><span class="pre">completed()</span></tt></a>. If a block is started before completion, a
+<a class="reference internal" href="#mdpow.restart.JournalSequenceError" title="mdpow.restart.JournalSequenceError"><tt class="xref py py-exc docutils literal"><span class="pre">JournalSequenceError</span></tt></a> will be raised.</p>
+<p>Other methods such as <a class="reference internal" href="#mdpow.restart.Journal.has_completed" title="mdpow.restart.Journal.has_completed"><tt class="xref py py-meth docutils literal"><span class="pre">has_completed()</span></tt></a> and
+<a class="reference internal" href="#mdpow.restart.Journal.has_not_completed" title="mdpow.restart.Journal.has_not_completed"><tt class="xref py py-meth docutils literal"><span class="pre">has_not_completed()</span></tt></a> can be used to query the status. The
+attribute <a class="reference internal" href="#mdpow.restart.Journal.incomplete" title="mdpow.restart.Journal.incomplete"><tt class="xref py py-attr docutils literal"><span class="pre">incomplete</span></tt></a> flags the state of the current stage
+(<a class="reference internal" href="#mdpow.restart.Journal.current" title="mdpow.restart.Journal.current"><tt class="xref py py-attr docutils literal"><span class="pre">current</span></tt></a>).</p>
+<p>All completed stages are recorded in the attribute
+<a class="reference internal" href="#mdpow.restart.Journal.history" title="mdpow.restart.Journal.history"><tt class="xref py py-attr docutils literal"><span class="pre">history</span></tt></a>.</p>
+<p>The current (incomplete) stage can be reset to its initial state with
+<a class="reference internal" href="#mdpow.restart.Journal.clear" title="mdpow.restart.Journal.clear"><tt class="xref py py-meth docutils literal"><span class="pre">Journal.clear()</span></tt></a>.</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">J</span> <span class="o">=</span> <span class="n">Journal</span><span class="p">([</span><span class="s">&#39;pre&#39;</span><span class="p">,</span> <span class="s">&#39;main&#39;</span><span class="p">,</span> <span class="s">&#39;post&#39;</span><span class="p">])</span>
+<span class="n">J</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s">&#39;pre&#39;</span><span class="p">)</span>
+<span class="o">...</span>
+<span class="n">J</span><span class="o">.</span><span class="n">completed</span><span class="p">(</span><span class="s">&#39;pre&#39;</span><span class="p">)</span>
+<span class="n">J</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s">&#39;main&#39;</span><span class="p">)</span>
+<span class="o">...</span>
+<span class="c"># main does not finish properly</span>
+<span class="k">print</span> <span class="n">J</span><span class="o">.</span><span class="n">incomplete</span>
+<span class="c"># --&gt; &#39;main&#39;</span>
+<span class="n">J</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="s">&#39;post&#39;</span><span class="p">)</span>
+<span class="c"># raises JournalSequenceError</span>
+</pre></div>
+</div>
+<p>Initialise the journal that keeps track of stages.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Arguments :</th><td class="field-body"><dl class="first last docutils">
+<dt><em>stages</em></dt>
+<dd><p class="first last">list of the stage identifiers, in the order that they
+should per performed. Stage identifiers are checked
+against this list before they are accepted as arguments
+to most methods.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="mdpow.restart.Journal.clear">
+<tt class="descname">clear</tt><big>(</big><big>)</big><a class="headerlink" href="#mdpow.restart.Journal.clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset incomplete status and current stage</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mdpow.restart.Journal.completed">
+<tt class="descname">completed</tt><big>(</big><em>stage</em><big>)</big><a class="headerlink" href="#mdpow.restart.Journal.completed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Record completed stage and reset <a class="reference internal" href="#mdpow.restart.Journal.current" title="mdpow.restart.Journal.current"><tt class="xref py py-attr docutils literal"><span class="pre">Journal.current</span></tt></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mdpow.restart.Journal.current">
+<tt class="descname">current</tt><a class="headerlink" href="#mdpow.restart.Journal.current" title="Permalink to this definition">¶</a></dt>
+<dd><p>Current stage identifier</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mdpow.restart.Journal.has_completed">
+<tt class="descname">has_completed</tt><big>(</big><em>stage</em><big>)</big><a class="headerlink" href="#mdpow.restart.Journal.has_completed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns <tt class="xref docutils literal"><span class="pre">True</span></tt> if the <em>stage</em> has been started and completed at any time.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mdpow.restart.Journal.has_not_completed">
+<tt class="descname">has_not_completed</tt><big>(</big><em>stage</em><big>)</big><a class="headerlink" href="#mdpow.restart.Journal.has_not_completed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns <tt class="xref docutils literal"><span class="pre">True</span></tt> if the <em>stage</em> had been started but not completed yet.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mdpow.restart.Journal.history">
+<tt class="descname">history</tt><a class="headerlink" href="#mdpow.restart.Journal.history" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of stages completed</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mdpow.restart.Journal.incomplete">
+<tt class="descname">incomplete</tt><a class="headerlink" href="#mdpow.restart.Journal.incomplete" title="Permalink to this definition">¶</a></dt>
+<dd><p>This last stage was not completed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mdpow.restart.Journal.start">
+<tt class="descname">start</tt><big>(</big><em>stage</em><big>)</big><a class="headerlink" href="#mdpow.restart.Journal.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Record that <em>stage</em> is starting.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="mdpow.restart.Journalled">
+<em class="property">class </em><tt class="descclassname">mdpow.restart.</tt><tt class="descname">Journalled</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.restart.Journalled" title="Permalink to this definition">¶</a></dt>
+<dd><p>A base class providing methods for journalling and restarts.</p>
+<p>It installs an instance of <a class="reference internal" href="#mdpow.restart.Journal" title="mdpow.restart.Journal"><tt class="xref py py-class docutils literal"><span class="pre">Journal</span></tt></a> in the attribute
+<tt class="xref py py-attr docutils literal"><span class="pre">Journalled.journal</span></tt> if it does not exist already.</p>
+<dl class="method">
+<dt id="mdpow.restart.Journalled.get_protocol">
+<tt class="descname">get_protocol</tt><big>(</big><em>protocol</em><big>)</big><a class="headerlink" href="#mdpow.restart.Journalled.get_protocol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return method for <em>protocol</em>.</p>
+<ul>
+<li><p class="first">If <em>protocol</em> is a real method of the class then the method is
+returned.</p>
+</li>
+<li><p class="first">If <em>protocol</em> is a registered protocol name but no method of
+the name exists (i.e. <em>protocol</em> is a &#8220;dummy protocol&#8221;) then
+a wrapper function is returned. The wrapper has the
+signature</p>
+<dl class="function">
+<dt id="mdpow.restart.Journalled.dummy_protocol">
+<tt class="descname">dummy_protocol</tt><big>(</big><em>func</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.restart.Journalled.dummy_protocol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs <em>func</em> with the arguments and keywords between calls
+to <a class="reference internal" href="#mdpow.restart.Journal.start" title="mdpow.restart.Journal.start"><tt class="xref py py-meth docutils literal"><span class="pre">Journal.start()</span></tt></a> and <a class="reference internal" href="#mdpow.restart.Journal.completed" title="mdpow.restart.Journal.completed"><tt class="xref py py-meth docutils literal"><span class="pre">Journal.completed()</span></tt></a>,
+with the stage set to <em>protocol</em>.</p>
+</dd></dl>
+
+</li>
+<li><p class="first">Raises a <tt class="xref py py-exc docutils literal"><span class="pre">ValueError</span></tt> if the <em>protocol</em> is not
+registered (i.e. not found in <a class="reference internal" href="#mdpow.restart.Journalled.protocols" title="mdpow.restart.Journalled.protocols"><tt class="xref py py-attr docutils literal"><span class="pre">Journalled.protocols</span></tt></a>).</p>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="mdpow.restart.Journalled.load">
+<tt class="descname">load</tt><big>(</big><em>filename=None</em><big>)</big><a class="headerlink" href="#mdpow.restart.Journalled.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Re-instantiate class from pickled file.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mdpow.restart.Journalled.protocols">
+<tt class="descname">protocols</tt><a class="headerlink" href="#mdpow.restart.Journalled.protocols" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class-attribute that contains the names of computation protocols
+supported by the class. These are either method names or dummy names,
+whose logic is provided by an external callback function.
+The method <a class="reference internal" href="#mdpow.restart.Journalled.get_protocol" title="mdpow.restart.Journalled.get_protocol"><tt class="xref py py-meth docutils literal"><span class="pre">get_protocol()</span></tt></a> raises a <tt class="xref py py-exc docutils literal"><span class="pre">ValueError</span></tt> if a
+protocol is not listed in <a class="reference internal" href="#mdpow.restart.Journalled.protocols" title="mdpow.restart.Journalled.protocols"><tt class="xref py py-attr docutils literal"><span class="pre">protocols</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mdpow.restart.Journalled.save">
+<tt class="descname">save</tt><big>(</big><em>filename=None</em><big>)</big><a class="headerlink" href="#mdpow.restart.Journalled.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save instance to a pickle file.</p>
+<p>The default filename is the name of the file that was last loaded from
+or saved to.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="mdpow.restart.checkpoint">
+<tt class="descclassname">mdpow.restart.</tt><tt class="descname">checkpoint</tt><big>(</big><em>name</em>, <em>sim</em>, <em>filename</em><big>)</big><a class="headerlink" href="#mdpow.restart.checkpoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute the <a class="reference internal" href="#mdpow.restart.Journalled.save" title="mdpow.restart.Journalled.save"><tt class="xref py py-meth docutils literal"><span class="pre">Journalled.save()</span></tt></a> method and log the event.</p>
+</dd></dl>
+
+</div>
 </div>
 
 
@@ -246,6 +435,7 @@ create the logger in <tt class="docutils literal"><span class="pre">__init__.py<
 </ul>
 </li>
 <li><a class="reference internal" href="#mdpow-log-configure-logging-for-pow-analysis"><tt class="docutils literal"><span class="pre">mdpow.log</span></tt> &#8212; Configure logging for POW analysis</a></li>
+<li><a class="reference internal" href="#mdpow-restart-restarting-and-checkpointing"><tt class="docutils literal"><span class="pre">mdpow.restart</span></tt> &#8212; Restarting and checkpointing</a></li>
 </ul>
 </li>
 </ul>
