@@ -443,12 +443,26 @@ class Gsolv(Journalled):
            *kwargs*
                Most kwargs are passed on to :func:`gromacs.setup.MD` although some
                are set to values that are required for the FEP functionality.
-               Note: *runtime* is set from the constructor.
+
+               *mdrun_opts*
+                  list of options to :program:`mdrun`; ``-dgdl`` is always added
+                  to this list as it is required for the thermodynamic integration
+                  calculations
+               *includes*
+                  list of directories where Gromacs input files can be found
+
+               The following keywords cannot be changed: *dirname*, *jobname*,
+               *prefix*, *runtime*, *deffnm*. The last two can be specified when
+               constructing :class:`Gsolv`.
+
+        .. SeeAlso:: :func:`gromacs.setup.MD` and
+                     :func:`gromacs.qsub.generate_submit_scripts`
         """
         self.journal.start('setup')
 
         kwargs['mdrun_opts'] = " ".join([kwargs.pop('mdrun_opts',''), '-dgdl'])  # crucial for FEP!!
         kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.includes
+        kwargs['deffnm'] = self.deffnm
         qsubargs = kwargs.copy()
         qsubargs['dirname'] = self.dirname  # XXX: try and use frombase() here?
         # handle templates separately (necessary for array jobs)
@@ -459,18 +473,20 @@ class Gsolv(Journalled):
 
         for component, lambdas in self.lambdas.items():
             for l in lambdas:
-                self._setup(component, l, **kwargs)
-            # array job
+                params = self._setup(component, l, **kwargs)   # set up gromacs job for each FEP window
+            # generate queuing system script for array job
             directories = [self.wdir(component, l) for l in lambdas]
             qsubargs['jobname'] = self.arraylabel(component)
             qsubargs['prefix'] = self.label(component)+'_'
             self.scripts[component] = gromacs.qsub.generate_submit_array(qscripts, directories, **qsubargs)
             logger.info("[%s] Wrote array job scripts %r", component, self.scripts[component])
 
-        self.save(self.filename)
         self.journal.completed('setup')
+        self.save(self.filename)
         logger.info("Saved state information to %r; reload later with G = %r.", self.filename, self)
         logger.info("Finished setting up all individual simulations. Now run them...")
+        params.pop('struct',None)   # scrub window-specific params
+        return params
 
     def _setup(self, component, lmbda, **kwargs):
         """Prepare the input files for an individual Gromacs runs."""
@@ -495,7 +511,7 @@ class Gsolv(Journalled):
                       init_lambda=lmbda,
                       delta_lambda=0,
                       )
-        gromacs.setup.MD(**kwargs)
+        return gromacs.setup.MD(**kwargs)
 
 
     # TODO: p must be consistent between DeltaA_std and pdV

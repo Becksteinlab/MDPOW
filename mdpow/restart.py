@@ -205,7 +205,7 @@ class Journalled(object):
     def _journalled_func(self, protocol):
         def dummy_protocol(*args, **kwargs):
             """Wrap call to func(args) in journaling."""
-            assert len(args) > 1, "f(func, *args, **kwargs) --> func(*args,**kwargs)"
+            assert len(args) > 0, "f(func, *args, **kwargs) --> func(*args,**kwargs)"
             func = args[0]
             self.journal.start(protocol)
             success = func(*args[1:], **kwargs)

@@ -130,6 +130,7 @@ class Simulation(Journalled):
                 )
             # pre-set filenames: keyword == variable name
             self.files = AttributeDict([(k, kwargs.pop(k, None)) for k in self.filekeys])
+            self.deffnm = kwargs.pop("deffnm", "md")
 
             if self.files.topology:
                 # assume that a user-supplied topology lives in a 'standard' top dir
@@ -321,15 +322,15 @@ class Simulation(Journalled):
 
     def _MD(self, protocol, **kwargs):
         """Basic MD driver for this Simulation. Do not call directly."""
-        assert protocol in self.filekeys    # simple check (XXX: should only check a subset,not all keys)
         self.journal.start(protocol)
 
         kwargs.setdefault('dirname', self.BASEDIR(protocol))
+        kwargs.setdefault('deffnm', self.deffnm)
         self.dirs[protocol] = realpath(kwargs['dirname'])
         MD = kwargs.pop('MDfunc', gromacs.setup.MD)
         kwargs['top'] = self.files.topology
         kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.dirs.includes
-        kwargs['mdp'] = config.get_template('NPT_opls.mdp')
+        kwargs['mdp'] = config.get_template('NPT_opls.mdp')  # TODO: make this configurable
         kwargs['ndx'] = self.files.ndx
         kwargs['mainselection'] = None # important for SD (use custom mdp and ndx!, gromacs.setup._MD)
         self._checknotempty(kwargs['struct'], 'struct')
