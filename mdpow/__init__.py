@@ -18,7 +18,8 @@ drug-like compounds.
 The MD simulations are performed with Gromacs_ 4.x
 
 .. _Gromacs: http://www.gromacs.org
-
+.. |Pow| replace:: *P*\ :sub:`OW`
+.. |logPow| replace:: log *P*\ :sub:`OW`
 
 How to use the module
 =====================
@@ -85,10 +86,189 @@ section on `writing queuing system templates`_ . You will have to
    http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/qsub.html#queuing-system-templates
 
 
+
+The mdpow scripts
+=================
+
+Some tasks are simplified by using scripts, which are installed in a bin
+directory (or the directory pointed to by ``python setup.py
+--install-scripts``). See :doc:`scripts` for details and
+:ref:`tutorial-benzene-label` for an example. The scripts essentially execute
+the steps shown in :ref:`example_octanol-label` so in order to gain a better
+understanding of MDpow it is suggested to look at both tutorials.
+
+
+.. _tutorial-benzene-label:
+
+Tutorial: Using the mdpow scripts to compute |logPow| of benzene
+================================================================
+
+The most straightforward use of MDpow is through the Python scripts described
+in :doc:`scripts`. This tutorial shows how to use them to calculate |logPow|
+for benzene.
+
+The ``examples/benzene`` directory of the distribution contains a Gromacs
+OPLS/AA topology for benzene (:download:`benzene.itp
+<../../examples/benzene/benzene.itp>`) and a starting structure
+(:download:`benzene.pdb <../../examples/benzene/benzene.pdb>`) together with a
+*run input configuration file* for the mdpow scripts
+(:download:`benzene_runinput.cfg <../../examples/benzene_runinput.cfg>`).
+
+.. image:: ../../examples/benzene/benzene.pdb.png 
+   :width: 200
+
+
+#. Make a directory ``benzene`` and collect the files in the directory.
+
+#. Move into the parent directory of ``benzene``; in this tutorial all files will
+   be generated under ``benzene`` but the configuration file has recorded the
+   location of the input files as :file:`benzene/{filename}`. (For more on to
+   make best use of file names in the configuration file see
+   :ref:`advanced-mdpow-filenames-label`.)
+
+#. Set up Gromacs_ (e.g. by sourcing :file:`GMXRC`).
+
+   .. Note:: Gromacs_ must be set up so that all Gromacs commands (such as
+     :program:`mdrun` or :program:`grompp` can be found on the shell's
+     :envvar:`PATH`). If this is not the case then the following will
+     fail. Look at the **log file** (named **mdpow.log**) for error messages.)
+
+#. Generate the input files for a equilibrium simulation of benzene in
+   **water** (TIP4P) and run the simulation::
+
+     mdpow-equilibrium --solvent water benzene/benzene_runinput.cfg
+
+   The example file provided will only set up very short simulations and it
+   will also directly call :program:`mdrun` to run the simulations. This is
+   configured via the ``runlocal = True`` parameter in the ``[MD_relaxed]`` and
+   ``[MD_NPT]`` sections.
+
+   In fact, the following steps are carried out:
+
+   #. generate a system topology (section ``[Setup]``)
+
+   #. solvate the compound (section ``[Setup]``)
+
+   #. energy minimise the system (section ``[Setup]``)
+
+   #. run a short relaxation with a time step of 0.1 fs in order to remove any
+      steric clashes; this step was found to enable much more robust
+      simulations, especially when using octanol as a solvent. Section
+      ``[MD_relaxed]`` controls this step.
+
+   #. run a equilibrium MD simulation at constant pressure and temperature
+      using a time step of 2 fs. Section ``[MD_NPT]`` controls this step.
+
+#. Generate the input files for a equilibrium simulation of benzene in
+   **octanol** (OPLS/AA parameters) and run the simulation::
+
+     mdpow-equilibrium --solvent octanol benzene/benzene_runinput.cfg
+
+   The steps are analogous to the ones described under 4.
+
+#. Use the last frame of the equilibrium simulation as a starting point for the
+   free energy perturbation (FEP) calculations. This step is controlled by the
+   ``[FEP]`` section in the run input configuration file.
+
+   The example only runs very short windows (``runtime = 25`` ps) but it will
+   run *all* 21 individual simulations sequentially (``runlocal = True``). Thus
+   it is recommended to run this example on a fast multi-core workstation and
+   at least Gromacs 4.5.x, which has thread support for :program:`mdrun`.
+
+   The FEP windows for benzene in **water** are generated and run by ::
+
+     mdpow-fep --solvent water benzene/benzene_runinput.cfg
+
+   (In order to run the FEP windows on a cluster see
+   :ref:`advanced-mdpow-qscript-label`.)
+   
+#. The FEP windows for benzene in **octanol** are generated and run by ::
+
+     mdpow-fep --solvent octanol benzene/benzene_runinput.cfg
+
+#. Analyse the simulation output with :ref:`mdpow-pow <mdpow-pow-label>`.  It
+   collects the raw data from the FEP simulations and computes the free
+   energies of solvation using thermodynamic integration (TI) together with
+   error estimates.  |logPow| is calculated from the difference of the octanol
+   and water solvation free energies::
+
+     mdpow-pow benzene
+
+   ``benzene`` is the directory name under which the FEP simulations are
+   stored. By default, results are *appended* to the files :file:`energies.txt`
+   and :file:`pow.txt`.
+
+   TODO: Explain output format; see :ref:`mdpow-pow-label` for the moment.
+
+
+.. _advanced-mdpow-qscript-label:
+
+Advanced: Generating queuing system scripts
+-------------------------------------------
+
+(To be written)
+
+.. SeeAlso:: :mod:`gromacs.qsub` for the reference on how queuing system script
+             templates are handled and processed
+
+
+.. _advanced-mdpow-filenames-label:
+
+Advanced: Separating input from output data
+-------------------------------------------
+
+Make another directory under which simulation data will be stored; in this
+tutorial it will be called ``WORK`` and we assume that all directories reside
+in ``~/Projects/POW``. We will end up with a directory layout under
+``~/Projects/POW`` like this::
+
+  benzene/
+         benzene.itp
+         benzene.pdb
+         benzene_runinput.cfg
+  WORK/
+       benzene/
+               water/
+               octanol/
+
+Edit :file:`benzene_runinput.cfg` to put in *absolute paths* to the input
+files. It is convenient to use the variable substitution feature of
+:mod:`ConfigParser` by defining a default variable ``topdir`` in
+``[DEFAULT]``::
+
+ [DEFAULT]
+ topdir = ~/Projects/POW/
+
+In the ``[setup]`` section use ``topdir`` to define absolute paths to the itp
+and pdb files of benzene::
+
+ [setup]
+ name = benzene
+ molecule = BNZ
+ structure = %(topdir)s/benzene/benzene.pdb
+ itp = %(topdir)s/benzene/benzene.itp
+
+With absolute paths defined, it is easy to generate all other files under
+``WORK/benzene`` (the directory name "benzene" is the *name* entry from the
+``[setup]`` section of the configuration file)::
+
+ cd WORK
+ mdpow-equilibrium --solvent water ../benzene/benzene_runinput.cfg
+ mdpow-equilibrium --solvent octanol ../benzene/benzene_runinput.cfg
+ mdpow-fep --solvent water ../benzene/benzene_runinput.cfg
+ mdpow-fep --solvent octanol ../benzene/benzene_runinput.cfg
+
+Finally, calculate |logPow|::
+
+ cd WORK
+ mdpow-pow benzene
+
+
+
 .. _example_octanol-label:
 
-Example session: 1-octanol as a solute
---------------------------------------
+Tutorial: Manual session: 1-octanol as a solute
+===============================================
 
 In the following interactive python session we use octanol as an
 example for a solute; all files are present in the package so one can
@@ -103,7 +283,7 @@ path to :program:`grompp`.
 
 
 Water
-~~~~~
+-----
 
 Equilibrium simulation
 ......................
@@ -164,7 +344,7 @@ covered in this tutorial.)
 
 
 Octanol
-~~~~~~~
+-------
 
 Equilibrium simulation
 ......................
@@ -200,7 +380,7 @@ This generates all the input files under ``FEP/octanol``.
 
 
 Running the FEP simulations
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------
 
 The files are under the ``FEP/water`` and ``FEP/octanol`` directories
 in separate sub directories.
@@ -220,8 +400,8 @@ where DEFFNM is typically "md"; see the run ``local.sh`` script in
 each direcory for hints on what needs to be done.
 
 
-Analyze output and logPow calculation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Analyze output and |logPow| calculation
+---------------------------------------
 
 For the water and octanol FEPs do ::
 
@@ -278,7 +458,7 @@ For comparison to experimental values see :mod:`mdpow.analysis`.
 
 
 Error analysis
-~~~~~~~~~~~~~~
+--------------
 
 The data points are the (time) **average <A>** of A = dV/dl over each
 window. The **error bars** s_A are the error of the mean <A>. They are computed
@@ -313,16 +493,8 @@ through the thermodynamic integration and the subsequent thermodynamic sums
   the calculations.
 
 
-The mdpow scripts
-=================
-
-Some tasks are simplified by using scripts, which are installed in a
-bin directory (or the directory pointed to by
-``python setup.py --install-scripts``). See :doc:`scripts` for details.
-
-
 """
-VERSION = 0,4,2
+VERSION = 0,5,0
 
 __all__ = ['fep', 'equil']
 

@@ -17,6 +17,7 @@ can be automatically installed).
 .. _GromacsWrapper: http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/
 .. |Pow| replace:: *P*\ :sub:`OW`
 .. |P_OW| replace:: *P*\ :sub:`OW`
+.. |POW|  replace:: *P*\ :sub:`OW`
 .. |P_ow| replace:: *P*\ :sub:`OW`
 
 
