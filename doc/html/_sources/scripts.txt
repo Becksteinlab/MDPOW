@@ -112,6 +112,8 @@ Options:
 
 
 
+.. _mdpow-pow-label:
+
 Running analysis
 ----------------
 

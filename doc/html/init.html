@@ -7,13 +7,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>mdpow — Computing the octanol/water partitioning coefficient &mdash; MDpow v0.4.2 documentation</title>
+    <title>mdpow — Computing the octanol/water partitioning coefficient &mdash; MDpow v0.5.0 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.4.2',
+        VERSION:     '0.5.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -22,7 +22,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="MDpow v0.4.2 documentation" href="index.html" />
+    <link rel="top" title="MDpow v0.5.0 documentation" href="index.html" />
     <link rel="next" title="The mdpow-* scripts" href="scripts.html" />
     <link rel="prev" title="Quick installation instructions for POW" href="INSTALL.html" /> 
   </head>
@@ -42,7 +42,7 @@
         <li class="right" >
           <a href="INSTALL.html" title="Quick installation instructions for POW"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">MDpow v0.4.2 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow v0.5.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -121,8 +121,158 @@ qsub my_script.sh</pre>
 </li>
 </ul>
 </div>
-<div class="section" id="example-session-1-octanol-as-a-solute">
-<span id="example-octanol-label"></span><h3>Example session: 1-octanol as a solute<a class="headerlink" href="#example-session-1-octanol-as-a-solute" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="the-mdpow-scripts">
+<h2>The mdpow scripts<a class="headerlink" href="#the-mdpow-scripts" title="Permalink to this headline">¶</a></h2>
+<p>Some tasks are simplified by using scripts, which are installed in a bin
+directory (or the directory pointed to by <tt class="docutils literal"><span class="pre">python</span> <span class="pre">setup.py</span>
+<span class="pre">--install-scripts</span></tt>). See <a class="reference internal" href="scripts.html"><em>The mdpow-* scripts</em></a> for details and
+<a class="reference internal" href="#tutorial-benzene-label"><em>Tutorial: Using the mdpow scripts to compute log POW of benzene</em></a> for an example. The scripts essentially execute
+the steps shown in <a class="reference internal" href="#example-octanol-label"><em>Tutorial: Manual session: 1-octanol as a solute</em></a> so in order to gain a better
+understanding of MDpow it is suggested to look at both tutorials.</p>
+</div>
+<div class="section" id="tutorial-using-the-mdpow-scripts-to-compute-logpow-of-benzene">
+<span id="tutorial-benzene-label"></span><h2>Tutorial: Using the mdpow scripts to compute log <em>P</em><sub>OW</sub> of benzene<a class="headerlink" href="#tutorial-using-the-mdpow-scripts-to-compute-logpow-of-benzene" title="Permalink to this headline">¶</a></h2>
+<p>The most straightforward use of MDpow is through the Python scripts described
+in <a class="reference internal" href="scripts.html"><em>The mdpow-* scripts</em></a>. This tutorial shows how to use them to calculate log <em>P</em><sub>OW</sub>
+for benzene.</p>
+<p>The <tt class="docutils literal"><span class="pre">examples/benzene</span></tt> directory of the distribution contains a Gromacs
+OPLS/AA topology for benzene (<a class="reference download internal" href="_downloads/benzene6.itp"><tt class="xref download docutils literal"><span class="pre">benzene.itp</span></tt></a>) and a starting structure
+(<a class="reference download internal" href="_downloads/benzene6.pdb"><tt class="xref download docutils literal"><span class="pre">benzene.pdb</span></tt></a>) together with a
+<em>run input configuration file</em> for the mdpow scripts
+(<a class="reference download internal" href="_downloads/benzene_runinput4.cfg"><tt class="xref download docutils literal"><span class="pre">benzene_runinput.cfg</span></tt></a>).</p>
+<img alt="_images/benzene.pdb6.png" src="_images/benzene.pdb6.png" style="width: 200px;" />
+<ol class="arabic">
+<li><p class="first">Make a directory <tt class="docutils literal"><span class="pre">benzene</span></tt> and collect the files in the directory.</p>
+</li>
+<li><p class="first">Move into the parent directory of <tt class="docutils literal"><span class="pre">benzene</span></tt>; in this tutorial all files will
+be generated under <tt class="docutils literal"><span class="pre">benzene</span></tt> but the configuration file has recorded the
+location of the input files as <tt class="file docutils literal"><span class="pre">benzene/</span><em><span class="pre">filename</span></em></tt>. (For more on to
+make best use of file names in the configuration file see
+<a class="reference internal" href="#advanced-mdpow-filenames-label"><em>Advanced: Separating input from output data</em></a>.)</p>
+</li>
+<li><p class="first">Set up <a class="reference external" href="http://www.gromacs.org">Gromacs</a> (e.g. by sourcing <tt class="file docutils literal"><span class="pre">GMXRC</span></tt>).</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><a class="reference external" href="http://www.gromacs.org">Gromacs</a> must be set up so that all Gromacs commands (such as
+<strong class="program">mdrun</strong> or <strong class="program">grompp</strong> can be found on the shell&#8217;s
+<span class="target" id="index-0"></span><tt class="xref std std-envvar docutils literal"><span class="pre">PATH</span></tt>). If this is not the case then the following will
+fail. Look at the <strong>log file</strong> (named <strong>mdpow.log</strong>) for error messages.)</p>
+</div>
+</li>
+<li><p class="first">Generate the input files for a equilibrium simulation of benzene in
+<strong>water</strong> (TIP4P) and run the simulation:</p>
+<div class="highlight-python"><pre>mdpow-equilibrium --solvent water benzene/benzene_runinput.cfg</pre>
+</div>
+<p>The example file provided will only set up very short simulations and it
+will also directly call <strong class="program">mdrun</strong> to run the simulations. This is
+configured via the <tt class="docutils literal"><span class="pre">runlocal</span> <span class="pre">=</span> <span class="pre">True</span></tt> parameter in the <tt class="docutils literal"><span class="pre">[MD_relaxed]</span></tt> and
+<tt class="docutils literal"><span class="pre">[MD_NPT]</span></tt> sections.</p>
+<p>In fact, the following steps are carried out:</p>
+<ol class="arabic simple">
+<li>generate a system topology (section <tt class="docutils literal"><span class="pre">[Setup]</span></tt>)</li>
+<li>solvate the compound (section <tt class="docutils literal"><span class="pre">[Setup]</span></tt>)</li>
+<li>energy minimise the system (section <tt class="docutils literal"><span class="pre">[Setup]</span></tt>)</li>
+<li>run a short relaxation with a time step of 0.1 fs in order to remove any
+steric clashes; this step was found to enable much more robust
+simulations, especially when using octanol as a solvent. Section
+<tt class="docutils literal"><span class="pre">[MD_relaxed]</span></tt> controls this step.</li>
+<li>run a equilibrium MD simulation at constant pressure and temperature
+using a time step of 2 fs. Section <tt class="docutils literal"><span class="pre">[MD_NPT]</span></tt> controls this step.</li>
+</ol>
+</li>
+<li><p class="first">Generate the input files for a equilibrium simulation of benzene in
+<strong>octanol</strong> (OPLS/AA parameters) and run the simulation:</p>
+<div class="highlight-python"><pre>mdpow-equilibrium --solvent octanol benzene/benzene_runinput.cfg</pre>
+</div>
+<p>The steps are analogous to the ones described under 4.</p>
+</li>
+<li><p class="first">Use the last frame of the equilibrium simulation as a starting point for the
+free energy perturbation (FEP) calculations. This step is controlled by the
+<tt class="docutils literal"><span class="pre">[FEP]</span></tt> section in the run input configuration file.</p>
+<p>The example only runs very short windows (<tt class="docutils literal"><span class="pre">runtime</span> <span class="pre">=</span> <span class="pre">25</span></tt> ps) but it will
+run <em>all</em> 21 individual simulations sequentially (<tt class="docutils literal"><span class="pre">runlocal</span> <span class="pre">=</span> <span class="pre">True</span></tt>). Thus
+it is recommended to run this example on a fast multi-core workstation and
+at least Gromacs 4.5.x, which has thread support for <strong class="program">mdrun</strong>.</p>
+<p>The FEP windows for benzene in <strong>water</strong> are generated and run by</p>
+<div class="highlight-python"><pre>mdpow-fep --solvent water benzene/benzene_runinput.cfg</pre>
+</div>
+<p>(In order to run the FEP windows on a cluster see
+<a class="reference internal" href="#advanced-mdpow-qscript-label"><em>Advanced: Generating queuing system scripts</em></a>.)</p>
+</li>
+<li><p class="first">The FEP windows for benzene in <strong>octanol</strong> are generated and run by</p>
+<div class="highlight-python"><pre>mdpow-fep --solvent octanol benzene/benzene_runinput.cfg</pre>
+</div>
+</li>
+<li><p class="first">Analyse the simulation output with <a class="reference internal" href="scripts.html#mdpow-pow-label"><em>mdpow-pow</em></a>.  It
+collects the raw data from the FEP simulations and computes the free
+energies of solvation using thermodynamic integration (TI) together with
+error estimates.  log <em>P</em><sub>OW</sub> is calculated from the difference of the octanol
+and water solvation free energies:</p>
+<div class="highlight-python"><pre>mdpow-pow benzene</pre>
+</div>
+<p><tt class="docutils literal"><span class="pre">benzene</span></tt> is the directory name under which the FEP simulations are
+stored. By default, results are <em>appended</em> to the files <tt class="file docutils literal"><span class="pre">energies.txt</span></tt>
+and <tt class="file docutils literal"><span class="pre">pow.txt</span></tt>.</p>
+<p>TODO: Explain output format; see <a class="reference internal" href="scripts.html#mdpow-pow-label"><em>Running analysis</em></a> for the moment.</p>
+</li>
+</ol>
+<div class="section" id="advanced-generating-queuing-system-scripts">
+<span id="advanced-mdpow-qscript-label"></span><h3>Advanced: Generating queuing system scripts<a class="headerlink" href="#advanced-generating-queuing-system-scripts" title="Permalink to this headline">¶</a></h3>
+<p>(To be written)</p>
+<div class="admonition-see-also admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/qsub.html#gromacs.qsub" title="(in GromacsWrapper v0.2)"><tt class="xref py py-mod docutils literal"><span class="pre">gromacs.qsub</span></tt></a> for the reference on how queuing system script
+templates are handled and processed</p>
+</div>
+</div>
+<div class="section" id="advanced-separating-input-from-output-data">
+<span id="advanced-mdpow-filenames-label"></span><h3>Advanced: Separating input from output data<a class="headerlink" href="#advanced-separating-input-from-output-data" title="Permalink to this headline">¶</a></h3>
+<p>Make another directory under which simulation data will be stored; in this
+tutorial it will be called <tt class="docutils literal"><span class="pre">WORK</span></tt> and we assume that all directories reside
+in <tt class="docutils literal"><span class="pre">~/Projects/POW</span></tt>. We will end up with a directory layout under
+<tt class="docutils literal"><span class="pre">~/Projects/POW</span></tt> like this:</p>
+<div class="highlight-python"><pre>benzene/
+       benzene.itp
+       benzene.pdb
+       benzene_runinput.cfg
+WORK/
+     benzene/
+             water/
+             octanol/</pre>
+</div>
+<p>Edit <tt class="file docutils literal"><span class="pre">benzene_runinput.cfg</span></tt> to put in <em>absolute paths</em> to the input
+files. It is convenient to use the variable substitution feature of
+<a class="reference external" href="http://docs.python.org/library/configparser.html#module-ConfigParser" title="(in Python v2.7)"><tt class="xref py py-mod docutils literal"><span class="pre">ConfigParser</span></tt></a> by defining a default variable <tt class="docutils literal"><span class="pre">topdir</span></tt> in
+<tt class="docutils literal"><span class="pre">[DEFAULT]</span></tt>:</p>
+<div class="highlight-python"><pre>[DEFAULT]
+topdir = ~/Projects/POW/</pre>
+</div>
+<p>In the <tt class="docutils literal"><span class="pre">[setup]</span></tt> section use <tt class="docutils literal"><span class="pre">topdir</span></tt> to define absolute paths to the itp
+and pdb files of benzene:</p>
+<div class="highlight-python"><pre>[setup]
+name = benzene
+molecule = BNZ
+structure = %(topdir)s/benzene/benzene.pdb
+itp = %(topdir)s/benzene/benzene.itp</pre>
+</div>
+<p>With absolute paths defined, it is easy to generate all other files under
+<tt class="docutils literal"><span class="pre">WORK/benzene</span></tt> (the directory name &#8220;benzene&#8221; is the <em>name</em> entry from the
+<tt class="docutils literal"><span class="pre">[setup]</span></tt> section of the configuration file):</p>
+<div class="highlight-python"><pre>cd WORK
+mdpow-equilibrium --solvent water ../benzene/benzene_runinput.cfg
+mdpow-equilibrium --solvent octanol ../benzene/benzene_runinput.cfg
+mdpow-fep --solvent water ../benzene/benzene_runinput.cfg
+mdpow-fep --solvent octanol ../benzene/benzene_runinput.cfg</pre>
+</div>
+<p>Finally, calculate log <em>P</em><sub>OW</sub>:</p>
+<div class="highlight-python"><pre>cd WORK
+mdpow-pow benzene</pre>
+</div>
+</div>
+</div>
+<div class="section" id="tutorial-manual-session-1-octanol-as-a-solute">
+<span id="example-octanol-label"></span><h2>Tutorial: Manual session: 1-octanol as a solute<a class="headerlink" href="#tutorial-manual-session-1-octanol-as-a-solute" title="Permalink to this headline">¶</a></h2>
 <p>In the following interactive python session we use octanol as an
 example for a solute; all files are present in the package so one can
 work through the example immediately.</p>
@@ -130,9 +280,9 @@ work through the example immediately.</p>
 <a class="reference external" href="http://www.gromacs.org">Gromacs</a> 4.0.x tools can be found, e.g. <tt class="docutils literal"><span class="pre">which</span> <span class="pre">grompp</span></tt> should show you the
 path to <strong class="program">grompp</strong>.</p>
 <div class="section" id="water">
-<h4>Water<a class="headerlink" href="#water" title="Permalink to this headline">¶</a></h4>
+<h3>Water<a class="headerlink" href="#water" title="Permalink to this headline">¶</a></h3>
 <div class="section" id="equilibrium-simulation">
-<h5>Equilibrium simulation<a class="headerlink" href="#equilibrium-simulation" title="Permalink to this headline">¶</a></h5>
+<h4>Equilibrium simulation<a class="headerlink" href="#equilibrium-simulation" title="Permalink to this headline">¶</a></h4>
 <p>Make a directory <tt class="docutils literal"><span class="pre">octanol</span></tt> and copy the <tt class="docutils literal"><span class="pre">octanol.itp</span></tt> and
 <tt class="docutils literal"><span class="pre">octanol.gro</span></tt> file into it. Launch <strong class="program">ipython</strong> from this
 directory and type:</p>
@@ -159,7 +309,7 @@ extract thermodynamic data.</p>
 </div>
 </div>
 <div class="section" id="hydration-free-energy">
-<h5>Hydration free energy<a class="headerlink" href="#hydration-free-energy" title="Permalink to this headline">¶</a></h5>
+<h4>Hydration free energy<a class="headerlink" href="#hydration-free-energy" title="Permalink to this headline">¶</a></h4>
 <p>Reopen the python session and set up a <a class="reference internal" href="fep.html#mdpow.fep.Ghyd" title="mdpow.fep.Ghyd"><tt class="xref py py-class docutils literal"><span class="pre">Ghyd</span></tt></a> object:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">mdpow.fep</span>
 <span class="n">gwat</span> <span class="o">=</span> <span class="n">mdpow</span><span class="o">.</span><span class="n">fep</span><span class="o">.</span><span class="n">Ghyd</span><span class="p">(</span><span class="n">molecule</span><span class="o">=</span><span class="s">&quot;OcOH&quot;</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="s">&quot;Equilibrium/water/top/system.top&quot;</span><span class="p">,</span> <span class="n">struct</span><span class="o">=</span><span class="s">&quot;Equilibrium/water/MD_NPT/md.pdb&quot;</span><span class="p">,</span> <span class="n">ndx</span><span class="o">=</span><span class="s">&quot;Equilibrium/water/solvation/main.ndx&quot;</span><span class="p">,</span> <span class="n">runtime</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
@@ -190,9 +340,9 @@ covered in this tutorial.)</p>
 </div>
 </div>
 <div class="section" id="octanol">
-<h4>Octanol<a class="headerlink" href="#octanol" title="Permalink to this headline">¶</a></h4>
+<h3>Octanol<a class="headerlink" href="#octanol" title="Permalink to this headline">¶</a></h3>
 <div class="section" id="id2">
-<h5>Equilibrium simulation<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h5>
+<h4>Equilibrium simulation<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h4>
 <p>Almost identical to the water case:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">O</span> <span class="o">=</span> <span class="n">mdpow</span><span class="o">.</span><span class="n">equil</span><span class="o">.</span><span class="n">OctanolSimulation</span><span class="p">(</span><span class="n">molecule</span><span class="o">=</span><span class="s">&quot;OcOH&quot;</span><span class="p">)</span>
 <span class="n">O</span><span class="o">.</span><span class="n">topology</span><span class="p">(</span><span class="n">itp</span><span class="o">=</span><span class="s">&quot;octanol.itp&quot;</span><span class="p">)</span>
@@ -211,7 +361,7 @@ extract thermodynamic data.</p>
 </div>
 </div>
 <div class="section" id="octanol-solvation-free-energy">
-<h5>Octanol solvation free energy<a class="headerlink" href="#octanol-solvation-free-energy" title="Permalink to this headline">¶</a></h5>
+<h4>Octanol solvation free energy<a class="headerlink" href="#octanol-solvation-free-energy" title="Permalink to this headline">¶</a></h4>
 <p>Almost identical setup as in the water case:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">goct</span> <span class="o">=</span> <span class="n">mdpow</span><span class="o">.</span><span class="n">fep</span><span class="o">.</span><span class="n">Goct</span><span class="p">(</span><span class="n">simulation</span><span class="o">=</span><span class="n">O</span><span class="p">,</span> <span class="n">runtime</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
 <span class="n">goct</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">qscript</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;my_script.sge&#39;</span><span class="p">,</span> <span class="s">&#39;local.sh&#39;</span><span class="p">])</span>
@@ -227,7 +377,7 @@ default is 5 ns)</p>
 </div>
 </div>
 <div class="section" id="running-the-fep-simulations">
-<h4>Running the FEP simulations<a class="headerlink" href="#running-the-fep-simulations" title="Permalink to this headline">¶</a></h4>
+<h3>Running the FEP simulations<a class="headerlink" href="#running-the-fep-simulations" title="Permalink to this headline">¶</a></h3>
 <p>The files are under the <tt class="docutils literal"><span class="pre">FEP/water</span></tt> and <tt class="docutils literal"><span class="pre">FEP/octanol</span></tt> directories
 in separate sub directories.</p>
 <p>Either run job arrays that should have been generated from the
@@ -243,7 +393,7 @@ should be called with at least the following options</p>
 each direcory for hints on what needs to be done.</p>
 </div>
 <div class="section" id="analyze-output-and-logpow-calculation">
-<h4>Analyze output and logPow calculation<a class="headerlink" href="#analyze-output-and-logpow-calculation" title="Permalink to this headline">¶</a></h4>
+<h3>Analyze output and log <em>P</em><sub>OW</sub> calculation<a class="headerlink" href="#analyze-output-and-logpow-calculation" title="Permalink to this headline">¶</a></h3>
 <p>For the water and octanol FEPs do</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">gwat</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
 <span class="n">gwat</span><span class="o">.</span><span class="n">analyze</span><span class="p">()</span>
@@ -296,7 +446,7 @@ correction Vdp is required. <em>This correction is currently ignored.</em></p>
 <p>For comparison to experimental values see <a class="reference internal" href="analysis.html#module-mdpow.analysis" title="mdpow.analysis"><tt class="xref py py-mod docutils literal"><span class="pre">mdpow.analysis</span></tt></a>.</p>
 </div>
 <div class="section" id="error-analysis">
-<h4>Error analysis<a class="headerlink" href="#error-analysis" title="Permalink to this headline">¶</a></h4>
+<h3>Error analysis<a class="headerlink" href="#error-analysis" title="Permalink to this headline">¶</a></h3>
 <p>The data points are the (time) <strong>average &lt;A&gt;</strong> of A = dV/dl over each
 window. The <strong>error bars</strong> s_A are the error of the mean &lt;A&gt;. They are computed
 from the auto-correlation time of the fluctuations and the standard deviation
@@ -328,13 +478,6 @@ the calculations.</li>
 </div>
 </div>
 </div>
-<div class="section" id="the-mdpow-scripts">
-<h2>The mdpow scripts<a class="headerlink" href="#the-mdpow-scripts" title="Permalink to this headline">¶</a></h2>
-<p>Some tasks are simplified by using scripts, which are installed in a
-bin directory (or the directory pointed to by
-<tt class="docutils literal"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">--install-scripts</span></tt>). See <a class="reference internal" href="scripts.html"><em>The mdpow-* scripts</em></a> for details.</p>
-</div>
-</div>
 
 
           </div>
@@ -348,7 +491,15 @@ bin directory (or the directory pointed to by
 <li><a class="reference internal" href="#how-to-use-the-module">How to use the module</a><ul>
 <li><a class="reference internal" href="#basic-work-flow">Basic work flow</a></li>
 <li><a class="reference internal" href="#customized-submission-scripts-for-queuing-systems">Customized submission scripts for queuing systems</a></li>
-<li><a class="reference internal" href="#example-session-1-octanol-as-a-solute">Example session: 1-octanol as a solute</a><ul>
+</ul>
+</li>
+<li><a class="reference internal" href="#the-mdpow-scripts">The mdpow scripts</a></li>
+<li><a class="reference internal" href="#tutorial-using-the-mdpow-scripts-to-compute-logpow-of-benzene">Tutorial: Using the mdpow scripts to compute log <em>P</em><sub>OW</sub> of benzene</a><ul>
+<li><a class="reference internal" href="#advanced-generating-queuing-system-scripts">Advanced: Generating queuing system scripts</a></li>
+<li><a class="reference internal" href="#advanced-separating-input-from-output-data">Advanced: Separating input from output data</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tutorial-manual-session-1-octanol-as-a-solute">Tutorial: Manual session: 1-octanol as a solute</a><ul>
 <li><a class="reference internal" href="#water">Water</a><ul>
 <li><a class="reference internal" href="#equilibrium-simulation">Equilibrium simulation</a></li>
 <li><a class="reference internal" href="#hydration-free-energy">Hydration free energy</a></li>
@@ -360,13 +511,10 @@ bin directory (or the directory pointed to by
 </ul>
 </li>
 <li><a class="reference internal" href="#running-the-fep-simulations">Running the FEP simulations</a></li>
-<li><a class="reference internal" href="#analyze-output-and-logpow-calculation">Analyze output and logPow calculation</a></li>
+<li><a class="reference internal" href="#analyze-output-and-logpow-calculation">Analyze output and log <em>P</em><sub>OW</sub> calculation</a></li>
 <li><a class="reference internal" href="#error-analysis">Error analysis</a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li><a class="reference internal" href="#the-mdpow-scripts">The mdpow scripts</a></li>
 </ul>
 </li>
 </ul>
@@ -414,7 +562,7 @@ bin directory (or the directory pointed to by
         <li class="right" >
           <a href="INSTALL.html" title="Quick installation instructions for POW"
              >previous</a> |</li>
-        <li><a href="index.html">MDpow v0.4.2 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow v0.5.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

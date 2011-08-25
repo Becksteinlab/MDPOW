@@ -7,13 +7,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Helper modules &mdash; MDpow v0.4.2 documentation</title>
+    <title>Helper modules &mdash; MDpow v0.5.0 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.4.2',
+        VERSION:     '0.5.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -22,7 +22,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="MDpow v0.4.2 documentation" href="index.html" />
+    <link rel="top" title="MDpow v0.5.0 documentation" href="index.html" />
     <link rel="prev" title="mdpow.analysis — Collection of analysis and plotting functions" href="analysis.html" /> 
   </head>
   <body>
@@ -38,7 +38,7 @@
         <li class="right" >
           <a href="analysis.html" title="mdpow.analysis — Collection of analysis and plotting functions"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">MDpow v0.4.2 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow v0.5.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -384,6 +384,8 @@ registered (i.e. not found in <a class="reference internal" href="#mdpow.restart
 <dt id="mdpow.restart.Journalled.load">
 <tt class="descname">load</tt><big>(</big><em>filename=None</em><big>)</big><a class="headerlink" href="#mdpow.restart.Journalled.load" title="Permalink to this definition">¶</a></dt>
 <dd><p>Re-instantiate class from pickled file.</p>
+<p>If no <em>filename</em> was supplied then the filename is taken from the
+attribute <tt class="xref py py-attr docutils literal"><span class="pre">filename</span></tt>.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -401,7 +403,8 @@ protocol is not listed in <a class="reference internal" href="#mdpow.restart.Jou
 <tt class="descname">save</tt><big>(</big><em>filename=None</em><big>)</big><a class="headerlink" href="#mdpow.restart.Journalled.save" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save instance to a pickle file.</p>
 <p>The default filename is the name of the file that was last loaded from
-or saved to.</p>
+or saved to. Also sets the attribute <tt class="xref py py-attr docutils literal"><span class="pre">filename</span></tt> to
+the absolute path of the saved file.</p>
 </dd></dl>
 
 </dd></dl>
@@ -514,7 +517,7 @@ keyword arguments are allowed.</p>
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="analysis.html"
-                        title="previous chapter"><tt class="docutils literal"><span class="pre">mdpow.analysis</span></tt> &#8212; Collection of analysis and plotting functions</a></p>
+                        title="previous chapter"><tt class="docutils literal docutils literal docutils literal"><span class="pre">mdpow.analysis</span></tt> &#8212; Collection of analysis and plotting functions</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/utilities.txt"
@@ -549,7 +552,7 @@ keyword arguments are allowed.</p>
         <li class="right" >
           <a href="analysis.html" title="mdpow.analysis — Collection of analysis and plotting functions"
              >previous</a> |</li>
-        <li><a href="index.html">MDpow v0.4.2 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow v0.5.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

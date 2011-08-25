@@ -7,13 +7,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>mdpow.fep – Calculate free energy of solvation &mdash; MDpow v0.4.2 documentation</title>
+    <title>mdpow.fep – Calculate free energy of solvation &mdash; MDpow v0.5.0 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.4.2',
+        VERSION:     '0.5.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -22,7 +22,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="MDpow v0.4.2 documentation" href="index.html" />
+    <link rel="top" title="MDpow v0.5.0 documentation" href="index.html" />
     <link rel="next" title="mdpow.analysis — Collection of analysis and plotting functions" href="analysis.html" />
     <link rel="prev" title="mdpow.equil — Setting up and running equilibrium MD" href="equil.html" /> 
   </head>
@@ -42,7 +42,7 @@
         <li class="right" >
           <a href="equil.html" title="mdpow.equil — Setting up and running equilibrium MD"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">MDpow v0.4.2 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow v0.5.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -177,8 +177,11 @@ energy is to be computed (as in the gromacs topology)
 <dd><p class="first last">directory to work under [&#8216;FEP/<em>solvent</em>&#8216;]</p>
 </dd>
 <dt><em>solvent</em></dt>
-<dd><p class="first last">name of the solvent (only used for path names); will not
-affect the simulations</p>
+<dd><p class="first last">name of the solvent (only used for path names); will not affect
+the simulations because the input coordinates and topologies are
+determined by either <em>simulation</em> or <em>molecule</em>, <em>top</em>, and
+<em>struct</em>. If <em>solvent</em> is not provided then it is set to
+<tt class="xref py py-attr docutils literal"><span class="pre">solvent_default</span></tt>.</p>
 </dd>
 <dt><em>lambda_coulomb</em></dt>
 <dd><p class="first last">list of lambdas for discharging: q+vdw &#8211;&gt; vdw</p>
@@ -205,14 +208,16 @@ files from a <a class="reference internal" href="equil.html#mdpow.equil.Simulati
 </dd>
 <dt><em>filename</em></dt>
 <dd><p class="first last">Instead of providing the required arguments, load from pickle
-file</p>
+file. If either <em>simulation</em> or <em>molecule</em>, <em>top</em>, and <em>struct</em>
+are provided then simply set the attribute <tt class="xref py py-attr docutils literal"><span class="pre">filename</span></tt> of
+the default checkpoint file to <em>filename</em>.</p>
 </dd>
 <dt><em>basedir</em></dt>
 <dd><p class="first last">Prepend <em>basedir</em> to all filenames; <tt class="xref docutils literal"><span class="pre">None</span></tt> disables [.]</p>
 </dd>
 <dt><em>permissive</em></dt>
 <dd><p class="first last">Set to <tt class="xref docutils literal"><span class="pre">True</span></tt> if you want to read past corrupt data in output
-xvg files (see <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/formats.html#gromacs.formats.XVG" title="(in GromacsWrapper v0.2)"><tt class="xref py py-class docutils literal"><span class="pre">gromacs.formats.XVG</span></tt></a> for details); not that
+xvg files (see <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/formats.html#gromacs.formats.XVG" title="(in GromacsWrapper v0.2)"><tt class="xref py py-class docutils literal"><span class="pre">gromacs.formats.XVG</span></tt></a> for details); note that
 <em>permissive*=``True`` can lead to **wrong results*</em>. Overrides
 the value set in a loaded pickle file. [<tt class="xref docutils literal"><span class="pre">False</span></tt>]</p>
 </dd>
@@ -447,6 +452,12 @@ could be found</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="mdpow.fep.Gsolv.fep_dirs">
+<tt class="descname">fep_dirs</tt><big>(</big><big>)</big><a class="headerlink" href="#mdpow.fep.Gsolv.fep_dirs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generator for all simulation sub directories</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="mdpow.fep.Gsolv.frombase">
 <tt class="descname">frombase</tt><big>(</big><em>*args</em><big>)</big><a class="headerlink" href="#mdpow.fep.Gsolv.frombase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return path with <tt class="xref py py-attr docutils literal"><span class="pre">Gsolv.basedir</span></tt> prefixed.</p>
@@ -528,15 +539,32 @@ one template was provided).</p>
 the templates are used that were supplied to the constructor.</p>
 </dd>
 <dt><em>kwargs</em></dt>
-<dd><p class="first last">Most kwargs are passed on to <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/setup.html#gromacs.setup.MD" title="(in GromacsWrapper v0.2)"><tt class="xref py py-func docutils literal"><span class="pre">gromacs.setup.MD()</span></tt></a> although some
-are set to values that are required for the FEP functionality.
-Note: <em>runtime</em> is set from the constructor.</p>
+<dd><p class="first">Most kwargs are passed on to <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/setup.html#gromacs.setup.MD" title="(in GromacsWrapper v0.2)"><tt class="xref py py-func docutils literal"><span class="pre">gromacs.setup.MD()</span></tt></a> although some
+are set to values that are required for the FEP functionality.</p>
+<dl class="docutils">
+<dt><em>mdrun_opts</em></dt>
+<dd><p class="first last">list of options to <strong class="program">mdrun</strong>; <tt class="docutils literal"><span class="pre">-dgdl</span></tt> is always added
+to this list as it is required for the thermodynamic integration
+calculations</p>
+</dd>
+<dt><em>includes</em></dt>
+<dd><p class="first last">list of directories where Gromacs input files can be found</p>
+</dd>
+</dl>
+<p class="last">The following keywords cannot be changed: <em>dirname</em>, <em>jobname</em>,
+<em>prefix</em>, <em>runtime</em>, <em>deffnm</em>. The last two can be specified when
+constructing <a class="reference internal" href="#mdpow.fep.Gsolv" title="mdpow.fep.Gsolv"><tt class="xref py py-class docutils literal"><span class="pre">Gsolv</span></tt></a>.</p>
 </dd>
 </dl>
 </td>
 </tr>
 </tbody>
 </table>
+<div class="admonition-see-also admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/setup.html#gromacs.setup.MD" title="(in GromacsWrapper v0.2)"><tt class="xref py py-func docutils literal"><span class="pre">gromacs.setup.MD()</span></tt></a> and
+<a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/qsub.html#gromacs.qsub.generate_submit_scripts" title="(in GromacsWrapper v0.2)"><tt class="xref py py-func docutils literal"><span class="pre">gromacs.qsub.generate_submit_scripts()</span></tt></a></p>
+</div>
 </dd></dl>
 
 <dl class="method">
@@ -559,7 +587,15 @@ molecule solvent  total  coulomb  vdw  Vdp</pre>
 <dl class="method">
 <dt id="mdpow.fep.Gsolv.wdir">
 <tt class="descname">wdir</tt><big>(</big><em>component</em>, <em>lmbda</em><big>)</big><a class="headerlink" href="#mdpow.fep.Gsolv.wdir" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return path to the work directory for <em>component</em> and <em>lmbda</em>.</p>
+<dd><p>Return rooted path to the work directory for <em>component</em> and <em>lmbda</em>.</p>
+<p>(Constructed from <a class="reference internal" href="#mdpow.fep.Gsolv.frombase" title="mdpow.fep.Gsolv.frombase"><tt class="xref py py-meth docutils literal"><span class="pre">frombase()</span></tt></a> and <a class="reference internal" href="#mdpow.fep.Gsolv.wname" title="mdpow.fep.Gsolv.wname"><tt class="xref py py-meth docutils literal"><span class="pre">wname()</span></tt></a>.)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mdpow.fep.Gsolv.wname">
+<tt class="descname">wname</tt><big>(</big><em>component</em>, <em>lmbda</em><big>)</big><a class="headerlink" href="#mdpow.fep.Gsolv.wname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return name of the window directory itself.</p>
+<p>Typically something like <tt class="docutils literal"><span class="pre">VDW/0000</span></tt>, <tt class="docutils literal"><span class="pre">VDW/0500</span></tt>, ..., <tt class="docutils literal"><span class="pre">Coulomb/1000</span></tt></p>
 </dd></dl>
 
 <dl class="method">
@@ -619,8 +655,11 @@ energy is to be computed (as in the gromacs topology)
 <dd><p class="first last">directory to work under [&#8216;FEP/<em>solvent</em>&#8216;]</p>
 </dd>
 <dt><em>solvent</em></dt>
-<dd><p class="first last">name of the solvent (only used for path names); will not
-affect the simulations</p>
+<dd><p class="first last">name of the solvent (only used for path names); will not affect
+the simulations because the input coordinates and topologies are
+determined by either <em>simulation</em> or <em>molecule</em>, <em>top</em>, and
+<em>struct</em>. If <em>solvent</em> is not provided then it is set to
+<tt class="xref py py-attr docutils literal"><span class="pre">solvent_default</span></tt>.</p>
 </dd>
 <dt><em>lambda_coulomb</em></dt>
 <dd><p class="first last">list of lambdas for discharging: q+vdw &#8211;&gt; vdw</p>
@@ -647,14 +686,16 @@ files from a <a class="reference internal" href="equil.html#mdpow.equil.Simulati
 </dd>
 <dt><em>filename</em></dt>
 <dd><p class="first last">Instead of providing the required arguments, load from pickle
-file</p>
+file. If either <em>simulation</em> or <em>molecule</em>, <em>top</em>, and <em>struct</em>
+are provided then simply set the attribute <tt class="xref py py-attr docutils literal"><span class="pre">filename</span></tt> of
+the default checkpoint file to <em>filename</em>.</p>
 </dd>
 <dt><em>basedir</em></dt>
 <dd><p class="first last">Prepend <em>basedir</em> to all filenames; <tt class="xref docutils literal"><span class="pre">None</span></tt> disables [.]</p>
 </dd>
 <dt><em>permissive</em></dt>
 <dd><p class="first last">Set to <tt class="xref docutils literal"><span class="pre">True</span></tt> if you want to read past corrupt data in output
-xvg files (see <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/formats.html#gromacs.formats.XVG" title="(in GromacsWrapper v0.2)"><tt class="xref py py-class docutils literal"><span class="pre">gromacs.formats.XVG</span></tt></a> for details); not that
+xvg files (see <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/formats.html#gromacs.formats.XVG" title="(in GromacsWrapper v0.2)"><tt class="xref py py-class docutils literal"><span class="pre">gromacs.formats.XVG</span></tt></a> for details); note that
 <em>permissive*=``True`` can lead to **wrong results*</em>. Overrides
 the value set in a loaded pickle file. [<tt class="xref docutils literal"><span class="pre">False</span></tt>]</p>
 </dd>
@@ -702,8 +743,11 @@ energy is to be computed (as in the gromacs topology)
 <dd><p class="first last">directory to work under [&#8216;FEP/<em>solvent</em>&#8216;]</p>
 </dd>
 <dt><em>solvent</em></dt>
-<dd><p class="first last">name of the solvent (only used for path names); will not
-affect the simulations</p>
+<dd><p class="first last">name of the solvent (only used for path names); will not affect
+the simulations because the input coordinates and topologies are
+determined by either <em>simulation</em> or <em>molecule</em>, <em>top</em>, and
+<em>struct</em>. If <em>solvent</em> is not provided then it is set to
+<tt class="xref py py-attr docutils literal"><span class="pre">solvent_default</span></tt>.</p>
 </dd>
 <dt><em>lambda_coulomb</em></dt>
 <dd><p class="first last">list of lambdas for discharging: q+vdw &#8211;&gt; vdw</p>
@@ -730,14 +774,16 @@ files from a <a class="reference internal" href="equil.html#mdpow.equil.Simulati
 </dd>
 <dt><em>filename</em></dt>
 <dd><p class="first last">Instead of providing the required arguments, load from pickle
-file</p>
+file. If either <em>simulation</em> or <em>molecule</em>, <em>top</em>, and <em>struct</em>
+are provided then simply set the attribute <tt class="xref py py-attr docutils literal"><span class="pre">filename</span></tt> of
+the default checkpoint file to <em>filename</em>.</p>
 </dd>
 <dt><em>basedir</em></dt>
 <dd><p class="first last">Prepend <em>basedir</em> to all filenames; <tt class="xref docutils literal"><span class="pre">None</span></tt> disables [.]</p>
 </dd>
 <dt><em>permissive</em></dt>
 <dd><p class="first last">Set to <tt class="xref docutils literal"><span class="pre">True</span></tt> if you want to read past corrupt data in output
-xvg files (see <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/formats.html#gromacs.formats.XVG" title="(in GromacsWrapper v0.2)"><tt class="xref py py-class docutils literal"><span class="pre">gromacs.formats.XVG</span></tt></a> for details); not that
+xvg files (see <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/formats.html#gromacs.formats.XVG" title="(in GromacsWrapper v0.2)"><tt class="xref py py-class docutils literal"><span class="pre">gromacs.formats.XVG</span></tt></a> for details); note that
 <em>permissive*=``True`` can lead to **wrong results*</em>. Overrides
 the value set in a loaded pickle file. [<tt class="xref docutils literal"><span class="pre">False</span></tt>]</p>
 </dd>
@@ -921,7 +967,7 @@ use preprocessed topology from <tt class="docutils literal"><span class="pre">gr
         <li class="right" >
           <a href="equil.html" title="mdpow.equil — Setting up and running equilibrium MD"
              >previous</a> |</li>
-        <li><a href="index.html">MDpow v0.4.2 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow v0.5.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
