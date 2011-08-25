@@ -237,11 +237,12 @@ def fep_simulation(cfg, solvent, **kwargs):
 
     # start pipeline
     if os.path.exists(savefilename):
-        S = Simulation(filename=savefilename)
+        S = Simulation(filename=savefilename, basedir=topdir)
     else:
         # TODO: put lambda schedules in [FEP] section and load here!
+        # Note that we set basedir=topdir (and *not* dirname=dirname!)...FEP is a bit convoluted
         S = Simulation(simulation=equil_S, runtime=cfg.getfloat("FEP", "runtime"),
-                       dirname=dirname, deffnm=deffnm)
+                       basedir=topdir, deffnm=deffnm)
 
     if S.journal.has_not_completed("setup"):
         params = S.setup(qscript=cfg.getlist("FEP", "qscript"))

@@ -218,20 +218,41 @@ class Journalled(object):
         """Save instance to a pickle file.
 
         The default filename is the name of the file that was last loaded from
-        or saved to.
+        or saved to. Also sets the attribute :attr:`~Journalled.filename` to
+        the absolute path of the saved file.
         """
         if filename is None:
-            filename = self.filename
+            try:
+                if self.filename is not None:
+                    filename = self.filename
+                else:
+                    raise AttributeError
+            except AttributeError:
+                errmsg = "Neither filename nor default filename provided to save to."
+                logger.error(errmsg)
+                raise ValueError(errmsg)
         else:
-            self.filename = filename
-        with open(filename, 'wb') as f:
+            self.filename = os.path.abspath(filename)
+        with open(self.filename, 'wb') as f:
             cPickle.dump(self, f, protocol=cPickle.HIGHEST_PROTOCOL)
-        logger.debug("Instance pickled to %(filename)r" % vars())
+        logger.debug("Instance pickled to %(filename)r" % vars(self))
 
     def load(self, filename=None):
-        """Re-instantiate class from pickled file."""
+        """Re-instantiate class from pickled file.
+        
+        If no *filename* was supplied then the filename is taken from the
+        attribute :attr:`~Journalled.filename`.
+        """
         if filename is None:
-            filename = self.filename
+            try:
+                if self.filename is not None:
+                    filename = self.filename
+                else:
+                    raise AttributeError
+            except AttributeError:
+                errmsg = "Neither filename nor default filename provided to load from."
+                logger.error(errmsg)
+                raise ValueError(errmsg)
         with open(filename, 'rb') as f:
             instance = cPickle.load(f)
         self.__dict__.update(instance.__dict__)

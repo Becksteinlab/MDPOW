@@ -270,8 +270,11 @@ class Gsolv(Journalled):
            *dirname*
                directory to work under ['FEP/*solvent*']
            *solvent*
-               name of the solvent (only used for path names); will not
-               affect the simulations
+               name of the solvent (only used for path names); will not affect
+               the simulations because the input coordinates and topologies are
+               determined by either *simulation* or *molecule*, *top*, and
+               *struct*. If *solvent* is not provided then it is set to
+               :attr:`solvent_default`.
            *lambda_coulomb*
                list of lambdas for discharging: q+vdw --> vdw
            *lambda_vdw*
@@ -290,12 +293,14 @@ class Gsolv(Journalled):
                files from a :class:`mdpow.equil.Simulation` instance.
            *filename*
                Instead of providing the required arguments, load from pickle
-               file
+               file. If either *simulation* or *molecule*, *top*, and *struct*
+               are provided then simply set the attribute :attr:`filename` of
+               the default checkpoint file to *filename*.
            *basedir*
                Prepend *basedir* to all filenames; ``None`` disables [.]
            *permissive*
                Set to ``True`` if you want to read past corrupt data in output
-               xvg files (see :class:`gromacs.formats.XVG` for details); not that
+               xvg files (see :class:`gromacs.formats.XVG` for details); note that
                *permissive*=``True`` can lead to **wrong results**. Overrides
                the value set in a loaded pickle file. [``False``]
            *stride*
@@ -306,7 +311,7 @@ class Gsolv(Journalled):
         required_args = ('molecule', 'top', 'struct')
 
         filename = kwargs.pop('filename', None)
-        basedir = kwargs.pop('basedir', os.path.curdir)
+        basedir = kwargs.pop('basedir', os.path.curdir)  # all other dirs relative to basedir
         simulation = kwargs.pop('simulation', None)
         solvent = kwargs.pop('solvent', self.solvent_default)
 
@@ -366,9 +371,6 @@ class Gsolv(Journalled):
             self.component_dirs = {'coulomb': os.path.join(self.dirname, 'Coulomb'),
                                    'vdw': os.path.join(self.dirname, 'VDW')}
 
-            self.filename = filename or os.path.join(self.dirname,
-                                                     self.__class__.__name__ + os.extsep + 'fep')
-
             # for analysis
             self.stride = kwargs.pop('stride', 1)
 
@@ -393,13 +395,22 @@ class Gsolv(Journalled):
             self.basedir = os.path.realpath(basedir)
         else:
             self.basedir = None
+
+        try:
+            self.filename = os.path.abspath(self.filename)
+        except (AttributeError, TypeError):
+            # default filename if none was provided
+            self.filename = self.frombase(self.dirname, self.__class__.__name__+os.extsep+'fep')
+
         # override pickle file for this dangerous option: must be set
         # on a case-by-case basis
         self.permissive = kwargs.pop('permissive', False)
 
         logger.info("Solvation free energy calculation for molecule "
-                    "%(molecule)s in solvent %(solvent_type)s." % vars(self))
-        logger.info("Using directories under %(dirname)r: %(component_dirs)r" % vars(self))
+                    "%(molecule)s in solvent %(solvent_type)s.", vars(self))
+        logger.info("Base directory is %(basedir)r", vars(self))
+        logger.info("Using setup directories under %(dirname)r: %(component_dirs)r", vars(self))
+        logger.info("Default checkpoint file is %(filename)r", vars(self))
 
         super(Gsolv, self).__init__(**kwargs)
 
@@ -411,9 +422,19 @@ class Gsolv(Journalled):
             return os.path.join(*args)
         return os.path.join(self.basedir, *args)
 
+    def wname(self, component, lmbda):
+        """Return name of the window directory itself.
+
+        Typically something like ``VDW/0000``, ``VDW/0500``, ..., ``Coulomb/1000``
+        """
+        return os.path.join(self.component_dirs[component], "%04d" % (1000 * lmbda))
+
     def wdir(self, component, lmbda):
-        """Return path to the work directory for *component* and *lmbda*."""
-        return self.frombase(self.component_dirs[component], "%04d" % (1000 * lmbda))
+        """Return rooted path to the work directory for *component* and *lmbda*.
+
+        (Constructed from :meth:`frombase` and :meth:`wname`.)
+        """
+        return self.frombase(self.wname(component, lmbda))
 
     def label(self, component):
         """Simple label for component, e.g. for use in filenames."""
@@ -460,11 +481,12 @@ class Gsolv(Journalled):
         """
         self.journal.start('setup')
 
-        kwargs['mdrun_opts'] = " ".join([kwargs.pop('mdrun_opts',''), '-dgdl'])  # crucial for FEP!!
+        # -dgdl for FEP output (although that seems to have been changed to -dHdl in Gromacs 4.5.3)
+        kwargs['mdrun_opts'] = " ".join([kwargs.pop('mdrun_opts',''), '-dgdl'])
         kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.includes
         kwargs['deffnm'] = self.deffnm
         qsubargs = kwargs.copy()
-        qsubargs['dirname'] = self.dirname  # XXX: try and use frombase() here?
+        qsubargs['dirname'] = self.frombase(self.dirname)
         # handle templates separately (necessary for array jobs)
         qscripts = qsubargs.pop('sge', None) or self.qscript
         qscripts.extend(qsubargs.pop('qscript',[]))  # also allow canonical 'templates'

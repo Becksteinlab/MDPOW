@@ -125,7 +125,7 @@ class Simulation(Journalled):
         else:
             self.molecule = molecule or 'DRUG'
             self.dirs = AttributeDict(
-                basedir=realpath(dirname),
+                basedir=realpath(dirname),    # .../Equilibrium/<solvent>
                 includes=list(asiterable(kwargs.pop('includes',[]))) + [config.includedir],
                 )
             # pre-set filenames: keyword == variable name
