@@ -198,7 +198,9 @@ OPLS/AA topology for benzene (:download:`benzene.itp
    stored. By default, results are *appended* to the files :file:`energies.txt`
    and :file:`pow.txt`.
 
-   TODO: Explain output format; see :ref:`mdpow-pow-label` for the moment.
+   .. SeeAlso:: The output formats are explained with examples in
+      :ref:`mdpow-pow-outputformat-label`. 
+
 
 
 .. _advanced-mdpow-qscript-label:
