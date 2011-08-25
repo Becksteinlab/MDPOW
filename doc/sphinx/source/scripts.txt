@@ -34,6 +34,8 @@ input file (see `Equilibrium simulations`_) is the value of the
 variable ``name`` in the ``[setup]`` section.
 
 
+.. _mdpow-equilibrium-label:
+
 Equilibrium simulations
 -----------------------
 
@@ -102,13 +104,55 @@ Options:
 
 .. cmdoption:: -S <NAME>, --solvent=<NAME>
 
-   solvent NAME for compound, 'water' or 'octanol' [water]
+   solvent ``<NAME>`` for compound, can be 'water' or 'octanol' [water]
 
 .. cmdoption:: -d <DIRECTORY>, --dirname=<DIRECTORY>
 
-   generate files and directories in DIRECTORY, which is created if it does not
-   already exist. The default is to use the *molecule name* from the run input
-   file [*molecule name*]
+   generate files and directories in ``<DIRECTORY>``, which is created if it does not
+   already exist. The default is to use the molecule *name* from the run input
+   file.
+
+
+.. _mdpow-fep-label:
+
+FEP simulations
+--------------- 
+
+The :program:`mdpow-fep` script sets up (and can also run) the free energy
+perturbation calculations for one compound and one solvent. It uses the results
+from :ref:`mdpow-equilibrium <mdpow-equilibrum-label>` together with the run
+input file.
+
+You will require:
+
+1. at least Gromacs 4.0.5 ready to run (check that all commands can
+   be found)
+2. the results from a previous complete run of :program:`mdpow-equilibrium`
+
+
+.. program:: mdpow-fep
+
+:program:`mdpow-fep`  [options] *RUNFILE*
+
+Options:
+
+.. cmdoption:: -h, --help
+
+   show this help message and exit
+
+.. cmdoption:: --get-template        
+
+   generate a template *RUNFILE* and exit
+
+.. cmdoption:: -S <NAME>, --solvent=<NAME>
+                        
+   solvent ``<NAME>`` for compound, can be 'water' or 'octanol' [water]
+
+.. cmdoption:: -d <DIRECTORY>, --dirname=<DIRECTORY>
+
+   generate files and directories in ``<DIRECTORY>``, which is created if it
+   does not already exist. The default is to use the molecule *name* from the run
+   input file.
 
 
 
@@ -181,11 +225,11 @@ Options:
 
 .. cmdoption:: -o <FILE>, --outfile=<FILE>
 
-   append one-line results summary to FILE [:file:`pow.txt`]
+   append one-line results summary to ``<FILE>`` [:file:`pow.txt`]
 
 .. cmdoption:: -e <FILE>, --energies=<FILE>
 
-   append solvation free energies to FILE [:file:`energies.txt`]
+   append solvation free energies to ``<FILE>`` [:file:`energies.txt`]
 
 .. cmdoption:: --force
 
