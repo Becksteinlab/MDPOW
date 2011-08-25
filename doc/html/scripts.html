@@ -80,7 +80,7 @@ assumed:</p>
 input file (see <a class="reference internal" href="#equilibrium-simulations">Equilibrium simulations</a>) is the value of the
 variable <tt class="docutils literal"><span class="pre">name</span></tt> in the <tt class="docutils literal"><span class="pre">[setup]</span></tt> section.</p>
 <div class="section" id="equilibrium-simulations">
-<h2>Equilibrium simulations<a class="headerlink" href="#equilibrium-simulations" title="Permalink to this headline">¶</a></h2>
+<span id="mdpow-equilibrium-label"></span><h2>Equilibrium simulations<a class="headerlink" href="#equilibrium-simulations" title="Permalink to this headline">¶</a></h2>
 <p>The <strong class="program">mdpow-equilibrium</strong> script</p>
 <ul class="simple">
 <li>sets up equilibrium MD simulations for the solvents <em>water</em> or
@@ -121,7 +121,8 @@ let it figure out the best course of action. Look at the log file to see what
 has been done. Lines reading &#8220;Fast forwarding: <em>stage</em>&#8221; indicate that results
 from <em>stage</em> are available.</p>
 <p>Usage of the command:</p>
-<p><strong class="program">mdpow-equilibrium</strong> [options] <em>RUNFILE</em></p>
+<blockquote>
+<div><p><strong class="program">mdpow-equilibrium</strong> [options] <em>RUNFILE</em></p>
 <p>Set up (and possibly run) the equilibration equilibrium simulation for one
 compound and one solvent. All parameters except the solvent are specified in
 the <em>RUNFILE</em>.</p>
@@ -141,17 +142,62 @@ the <em>RUNFILE</em>.</p>
 <dl class="cmdoption">
 <dt id="cmdoption-mdpow-equilibrium-S">
 <tt class="descname">-S</tt><tt class="descclassname"> &lt;NAME&gt;</tt><tt class="descclassname">, </tt><tt class="descname">--solvent</tt><tt class="descclassname">=&lt;NAME&gt;</tt><a class="headerlink" href="#cmdoption-mdpow-equilibrium-S" title="Permalink to this definition">¶</a></dt>
-<dd><p>solvent NAME for compound, &#8216;water&#8217; or &#8216;octanol&#8217; [water]</p>
+<dd><p>solvent <tt class="docutils literal"><span class="pre">&lt;NAME&gt;</span></tt> for compound, can be &#8216;water&#8217; or &#8216;octanol&#8217; [water]</p>
 </dd></dl>
 
 <dl class="cmdoption">
 <dt id="cmdoption-mdpow-equilibrium-d">
 <tt class="descname">-d</tt><tt class="descclassname"> &lt;DIRECTORY&gt;</tt><tt class="descclassname">, </tt><tt class="descname">--dirname</tt><tt class="descclassname">=&lt;DIRECTORY&gt;</tt><a class="headerlink" href="#cmdoption-mdpow-equilibrium-d" title="Permalink to this definition">¶</a></dt>
-<dd><p>generate files and directories in DIRECTORY, which is created if it does not
-already exist. The default is to use the <em>molecule name</em> from the run input
-file [<em>molecule name</em>]</p>
+<dd><p>generate files and directories in <tt class="docutils literal"><span class="pre">&lt;DIRECTORY&gt;</span></tt>, which is created if it does not
+already exist. The default is to use the molecule <em>name</em> from the run input
+file.</p>
 </dd></dl>
 
+</div></blockquote>
+</div>
+<div class="section" id="fep-simulations">
+<span id="mdpow-fep-label"></span><h2>FEP simulations<a class="headerlink" href="#fep-simulations" title="Permalink to this headline">¶</a></h2>
+<p>The <strong class="program">mdpow-fep</strong> script sets up (and can also run) the free energy
+perturbation calculations for one compound and one solvent. It uses the results
+from <a class="reference internal" href="#mdpow-equilibrium-label"><em>mdpow-equilibrium</em></a> together with the run
+input file.</p>
+<p>You will require:</p>
+<ol class="arabic simple">
+<li>at least Gromacs 4.0.5 ready to run (check that all commands can
+be found)</li>
+<li>the results from a previous complete run of <strong class="program">mdpow-equilibrium</strong></li>
+</ol>
+<p>Usage of the command:</p>
+<blockquote>
+<div><p><strong class="program">mdpow-fep</strong>  [options] <em>RUNFILE</em></p>
+<p>Options:</p>
+<dl class="cmdoption">
+<dt id="cmdoption-mdpow-fep-h">
+<tt class="descname">-h</tt><tt class="descclassname"></tt><tt class="descclassname">, </tt><tt class="descname">--help</tt><tt class="descclassname"></tt><a class="headerlink" href="#cmdoption-mdpow-fep-h" title="Permalink to this definition">¶</a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+<dl class="cmdoption">
+<dt id="cmdoption-mdpow-fep--get-template">
+<tt class="descname">--get-template</tt><tt class="descclassname"></tt><a class="headerlink" href="#cmdoption-mdpow-fep--get-template" title="Permalink to this definition">¶</a></dt>
+<dd><p>generate a template <em>RUNFILE</em> and exit</p>
+</dd></dl>
+
+<dl class="cmdoption">
+<dt id="cmdoption-mdpow-fep-S">
+<tt class="descname">-S</tt><tt class="descclassname"> &lt;NAME&gt;</tt><tt class="descclassname">, </tt><tt class="descname">--solvent</tt><tt class="descclassname">=&lt;NAME&gt;</tt><a class="headerlink" href="#cmdoption-mdpow-fep-S" title="Permalink to this definition">¶</a></dt>
+<dd><p>solvent <tt class="docutils literal"><span class="pre">&lt;NAME&gt;</span></tt> for compound, can be &#8216;water&#8217; or &#8216;octanol&#8217; [water]</p>
+</dd></dl>
+
+<dl class="cmdoption">
+<dt id="cmdoption-mdpow-fep-d">
+<tt class="descname">-d</tt><tt class="descclassname"> &lt;DIRECTORY&gt;</tt><tt class="descclassname">, </tt><tt class="descname">--dirname</tt><tt class="descclassname">=&lt;DIRECTORY&gt;</tt><a class="headerlink" href="#cmdoption-mdpow-fep-d" title="Permalink to this definition">¶</a></dt>
+<dd><p>generate files and directories in <tt class="docutils literal"><span class="pre">&lt;DIRECTORY&gt;</span></tt>, which is created if it
+does not already exist. The default is to use the molecule <em>name</em> from the run
+input file.</p>
+</dd></dl>
+
+</div></blockquote>
 </div>
 <div class="section" id="running-analysis">
 <span id="mdpow-pow-label"></span><h2>Running analysis<a class="headerlink" href="#running-analysis" title="Permalink to this headline">¶</a></h2>
@@ -164,10 +210,11 @@ water &#8211;&gt; vacuum via thermodynamic integration (TI)</li>
 <li>calculates log <em>P</em><sub>OW</sub></li>
 <li>plots dV/dlambda graphs</li>
 <li>appends results to <tt class="docutils literal"><span class="pre">pow.txt</span></tt> and <tt class="docutils literal"><span class="pre">energies.txt</span></tt> (when the
-default names are chosen)</li>
+default names are chosen), see <a class="reference internal" href="#mdpow-pow-outputformat-label"><em>Output data file formats</em></a>.</li>
 </ul>
 <p>Usage of the command:</p>
-<p><strong class="program">mdpow-pow</strong> [options] <em>DIRECTORY</em> [<em>DIRECTORY</em> ...]</p>
+<blockquote>
+<div><p><strong class="program">mdpow-pow</strong> [options] <em>DIRECTORY</em> [<em>DIRECTORY</em> ...]</p>
 <p>Run the free energy analysis for water and octanol in <em>DIRECTORY</em>/FEP and
 return the octanol-water partition coefficient log <em>P</em><sub>OW</sub>.</p>
 <p><em>DIRECTORY</em> should contain all the files resulting from running
@@ -177,28 +224,6 @@ just use the defaults as in the tutorial).</p>
 <p>The dV/dlambda plots can be produced automatically (<em class="xref std std-option">mdpow-pow
 -p</em> auto). If multiple <em>DIRECTORY</em> arguments are provided then one has to
 choose the auto option (or <tt class="xref docutils literal"><span class="pre">None</span></tt>).</p>
-<p>Results are <em>appended</em> to a data file with <strong>Output file format</strong>:</p>
-<div class="highlight-python"><pre>molecule   DeltaA0(kJ/mol)    log P_OW  wat_ok octa_ok  directory</pre>
-</div>
-<dl class="docutils">
-<dt>Explanation of the columns of the output file:</dt>
-<dd><dl class="first last docutils">
-<dt>molecule</dt>
-<dd>molecule name as used in the itp</dd>
-<dt>DeltaA0</dt>
-<dd>transfer free energy water &#8211;&gt; octanol, in kJ/mol</dd>
-<dt>log P_OW</dt>
-<dd>base-10 logarithm of the octanol-water partition coefficient; &gt;0: partitions into
-octanol, &lt;0: partitions preferrably into water</dd>
-<dt>wat_ok, octa_ok</dt>
-<dd>&#8220;OK&#8221;: input data was clean; &#8220;BAD&#8221;: some input data xvg files contained
-unparseable lines that were skipped; this can mean that the data became
-corrupted and caution should be used.</dd>
-<dt>directory</dt>
-<dd>folder in which the simulations were stored</dd>
-</dl>
-</dd>
-</dl>
 <p>Options:</p>
 <dl class="cmdoption">
 <dt id="cmdoption-mdpow-pow-h">
@@ -217,13 +242,13 @@ file type. &#8216;auto&#8217; generates a pdf file <tt class="file docutils lite
 <dl class="cmdoption">
 <dt id="cmdoption-mdpow-pow-o">
 <tt class="descname">-o</tt><tt class="descclassname"> &lt;FILE&gt;</tt><tt class="descclassname">, </tt><tt class="descname">--outfile</tt><tt class="descclassname">=&lt;FILE&gt;</tt><a class="headerlink" href="#cmdoption-mdpow-pow-o" title="Permalink to this definition">¶</a></dt>
-<dd><p>append one-line results summary to FILE [<tt class="file docutils literal"><span class="pre">pow.txt</span></tt>]</p>
+<dd><p>append one-line results summary to <tt class="docutils literal"><span class="pre">&lt;FILE&gt;</span></tt> [<tt class="file docutils literal"><span class="pre">pow.txt</span></tt>]</p>
 </dd></dl>
 
 <dl class="cmdoption">
 <dt id="cmdoption-mdpow-pow-e">
 <tt class="descname">-e</tt><tt class="descclassname"> &lt;FILE&gt;</tt><tt class="descclassname">, </tt><tt class="descname">--energies</tt><tt class="descclassname">=&lt;FILE&gt;</tt><a class="headerlink" href="#cmdoption-mdpow-pow-e" title="Permalink to this definition">¶</a></dt>
-<dd><p>append solvation free energies to FILE [<tt class="file docutils literal"><span class="pre">energies.txt</span></tt>]</p>
+<dd><p>append solvation free energies to <tt class="docutils literal"><span class="pre">&lt;FILE&gt;</span></tt> [<tt class="file docutils literal"><span class="pre">energies.txt</span></tt>]</p>
 </dd></dl>
 
 <dl class="cmdoption">
@@ -247,12 +272,334 @@ corruption test. USE AT YOUR OWN RISK.</p>
 <p>It is recommended to simply rerun the affected simulation(s).</p>
 </dd></dl>
 
+</div></blockquote>
+<div class="section" id="output-data-file-formats">
+<span id="mdpow-pow-outputformat-label"></span><h3>Output data file formats<a class="headerlink" href="#output-data-file-formats" title="Permalink to this headline">¶</a></h3>
+<p>Results are <em>appended</em> to data files.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Energies are always output in <strong>kJ/mol</strong>.</p>
+</div>
+<div class="section" id="pow-summary-file">
+<h4>POW summary file<a class="headerlink" href="#pow-summary-file" title="Permalink to this headline">¶</a></h4>
+<p>The <tt class="file docutils literal"><span class="pre">pow.txt</span></tt> output file summarises the results from the water and
+octanol solvation calculations. Its name set with the option <a class="reference internal" href="#cmdoption-mdpow-pow-o"><em class="xref std std-option">mdpow-pow -o</em></a>.
+It contains fixed column data in the following order and all energies are
+in <strong>kJ/mol</strong>. See the <a class="reference internal" href="#table-logpow-label"><em>Table of computed water-octanol transfer energies
+and logPow</em></a> as an example.</p>
+<p><strong>itp_name</strong></p>
+<blockquote>
+<div><em>molecule</em> identifier from the itp file</div></blockquote>
+<p><strong>DeltaG0</strong></p>
+<blockquote>
+<div>transfer free energy from water to octanol (difference between
+<strong>DeltaG0</strong> for octanol and water), in kJ/mol; &gt;0: partitions into
+water, &lt;0: partitions into octanol,</div></blockquote>
+<p><strong>errDG0</strong></p>
+<blockquote>
+<div>error on <strong>DeltaG0</strong>; errors are calculated through propagation of
+errors from the errors on the means &lt;dV/dlambda&gt;</div></blockquote>
+<p><strong>logPOW</strong></p>
+<blockquote>
+<div>log <em>P</em><sub>OW</sub>, base-10 logarithm of the octanol-water partition
+coefficient; &gt;0: partitions into octanol, &lt;0: partitions preferrably
+into water</div></blockquote>
+<p><strong>errlogP</strong></p>
+<blockquote>
+<div>error on <strong>logPow</strong></div></blockquote>
+<p><strong>directory</strong></p>
+<blockquote>
+<div>directory under which all data files are stored; by default this is
+the <em>name</em> of the molecule and hence it can be used to identify the
+compound.</div></blockquote>
+<table border="1" class="docutils" id="table-logpow-label">
+<caption>Computed logPow and water-to-octanol transfer energies (in kJ/mol).</caption>
+<colgroup>
+<col width="10%" />
+<col width="10%" />
+<col width="10%" />
+<col width="11%" />
+<col width="10%" />
+<col width="51%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">itp_name</th>
+<th class="head">DeltaG0</th>
+<th class="head">errDG0</th>
+<th class="head">logPow</th>
+<th class="head">errlogP</th>
+<th class="head">directory</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>BNZ</td>
+<td>-12.87</td>
+<td>0.43</td>
+<td>+2.24</td>
+<td>0.07</td>
+<td>benzene</td>
+</tr>
+<tr><td>OC9</td>
+<td>-16.24</td>
+<td>1.12</td>
+<td>+2.83</td>
+<td>0.20</td>
+<td>octanol</td>
+</tr>
+<tr><td>URE</td>
+<td>+4.66</td>
+<td>1.13</td>
+<td>-0.81</td>
+<td>0.20</td>
+<td>urea</td>
+</tr>
+<tr><td>902</td>
+<td>+9.35</td>
+<td>1.06</td>
+<td>-1.63</td>
+<td>0.18</td>
+<td>water_TIP4P</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="energy-file">
+<h4>Energy file<a class="headerlink" href="#energy-file" title="Permalink to this headline">¶</a></h4>
+<p>The <tt class="file docutils literal"><span class="pre">energy.txt</span></tt> output file collects all computed energy terms together
+with the results also found in the summary file <tt class="file docutils literal"><span class="pre">pow.txt</span></tt>. Its name is
+set with the option <a class="reference internal" href="#cmdoption-mdpow-pow-e"><em class="xref std std-option">mdpow-pow -e</em></a>.  It contains fixed column data in
+the following order and all energies are in <strong>kJ/mol</strong>. As an example see
+<a class="reference internal" href="#table-energies-label"><em>Table of Solvation Energies</em></a> for the same
+compounds as above.</p>
+<p><strong>molecule</strong></p>
+<blockquote>
+<div><em>molecule</em> identifier from the itp file</div></blockquote>
+<p><strong>solvent</strong></p>
+<blockquote>
+<div>solvent name (water, octanol)</div></blockquote>
+<p><strong>DeltaG0</strong></p>
+<blockquote>
+<div>solvation free energy difference in kJ/mol (Ben-Naim standard
+state, i.e. 1M gas/1M solution)</div></blockquote>
+<p><strong>errDG0</strong></p>
+<blockquote>
+<div>error on <strong>DeltaG0</strong>, calculated through propagation of errors from the
+errors on the mean &lt;dV/dlambda&gt;</div></blockquote>
+<p><strong>coulomb</strong></p>
+<blockquote>
+<div>Coulomb (discharging) contribution to the solvation free energy <strong>DeltaG0</strong></div></blockquote>
+<p><strong>errCoul</strong></p>
+<blockquote>
+<div>error on <strong>coulomb</strong></div></blockquote>
+<p><strong>VDW</strong></p>
+<blockquote>
+<div>Van der Waals/Lennard-Jones (decoupling) contribution to <strong>DeltaG0</strong></div></blockquote>
+<p><strong>errVDW</strong></p>
+<blockquote>
+<div>error on <strong>VDW</strong></div></blockquote>
+<p><strong>Vdp</strong></p>
+<blockquote>
+<div>correction because the FEP are run at constant volume but the
+desired solvation free energy is the Gibbs energy (<strong>currently
+neglected</strong> and set to 0)</div></blockquote>
+<p><strong>errVdp</strong></p>
+<blockquote>
+<div>error on <strong>Vdp</strong></div></blockquote>
+<p><strong>w2oct</strong></p>
+<blockquote>
+<div>transfer free energy from water to octanol (difference between
+<strong>DeltaG0</strong> for octanol and water)</div></blockquote>
+<p><strong>errw2oct</strong></p>
+<blockquote>
+<div>error on <strong>w2oct</strong></div></blockquote>
+<p><strong>logPOW</strong></p>
+<blockquote>
+<div>log <em>P</em><sub>OW</sub></div></blockquote>
+<p><strong>errlogP</strong></p>
+<blockquote>
+<div>error on <strong>logPow</strong></div></blockquote>
+<p><strong>directory</strong></p>
+<blockquote>
+<div>directory under which all data files are stored; by default this is
+the <em>name</em> of the molecule and hence it can be used to identify the
+compound.</div></blockquote>
+<table border="1" class="docutils" id="table-energies-label">
+<caption>Solvation free energies for compounds in water and octanol (in kJ/mol).</caption>
+<colgroup>
+<col width="7%" />
+<col width="7%" />
+<col width="6%" />
+<col width="6%" />
+<col width="6%" />
+<col width="6%" />
+<col width="6%" />
+<col width="6%" />
+<col width="6%" />
+<col width="6%" />
+<col width="6%" />
+<col width="6%" />
+<col width="6%" />
+<col width="6%" />
+<col width="15%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">molecule</th>
+<th class="head">solvent</th>
+<th class="head">DeltaG0</th>
+<th class="head">errDG0</th>
+<th class="head">coulomb</th>
+<th class="head">errCoul</th>
+<th class="head">VDW</th>
+<th class="head">errVDW</th>
+<th class="head">Vdp</th>
+<th class="head">errVdp</th>
+<th class="head">w2oct</th>
+<th class="head">errw2oct</th>
+<th class="head">logPOW</th>
+<th class="head">errlogP</th>
+<th class="head">directory</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>BNZ</td>
+<td>water</td>
+<td>-2.97</td>
+<td>0.21</td>
+<td>+7.65</td>
+<td>0.07</td>
+<td>-4.68</td>
+<td>0.20</td>
+<td>+0.00</td>
+<td>0.00</td>
+<td>-12.87</td>
+<td>0.43</td>
+<td>+2.24</td>
+<td>0.07</td>
+<td>benzene</td>
+</tr>
+<tr><td>BNZ</td>
+<td>octanol</td>
+<td>-15.84</td>
+<td>0.37</td>
+<td>+1.40</td>
+<td>0.19</td>
+<td>+14.44</td>
+<td>0.32</td>
+<td>+0.00</td>
+<td>0.00</td>
+<td>-12.87</td>
+<td>0.43</td>
+<td>+2.24</td>
+<td>0.07</td>
+<td>benzene</td>
+</tr>
+<tr><td>OC9</td>
+<td>water</td>
+<td>-16.03</td>
+<td>0.32</td>
+<td>+27.35</td>
+<td>0.09</td>
+<td>-11.32</td>
+<td>0.31</td>
+<td>+0.00</td>
+<td>0.00</td>
+<td>-16.24</td>
+<td>1.12</td>
+<td>+2.83</td>
+<td>0.20</td>
+<td>octanol</td>
+</tr>
+<tr><td>OC9</td>
+<td>octanol</td>
+<td>-32.28</td>
+<td>1.08</td>
+<td>+11.32</td>
+<td>0.92</td>
+<td>+20.96</td>
+<td>0.56</td>
+<td>+0.00</td>
+<td>0.00</td>
+<td>-16.24</td>
+<td>1.12</td>
+<td>+2.83</td>
+<td>0.20</td>
+<td>octanol</td>
+</tr>
+<tr><td>URE</td>
+<td>water</td>
+<td>-53.52</td>
+<td>0.17</td>
+<td>+56.94</td>
+<td>0.11</td>
+<td>-3.41</td>
+<td>0.14</td>
+<td>+0.00</td>
+<td>0.00</td>
+<td>+4.66</td>
+<td>1.13</td>
+<td>-0.81</td>
+<td>0.20</td>
+<td>urea</td>
+</tr>
+<tr><td>URE</td>
+<td>octanol</td>
+<td>-48.86</td>
+<td>1.12</td>
+<td>+35.75</td>
+<td>1.09</td>
+<td>+13.11</td>
+<td>0.25</td>
+<td>+0.00</td>
+<td>0.00</td>
+<td>+4.66</td>
+<td>1.13</td>
+<td>-0.81</td>
+<td>0.20</td>
+<td>urea</td>
+</tr>
+<tr><td>902</td>
+<td>water</td>
+<td>-25.46</td>
+<td>0.11</td>
+<td>+34.93</td>
+<td>0.10</td>
+<td>-9.48</td>
+<td>0.06</td>
+<td>+0.00</td>
+<td>0.00</td>
+<td>+9.35</td>
+<td>1.06</td>
+<td>-1.63</td>
+<td>0.18</td>
+<td>water_TIP4P</td>
+</tr>
+<tr><td>902</td>
+<td>octanol</td>
+<td>-16.11</td>
+<td>1.05</td>
+<td>+21.16</td>
+<td>1.05</td>
+<td>-5.05</td>
+<td>0.09</td>
+<td>+0.00</td>
+<td>0.00</td>
+<td>+9.35</td>
+<td>1.06</td>
+<td>-1.63</td>
+<td>0.18</td>
+<td>water_TIP4P</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div class="section" id="checking-if-the-simulation-is-complete">
 <h2>Checking if the simulation is complete<a class="headerlink" href="#checking-if-the-simulation-is-complete" title="Permalink to this headline">¶</a></h2>
 <p>Run <strong class="program">mdpow-check</strong> in order to check if all necessary files
 are available:</p>
-<p><strong class="program">mdpow-check</strong> [options] <em>DIRECTORY</em> [<em>DIRECTORY</em> ...]</p>
+<blockquote>
+<div><p><strong class="program">mdpow-check</strong> [options] <em>DIRECTORY</em> [<em>DIRECTORY</em> ...]</p>
 <p>Check status of the progress of the project in <em>DIRECTORY</em>.</p>
 <p>Output is only written to the status file (<tt class="file docutils literal"><span class="pre">status.txt</span></tt>). A quick way to find
 problems is to do a</p>
@@ -271,6 +618,7 @@ problems is to do a</p>
 <dd><p>write status results to <tt class="file docutils literal"><em><span class="pre">FILE</span></em></tt> [<tt class="file docutils literal"><span class="pre">status.txt</span></tt>]</p>
 </dd></dl>
 
+</div></blockquote>
 </div>
 <div class="section" id="re-building-ghyd-fep-and-goct-fep">
 <h2>Re-building <tt class="file docutils literal"><span class="pre">Ghyd.fep</span></tt> and <tt class="file docutils literal"><span class="pre">Goct.fep</span></tt><a class="headerlink" href="#re-building-ghyd-fep-and-goct-fep" title="Permalink to this headline">¶</a></h2>
@@ -312,7 +660,15 @@ the paths stored in the <tt class="file docutils literal"><em><span class="pre">
   <ul>
 <li><a class="reference internal" href="#">The <tt class="docutils literal"><span class="pre">mdpow-*</span></tt> scripts</a><ul>
 <li><a class="reference internal" href="#equilibrium-simulations">Equilibrium simulations</a></li>
-<li><a class="reference internal" href="#running-analysis">Running analysis</a></li>
+<li><a class="reference internal" href="#fep-simulations">FEP simulations</a></li>
+<li><a class="reference internal" href="#running-analysis">Running analysis</a><ul>
+<li><a class="reference internal" href="#output-data-file-formats">Output data file formats</a><ul>
+<li><a class="reference internal" href="#pow-summary-file">POW summary file</a></li>
+<li><a class="reference internal" href="#energy-file">Energy file</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li><a class="reference internal" href="#checking-if-the-simulation-is-complete">Checking if the simulation is complete</a></li>
 <li><a class="reference internal" href="#re-building-ghyd-fep-and-goct-fep">Re-building <tt class="file docutils literal"><span class="pre">Ghyd.fep</span></tt> and <tt class="file docutils literal"><span class="pre">Goct.fep</span></tt></a></li>
 </ul>
@@ -321,7 +677,7 @@ the paths stored in the <tt class="file docutils literal"><em><span class="pre">
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="init.html"
-                        title="previous chapter"><tt class="docutils literal docutils literal"><span class="pre">mdpow</span></tt> &#8212; Computing the octanol/water partitioning coefficient</a></p>
+                        title="previous chapter"><tt class="docutils literal"><span class="pre">mdpow</span></tt> &#8212; Computing the octanol/water partitioning coefficient</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="equil.html"
                         title="next chapter"><tt class="docutils literal"><span class="pre">mdpow.equil</span></tt> &#8212; Setting up and running equilibrium MD</a></p>
