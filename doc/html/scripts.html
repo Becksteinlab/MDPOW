@@ -7,13 +7,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>The mdpow-* scripts &mdash; MDpow v0.5.0 documentation</title>
+    <title>The mdpow-* scripts &mdash; MDpow v0.5.1 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.5.0',
+        VERSION:     '0.5.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -22,7 +22,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="MDpow v0.5.0 documentation" href="index.html" />
+    <link rel="top" title="MDpow v0.5.1 documentation" href="index.html" />
     <link rel="next" title="mdpow.equil — Setting up and running equilibrium MD" href="equil.html" />
     <link rel="prev" title="mdpow — Computing the octanol/water partitioning coefficient" href="init.html" /> 
   </head>
@@ -42,7 +42,7 @@
         <li class="right" >
           <a href="init.html" title="mdpow — Computing the octanol/water partitioning coefficient"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">MDpow v0.5.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow v0.5.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -313,7 +313,7 @@ into water</div></blockquote>
 the <em>name</em> of the molecule and hence it can be used to identify the
 compound.</div></blockquote>
 <table border="1" class="docutils" id="table-logpow-label">
-<caption>Computed logPow and water-to-octanol transfer energies (in kJ/mol).</caption>
+<caption>Computed log <em>P</em><sub>OW</sub> and water-to-octanol transfer energies (in kJ/mol).</caption>
 <colgroup>
 <col width="10%" />
 <col width="10%" />
@@ -594,10 +594,19 @@ compound.</div></blockquote>
 </div>
 </div>
 </div>
+<div class="section" id="house-keeping-scripts">
+<h2>House-keeping scripts<a class="headerlink" href="#house-keeping-scripts" title="Permalink to this headline">¶</a></h2>
+<p>A number of scripts are provided to complete simple tasks; they can be
+used to check that all required files are present or they can help in
+fixing small problems without one having to write Python code to do
+this oneself (e.g. by manipulating the checlpoint files). They
+generally make the same assumptions about file system layout as the
+other mdpow scripts.</p>
 <div class="section" id="checking-if-the-simulation-is-complete">
-<h2>Checking if the simulation is complete<a class="headerlink" href="#checking-if-the-simulation-is-complete" title="Permalink to this headline">¶</a></h2>
+<h3>Checking if the simulation is complete<a class="headerlink" href="#checking-if-the-simulation-is-complete" title="Permalink to this headline">¶</a></h3>
 <p>Run <strong class="program">mdpow-check</strong> in order to check if all necessary files
-are available:</p>
+are available.</p>
+<p>Usage of the command:</p>
 <blockquote>
 <div><p><strong class="program">mdpow-check</strong> [options] <em>DIRECTORY</em> [<em>DIRECTORY</em> ...]</p>
 <p>Check status of the progress of the project in <em>DIRECTORY</em>.</p>
@@ -620,15 +629,43 @@ problems is to do a</p>
 
 </div></blockquote>
 </div>
+<div class="section" id="changing-paths-in-water-simulation-and-octanol-simulation">
+<h3>Changing paths in <tt class="file docutils literal"><span class="pre">water.simulation</span></tt> and <tt class="file docutils literal"><span class="pre">octanol.simulation</span></tt><a class="headerlink" href="#changing-paths-in-water-simulation-and-octanol-simulation" title="Permalink to this headline">¶</a></h3>
+<p>It can become necessary to recreate the <tt class="file docutils literal"><em><span class="pre">solvent</span></em><span class="pre">.simulation</span></tt>
+status/checkpoint files in order to change paths, e.g. when one moved
+the directories or transferred all files to a different file system.</p>
+<p>Typically, one would execute the <strong class="program">mdpow-rebuild-simulation</strong> command
+in the parent directory of <em>moleculename</em>.</p>
+<p>Usage of the command:</p>
+<blockquote>
+<div><p><strong class="program">mdpow-rebuild-simulation</strong> [options] <em>DIRECTORY</em> [<em>DIRECTORY</em> ...]</p>
+<p>Re-create the <tt class="docutils literal"><span class="pre">water.simulation</span></tt> or <tt class="docutils literal"><span class="pre">octanol.simulation</span></tt> file with
+adjusted paths (now rooted at <em>DIRECTORY</em>).</p>
+<p>Options:</p>
+<dl class="cmdoption">
+<dt id="cmdoption-mdpow-rebuild-simulation-h">
+<tt class="descname">-h</tt><tt class="descclassname"></tt><tt class="descclassname">, </tt><tt class="descname">--help</tt><tt class="descclassname"></tt><a class="headerlink" href="#cmdoption-mdpow-rebuild-simulation-h" title="Permalink to this definition">¶</a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+<dl class="cmdoption">
+<dt id="cmdoption-mdpow-rebuild-simulation--solvent">
+<tt class="descname">--solvent</tt><tt class="descclassname">=&lt;NAME&gt;</tt><a class="headerlink" href="#cmdoption-mdpow-rebuild-simulation--solvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>rebuild file for &#8216;water&#8217;, &#8216;octanol&#8217;, or &#8216;all&#8217; [all]</p>
+</dd></dl>
+
+</div></blockquote>
+</div>
 <div class="section" id="re-building-ghyd-fep-and-goct-fep">
-<h2>Re-building <tt class="file docutils literal"><span class="pre">Ghyd.fep</span></tt> and <tt class="file docutils literal"><span class="pre">Goct.fep</span></tt><a class="headerlink" href="#re-building-ghyd-fep-and-goct-fep" title="Permalink to this headline">¶</a></h2>
+<h3>Re-building <tt class="file docutils literal"><span class="pre">Ghyd.fep</span></tt> and <tt class="file docutils literal"><span class="pre">Goct.fep</span></tt><a class="headerlink" href="#re-building-ghyd-fep-and-goct-fep" title="Permalink to this headline">¶</a></h3>
 <p>It can become necessary to recreate the <tt class="file docutils literal"><em><span class="pre">name</span></em><span class="pre">.fep</span></tt> status/checkpoint
 files (e.g. if the files became corrupted due to a software error or in order
 to change paths).</p>
 <p>Typically, one would execute the <strong class="program">mdpow-rebuild-fep</strong> command
 in the parent directory of <em>moleculename</em>.</p>
-<p>Usage:</p>
-<p><strong class="program">mdpow-rebuild-fep</strong> [options] <em>DIRECTORY</em> [<em>DIRECTORY</em> ...]</p>
+<p>Usage of the command:</p>
+<blockquote>
+<div><p><strong class="program">mdpow-rebuild-fep</strong> [options] <em>DIRECTORY</em> [<em>DIRECTORY</em> ...]</p>
 <p>Re-create the <tt class="file docutils literal"><span class="pre">Goct.fep</span></tt> or <tt class="file docutils literal"><span class="pre">Ghyd.fep</span></tt> file using the appropriate
 equilibrium simulation file under <em>DIRECTORY</em>/FEP.</p>
 <p>This should only be necessary when the fep file was destroyed due to a software
@@ -647,6 +684,20 @@ the paths stored in the <tt class="file docutils literal"><em><span class="pre">
 <dd><p>rebuild fep for &#8216;water&#8217;, &#8216;octanol&#8217;, or &#8216;all&#8217; [all]</p>
 </dd></dl>
 
+<dl class="cmdoption">
+<dt id="cmdoption-mdpow-rebuild-fep--setup">
+<tt class="descname">--setup</tt><tt class="descclassname">=&lt;LIST&gt;</tt><a class="headerlink" href="#cmdoption-mdpow-rebuild-fep--setup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Re-generate queuing system scripts with appropriate paths: runs
+<tt class="xref py py-meth docutils literal"><span class="pre">fep.Gsolv.setup()</span></tt> with argument <cite>qscript=[LIST]</cite> after
+fixing Gsolv.</p>
+<p><tt class="docutils literal"><span class="pre">LIST</span></tt> should contain a comma-separated list of queing system
+templates. For example:
+<tt class="docutils literal"><span class="pre">'icsn_8pd.sge,icsn_2pd.sge,local.sh'</span></tt>. It is an error if
+<tt class="docutils literal"><span class="pre">--setup</span></tt> is set without a <tt class="docutils literal"><span class="pre">LIST</span></tt>.</p>
+</dd></dl>
+
+</div></blockquote>
+</div>
 </div>
 </div>
 
@@ -669,18 +720,22 @@ the paths stored in the <tt class="file docutils literal"><em><span class="pre">
 </li>
 </ul>
 </li>
+<li><a class="reference internal" href="#house-keeping-scripts">House-keeping scripts</a><ul>
 <li><a class="reference internal" href="#checking-if-the-simulation-is-complete">Checking if the simulation is complete</a></li>
+<li><a class="reference internal" href="#changing-paths-in-water-simulation-and-octanol-simulation">Changing paths in <tt class="file docutils literal"><span class="pre">water.simulation</span></tt> and <tt class="file docutils literal"><span class="pre">octanol.simulation</span></tt></a></li>
 <li><a class="reference internal" href="#re-building-ghyd-fep-and-goct-fep">Re-building <tt class="file docutils literal"><span class="pre">Ghyd.fep</span></tt> and <tt class="file docutils literal"><span class="pre">Goct.fep</span></tt></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="init.html"
-                        title="previous chapter"><tt class="docutils literal docutils literal"><span class="pre">mdpow</span></tt> &#8212; Computing the octanol/water partitioning coefficient</a></p>
+                        title="previous chapter"><tt class="docutils literal docutils literal docutils literal"><span class="pre">mdpow</span></tt> &#8212; Computing the octanol/water partitioning coefficient</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="equil.html"
-                        title="next chapter"><tt class="docutils literal"><span class="pre">mdpow.equil</span></tt> &#8212; Setting up and running equilibrium MD</a></p>
+                        title="next chapter"><tt class="docutils literal docutils literal docutils literal"><span class="pre">mdpow.equil</span></tt> &#8212; Setting up and running equilibrium MD</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/scripts.txt"
@@ -718,7 +773,7 @@ the paths stored in the <tt class="file docutils literal"><em><span class="pre">
         <li class="right" >
           <a href="init.html" title="mdpow — Computing the octanol/water partitioning coefficient"
              >previous</a> |</li>
-        <li><a href="index.html">MDpow v0.5.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow v0.5.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
