@@ -1,0 +1,75 @@
+#!/usr/bin/env python
+"""%prog [options] DIRECTORY [DIRECTORY ...]
+
+Re-create the ``water.simulation`` or ``octanol.simulation`` file with
+adjusted paths.
+
+(This should only be necessary when the directories are moved or
+copied to a different machine.)
+"""
+
+import os
+import mdpow.equil
+
+import logging
+logger = logging.getLogger('mdpow')
+
+
+def fixSimulation(solvent, simfile, basedir):
+    try:
+        S = mdpow.equil.Simulation(filename=simfile)
+        # hack: need to explicitly add the Equilibrium/solvent dir to make it work
+        # (note: I am not fixing the include path at the moment, see log...)
+        simbasedir = os.path.join(basedir, 'Equilibrium', solvent)
+        S.make_paths_relative(simbasedir)
+        # TODO: fix includedir
+        # S.dirs.includes[0] = '/sansom/gfio/oliver/Projects/pow/lib/python/POW/mdpow/top'
+    except Exception, err:
+        logger.error(str(err))
+
+    S.save(simfile)
+    logger.info("Re-created %(simfile)r for basedir=%(basedir)r", vars())
+    return S
+
+if __name__ == "__main__":
+    import sys
+    import os.path
+    from gromacs.utilities import in_dir
+    from optparse import OptionParser
+
+    parser = OptionParser(usage=__doc__)
+    parser.add_option('--solvent', dest="solvent",
+                      help="rebuild simulation file for 'water', 'octanol', or 'all' [%default]",
+                      metavar="NAME")
+    parser.set_defaults(solvent="all")
+
+    opts,args = parser.parse_args()
+
+    solvnames = ('water', 'octanol')
+    if opts.solvent == "all":
+        opts.solvent = solvnames
+    else:
+        if not opts.solvent in solvnames:
+            raise ValueError("--solvent must be 'all' or one of %r" % solvnames)
+        opts.solvent = (opts.solvent,)
+
+    for directory in args:
+        if not os.path.isdir(directory):
+            logger.debug("%r is not a directory, skipping!", directory)
+            continue
+        if not os.path.exists(directory):
+            logger.warn("Directory %r not found, skipping!", directory)
+            continue
+        logger.info("Rebuilding under directory %r... (can take a while)", directory)
+        with in_dir(directory, create=False):
+            for solvent in opts.solvent:
+                simfile = os.path.join(os.path.curdir, solvent+'.simulation')
+                logger.info("[%(solvent)8s] equilibrium simulation: %(simfile)s", vars())
+
+                try:
+                    S = fixSimulation(solvent, simfile, os.path.realpath(os.path.curdir))
+                except Exception,err:
+                    logger.error("[%(solvent)8s] Failed to fix %(simfile)r", vars())
+                    logger.error(str(err))
+
+

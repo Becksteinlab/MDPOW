@@ -114,7 +114,7 @@ OPLS/AA topology for benzene (:download:`benzene.itp
 *run input configuration file* for the mdpow scripts
 (:download:`benzene_runinput.cfg <../../examples/benzene_runinput.cfg>`).
 
-.. image:: ../../examples/benzene/benzene.pdb.png 
+.. image:: ../../examples/benzene/benzene.pdb.png
    :width: 200
 
 
@@ -181,7 +181,7 @@ OPLS/AA topology for benzene (:download:`benzene.itp
 
    (In order to run the FEP windows on a cluster see
    :ref:`advanced-mdpow-qscript-label`.)
-   
+
 #. The FEP windows for benzene in **octanol** are generated and run by ::
 
      mdpow-fep --solvent octanol benzene/benzene_runinput.cfg
@@ -199,7 +199,7 @@ OPLS/AA topology for benzene (:download:`benzene.itp
    and :file:`pow.txt`.
 
    .. SeeAlso:: The output formats are explained with examples in
-      :ref:`mdpow-pow-outputformat-label`. 
+      :ref:`mdpow-pow-outputformat-label`.
 
 
 
@@ -496,14 +496,10 @@ through the thermodynamic integration and the subsequent thermodynamic sums
 
 
 """
-VERSION = 0,5,0
+VERSION = 0,5,1
 
 __all__ = ['fep', 'equil']
 
-import log
-logger = log.create('mdpow', 'mdpow.log')
-log.create('numkit', 'mdpow.log')   # capture numkit messages to same file
-log.create('gromacs', 'mdpow.log')  # and the GromacsWrapper messages
 
 def get_version():
     """Return current package version as a string."""
@@ -513,13 +509,27 @@ def get_version_tuple():
     """Return current package version as a (MAJOR,MINOR,PATCHLEVEL)."""
     return tuple(VERSION)
 
+import log
+
+def create_logger(logfile="mdpow.log"):
+    """Create the default logger.
+
+    Channels the output from :mod:`mdpow`, :mod:`gromacs`, and
+    :mod:`numkit` into the file *logfile*.
+    """
+    logger = log.create('mdpow', logfile)
+    log.create('numkit', logfile)   # capture numkit messages to same file
+    log.create('gromacs', logfile)  # and the GromacsWrapper messages
+    return logger
+
 def log_banner():
     """Log program name and licence at INFO level."""
     logger.info("MDPOW %s starting.", get_version())
     logger.info("Copyright (c) 2010-2011 Oliver Beckstein and Bogdan Iorga")
     logger.info("Released under the GNU Public Licence, version 3.")
+    logger.info("Contact the authors for bug reports or questions about licensing.")
 
-
+logger = create_logger()
 log_banner()
 
 import config

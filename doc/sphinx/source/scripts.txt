@@ -393,10 +393,19 @@ compounds as above.
    ========== ========== ======== ========  ======== ========  ======== ========  ======== ========  ======== ========   ======== ========  ====================
 
 
+House-keeping scripts
+---------------------
+
+A number of scripts are provided to complete simple tasks; they can be
+used to check that all required files are present or they can help in
+fixing small problems without one having to write Python code to do
+this oneself (e.g. by manipulating the checlpoint files). They
+generally make the same assumptions about file system layout as the
+other mdpow scripts.
 
 
 Checking if the simulation is complete
---------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Run :program:`mdpow-check` in order to check if all necessary files
 are available.
@@ -425,8 +434,38 @@ Usage of the command:
       write status results to :file:`{FILE}` [:file:`status.txt`]
 
 
+Changing paths in :file:`water.simulation` and :file:`octanol.simulation`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+It can become necessary to recreate the :file:`{solvent}.simulation`
+status/checkpoint files in order to change paths, e.g. when one moved
+the directories or transferred all files to a different file system.
+
+Typically, one would execute the :program:`mdpow-rebuild-simulation` command
+in the parent directory of *moleculename*.
+
+Usage of the command:
+
+   .. program:: mdpow-rebuild-simulation
+
+   :program:`mdpow-rebuild-simulation` [options] *DIRECTORY* [*DIRECTORY* ...]
+
+   Re-create the ``water.simulation`` or ``octanol.simulation`` file with
+   adjusted paths (now rooted at *DIRECTORY*).
+
+   Options:
+
+   .. cmdoption:: -h, --help
+
+      show this help message and exit
+
+   .. cmdoption:: --solvent=<NAME>
+
+      rebuild file for 'water', 'octanol', or 'all' [all]
+
+
 Re-building :file:`Ghyd.fep` and :file:`Goct.fep`
--------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 It can become necessary to recreate the :file:`{name}.fep` status/checkpoint
 files (e.g. if the files became corrupted due to a software error or in order
@@ -458,4 +497,14 @@ Usage of the command:
 
       rebuild fep for 'water', 'octanol', or 'all' [all]
 
+   .. cmdoption:: --setup=<LIST>
+
+      Re-generate queuing system scripts with appropriate paths: runs
+      :meth:`fep.Gsolv.setup` with argument `qscript=[LIST]` after
+      fixing Gsolv.
+
+      ``LIST`` should contain a comma-separated list of queing system
+      templates. For example:
+      ``'icsn_8pd.sge,icsn_2pd.sge,local.sh'``. It is an error if
+      ``--setup`` is set without a ``LIST``.
 

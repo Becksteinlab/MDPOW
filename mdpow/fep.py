@@ -131,7 +131,11 @@ from pkg_resources import resource_filename
 
 import numpy
 
-import gromacs, gromacs.setup, gromacs.utilities
+import gromacs, gromacs.utilities
+try:
+    import gromacs.setup
+except (ImportError, OSError):
+    raise ImportError("Gromacs installation not found, source GMXRC?")
 from gromacs.utilities import asiterable, AttributeDict, in_dir, openany
 from numkit.observables import QuantityWithError
 
@@ -453,7 +457,7 @@ class Gsolv(Journalled):
         for component, lambdas in self.lambdas.items():
             for l in lambdas:
                 yield self.wdir(component, l)
-    
+
     def setup(self, **kwargs):
         """Prepare the input files for all Gromacs runs.
 

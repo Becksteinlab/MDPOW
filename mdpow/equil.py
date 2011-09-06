@@ -37,8 +37,10 @@ import os, errno
 import shutil
 import cPickle
 
-import gromacs.setup
-import gromacs.cbook
+try:
+    import gromacs.setup, gromacs.cbook
+except (ImportError, OSError):
+    raise ImportError("Gromacs installation not found, source GMXRC?")
 from gromacs.utilities import in_dir, realpath, asiterable, AttributeDict
 import gromacs.utilities
 
@@ -185,7 +187,7 @@ class Simulation(Journalled):
         """Hack to be able to copy directories around: prune basedir from paths.
 
         .. Warning:: This is not guaranteed to work for all paths. In particular,
-                     check :data:`mdpow.equil.Simulation.dirs.includes` and adjust
+                     check :attrib:`mdpow.equil.Simulation.dirs.includes` and adjust
                      manually if necessary.
         """
         def assinglet(m):
