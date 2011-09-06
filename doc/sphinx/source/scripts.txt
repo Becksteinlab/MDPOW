@@ -171,7 +171,7 @@ The :program:`mdpow-pow` script
 * calculates desolvation free energies for octanol --> vacuum and
   water --> vacuum via thermodynamic integration (TI)
 * calculates transfer free energy water --> octanol
-* calculates log |Pow|
+* calculates |logPow|
 * plots dV/dlambda graphs
 * appends results to ``pow.txt`` and ``energies.txt`` (when the
   default names are chosen), see :ref:`mdpow-pow-outputformat-label`.
@@ -183,7 +183,7 @@ Usage of the command:
    :program:`mdpow-pow` [options] *DIRECTORY* [*DIRECTORY* ...]
 
    Run the free energy analysis for water and octanol in *DIRECTORY*/FEP and
-   return the octanol-water partition coefficient log |Pow|.
+   return the octanol-water partition coefficient |logPow|.
 
    *DIRECTORY* should contain all the files resulting from running
    :meth:`mdpow.fep.Goct.setup` and :meth:`mdpow.fep.Goct.setup` and the results
@@ -285,7 +285,7 @@ and logPow <table-logPow-label>` as an example.
 
 .. _table-logPow-label:
 
-.. Table:: Computed logPow and water-to-octanol transfer energies (in kJ/mol).
+.. Table:: Computed |logPow| and water-to-octanol transfer energies (in kJ/mol).
 
    ======== ======== ======== ========= ======== ===========================================
    itp_name  DeltaG0   errDG0    logPow  errlogP  directory
@@ -399,7 +399,9 @@ Checking if the simulation is complete
 --------------------------------------
 
 Run :program:`mdpow-check` in order to check if all necessary files
-are available:
+are available.
+
+Usage of the command:
 
    .. program:: mdpow-check
 
@@ -433,27 +435,27 @@ to change paths).
 Typically, one would execute the :program:`mdpow-rebuild-fep` command
 in the parent directory of *moleculename*.
 
-Usage:
+Usage of the command:
 
-.. program:: mdpow-rebuild-fep
+   .. program:: mdpow-rebuild-fep
 
-:program:`mdpow-rebuild-fep` [options] *DIRECTORY* [*DIRECTORY* ...]
+   :program:`mdpow-rebuild-fep` [options] *DIRECTORY* [*DIRECTORY* ...]
 
-Re-create the :file:`Goct.fep` or :file:`Ghyd.fep` file using the appropriate
-equilibrium simulation file under *DIRECTORY*/FEP.
+   Re-create the :file:`Goct.fep` or :file:`Ghyd.fep` file using the appropriate
+   equilibrium simulation file under *DIRECTORY*/FEP.
 
-This should only be necessary when the fep file was destroyed due to a software
-error or when the files are transferred to a different file system and some of
-the paths stored in the :file:`{name}.fep` files have to be changed.
+   This should only be necessary when the fep file was destroyed due to a software
+   error or when the files are transferred to a different file system and some of
+   the paths stored in the :file:`{name}.fep` files have to be changed.
 
-Options:
+   Options:
 
-.. cmdoption:: -h, --help
+   .. cmdoption:: -h, --help
 
-   show this help message and exit
+      show this help message and exit
 
-.. cmdoption:: --solvent=<NAME>
+   .. cmdoption:: --solvent=<NAME>
 
-   rebuild fep for 'water', 'octanol', or 'all' [all]
+      rebuild fep for 'water', 'octanol', or 'all' [all]
 
 
