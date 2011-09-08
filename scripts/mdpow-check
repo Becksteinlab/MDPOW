@@ -57,7 +57,7 @@ if __name__ == "__main__":
                 for feptype,nmin in nmin_fepsims.items():
                     xvg = os.path.join(
                         directory, 'FEP', solvent,
-                        feptype, '[0-9][0-9][0-9][0-9]', 'md.xvg')
+                        feptype, '[0-9][0-9][0-9][0-9]', 'md.xvg*')
                     dgdl = glob(xvg)
                     n = len(dgdl)
                     what = "%(solvent)s/%(feptype)s" % vars()
