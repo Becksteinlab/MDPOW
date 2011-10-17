@@ -1,0 +1,26 @@
+================
+ TODO for MDPOW
+================
+
+- implement NVT correction
+
+  Ghyd = Ahyd - vs^2 kappa^-1 V0^-1
+
+- calculate V0 = <V> from average of 2nd half of equilibrium
+  trajectory (probably better than volume of last frame)
+
+- calculate volume of solute 
+  - XXX: Do we need the solvent accessible volume??
+  - either ``g_sas -probe 0.14 -tv`` (solvent accessible because probe
+    = radius of water)
+  - or
+    1. remove solute from equilib frame
+    2. start NPT simulation with "hole"
+    3. equilibrate to new smaller box volume V'
+    4. average V over 2nd half: V1 = <V'>
+    5. vs = V0 - V1   (that's the best solution because it directly
+       corresponds to the thermodynamics and kappa is directly
+       involved via the pressure coupling... although that should not
+       matter because it should only depend on the actual behaviour of
+       the water e.g. what is kappa of TIP4P at the given T?)
+
