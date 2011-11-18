@@ -31,7 +31,7 @@ import gromacs.run
 
 import mdpow.equil
 import mdpow.fep
-from mdpow.config import get_configuration
+from mdpow.config import get_configuration, set_gromacsoutput
 from mdpow.restart import checkpoint
 
 import logging
@@ -79,7 +79,7 @@ def runMD_or_exit(S, protocol, params, cfg, **kwargs):
     """
     dirname = kwargs.pop("dirname", None)
     if dirname is None:
-        try:        
+        try:
             dirname = S.dirs[protocol]
         except KeyError:
             raise ValueError("S.dirs does not have protocol %r" % protocol)
@@ -140,11 +140,14 @@ def equilibrium_simulation(cfg, solvent, **kwargs):
     dirname = os.path.join(topdir, Simulation.dirname_default)
     savefilename = os.path.join(topdir, "%(solvent)s.simulation" % vars())
 
+    # output to screen or hidden?
+    set_gromacsoutput(cfg)
+
     # start pipeline
     if os.path.exists(savefilename):
         S = Simulation(filename=savefilename)
     else:
-        S = Simulation(molecule=cfg.get("setup", "molecule"), 
+        S = Simulation(molecule=cfg.get("setup", "molecule"),
                        dirname=dirname, deffnm=deffnm)
 
     if S.journal.has_not_completed("energy_minimize"):
@@ -234,6 +237,9 @@ def fep_simulation(cfg, solvent, **kwargs):
             logger.critical("Missing the equilibrium simulation %(equil_savefilename)r.", vars())
             logger.critical("Run `mdpow-equilibrium -S %s %s'  first!", solvent, "RUNINPUT.cfg")
         raise
+
+    # output to screen or hidden?
+    set_gromacsoutput(cfg)
 
     # start pipeline
     if os.path.exists(savefilename):

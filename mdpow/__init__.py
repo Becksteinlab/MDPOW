@@ -496,7 +496,7 @@ through the thermodynamic integration and the subsequent thermodynamic sums
 
 
 """
-VERSION = 0,5,1
+VERSION = 0,5,2
 
 __all__ = ['fep', 'equil']
 

@@ -139,6 +139,16 @@ def get_configuration(filename=None):
         logger.warning("Running with package defaults for the run; you should supply a runinput file!")
     return cfg
 
+def modify_gromacs_environment(name, value):
+    from gromacs.environment import flags
+    if flags[name] != value:
+        logger.warn("Changing GromacsWrapper environment: flags[%(name)r] = %(value)r", vars())
+        flags[name] = value
+
+def set_gromacsoutput(cfg):
+    # maybe allow setting this on a per protocol basis?
+    modify_gromacs_environment('capture_output', not cfg.getboolean('setup', 'gromacsoutput'))
+
 
 # Functions to locate template files
 # ----------------------------------
@@ -238,7 +248,7 @@ def _get_template(t):
 
 def iterable(obj):
     """Returns ``True`` if *obj* can be iterated over and is *not* a  string."""
-    if type(obj) is str:
+    if isinstance(obj, basestring):
         return False    # avoid iterating over characters of a string
 
     if hasattr(obj, 'next'):
