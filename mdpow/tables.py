@@ -3,6 +3,7 @@ Tables of hard-coded values used in mdpow.
 
 TODO: Move these data into files in the top directory.
 """
+from numkit.observables import QuantityWithError
 
 #: Avogadro's constant from http://physics.nist.gov/cgi-bin/cuu/Value?na
 #: in mol<sup>-1</sup>.
@@ -32,8 +33,21 @@ solvent_selections = {
 #: to be made more general, possibly by using a spline interpolation
 #: for the equation of state. Unit kg/m^3.
 solvent_density = {
-    "water": 993.2,     # TIP4P, approx
-    "octanol": 200,     # XXXXXXXXXX change XXXXXXXXXX
+    "water": QuantityWithError(992.342, 0.18)     # TIP4P
+    # xfer3-336/Equilibrium/water/MD_NPT
+    # 992.342 (0.18), 652 w, 15ns (disc 5ns from 20ns), T=296.009 (0.019), P=0.993607 (0.024) bar
+    "octanol": QuantityWithError(819.491, 0.24),
+    # octanol_box_compresibility/Equilibrium/octanol/MD_NPT
+    # 819.491 (0.24), 496 octanols, 303.5010 (0.0038) K, 1.00669 (0.0026) bar
+
+    # other results (not used at the moment)
+    # --------------------------------------
+    "water_296": QuantityWithError(993.379, 0.13)     # TIP4P,
+    # xfer3-302/Equilibrium/water/MD_NPT
+    # 993.379 (0.13), 296 w, 15ns (discarded 5ns from 20ns)
+    "octanol_123": QuantityWithError(818.654, 0.39)   # OPLS-AA
+    # xfer3-336/Equilibrium/octanol/MD_NPT
+    # 818.654 (0.39), 123 octanols
     }
 
 # In the future, use the table to compute a proper interpolating function
@@ -43,13 +57,13 @@ Table[water_density]: TIP4P water density from simulations
 ======== ========== ============= ============ =============
 solvent  forcefield temperature   pressure     density
 ======== ========== ============= ============ =============
-water    TIP4P            300.0          1.0      993.2
+water    TIP4P            300.0          1.0      993.379
 octanol  OPLS-AA          300.0          1.0      200
 ======== ========== ============= ============ =============
 """
 
 solvent_molecular_volume = {
-    "water": None,
+    "water": 0.0301174,  #  0.0301174 (4.05405e-06) same TIP4P sim as above
     "octanol": None,
 }
 

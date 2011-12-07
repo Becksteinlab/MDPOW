@@ -143,14 +143,20 @@ def get_observables(edr, observables=None, **kwargs):
     """
     if observables is None:
         observables = ["Pressure", "Volume", "Density", "Temperature"]
+    logger.info("Analyzing observables %(observables)r in energy file %(edr)r...", vars())
+
     kwargs['input'] = observables
     kwargs['f'] = edr
     kwargs['stdout'] = False  # required for processing
     kwargs['stderr'] = False  # suppress stderr
-    logger.info("Analyzing observables %(observables)r in energy file %(edr)r...", vars())
-    rc, data, stderr = gromacs.g_energy(**kwargs)
-    if rc != 0:
-        raise GromacsError("g_energy failed --- see output below:\n\n" + stderr + data)
+    fd, kwargs['o'] = tempfile.mkstemp(suffix=".xvg")
+    try:
+        rc, data, stderr = gromacs.g_energy(**kwargs)
+        if rc != 0:
+            logger.error("g_energy failed")
+            raise GromacsError("g_energy failed --- see output below:\n\n" + stderr + data)
+    finally:
+        unlink_gmx(kwargs['o'])
     return parse_energy(data)
 
 def recwhere(r, value, name='Energy'):
@@ -158,10 +164,16 @@ def recwhere(r, value, name='Energy'):
     return r[r.field(name) == value]
 
 
-def Observable(r, name, column='Energy'):
-    """Return a :class:`numkit.observables.QuantityWithError` for observable *name*."""
-    return QuantityWithError(recwhere(r,name,column).Average[0],
-                             recwhere(r,name,column).ErrEst[0])
+def Observable(r, name, column='Energy', index=0):
+    """Return a :class:`numkit.observables.QuantityWithError` for observable *name*.
+
+    .. Note:: If for some unknown reason there is more than one entry
+              in the recarray *r* that matches *name* in the field
+              *column* then only the match at index *index* is
+              returned. Other matches are silently ignored.
+    """
+    return QuantityWithError(recwhere(r, name, column).Average[index],
+                             recwhere(r, name, column).ErrEst[index])
 
 def v_mol(N, V):
     """Returns the molecular volume V/N."""
@@ -293,7 +305,7 @@ def count_solvent_molecules(tpr, solvent="water"):
     logger.info("Found %(N_solvent)d %(solvent)s solvent molecules in %(tpr)r", vars())
     return N_solvent
 
-def molecular_volume(tpr, edr, solvent="water", **kwargs):
+def molecular_volume_analysis(tpr, edr, solvent="water", **kwargs):
     """Calculate molecular volume from NPT simulation data.
 
     v_mol = V/N
@@ -322,8 +334,8 @@ class ThermodynamicAnalysis(object):
         self.solvent = solvent
         self.g_energy_kwargs = kwargs    # for g_energy
 
-        self.data = self._get_observables(**kwargs)
         self.N_solvent = self._count_solvent_molecules()
+        self.data = self._get_observables(**kwargs)
 
         self.__v_solute = None
 
@@ -333,13 +345,22 @@ class ThermodynamicAnalysis(object):
         return QuantityWithError(recwhere(self.data, name, column).Average[0],
                                  recwhere(self.data, name, column).ErrEst[0])
 
-    def _get_observables(self, **kwargs):
-        return get_observables(self.edr, **kwargs)
-
     def _count_solvent_molecules(self):
         return count_solvent_molecules(self.tpr, solvent=self.solvent)
 
+    def _get_observables(self, **kwargs):
+        return get_observables(self.edr, **kwargs)
+
     def solute_volume(self, **kwargs):
+        """Calculate the solute volume.
+
+        Arguments are passed to :func:`calculate_solute_volume` unless they
+        need to be set to values to match the system defined by this tpr (such
+        as *N_solvent* and *solvent*). Useful keywords are *rho_solvent* or
+        *v_solvent*.
+
+        .. SeeAlso:: :attr:`~ThermodynamicAnalysis.v_solute` and :func:`calculate_solute_volume`
+        """
         kwargs['N_solvent'] = self.N_solvent
         kwargs['solvent'] = self.solvent
         kwargs.setdefault('rho_solvent', solvent_density[self.solvent])
@@ -350,12 +371,17 @@ class ThermodynamicAnalysis(object):
     def v_solute(self):
         """Volume of the solute in nm^3.
 
-        .. SeeAlso:: :meth:`solute_volume` (which accepts *kwargs* and
-                     also updates this managed attribute).
+        .. SeeAlso:: :meth:`~ThermodynamicAnalysis.solute_volume` (which
+                     accepts *kwargs* and also updates this managed attribute).
         """
         if self.__v_solute is None:
             self.__v_solute = self.solute_volume()
         return self.__v_solute
+
+    @property
+    def v_solvent(self):
+        """Volume of a solvent molecule V/N"""
+        return self.volume/self.N_solvent
 
     @property
     def density(self):
@@ -368,10 +394,25 @@ class ThermodynamicAnalysis(object):
         return self.Observable("Volume")
 
     @property
-    def v_solvent(self):
-        """Volume of a solvent molecule V/N"""
-        return self.volume/self.N_solvent
+    def temperature(self):
+        """Average total temperature of the simulation system in K"""
+        return self.Observable("Temperature")
 
+    @property
+    def pressure(self):
+        """Average total pressure of the simulation system in bar"""
+        return self.Observable("Pressure")
+
+    def summary(self):
+        """Log summary information"""
+        logger.info("summary: tpr=%(tpr)r, edr=%(edr)r", vars(self))
+        logger.info("summary: N_solvent = %(N_solvent)d", vars(self))
+        logger.info("summary: T=%r K", self.temperature)
+        logger.info("summary: P=%r bar", self.pressure)
+        logger.info("summary: V=%r nm^3", self.volume)
+        logger.info("summary: rho=%r kg/m^3 (total system density)", self.density)
+        logger.info("summary: v_solvent = %r nm^3 (solvent particle volume)", self.v_solvent)
+        logger.info("summary: v_solute = %r nm^3 (difference to ideal solvent box)", self.v_solute)
 
 #------------------------------------------------------------
 # from NVTcorrection.py
