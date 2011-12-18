@@ -441,7 +441,7 @@ def kJ2kcal(x):
     return x/4.184
 
 def energyUnit(x, **kwargs):
-    if kwargs.get('unit', None) == 'kcal' or kwargs.get('kcal', False):
+    if kwargs.get('unit', None) == 'kcal' or kwargs.get('kcal', False) is True:
         return kJ2kcal(x)
     return x
 
@@ -458,15 +458,17 @@ def DeltaW(*args, **kwargs):
        *kappa*
            isothermal compressibility (can be omitted if
            *solvent* keyword is supplied)
+
      :Keywords:
        *solvent*
            "water" or "octanol" (will choose the default
            kappa_T from :data:`mdpow.tables.kappaT`
        *unit*
-           "kcal" or "kJ" (energy unit)
+           "kcal" means kcal/mol, or "kJ" is kJ/mol (energy unit)
        *kcal*
            ``True`` or ``False`` (``True`` is same as *unit* = "kcal")
 
+    :Returns: correction in chosen energy units (kJ/mol by default)
     """
     if "solvent" in kwargs:
         args = args + (mdpow.tables.kappaT[kwargs.pop('solvent')]['DEFAULT'],)
