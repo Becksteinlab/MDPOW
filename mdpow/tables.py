@@ -37,7 +37,7 @@ solvent_selections = {
 #: to be made more general, possibly by using a spline interpolation
 #: for the equation of state. Unit kg/m^3.
 solvent_density = {
-    "water": QuantityWithError(992.342, 0.18)     # TIP4P
+    "water": QuantityWithError(992.342, 0.18),     # TIP4P
     # xfer3-336/Equilibrium/water/MD_NPT
     # 992.342 (0.18), 652 w, 15ns (disc 5ns from 20ns), T=296.009 (0.019), P=0.993607 (0.024) bar
     "octanol": QuantityWithError(819.491, 0.24),
@@ -53,10 +53,10 @@ solvent_density = {
 
     # other results (not used at the moment)
     # --------------------------------------
-    "water_296": QuantityWithError(993.379, 0.13)     # TIP4P,
+    "water_296": QuantityWithError(993.379, 0.13),     # TIP4P,
     # xfer3-302/Equilibrium/water/MD_NPT
     # 993.379 (0.13), 296 w, 15ns (discarded 5ns from 20ns)
-    "octanol_123": QuantityWithError(818.654, 0.39)   # OPLS-AA
+    "octanol_123": QuantityWithError(818.654, 0.39),   # OPLS-AA
     # xfer3-336/Equilibrium/octanol/MD_NPT
     # 818.654 (0.39), 123 octanols
     }
