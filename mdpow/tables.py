@@ -1,5 +1,11 @@
+# POW package __init__.py
+# Copyright (c) 2012 Oliver Beckstein <orbeckst@gmail.com>
+# Released under the GNU Public License 3 (or higher, your choice)
+# See the file COPYING for details.
+
 """
-Tables of hard-coded values used in mdpow.
+Tables of hard-coded values used in mdpow
+=========================================
 
 TODO: Move these data into files in the top directory.
 """

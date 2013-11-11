@@ -1,10 +1,18 @@
+# POW package __init__.py
+# Copyright (c) 2012 Oliver Beckstein <orbeckst@gmail.com>
+# Released under the GNU Public License 3 (or higher, your choice)
+# See the file COPYING for details.
+
 """
+================================================
 Volume correction for running NVT instead of NPT
+================================================
 
-Compute the correction for Delta G_hyd for Delta F_hyd from NVT sims.
+Compute the correction for :math:`\Delta G_\text{hyd}` for
+:math:`\Delta A_\text{hyd}` from NVT sims.
 
-Required quantities for the correction DeltaW
-=============================================
+Required quantities for the correction :math:`\Delta W`
+=======================================================
 
 - volume of the solute
   * in water
@@ -28,7 +36,8 @@ Solute volume
    state) only needs to be computed once.
 
    Right now we're actually just storing the value at T=300 K and 1
-   bar: 993. kg/m^3 (computed from 20 ns MD with 296 water molecules).
+   bar: 992.342. kg/m^3 (computed from 15 ns MD with 652 water
+   molecules and stored in :data:`mdpow.tables.solvent_density`)
 
 3. V_solute = V_NPT - V_water
 
@@ -50,8 +59,10 @@ simulation.
 Isothermal compressibility
 --------------------------
 
-kappa_T needs to be calculated for a given T and P. We compute it from
-a long NPT simulation via the fluctuation formula and store the value.
+:math:`kappa_T` needs to be calculated for a given :math:`T` and
+:math:`P`. We can compute it from a long *NPT* simulation via the
+fluctuation formula and store the value or use a published computed or
+experimental value (stored in :data:`mdpow.tables.kappaT`).
 
 """
 import tempfile
@@ -428,12 +439,24 @@ class ThermodynamicAnalysis(object):
         # 1 bar = 10^5 J/m^3
         return kappaT_fluctuations(varN, N, self.v_solvent, self.temperature) * 1e5
 
+def analyze_NPT(sim, **kwargs):
+    """Analyze NPT simulation for solute volume and other thermodynamics"""
+    try:
+        sim_deffnm = sim.deffnm
+    except AttributeError:
+        sim_deffnm = "md"
+    deffnm = kwargs.pop("deffnm", sim_deffnm)
+
+    tpr = os.path.join(sim.dirs.MD_NPT, deffnm + ".tpr")
+    edr = os.path.join(sim.dirs.MD_NPT, deffnm + ".edr")
+    A = mdpow.correction.ThermodynamicAnalysis(tpr, edr, **kwargs)
+    v_s = A.solute_volume()
+    return {'v_s': vs}
+
 #------------------------------------------------------------
 # from NVTcorrection.py
 import numpy as np
-from mdpow.tables import kappaT, bar, k_Boltzmann
-
-N_A = N_Avogadro ##6.0221415e23  # mol**-1
+from mdpow.tables import bar, k_Boltzmann
 
 # base energy unit is kJ or kJ/mol
 
@@ -448,7 +471,8 @@ def energyUnit(x, **kwargs):
 def DeltaW(*args, **kwargs):
     """Correction for decoupling as used in POW
 
-    (pretty much equivalent to the lowest order correction)
+    The correction :math:`DeltaW` is calculated with
+    :func:`DeltaW_decoupling`.
 
     :Arguments:
        *vs*
@@ -456,34 +480,59 @@ def DeltaW(*args, **kwargs):
        *V0*
            box volume in nm^3
        *kappa*
-           isothermal compressibility (can be omitted if
-           *solvent* keyword is supplied)
+           isothermal compressibility :math:`\kappa_T` in 1/bar (can
+           be omitted if *solvent* keyword is supplied)
 
      :Keywords:
        *solvent*
            "water" or "octanol" (will choose the default
-           kappa_T from :data:`mdpow.tables.kappaT`
+           :math:`\kappa_T` from :data:`mdpow.tables.kappaT` and use
+           as *kappa* if no third argument *kappa* was supplied)
        *unit*
-           "kcal" means kcal/mol, or "kJ" is kJ/mol (energy unit)
+           "kcal" means kcal/mol and "kJ" is kJ/mol (energy unit);
+           the default is "kJ".
        *kcal*
            ``True`` or ``False`` (``True`` is same as *unit* = "kcal")
 
     :Returns: correction in chosen energy units (kJ/mol by default)
-    """
-    if "solvent" in kwargs:
-        args = args + (mdpow.tables.kappaT[kwargs.pop('solvent')]['DEFAULT'],)
-    return DeltaW_A(*args, **kwargs)
 
-def DeltaW_A(vs, V0, kappa, **kwargs):
-    """Exact correction for annihilation, see (Eq 13)"""
+    .. SeeAlso::
+       * :func:`DeltaW_decoupling`
+       * :func:`DeltaW_growing`
+       * :func:`DeltaW_lowestorder`
+
+    """
+    if "solvent" in kwargs and len(args) == 2:
+        args = args + (mdpow.tables.kappaT[kwargs.pop('solvent')]['DEFAULT'],)
+    return DeltaW_lowestorder(*args, **kwargs)
+
+def DeltaW_decoupling(vs, V0, kappa, **kwargs):
+    """Exact correction for decoupling of the solute.
+
+    The difference in work when closing a cavity in a solvent
+    in *NPT* vs *NVT*.
+
+    .. math::
+
+       \Delta W = -\kappa_{T}^{-1} V_{0} \left[-\frac{v_{s}}{V_{0}} + \left(1+\frac{v_{s}}{V_{0}}\right) \ln\left(1+\frac{v_{s}}{V_{0}}\right)\right].
+    """
     x = vs/V0
-    y = V0/(kappa/bar)*(x + np.log(1-x))
+    y = -V0/(kappa/bar)*(-x + (1+x)*np.log(1+x))
     return energyUnit(y, **kwargs)
 
-def DeltaW_B(vs, V0, kappa, **kwargs):
-    """Exact correction for growing (Eq 12)"""
+def DeltaW_growing(vs, V0, kappa, **kwargs):
+    """Exact correction for growing a solute cavity (Eq S12)
+
+    The difference in work when opening a cavity in a solvent in *NPT*
+    vs *NVT*.
+
+    .. math::
+
+       \Delta W = -\kappa_{T}^{-1} V_{0} \left[\frac{v_{s}}{V_{0}} + \left(1-\frac{v_{s}}{V_{0}}\right) \ln\left(1-\frac{v_{s}}{V_{0}}\right)\right].
+
+    """
     x = vs/V0
-    y = -V0/(kappa/bar)*(x - (x-1)*np.log(1-x))
+    y = -V0/(kappa/bar)*(x + (1-x)*np.log(1-x))
     return energyUnit(y, **kwargs)
 
 def pV(vs, P=1., **kwargs):
@@ -491,7 +540,12 @@ def pV(vs, P=1., **kwargs):
     return energyUnit(y, **kwargs)
 
 def DeltaW_lowestorder(vs, V0, kappa, **kwargs):
-    """Lowest order correction (Eq 16)"""
+    """Lowest order correction for a solvent cavity (Eq 8)
+
+    .. math::
+
+       \Delta W = -\frac{1}{2} \kappa_T^{-1} V_)0 \Big(\frac{v_s}{V_0}\Big)^2
+    """
     # vs, V0: nm**3
     y = -0.5*vs**2/(kappa/bar * V0)
     return energyUnit(y, **kwargs)
@@ -503,13 +557,15 @@ def kappaT_fluctuations(varN, N, v_solvent, T):
     The fluctuations in the number of particles of a homogenous liquid are
     related to the compressibility through [e.g. Barret & Hansen (2003)]
 
-      <(\Delta N)^2> = kT n \kappa_T N
+    .. math::
+
+      \langle (\Delta N)^2 \rangle = kT n \kappa_T N
 
     Hence
 
-      \kappa_T = <(\Delta N)^2>/(kT n N) = <(\Delta N)^2> v_solvent/(kT N)
+      \kappa_T = \langle (\Delta N)^2 \rangle/(kT n N) = \langle (\Delta N)^2 \rangle v_\text{solvent}/(kT N)
 
-    where n = 1/v_solvent
+    where :math:`n = 1/v_\text{solvent}`.
 
     :Arguments:
        *varN*
@@ -521,9 +577,11 @@ def kappaT_fluctuations(varN, N, v_solvent, T):
        *T*
            temperature in K
 
-    :Returns: \kappa_T in m^3/J = 1/Pa
+    :Returns: :math:`\kappa_T` in m^3/J = 1/Pa
 
-    .. Note:: Slowly converging.
+    .. Note:: This is slowly converging and not the best way to compute
+              kappa. A more straightforward approach uses the volume
+              fluctuations in NPT simulations.
     """
     return varN * v_solvent * 1e-27 / (k_Boltzmann * T * N)
 
