@@ -3,17 +3,20 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>The mdpow-* scripts &mdash; MDpow v0.5.1 documentation</title>
+    <title>The mdpow-* scripts &mdash; MDpow 0.5.2 documentation</title>
+    
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.5.1',
+        VERSION:     '0.5.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -22,8 +25,9 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="MDpow v0.5.1 documentation" href="index.html" />
-    <link rel="next" title="mdpow.equil — Setting up and running equilibrium MD" href="equil.html" />
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="MDpow 0.5.2 documentation" href="index.html" />
+    <link rel="next" title="&lt;no title&gt;" href="equil.html" />
     <link rel="prev" title="mdpow — Computing the octanol/water partitioning coefficient" href="init.html" /> 
   </head>
   <body>
@@ -37,12 +41,12 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="equil.html" title="mdpow.equil — Setting up and running equilibrium MD"
+          <a href="equil.html" title="&lt;no title&gt;"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="init.html" title="mdpow — Computing the octanol/water partitioning coefficient"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">MDpow v0.5.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow 0.5.2 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -105,8 +109,8 @@ be found). The required <strong>input</strong> is</p>
 </div></blockquote>
 <p>A template <em>RUNFILE</em> can be generated with
 <a class="reference internal" href="#cmdoption-mdpow-equilibrium--get-template"><em class="xref std std-option">mdpow-equilibrium --get-template</em></a>.</p>
-<p>For an example of a <em>RUNFILE</em> see <a class="reference download internal" href="_downloads/benzene_runinput4.cfg"><tt class="xref download docutils literal"><span class="pre">benzene_runinput.cfg</span></tt></a>. It is recommended to use absolute paths
-to file names. The run input file uses <a class="reference external" href="http://docs.python.org/library/configparser.html#module-ConfigParser" title="(in Python v2.7)"><tt class="xref py py-mod docutils literal"><span class="pre">ConfigParser</span></tt></a>, which describes the
+<p>For an example of a <em>RUNFILE</em> see <a class="reference download internal" href="_downloads/benzene_runinput.cfg"><tt class="xref download docutils literal"><span class="pre">benzene_runinput.cfg</span></tt></a>. It is recommended to use absolute paths
+to file names. The run input file uses <a class="reference external" href="http://docs.python.org/library/configparser.html#ConfigParser" title="(in Python v2.7)"><tt class="xref py py-mod docutils literal"><span class="pre">ConfigParser</span></tt></a>, which describes the
 syntax of the file.</p>
 <p>The script keeps track of the stages of the simulation protocol and allows the
 user to <strong>restart from the last completed stage</strong>. For instance, one can use the
@@ -223,7 +227,7 @@ of the MD FEP simulations. It relies on the canonical naming scheme (basically:
 just use the defaults as in the tutorial).</p>
 <p>The dV/dlambda plots can be produced automatically (<em class="xref std std-option">mdpow-pow
 -p</em> auto). If multiple <em>DIRECTORY</em> arguments are provided then one has to
-choose the auto option (or <tt class="xref docutils literal"><span class="pre">None</span></tt>).</p>
+choose the auto option (or <tt class="docutils literal"><span class="pre">None</span></tt>).</p>
 <p>Options:</p>
 <dl class="cmdoption">
 <dt id="cmdoption-mdpow-pow-h">
@@ -323,7 +327,7 @@ compound.</div></blockquote>
 <col width="51%" />
 </colgroup>
 <thead valign="bottom">
-<tr><th class="head">itp_name</th>
+<tr class="row-odd"><th class="head">itp_name</th>
 <th class="head">DeltaG0</th>
 <th class="head">errDG0</th>
 <th class="head">logPow</th>
@@ -332,28 +336,28 @@ compound.</div></blockquote>
 </tr>
 </thead>
 <tbody valign="top">
-<tr><td>BNZ</td>
+<tr class="row-even"><td>BNZ</td>
 <td>-12.87</td>
 <td>0.43</td>
 <td>+2.24</td>
 <td>0.07</td>
 <td>benzene</td>
 </tr>
-<tr><td>OC9</td>
+<tr class="row-odd"><td>OC9</td>
 <td>-16.24</td>
 <td>1.12</td>
 <td>+2.83</td>
 <td>0.20</td>
 <td>octanol</td>
 </tr>
-<tr><td>URE</td>
+<tr class="row-even"><td>URE</td>
 <td>+4.66</td>
 <td>1.13</td>
 <td>-0.81</td>
 <td>0.20</td>
 <td>urea</td>
 </tr>
-<tr><td>902</td>
+<tr class="row-odd"><td>902</td>
 <td>+9.35</td>
 <td>1.06</td>
 <td>-1.63</td>
@@ -443,7 +447,7 @@ compound.</div></blockquote>
 <col width="15%" />
 </colgroup>
 <thead valign="bottom">
-<tr><th class="head">molecule</th>
+<tr class="row-odd"><th class="head">molecule</th>
 <th class="head">solvent</th>
 <th class="head">DeltaG0</th>
 <th class="head">errDG0</th>
@@ -461,7 +465,7 @@ compound.</div></blockquote>
 </tr>
 </thead>
 <tbody valign="top">
-<tr><td>BNZ</td>
+<tr class="row-even"><td>BNZ</td>
 <td>water</td>
 <td>-2.97</td>
 <td>0.21</td>
@@ -477,7 +481,7 @@ compound.</div></blockquote>
 <td>0.07</td>
 <td>benzene</td>
 </tr>
-<tr><td>BNZ</td>
+<tr class="row-odd"><td>BNZ</td>
 <td>octanol</td>
 <td>-15.84</td>
 <td>0.37</td>
@@ -493,7 +497,7 @@ compound.</div></blockquote>
 <td>0.07</td>
 <td>benzene</td>
 </tr>
-<tr><td>OC9</td>
+<tr class="row-even"><td>OC9</td>
 <td>water</td>
 <td>-16.03</td>
 <td>0.32</td>
@@ -509,7 +513,7 @@ compound.</div></blockquote>
 <td>0.20</td>
 <td>octanol</td>
 </tr>
-<tr><td>OC9</td>
+<tr class="row-odd"><td>OC9</td>
 <td>octanol</td>
 <td>-32.28</td>
 <td>1.08</td>
@@ -525,7 +529,7 @@ compound.</div></blockquote>
 <td>0.20</td>
 <td>octanol</td>
 </tr>
-<tr><td>URE</td>
+<tr class="row-even"><td>URE</td>
 <td>water</td>
 <td>-53.52</td>
 <td>0.17</td>
@@ -541,7 +545,7 @@ compound.</div></blockquote>
 <td>0.20</td>
 <td>urea</td>
 </tr>
-<tr><td>URE</td>
+<tr class="row-odd"><td>URE</td>
 <td>octanol</td>
 <td>-48.86</td>
 <td>1.12</td>
@@ -557,7 +561,7 @@ compound.</div></blockquote>
 <td>0.20</td>
 <td>urea</td>
 </tr>
-<tr><td>902</td>
+<tr class="row-even"><td>902</td>
 <td>water</td>
 <td>-25.46</td>
 <td>0.11</td>
@@ -573,7 +577,7 @@ compound.</div></blockquote>
 <td>0.18</td>
 <td>water_TIP4P</td>
 </tr>
-<tr><td>902</td>
+<tr class="row-odd"><td>902</td>
 <td>octanol</td>
 <td>-16.11</td>
 <td>1.05</td>
@@ -735,7 +739,7 @@ templates. For example:
                         title="previous chapter"><tt class="docutils literal docutils literal docutils literal"><span class="pre">mdpow</span></tt> &#8212; Computing the octanol/water partitioning coefficient</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="equil.html"
-                        title="next chapter"><tt class="docutils literal docutils literal docutils literal"><span class="pre">mdpow.equil</span></tt> &#8212; Setting up and running equilibrium MD</a></p>
+                        title="next chapter">&lt;no title&gt;</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/scripts.txt"
@@ -744,7 +748,7 @@ templates. For example:
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -768,17 +772,17 @@ templates. For example:
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="equil.html" title="mdpow.equil — Setting up and running equilibrium MD"
+          <a href="equil.html" title="&lt;no title&gt;"
              >next</a> |</li>
         <li class="right" >
           <a href="init.html" title="mdpow — Computing the octanol/water partitioning coefficient"
              >previous</a> |</li>
-        <li><a href="index.html">MDpow v0.5.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow 0.5.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2010–2011, Oliver Beckstein and Bogdan Iorga.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+        &copy; Copyright 2010–2013, Oliver Beckstein and Bogdan Iorga.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>

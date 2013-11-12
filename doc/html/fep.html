@@ -3,17 +3,20 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>mdpow.fep – Calculate free energy of solvation &mdash; MDpow v0.5.1 documentation</title>
+    <title>mdpow.fep – Calculate free energy of solvation &mdash; MDpow 0.5.2 documentation</title>
+    
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.5.1',
+        VERSION:     '0.5.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -22,8 +25,9 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="MDpow v0.5.1 documentation" href="index.html" />
-    <link rel="next" title="mdpow.analysis — Collection of analysis and plotting functions" href="analysis.html" />
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="MDpow 0.5.2 documentation" href="index.html" />
+    <link rel="next" title="mdpow.correction — Volume correction for running NVT instead of NPT" href="correction.html" />
     <link rel="prev" title="mdpow.equil — Setting up and running equilibrium MD" href="equil.html" /> 
   </head>
   <body>
@@ -37,12 +41,12 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="analysis.html" title="mdpow.analysis — Collection of analysis and plotting functions"
+          <a href="correction.html" title="mdpow.correction — Volume correction for running NVT instead of NPT"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="equil.html" title="mdpow.equil — Setting up and running equilibrium MD"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">MDpow v0.5.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow 0.5.2 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -79,26 +83,31 @@ understand it) allow us to only calculate the free energy changes in solution
 so that we do not have to do an extra calculation in vacuo.
 <a class="reference external" href="http://www.mail-archive.com/gmx-users&#64;gromacs.org/msg18803.html">http://www.mail-archive.com/gmx-users&#64;gromacs.org/msg18803.html</a></p>
 <p>Mobley does an extra discharging calculation in vacuo and calculates</p>
-<blockquote>
-<div><p>DeltaA = DeltaA_coul(vac) - (DeltaA_coul(sol) + DeltaA_vdw(sol))</p>
-</div></blockquote>
+<div class="math">
+\[\Delta A = \Delta A_{\mathrm{coul}}(\mathrm{vac}) - (\Delta A_{\mathrm{coul}}(\mathrm{sol}) + \Delta A_{\mathrm{vdw}}(\mathrm{sol}))\]</div>
 <p>(but also annihilates the interactions on the solute, corresponding to
 <tt class="docutils literal"><span class="pre">couple-intramol</span> <span class="pre">=</span> <span class="pre">yes</span></tt>) whereas we do</p>
-<blockquote>
-<div><p>DeltaA = - (DeltaA_coul(sol) + DeltaA_vdw(sol))</p>
-</div></blockquote>
+<div class="math">
+\[\Delta A = - (\Delta A_{\mathrm{coul}}(\mathrm{sol}) + \Delta A_{\mathrm{vdw}}(\mathrm{sol}))\]</div>
 </li>
 <li><p class="first">Pressure and Volume: Mobley scales the box size with an affine transformation
 to the density corresponding to the average pressure of the equilibration
 run. We simply take the last frame from the trajectory (and also assume that
 the pressure is exactly what we set, namely 1 bar).</p>
-<p>Arguably we should</p>
+<p>Our protocol could be improved by</p>
 <ul class="simple">
-<li>scale the box to the average volume obtained from the second half of the
+<li>scaling the box to the average volume obtained from the second half of the
 simulation. This is potentially more important because the density of the
 water has an effect on the interactions but we would need to run tests to
 check how big the effect typically is.</li>
-<li>do a Vdp (?) correction (how?)</li>
+<li>correct for difference in pressures between equilibrium
+<span class="math">\(NPT\)</span> and FEP <span class="math">\(NVT\)</span> where the pressure of the last
+frame is unlikely to be even close to the desired average pressure
+because pressure fluctuates so much in small systems</li>
+<li>correcting for the fact that we run FEP at constant volume
+(i.e. calculate a Helmholtz free energy instead of a Gibbs free
+energy) &#8212; see <a class="reference internal" href="correction.html#module-mdpow.correction" title="mdpow.correction"><tt class="xref py py-mod docutils literal"><span class="pre">mdpow.correction</span></tt></a> (which is not fully
+implemented yet)</li>
 </ul>
 </li>
 </ul>
@@ -120,29 +129,32 @@ solvation free energy in octanol there is
 <em class="property">class </em><tt class="descclassname">mdpow.fep.</tt><tt class="descname">Gsolv</tt><big>(</big><em>molecule=None</em>, <em>top=None</em>, <em>struct=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.fep.Gsolv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Simulations to calculate and analyze the solvation free energy.</p>
 <p>The simulations are run at constant volume so this is in fact a Helmholtz
-solvation free energy, DeltaA(V). To compute the Gibbs solvation free
+solvation free energy, <span class="math">\(\Delta A(V)\)</span>. To compute the Gibbs solvation free
 energy (which is the experimental quantity) at the standard state (1 M
 solution and 1 M in the gas phase, also known as the &#8220;Ben-Naim standard
-state&#8221;):</p>
-<blockquote>
-<div>DeltaG* = DeltaA + (p*-p)*Vsim</div></blockquote>
-<p>The pressure term is currently NOT IMPLEMENTED.
-1 bar = 0.06 kJ mol^-1 nm^-3 typical values of the term are XXX
-kJ/mol. Vsim is the constant simulations box volume (taken from
-the last frame of the equilibrium simulation that is the starting
-point for the FEP simulations.)</p>
-<p>(We neglect the negligible correction DeltaA = DeltaAsim -kT ln Vx/Vsim
-where Vx is the volume of the system without the solute but the same number
-of water molecules as in the fully interacting case [see Michael Shirts&#8217;
-Thesis, p82].)</p>
-<p>DeltaA is computed from the decharging and the decoupling step. With our
-choice of lambda=0 being the fully interacting and lambda=1 the
-non-interacting state, it is computed as</p>
-<blockquote>
-<div>Delta A = -(Delta A_coul + Delta A_vdw)</div></blockquote>
-<p>With this protocol, the concentration in the liquid and in the gas phase
-is the same. (Under the assumption of ideal solution/ideal gas behaviour
-this seems to directly relate to the Ben-Naim 1M/1M standard state.)</p>
+state&#8221;) add a correction term <span class="math">\(Delta W(V_{\mathrm{sim}}, v_s)\)</span>:</p>
+<div class="math">
+\[\Delta G^{*} = \Delta A + \Delta W(V_{\mathrm{sim}}, v_s)\]</div>
+<p>which depends on simulation cell volume <span class="math">\(V_{\mathrm{sim}}\)</span> and
+the volume of the solute <span class="math">\(v_s\)</span>.  <span class="math">\(V_{\mathrm{sim}}\)</span> is the
+constant simulations box volume (taken from the last frame of the
+equilibrium simulation that is the starting point for the FEP
+simulations.)</p>
+<p>(We neglect the negligible correction <span class="math">\(-kT \ln
+V_x/V_{\mathrm{sim}} = -kT \ln(1 - v_s/V_{\mathrm{sim}})\)</span> where
+<span class="math">\(V_x\)</span> is the volume of the system without the solute but the
+same number of water molecules as in the fully interacting case
+[see Michael Shirts&#8217; Thesis, p82].)</p>
+<p><span class="math">\(\Delta A\)</span> is computed from the decharging and the
+decoupling step. With our choice of <tt class="docutils literal"><span class="pre">lambda=0</span></tt> being the fully
+interacting and <tt class="docutils literal"><span class="pre">lambda=1</span></tt> the non-interacting state, it is computed
+as</p>
+<div class="math">
+\[\Delta A = -(\Delta A_{\mathrm{coul}} + \Delta A_{\mathrm{vdw}})\]</div>
+<p>With this protocol, the concentration in the liquid and in the gas
+phase is the same. (Under the assumption of ideal solution/ideal
+gas behaviour this directly relates to the Ben-Naim 1M/1M standard
+state.)</p>
 <p>Typical work flow:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">G</span> <span class="o">=</span> <span class="n">Gsolv</span><span class="p">(</span><span class="n">simulation</span><span class="o">=</span><span class="s">&#39;drug.simulation&#39;</span><span class="p">)</span>           <span class="c"># continue from :mod:`mdpow.equil`</span>
 <span class="n">G</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">qscript</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;my_template.sge&#39;</span><span class="p">,</span> <span class="s">&#39;local.sh&#39;</span><span class="p">])</span>  <span class="c"># my_template.sge is user supplied</span>
@@ -151,14 +163,14 @@ this seems to directly relate to the Ben-Naim 1M/1M standard state.)</p>
 <span class="n">G</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>See <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/qsub.html#gromacs.qsub" title="(in GromacsWrapper v0.2)"><tt class="xref py py-mod docutils literal"><span class="pre">gromacs.qsub</span></tt></a> for notes on how to write templates for
-queuing system scripts (in particular <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/building_blocks.html?highlight=qsub#queuing-system-templates">queuing system templates</a>).</p>
+<p>See <a class="reference external" href="http://orbeckst.github.io/GromacsWrapper/gromacs/blocks/qsub.html#gromacs.qsub" title="(in GromacsWrapper v0.3)"><tt class="xref py py-mod docutils literal"><span class="pre">gromacs.qsub</span></tt></a> for notes on how to write templates for
+queuing system scripts (in particular <a class="reference external" href="http://orbeckst.github.io/GromacsWrapper/gromacs/blocks/qsub.html#queuing-system-templates">queuing system templates</a>).</p>
 <p>Set up Gsolv from input files or a equilibrium simulation.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Arguments :</th><td class="field-body"><dl class="first last docutils">
+<tr class="field-odd field"><th class="field-name">Arguments :</th><td class="field-body"><dl class="first last docutils">
 <dt><em>molecule</em></dt>
 <dd><p class="first last">name of the molecule for which the hydration free
 energy is to be computed (as in the gromacs topology)
@@ -197,7 +209,7 @@ determined by either <em>simulation</em> or <em>molecule</em>, <em>top</em>, and
 </dd>
 <dt><em>qscript</em></dt>
 <dd><p class="first last">template or list of templates for queuing system scripts
-(see <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/config.html#gromacs.config.templates" title="(in GromacsWrapper v0.2)"><tt class="xref py py-data docutils literal"><span class="pre">gromacs.config.templates</span></tt></a> for details) [local.sh]</p>
+(see <a class="reference external" href="http://orbeckst.github.io/GromacsWrapper/gromacs/core/config.html#gromacs.config.templates" title="(in GromacsWrapper v0.3)"><tt class="xref py py-data docutils literal"><span class="pre">gromacs.config.templates</span></tt></a> for details) [local.sh]</p>
 </dd>
 <dt><em>includes</em></dt>
 <dd><p class="first last">include directories</p>
@@ -213,16 +225,21 @@ are provided then simply set the attribute <tt class="xref py py-attr docutils l
 the default checkpoint file to <em>filename</em>.</p>
 </dd>
 <dt><em>basedir</em></dt>
-<dd><p class="first last">Prepend <em>basedir</em> to all filenames; <tt class="xref docutils literal"><span class="pre">None</span></tt> disables [.]</p>
+<dd><p class="first last">Prepend <em>basedir</em> to all filenames; <tt class="docutils literal"><span class="pre">None</span></tt> disables [.]</p>
 </dd>
 <dt><em>permissive</em></dt>
-<dd><p class="first last">Set to <tt class="xref docutils literal"><span class="pre">True</span></tt> if you want to read past corrupt data in output
-xvg files (see <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/formats.html#gromacs.formats.XVG" title="(in GromacsWrapper v0.2)"><tt class="xref py py-class docutils literal"><span class="pre">gromacs.formats.XVG</span></tt></a> for details); note that
+<dd><p class="first last">Set to <tt class="docutils literal"><span class="pre">True</span></tt> if you want to read past corrupt data in output
+xvg files (see <tt class="xref py py-class docutils literal"><span class="pre">gromacs.formats.XVG</span></tt> for details); note that
 <em>permissive*=``True`` can lead to **wrong results*</em>. Overrides
-the value set in a loaded pickle file. [<tt class="xref docutils literal"><span class="pre">False</span></tt>]</p>
+the value set in a loaded pickle file. [<tt class="docutils literal"><span class="pre">False</span></tt>]</p>
 </dd>
 <dt><em>stride</em></dt>
 <dd><p class="first last">collect every <em>stride</em> data line, see <a class="reference internal" href="#mdpow.fep.Gsolv.collect" title="mdpow.fep.Gsolv.collect"><tt class="xref py py-meth docutils literal"><span class="pre">Gsolv.collect()</span></tt></a> [1]</p>
+</dd>
+<dt><em>v_solute</em></dt>
+<dd><p class="first last">solute volume (required for the correction <a class="reference internal" href="#mdpow.fep.Gsolv.DeltaW" title="mdpow.fep.Gsolv.DeltaW"><tt class="xref py py-meth docutils literal"><span class="pre">DeltaW()</span></tt></a>); if not
+provided then we try to compute it from the equilibrium simulation
+provided in keyword <em>simulation</em>.</p>
 </dd>
 <dt><em>kwargs</em></dt>
 <dd><p class="first last">other undocumented arguments (see source for the moment)</p>
@@ -233,58 +250,66 @@ the value set in a loaded pickle file. [<tt class="xref docutils literal"><span 
 </tbody>
 </table>
 <dl class="method">
-<dt id="mdpow.fep.Gsolv.Vdp">
-<tt class="descname">Vdp</tt><big>(</big><em>p=1.0</em><big>)</big><a class="headerlink" href="#mdpow.fep.Gsolv.Vdp" title="Permalink to this definition">¶</a></dt>
-<dd><p>Vdp contribution to Gibbs free energy</p>
-<blockquote>
-<div>DeltaG = DeltaA + V*DeltaP     (for V=const)</div></blockquote>
-<p>Delta refers to</p>
-<blockquote>
-<div>aq (fully coupled) &#8211;&gt; gaseous (decoupled)</div></blockquote>
+<dt id="mdpow.fep.Gsolv.DeltaW">
+<tt class="descname">DeltaW</tt><big>(</big><big>)</big><a class="headerlink" href="#mdpow.fep.Gsolv.DeltaW" title="Permalink to this definition">¶</a></dt>
+<dd><p>Difference in work between <em>NPT</em> and <em>NVT</em> to remove a solute cavity.</p>
+<div class="math">
+\[\Delta W := \Delta G - \Delta A = W_{NPT} - W_{NVT}\]</div>
+<p>This correction for the decoupling process can be added to a
+Helmholtz free energy of decoupling to estimate the Gibbs free
+energy of decoupling:</p>
+<div class="math">
+\[\Delta G = \Delta A + \Delta W\]</div>
+<p>Our FEP describes a decoupling process <em>aquaeous (fully
+coupled)</em> <span class="math">\(rightarrow\)</span> <em>gaseous (decoupled)</em> whereas the
+hydration free energy is by convention the process in the
+opposite direction. Therefore, the correction <span class="math">\(\Delta W\)</span>
+for decoupling is <em>subtracted</em> from the Helmholtz hydration
+free energy:</p>
+<div class="math">
+\[\Delta G_{\mathrm{hyd}} = -(\Delta A_{\mathrm{decouple}} + \Delta W_{\mathrm{decouple}}) = \Delta A_{\mathrm{hyd}} - \Delta W_{\mathrm{decouple}}\]</div>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
-<p class="last">Not implemented at the moment and simply set to 0 because
-we cannot use the pressures directly from the simulation. In such a
-small system they fluctuate too much and completely dominate all
-thermodynamic calculations.</p>
+<p class="last">Not implemented at the moment and simply set to 0.</p>
 </div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Returns :</th><td class="field-body"><p class="first">0 (although it should be something like Vsim*(p*-p))  [in kJ/mol]</p>
-</td>
-</tr>
-<tr class="field"><th class="field-name">Arguments :</th><td class="field-body"><dl class="first last docutils">
-<dt><em>p</em></dt>
-<dd><p class="first last">constant pressure in bar [1.0]</p>
-</dd>
-</dl>
-</td>
+<tr class="field-odd field"><th class="field-name">Returns :</th><td class="field-body">0 (not implemented)  [in kJ/mol]</td>
 </tr>
 </tbody>
 </table>
+<div class="admonition-see-also admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="correction.html#mdpow.correction.DeltaW" title="mdpow.correction.DeltaW"><tt class="xref py py-func docutils literal"><span class="pre">mdpow.correction.DeltaW()</span></tt></a></p>
+</div>
 </dd></dl>
 
 <dl class="method">
 <dt id="mdpow.fep.Gsolv.analyze">
 <tt class="descname">analyze</tt><big>(</big><em>p=1.0</em>, <em>force=False</em>, <em>stride=None</em>, <em>autosave=True</em><big>)</big><a class="headerlink" href="#mdpow.fep.Gsolv.analyze" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extract dV/dl from output and calculate dG by TI.</p>
-<p>Thermodynamic integration (TI) is performed on the individual component
-window calculation (typically the Coulomb and the VDW part, DeltaA_coul
-and DeltaA_vdw). DeltaA_coul is the free energy component of
-discharging the molecule and DeltaA_vdw of decoupling (switching off LJ
-interactions with the environment). The free energy components must be
-interpreted in this way because we defined lambda=0 as interaction
-switched on and lambda=1 as switched off.</p>
-<blockquote>
-<div><p>Delta A* = -(Delta A_coul + Delta A_vdw)</p>
-<p>Delta_G* = Delta_A* + (p*-p)*V  [not implemented]</p>
-</div></blockquote>
+<p>Thermodynamic integration (TI) is performed on the individual
+component window calculation (typically the Coulomb and the
+VDW part, <span class="math">\(\Delta A_{\mathrm{coul}}\)</span> and <span class="math">\(\Delta
+A_{\mathrm{vdW}}\)</span>). <span class="math">\(\Delta A_{\mathrm{coul}}\)</span> is the free
+energy component of discharging the molecule and <span class="math">\(\Delta
+A_{\mathrm{vdW}}\)</span> of decoupling (switching off LJ interactions
+with the environment). The free energy components must be
+interpreted in this way because we defined <tt class="docutils literal"><span class="pre">lambda=0</span></tt> as
+interaction switched on and <tt class="docutils literal"><span class="pre">lambda=1</span></tt> as switched off.</p>
+<div class="math">
+\[\begin{split}\Delta A* &amp;= -(\Delta A_{\mathrm{coul}} + \Delta A_{\mathrm{vdw}})\
+\Delta G* &amp;= \Delta A* - \Delta W\end{split}\]</div>
+<p>The second equation corrects for the fact that we want a Gibbs
+free energy bit really have only simulated at constant volume
+and thus calculated a Helmholtz free energy; see
+<a class="reference internal" href="#mdpow.fep.Gsolv.DeltaW" title="mdpow.fep.Gsolv.DeltaW"><tt class="xref py py-meth docutils literal"><span class="pre">DeltaW()</span></tt></a> for more details.</p>
 <p>Data are stored in <a class="reference internal" href="#mdpow.fep.Gsolv.results" title="mdpow.fep.Gsolv.results"><tt class="xref py py-attr docutils literal"><span class="pre">Gsolv.results</span></tt></a>.</p>
 <p>The dV/dlambda graphs are integrated with the composite Simpson&#8217;s rule
 (and if the number of datapoints are even, the first interval is
-evaluated with the trapezoidal rule); see <a class="reference external" href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.simps.html#scipy.integrate.simps" title="(in SciPy v0.10.dev)"><tt class="xref py py-func docutils literal"><span class="pre">scipy.integrate.simps()</span></tt></a>
+evaluated with the trapezoidal rule); see <a class="reference external" href="http://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.simps.html#scipy.integrate.simps" title="(in SciPy v0.13.0)"><tt class="xref py py-func docutils literal"><span class="pre">scipy.integrate.simps()</span></tt></a>
 for details). Note that this implementation of Simpson&#8217;s rule does not
 require equidistant spacing on the lambda axis.</p>
 <p>For the Coulomb part using Simpson&#8217;s rule has been shown to produce
@@ -294,12 +319,12 @@ more accurate results than the trapezoidal rule <a class="reference internal" hr
 <div><ol class="arabic simple">
 <li>The error of the mean &lt;dV/dlambda&gt; is calculated via the decay time
 of the fluctuation around the mean (see
-<a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/formats.html#gromacs.formats.XVG.error" title="(in GromacsWrapper v0.2)"><tt class="xref py py-attr docutils literal"><span class="pre">gromacs.formats.XVG.error</span></tt></a>).</li>
+<tt class="xref py py-attr docutils literal"><span class="pre">gromacs.formats.XVG.error</span></tt>).</li>
 <li>The error on the integral is calculated analytically via
 propagation of errors through Simpson&#8217;s rule (with the
 approximation that all spacings are assumed to be equal; taken as
 the average over all spacings as implemented in
-<a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/numkit/integration.html#numkit.integration.simps_error" title="(in GromacsWrapper v0.2)"><tt class="xref py py-func docutils literal"><span class="pre">numkit.integration.simps_error()</span></tt></a>).</li>
+<a class="reference external" href="http://orbeckst.github.io/GromacsWrapper/numkit/integration.html#numkit.integration.simps_error" title="(in GromacsWrapper v0.3)"><tt class="xref py py-func docutils literal"><span class="pre">numkit.integration.simps_error()</span></tt></a>).</li>
 </ol>
 </div></blockquote>
 <div class="admonition note">
@@ -323,7 +348,7 @@ Chemical Theory and Computation, 6 (4):1018&#8211;1027,
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Keywords :</th><td class="field-body"><dl class="first last docutils">
+<tr class="field-odd field"><th class="field-name">Keywords :</th><td class="field-body"><dl class="first last docutils">
 <dt><em>p</em></dt>
 <dd><p class="first last">pressure in bar [1.0]
 TODO: should be obtained from equilib sim</p>
@@ -332,7 +357,7 @@ TODO: should be obtained from equilib sim</p>
 <dd><p class="first last">reload raw data even though it is already loaded</p>
 </dd>
 <dt><em>stride</em></dt>
-<dd><p class="first last">read data every <em>stride</em> lines, <tt class="xref docutils literal"><span class="pre">None</span></tt> uses the class default</p>
+<dd><p class="first last">read data every <em>stride</em> lines, <tt class="docutils literal"><span class="pre">None</span></tt> uses the class default</p>
 </dd>
 <dt><em>autosave</em></dt>
 <dd><p class="first last">save to the pickle file when results have been computed</p>
@@ -358,9 +383,9 @@ TODO: should be obtained from equilib sim</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Keywords :</th><td class="field-body"><dl class="first last docutils">
+<tr class="field-odd field"><th class="field-name">Keywords :</th><td class="field-body"><dl class="first last docutils">
 <dt><em>stride</em></dt>
-<dd><p class="first last">read data every <em>stride</em> lines, <tt class="xref docutils literal"><span class="pre">None</span></tt> uses the class default</p>
+<dd><p class="first last">read data every <em>stride</em> lines, <tt class="docutils literal"><span class="pre">None</span></tt> uses the class default</p>
 </dd>
 <dt><em>autosave</em></dt>
 <dd><p class="first last">immediately save the class pickle fep file</p>
@@ -396,7 +421,7 @@ occur which fail to find a <cite>md.xvg</cite> file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Returns :</th><td class="field-body"><tt class="xref docutils literal"><span class="pre">True</span></tt> if any of the xvg dgdl files were produced with the
+<tr class="field-odd field"><th class="field-name">Returns :</th><td class="field-body"><tt class="docutils literal"><span class="pre">True</span></tt> if any of the xvg dgdl files were produced with the
 permissive=True flag and had skipped lines.</td>
 </tr>
 </tbody>
@@ -429,7 +454,7 @@ files.</div></blockquote>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Arguments:</th><td class="field-body"><dl class="first docutils">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><dl class="first docutils">
 <dt><em>args</em></dt>
 <dd><p class="first last">joins the arguments into a path and adds the default
 filename for the dvdl file</p>
@@ -437,11 +462,11 @@ filename for the dvdl file</p>
 </dl>
 </td>
 </tr>
-<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Checks if a compressed file exists and returns
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Checks if a compressed file exists and returns
 the appropriate filename.</p>
 </td>
 </tr>
-<tr class="field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><tt class="xref py py-exc docutils literal"><span class="pre">IOError</span></tt> with error code ENOENT if no file
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><tt class="xref py py-exc docutils literal"><span class="pre">IOError</span></tt> with error code ENOENT if no file
 could be found</p>
 </td>
 </tr>
@@ -471,7 +496,7 @@ could be found</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Returns :</th><td class="field-body"><tt class="xref docutils literal"><span class="pre">True</span></tt> if the dV/dl data have bee aquired
+<tr class="field-odd field"><th class="field-name">Returns :</th><td class="field-body"><tt class="docutils literal"><span class="pre">True</span></tt> if the dV/dl data have bee aquired
 (<a class="reference internal" href="#mdpow.fep.Gsolv.collect" title="mdpow.fep.Gsolv.collect"><tt class="xref py py-meth docutils literal"><span class="pre">Gsolv.collect()</span></tt></a>) for all FEP simulations.</td>
 </tr>
 </tbody>
@@ -500,7 +525,7 @@ could be found</p>
 
 <dl class="attribute">
 <dt id="mdpow.fep.Gsolv.protocols">
-<tt class="descname">protocols</tt><a class="headerlink" href="#mdpow.fep.Gsolv.protocols" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">protocols</tt><em class="property"> = ['setup', 'fep_run']</em><a class="headerlink" href="#mdpow.fep.Gsolv.protocols" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check list of all methods that can be run as an independent protocol; see also
 <tt class="xref py py-meth docutils literal"><span class="pre">Simulation.get_protocol()</span></tt> and <tt class="xref py py-class docutils literal"><span class="pre">restart.Journal</span></tt></p>
 </dd></dl>
@@ -509,19 +534,19 @@ could be found</p>
 <dt id="mdpow.fep.Gsolv.qsub">
 <tt class="descname">qsub</tt><big>(</big><em>script=None</em><big>)</big><a class="headerlink" href="#mdpow.fep.Gsolv.qsub" title="Permalink to this definition">¶</a></dt>
 <dd><p>Submit a batch script locally.</p>
-<p>If <em>script</em> == <tt class="xref docutils literal"><span class="pre">None</span></tt> then take the first script (works well if only
+<p>If <em>script</em> == <tt class="docutils literal"><span class="pre">None</span></tt> then take the first script (works well if only
 one template was provided).</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mdpow.fep.Gsolv.results">
-<tt class="descname">results</tt><a class="headerlink" href="#mdpow.fep.Gsolv.results" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">results</tt><em class="property"> = None</em><a class="headerlink" href="#mdpow.fep.Gsolv.results" title="Permalink to this definition">¶</a></dt>
 <dd><p>Results from the analysis</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="mdpow.fep.Gsolv.scripts">
-<tt class="descname">scripts</tt><a class="headerlink" href="#mdpow.fep.Gsolv.scripts" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">scripts</tt><em class="property"> = None</em><a class="headerlink" href="#mdpow.fep.Gsolv.scripts" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generated run scripts</p>
 </dd></dl>
 
@@ -533,13 +558,13 @@ one template was provided).</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Keywords :</th><td class="field-body"><dl class="first last docutils">
+<tr class="field-odd field"><th class="field-name">Keywords :</th><td class="field-body"><dl class="first last docutils">
 <dt><em>qscript</em></dt>
 <dd><p class="first last">(List of) template(s) for batch submission scripts; if not set then
 the templates are used that were supplied to the constructor.</p>
 </dd>
 <dt><em>kwargs</em></dt>
-<dd><p class="first">Most kwargs are passed on to <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/setup.html#gromacs.setup.MD" title="(in GromacsWrapper v0.2)"><tt class="xref py py-func docutils literal"><span class="pre">gromacs.setup.MD()</span></tt></a> although some
+<dd><p class="first">Most kwargs are passed on to <a class="reference external" href="http://orbeckst.github.io/GromacsWrapper/gromacs/blocks/setup.html#gromacs.setup.MD" title="(in GromacsWrapper v0.3)"><tt class="xref py py-func docutils literal"><span class="pre">gromacs.setup.MD()</span></tt></a> although some
 are set to values that are required for the FEP functionality.</p>
 <dl class="docutils">
 <dt><em>mdrun_opts</em></dt>
@@ -562,8 +587,8 @@ constructing <a class="reference internal" href="#mdpow.fep.Gsolv" title="mdpow.
 </table>
 <div class="admonition-see-also admonition seealso">
 <p class="first admonition-title">See also</p>
-<p class="last"><a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/setup.html#gromacs.setup.MD" title="(in GromacsWrapper v0.2)"><tt class="xref py py-func docutils literal"><span class="pre">gromacs.setup.MD()</span></tt></a> and
-<a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/qsub.html#gromacs.qsub.generate_submit_scripts" title="(in GromacsWrapper v0.2)"><tt class="xref py py-func docutils literal"><span class="pre">gromacs.qsub.generate_submit_scripts()</span></tt></a></p>
+<p class="last"><a class="reference external" href="http://orbeckst.github.io/GromacsWrapper/gromacs/blocks/setup.html#gromacs.setup.MD" title="(in GromacsWrapper v0.3)"><tt class="xref py py-func docutils literal"><span class="pre">gromacs.setup.MD()</span></tt></a> and
+<a class="reference external" href="http://orbeckst.github.io/GromacsWrapper/gromacs/blocks/qsub.html#gromacs.qsub.generate_submit_scripts" title="(in GromacsWrapper v0.3)"><tt class="xref py py-func docutils literal"><span class="pre">gromacs.qsub.generate_submit_scripts()</span></tt></a></p>
 </div>
 </dd></dl>
 
@@ -573,8 +598,8 @@ constructing <a class="reference internal" href="#mdpow.fep.Gsolv" title="mdpow.
 <dd><p>Return a string that summarizes the energetics.</p>
 <p>Each energy component is followed by its error.</p>
 <p>Format:</p>
-<div class="highlight-python"><pre>.                 ---------- kJ/mol ------
-molecule solvent  total  coulomb  vdw  Vdp</pre>
+<div class="highlight-python"><pre>.                 ---------- kJ/mol ---------
+molecule solvent  total  coulomb  vdw  DeltaW</pre>
 </div>
 </dd></dl>
 
@@ -606,7 +631,7 @@ molecule solvent  total  coulomb  vdw  Vdp</pre>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Arguments :</th><td class="field-body"><dl class="first last docutils">
+<tr class="field-odd field"><th class="field-name">Arguments :</th><td class="field-body"><dl class="first last docutils">
 <dt><em>filename</em></dt>
 <dd><p class="first last">name of the text file</p>
 </dd>
@@ -620,8 +645,8 @@ molecule solvent  total  coulomb  vdw  Vdp</pre>
 </table>
 <dl class="docutils">
 <dt>Format::</dt>
-<dd>.                 &#8212;&#8212;&#8212;- kJ/mol &#8212;&#8212;
-molecule solvent  total  coulomb  vdw  Vdp</dd>
+<dd>.                 &#8212;&#8212;&#8212;- kJ/mol &#8212;&#8212;&#8212;
+molecule solvent  total  coulomb  vdw  DeltaW</dd>
 </dl>
 </dd></dl>
 
@@ -636,7 +661,7 @@ molecule solvent  total  coulomb  vdw  Vdp</dd>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Arguments :</th><td class="field-body"><dl class="first last docutils">
+<tr class="field-odd field"><th class="field-name">Arguments :</th><td class="field-body"><dl class="first last docutils">
 <dt><em>molecule</em></dt>
 <dd><p class="first last">name of the molecule for which the hydration free
 energy is to be computed (as in the gromacs topology)
@@ -675,7 +700,7 @@ determined by either <em>simulation</em> or <em>molecule</em>, <em>top</em>, and
 </dd>
 <dt><em>qscript</em></dt>
 <dd><p class="first last">template or list of templates for queuing system scripts
-(see <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/config.html#gromacs.config.templates" title="(in GromacsWrapper v0.2)"><tt class="xref py py-data docutils literal"><span class="pre">gromacs.config.templates</span></tt></a> for details) [local.sh]</p>
+(see <a class="reference external" href="http://orbeckst.github.io/GromacsWrapper/gromacs/core/config.html#gromacs.config.templates" title="(in GromacsWrapper v0.3)"><tt class="xref py py-data docutils literal"><span class="pre">gromacs.config.templates</span></tt></a> for details) [local.sh]</p>
 </dd>
 <dt><em>includes</em></dt>
 <dd><p class="first last">include directories</p>
@@ -691,16 +716,21 @@ are provided then simply set the attribute <tt class="xref py py-attr docutils l
 the default checkpoint file to <em>filename</em>.</p>
 </dd>
 <dt><em>basedir</em></dt>
-<dd><p class="first last">Prepend <em>basedir</em> to all filenames; <tt class="xref docutils literal"><span class="pre">None</span></tt> disables [.]</p>
+<dd><p class="first last">Prepend <em>basedir</em> to all filenames; <tt class="docutils literal"><span class="pre">None</span></tt> disables [.]</p>
 </dd>
 <dt><em>permissive</em></dt>
-<dd><p class="first last">Set to <tt class="xref docutils literal"><span class="pre">True</span></tt> if you want to read past corrupt data in output
-xvg files (see <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/formats.html#gromacs.formats.XVG" title="(in GromacsWrapper v0.2)"><tt class="xref py py-class docutils literal"><span class="pre">gromacs.formats.XVG</span></tt></a> for details); note that
+<dd><p class="first last">Set to <tt class="docutils literal"><span class="pre">True</span></tt> if you want to read past corrupt data in output
+xvg files (see <tt class="xref py py-class docutils literal"><span class="pre">gromacs.formats.XVG</span></tt> for details); note that
 <em>permissive*=``True`` can lead to **wrong results*</em>. Overrides
-the value set in a loaded pickle file. [<tt class="xref docutils literal"><span class="pre">False</span></tt>]</p>
+the value set in a loaded pickle file. [<tt class="docutils literal"><span class="pre">False</span></tt>]</p>
 </dd>
 <dt><em>stride</em></dt>
 <dd><p class="first last">collect every <em>stride</em> data line, see <a class="reference internal" href="#mdpow.fep.Gsolv.collect" title="mdpow.fep.Gsolv.collect"><tt class="xref py py-meth docutils literal"><span class="pre">Gsolv.collect()</span></tt></a> [1]</p>
+</dd>
+<dt><em>v_solute</em></dt>
+<dd><p class="first last">solute volume (required for the correction <tt class="xref py py-meth docutils literal"><span class="pre">DeltaW()</span></tt>); if not
+provided then we try to compute it from the equilibrium simulation
+provided in keyword <em>simulation</em>.</p>
 </dd>
 <dt><em>kwargs</em></dt>
 <dd><p class="first last">other undocumented arguments (see source for the moment)</p>
@@ -724,7 +754,7 @@ we hope to reduce the overall error on the dis-charging free energy.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Arguments :</th><td class="field-body"><dl class="first last docutils">
+<tr class="field-odd field"><th class="field-name">Arguments :</th><td class="field-body"><dl class="first last docutils">
 <dt><em>molecule</em></dt>
 <dd><p class="first last">name of the molecule for which the hydration free
 energy is to be computed (as in the gromacs topology)
@@ -763,7 +793,7 @@ determined by either <em>simulation</em> or <em>molecule</em>, <em>top</em>, and
 </dd>
 <dt><em>qscript</em></dt>
 <dd><p class="first last">template or list of templates for queuing system scripts
-(see <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/config.html#gromacs.config.templates" title="(in GromacsWrapper v0.2)"><tt class="xref py py-data docutils literal"><span class="pre">gromacs.config.templates</span></tt></a> for details) [local.sh]</p>
+(see <a class="reference external" href="http://orbeckst.github.io/GromacsWrapper/gromacs/core/config.html#gromacs.config.templates" title="(in GromacsWrapper v0.3)"><tt class="xref py py-data docutils literal"><span class="pre">gromacs.config.templates</span></tt></a> for details) [local.sh]</p>
 </dd>
 <dt><em>includes</em></dt>
 <dd><p class="first last">include directories</p>
@@ -779,16 +809,21 @@ are provided then simply set the attribute <tt class="xref py py-attr docutils l
 the default checkpoint file to <em>filename</em>.</p>
 </dd>
 <dt><em>basedir</em></dt>
-<dd><p class="first last">Prepend <em>basedir</em> to all filenames; <tt class="xref docutils literal"><span class="pre">None</span></tt> disables [.]</p>
+<dd><p class="first last">Prepend <em>basedir</em> to all filenames; <tt class="docutils literal"><span class="pre">None</span></tt> disables [.]</p>
 </dd>
 <dt><em>permissive</em></dt>
-<dd><p class="first last">Set to <tt class="xref docutils literal"><span class="pre">True</span></tt> if you want to read past corrupt data in output
-xvg files (see <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/core/formats.html#gromacs.formats.XVG" title="(in GromacsWrapper v0.2)"><tt class="xref py py-class docutils literal"><span class="pre">gromacs.formats.XVG</span></tt></a> for details); note that
+<dd><p class="first last">Set to <tt class="docutils literal"><span class="pre">True</span></tt> if you want to read past corrupt data in output
+xvg files (see <tt class="xref py py-class docutils literal"><span class="pre">gromacs.formats.XVG</span></tt> for details); note that
 <em>permissive*=``True`` can lead to **wrong results*</em>. Overrides
-the value set in a loaded pickle file. [<tt class="xref docutils literal"><span class="pre">False</span></tt>]</p>
+the value set in a loaded pickle file. [<tt class="docutils literal"><span class="pre">False</span></tt>]</p>
 </dd>
 <dt><em>stride</em></dt>
 <dd><p class="first last">collect every <em>stride</em> data line, see <a class="reference internal" href="#mdpow.fep.Gsolv.collect" title="mdpow.fep.Gsolv.collect"><tt class="xref py py-meth docutils literal"><span class="pre">Gsolv.collect()</span></tt></a> [1]</p>
+</dd>
+<dt><em>v_solute</em></dt>
+<dd><p class="first last">solute volume (required for the correction <tt class="xref py py-meth docutils literal"><span class="pre">DeltaW()</span></tt>); if not
+provided then we try to compute it from the equilibrium simulation
+provided in keyword <em>simulation</em>.</p>
 </dd>
 <dt><em>kwargs</em></dt>
 <dd><p class="first last">other undocumented arguments (see source for the moment)</p>
@@ -816,7 +851,7 @@ the value set in a loaded pickle file. [<tt class="xref docutils literal"><span 
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Arguments :</th><td class="field-body"><dl class="first docutils">
+<tr class="field-odd field"><th class="field-name">Arguments :</th><td class="field-body"><dl class="first docutils">
 <dt><em>G1</em>, <em>G2</em></dt>
 <dd><p class="first last"><em>G1</em> and <em>G2</em> should be a <a class="reference internal" href="#mdpow.fep.Ghyd" title="mdpow.fep.Ghyd"><tt class="xref py py-class docutils literal"><span class="pre">Ghyd</span></tt></a> and a <a class="reference internal" href="#mdpow.fep.Goct" title="mdpow.fep.Goct"><tt class="xref py py-class docutils literal"><span class="pre">Goct</span></tt></a> instance,
 but order does not matter</p>
@@ -830,7 +865,7 @@ but order does not matter</p>
 </dl>
 </td>
 </tr>
-<tr class="field"><th class="field-name">Returns :</th><td class="field-body"><p class="first last">(transfer free energy, log10 of the water-octanol partition coefficient = log Pow)</p>
+<tr class="field-even field"><th class="field-name">Returns :</th><td class="field-body"><p class="first last">(transfer free energy, log10 of the water-octanol partition coefficient = log Pow)</p>
 </td>
 </tr>
 </tbody>
@@ -859,7 +894,7 @@ only of interest to developers.</p>
 <dl class="function">
 <dt id="mdpow.fep.molar_to_nm3">
 <tt class="descclassname">mdpow.fep.</tt><tt class="descname">molar_to_nm3</tt><big>(</big><em>c</em><big>)</big><a class="headerlink" href="#mdpow.fep.molar_to_nm3" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert a concentration in Molar to nm^-3.</p>
+<dd><p>Convert a concentration in Molar to nm|^-3|.</p>
 </dd></dl>
 
 <dl class="function">
@@ -877,18 +912,18 @@ only of interest to developers.</p>
 <dl class="data">
 <dt id="mdpow.fep.N_AVOGADRO">
 <tt class="descclassname">mdpow.fep.</tt><tt class="descname">N_AVOGADRO</tt><a class="headerlink" href="#mdpow.fep.N_AVOGADRO" title="Permalink to this definition">¶</a></dt>
-<dd><p>Avogadro&#8217;s constant <em>N</em><sub>A</sub> in mol^-1 (<a class="reference external" href="http://physics.nist.gov/cgi-bin/cuu/Value?na">NA NIST value</a>).</p>
+<dd><p>Avogadro&#8217;s constant <em>N</em><sub>A</sub> in mol<sup>-1</sup> (<a class="reference external" href="http://physics.nist.gov/cgi-bin/cuu/Value?na">NA NIST value</a>).</p>
 </dd></dl>
 
 <dl class="data">
 <dt id="mdpow.fep.kBOLTZ">
 <tt class="descclassname">mdpow.fep.</tt><tt class="descname">kBOLTZ</tt><a class="headerlink" href="#mdpow.fep.kBOLTZ" title="Permalink to this definition">¶</a></dt>
-<dd><p>Boltzmann&#8217;s constant <em>k</em><sub>B</sub> in kJ mol^-1 (<a class="reference external" href="http://physics.nist.gov/cgi-bin/cuu/Value?k">kB NIST value</a>).</p>
+<dd><p>Boltzmann&#8217;s constant <em>k</em><sub>B</sub> in kJ mol<sup>-1</sup> (<a class="reference external" href="http://physics.nist.gov/cgi-bin/cuu/Value?k">kB NIST value</a>).</p>
 </dd></dl>
 
 <dl class="data">
 <dt id="mdpow.fep.fep_templates">
-<tt class="descclassname">mdpow.fep.</tt><tt class="descname">fep_templates</tt><a class="headerlink" href="#mdpow.fep.fep_templates" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">mdpow.fep.</tt><tt class="descname">fep_templates</tt><em class="property"> = {'production_mdp': '/Volumes/Data/oliver/Biop/Projects/Methods/pow/lib/python/POW/mdpow/templates/fep_opls.mdp'}</em><a class="headerlink" href="#mdpow.fep.fep_templates" title="Permalink to this definition">¶</a></dt>
 <dd><p>Template mdp files for different stages of the FEP protocol. (add equilibration, too?)</p>
 </dd></dl>
 
@@ -926,10 +961,10 @@ use preprocessed topology from <tt class="docutils literal"><span class="pre">gr
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="equil.html"
-                        title="previous chapter"><tt class="docutils literal docutils literal"><span class="pre">mdpow.equil</span></tt> &#8212; Setting up and running equilibrium MD</a></p>
+                        title="previous chapter"><tt class="docutils literal"><span class="pre">mdpow.equil</span></tt> &#8212; Setting up and running equilibrium MD</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="analysis.html"
-                        title="next chapter"><tt class="docutils literal docutils literal"><span class="pre">mdpow.analysis</span></tt> &#8212; Collection of analysis and plotting functions</a></p>
+  <p class="topless"><a href="correction.html"
+                        title="next chapter"><tt class="docutils literal"><span class="pre">mdpow.correction</span></tt> &#8212; Volume correction for running <em>NVT</em> instead of <em>NPT</em></a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/fep.txt"
@@ -938,7 +973,7 @@ use preprocessed topology from <tt class="docutils literal"><span class="pre">gr
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -962,17 +997,17 @@ use preprocessed topology from <tt class="docutils literal"><span class="pre">gr
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="analysis.html" title="mdpow.analysis — Collection of analysis and plotting functions"
+          <a href="correction.html" title="mdpow.correction — Volume correction for running NVT instead of NPT"
              >next</a> |</li>
         <li class="right" >
           <a href="equil.html" title="mdpow.equil — Setting up and running equilibrium MD"
              >previous</a> |</li>
-        <li><a href="index.html">MDpow v0.5.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow 0.5.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2010–2011, Oliver Beckstein and Bogdan Iorga.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+        &copy; Copyright 2010–2013, Oliver Beckstein and Bogdan Iorga.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>

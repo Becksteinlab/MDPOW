@@ -3,17 +3,20 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>MDpow documentation &mdash; MDpow v0.5.1 documentation</title>
+    <title>MDpow documentation &mdash; MDpow 0.5.2 documentation</title>
+    
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.5.1',
+        VERSION:     '0.5.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -22,7 +25,8 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="MDpow v0.5.1 documentation" href="#" />
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="MDpow 0.5.2 documentation" href="#" />
     <link rel="next" title="Quick installation instructions for POW" href="INSTALL.html" /> 
   </head>
   <body>
@@ -38,7 +42,7 @@
         <li class="right" >
           <a href="INSTALL.html" title="Quick installation instructions for POW"
              accesskey="N">next</a> |</li>
-        <li><a href="#">MDpow v0.5.1 documentation</a> &raquo;</li> 
+        <li><a href="#">MDpow 0.5.2 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -53,7 +57,7 @@
 solvation free energies via molecular dynamics (MD) simulations. In
 particular, it facilitates the computation of <em>water-octanol partition
 coefficients</em> (<em>P</em><sub>OW</sub>).</p>
-<p>The package is built on top of the <a class="reference external" href="http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/">GromacsWrapper</a> framework (which
+<p>The package is built on top of the <a class="reference external" href="http://orbeckst.github.io/GromacsWrapper/">GromacsWrapper</a> framework (which
 can be automatically installed).</p>
 <p>Contents:</p>
 <div class="toctree-wrapper compound">
@@ -85,6 +89,12 @@ can be automatically installed).</p>
 <li class="toctree-l2"><a class="reference internal" href="fep.html#developer-notes">Developer notes</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="correction.html"><tt class="docutils literal"><span class="pre">mdpow.correction</span></tt> &#8212; Volume correction for running <em>NVT</em> instead of <em>NPT</em></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="correction.html#required-quantities-for-the-correction">Required quantities for the correction <span class="math">\(\Delta W\)</span></a></li>
+<li class="toctree-l2"><a class="reference internal" href="correction.html#correction-to-obtain-gibbs-solvation-free-energy-from-helmholtz-solvation-free-energy">Correction to obtain Gibbs solvation free energy from Helmholtz solvation free energy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="correction.html#functions-and-classes">Functions and Classes</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="analysis.html"><tt class="docutils literal"><span class="pre">mdpow.analysis</span></tt> &#8212; Collection of analysis and plotting functions</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="analysis.html#prepare-data">Prepare data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="analysis.html#making-graphs">Making graphs</a></li>
@@ -98,6 +108,7 @@ can be automatically installed).</p>
 <li class="toctree-l2"><a class="reference internal" href="utilities.html#mdpow-run-performing-complete-simulation-protocols"><tt class="docutils literal"><span class="pre">mdpow.run</span></tt> &#8212; Performing complete simulation protocols</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="tables.html">Tables of hard-coded values used in mdpow</a></li>
 </ul>
 </div>
 </div>
@@ -135,7 +146,7 @@ can be automatically installed).</p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -161,12 +172,12 @@ can be automatically installed).</p>
         <li class="right" >
           <a href="INSTALL.html" title="Quick installation instructions for POW"
              >next</a> |</li>
-        <li><a href="#">MDpow v0.5.1 documentation</a> &raquo;</li> 
+        <li><a href="#">MDpow 0.5.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2010–2011, Oliver Beckstein and Bogdan Iorga.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+        &copy; Copyright 2010–2013, Oliver Beckstein and Bogdan Iorga.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>
