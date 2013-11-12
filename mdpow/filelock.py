@@ -1,13 +1,11 @@
 """
-:Author: Evan Fosmark
-:Year: 2009
-:License: BSD
-:URL: http://www.evanfosmark.com/2009/01/cross-platform-file-locking-support-in-python/
-
 Cross-platform filelocking
 ==========================
 
-http://www.evanfosmark.com/2009/01/cross-platform-file-locking-support-in-python/
+:Author: Evan Fosmark
+:Year: 2009
+:License: BSD (as mentioned in Evan's comment dating 22 April 2009 1:04pm)
+:URL: http://www.evanfosmark.com/2009/01/cross-platform-file-locking-support-in-python/
 
 On occasion, one requires the need to lock a file. Now, this is relatively easy
 if you're targeting a specific platform because there is often a function in
@@ -26,22 +24,20 @@ The largest downside of this is that the directory the file is located in must
 be writable. I hope this code helps you. Of course, if you have a better
 recipe, please share it in the comments. ;)
 
-
-(Licence: BSD; as mentioned in Evan's comment dating 22 April 2009 1:04pm)
 """
 import os
 import time
 import errno
- 
+
 class FileLockException(Exception):
     pass
- 
+
 class FileLock(object):
-    """ A file locking mechanism that has context-manager support so 
+    """ A file locking mechanism that has context-manager support so
         you can use it in a with statement. This should be relatively cross
         compatible as it doesn't rely on msvcrt or fcntl for the locking.
     """
- 
+
     def __init__(self, file_name, timeout=10, delay=.05):
         """ Prepare the file locker. Specify the file to lock and optionally
             the maximum timeout and the delay between each attempt to lock.
@@ -51,12 +47,12 @@ class FileLock(object):
         self.file_name = file_name
         self.timeout = timeout
         self.delay = delay
- 
- 
+
+
     def acquire(self):
         """ Acquire the lock, if possible. If the lock is in use, it check again
             every `wait` seconds. It does this until it either gets the lock or
-            exceeds `timeout` number of seconds, in which case it throws 
+            exceeds `timeout` number of seconds, in which case it throws
             an exception.
         """
         start_time = time.time()
@@ -66,41 +62,41 @@ class FileLock(object):
                 break;
             except OSError as e:
                 if e.errno != errno.EEXIST:
-                    raise 
+                    raise
                 if (time.time() - start_time) >= self.timeout:
                     raise FileLockException("Timeout occured.")
                 time.sleep(self.delay)
         self.is_locked = True
- 
- 
+
+
     def release(self):
-        """ Get rid of the lock by deleting the lockfile. 
-            When working in a `with` statement, this gets automatically 
+        """ Get rid of the lock by deleting the lockfile.
+            When working in a `with` statement, this gets automatically
             called at the end.
         """
         if self.is_locked:
             os.close(self.fd)
             os.unlink(self.lockfile)
             self.is_locked = False
- 
- 
+
+
     def __enter__(self):
-        """ Activated when used in the with statement. 
+        """ Activated when used in the with statement.
             Should automatically acquire a lock to be used in the with block.
         """
         if not self.is_locked:
             self.acquire()
         return self
- 
- 
+
+
     def __exit__(self, type, value, traceback):
         """ Activated at the end of the with statement.
             It automatically releases the lock if it isn't locked.
         """
         if self.is_locked:
             self.release()
- 
- 
+
+
     def __del__(self):
         """ Make sure that the FileLock instance doesn't leave a lockfile
             lying around.

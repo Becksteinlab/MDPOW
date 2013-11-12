@@ -23,7 +23,7 @@ import sys, os
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 # 'sphinx.ext.pngmath', 'sphinx.ext.jsmath'
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.intersphinx', 'sphinx.ext.coverage']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.intersphinx', 'sphinx.ext.coverage', 'sphinx.ext.mathjax']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -39,7 +39,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'MDpow'
-copyright = u'2010–2011, Oliver Beckstein and Bogdan Iorga'
+copyright = u'2010–2013, Oliver Beckstein and Bogdan Iorga'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -206,8 +206,8 @@ latex_documents = [
 intersphinx_mapping = {'http://docs.python.org/': None,
                        'http://docs.scipy.org/doc/numpy/': None,
                        'http://docs.scipy.org/doc/scipy/reference/': None,
-                       'http://sbcb.bioch.ox.ac.uk/oliver/software/RecSQL/html/': None,
-                       'http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/': None}
+                       'http://orbeckst.github.io/RecSQL/': None,
+                       'http://orbeckst.github.io/GromacsWrapper/': None}
 
 
 

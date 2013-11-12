@@ -1,7 +1,7 @@
 # mdpow: fep.py
 # Copyright (c) 2010 Oliver Beckstein
 
-"""
+r"""
 :mod:`mdpow.fep` -- Calculate free energy of solvation
 ======================================================
 
@@ -40,12 +40,14 @@ Some notes on how the approach encoded here differs from what others
 
   .. math::
 
-      \Delta A = \Delta A_\text{coul}(\text{vac}) - (\Delta A_\text{coul}(\text{sol}) + \Delta A_\text{vdw}(\text{sol}))
+      \Delta A = \Delta A_{\mathrm{coul}}(\mathrm{vac}) - (\Delta A_{\mathrm{coul}}(\mathrm{sol}) + \Delta A_{\mathrm{vdw}}(\mathrm{sol}))
 
   (but also annihilates the interactions on the solute, corresponding to
   ``couple-intramol = yes``) whereas we do
 
-      \Delta A = - (\Delta A_\text{coul}(\text{sol}) + \Delta A_\text{vdw}(\text{sol}))
+  .. math::
+
+      \Delta A = - (\Delta A_{\mathrm{coul}}(\mathrm{sol}) + \Delta A_{\mathrm{vdw}}(\mathrm{sol}))
 
 
 - Pressure and Volume: Mobley scales the box size with an affine transformation
@@ -67,7 +69,8 @@ Some notes on how the approach encoded here differs from what others
 
   - correcting for the fact that we run FEP at constant volume
     (i.e. calculate a Helmholtz free energy instead of a Gibbs free
-    energy)
+    energy) --- see :mod:`mdpow.correction` (which is not fully
+    implemented yet)
 
 Example
 -------
@@ -109,11 +112,11 @@ Additional objects that support :class:`mdpow.fep.Gsolv`.
 
 .. data:: N_AVOGADRO
 
-          Avogadro's constant |NA| in mol^-1 (`NA NIST value`_).
+          Avogadro's constant |NA| in mol\ :sup:`-1` (`NA NIST value`_).
 
 .. data:: kBOLTZ
 
-          Boltzmann's constant |kB| in kJ mol^-1 (`kB NIST value`_).
+          Boltzmann's constant |kB| in kJ mol\ :sup:`-1` (`kB NIST value`_).
 
 .. autodata:: fep_templates
 
@@ -121,6 +124,9 @@ Additional objects that support :class:`mdpow.fep.Gsolv`.
 .. |kB| replace:: *k*\ :sub:`B`
 .. _NA NIST value: http://physics.nist.gov/cgi-bin/cuu/Value?na
 .. _kB NIST value: http://physics.nist.gov/cgi-bin/cuu/Value?k
+.. |^-1| replace:: \ :sup:`-1`
+.. |^-3| replace:: \ :sup:`-3`
+.. |^3|  replace:: \ :sup:`3`
 
 TODO
 ~~~~
@@ -157,13 +163,13 @@ from restart import Journalled
 from mdpow import kBOLTZ, N_AVOGADRO
 
 def molar_to_nm3(c):
-    """Convert a concentration in Molar to nm^-3."""
+    """Convert a concentration in Molar to nm|^-3|."""
     return c * N_AVOGADRO * 1e-24
 
 def bar_to_kJmolnm3(p):
-    """Convert pressure in bar to kJ mol^-1 nm^-3.
+    """Convert pressure in bar to kJ mol|^-1| nm|^-3|.
 
-    1 bar = 1e5 J m^-3
+    1 bar = 1e5 J m|^-3|
     """
     return p * N_AVOGADRO * 1e-25
 
@@ -197,35 +203,35 @@ class Gsolv(Journalled):
     """Simulations to calculate and analyze the solvation free energy.
 
     The simulations are run at constant volume so this is in fact a Helmholtz
-    solvation free energy, :math:`Delta A(V)`. To compute the Gibbs solvation free
+    solvation free energy, :math:`\Delta A(V)`. To compute the Gibbs solvation free
     energy (which is the experimental quantity) at the standard state (1 M
     solution and 1 M in the gas phase, also known as the "Ben-Naim standard
-    state") add a correction term :math:`Delta W(V_\text{sim}, v_s)`:
+    state") add a correction term :math:`Delta W(V_{\mathrm{sim}}, v_s)`:
 
     .. math::
 
-           \Delta G^{*} = \Delta A + \Delta W(V_\text{sim}, v_s)
+           \Delta G^{*} = \Delta A + \Delta W(V_{\mathrm{sim}}, v_s)
 
-    which depends on simulation cell volume :math:`V_\text{sim}` and
-    the volume of the solute :math:`v_s`.  :math:`V_\text{sim}` is the
+    which depends on simulation cell volume :math:`V_{\mathrm{sim}}` and
+    the volume of the solute :math:`v_s`.  :math:`V_{\mathrm{sim}}` is the
     constant simulations box volume (taken from the last frame of the
     equilibrium simulation that is the starting point for the FEP
     simulations.)
 
     (We neglect the negligible correction :math:`-kT \ln
-    V_x/V_\text{sim} = -kT \ln(1 - v_s/V_\text{sim})` where
+    V_x/V_{\mathrm{sim}} = -kT \ln(1 - v_s/V_{\mathrm{sim}})` where
     :math:`V_x` is the volume of the system without the solute but the
     same number of water molecules as in the fully interacting case
     [see Michael Shirts' Thesis, p82].)
 
     :math:`\Delta A` is computed from the decharging and the
-    decoupling step. With our choice of lambda=0 being the fully
-    interacting and lambda=1 the non-interacting state, it is computed
+    decoupling step. With our choice of ``lambda=0`` being the fully
+    interacting and ``lambda=1`` the non-interacting state, it is computed
     as
 
     .. math::
 
-            \Delta A = -(\Delta A_\text{coul} + \Delta A_\text{vdw})
+            \Delta A = -(\Delta A_{\mathrm{coul}} + \Delta A_{\mathrm{vdw}})
 
     With this protocol, the concentration in the liquid and in the gas
     phase is the same. (Under the assumption of ideal solution/ideal
@@ -562,36 +568,42 @@ class Gsolv(Journalled):
                       )
         return gromacs.setup.MD(**kwargs)
 
-
-    # TODO: p must be consistent between DeltaA_std and pdV
-    # should get pressure from equil simulation
-
     def DeltaW(self):
-        """Difference in work to remove a cavity between NPT and NVT
+        """Difference in work between *NPT* and *NVT* to remove a solute cavity.
 
         .. math::
 
-           \Delta W := \Delta G - \Delta A
+           \Delta W := \Delta G - \Delta A = W_{NPT} - W_{NVT}
 
-        This correction can be added to a Helmholtz free energy to
-        estimate the Gibbs free energy:
+        This correction for the decoupling process can be added to a
+        Helmholtz free energy of decoupling to estimate the Gibbs free
+        energy of decoupling:
 
         .. math::
 
           \Delta G = \Delta A + \Delta W
 
-        :math:`\Delta` refers to
+        Our FEP describes a decoupling process *aquaeous (fully
+        coupled)* :math:`rightarrow` *gaseous (decoupled)* whereas the
+        hydration free energy is by convention the process in the
+        opposite direction. Therefore, the correction :math:`\Delta W`
+        for decoupling is *subtracted* from the Helmholtz hydration
+        free energy:
 
-          aq (fully coupled) --> gaseous (decoupled)
+        .. math::
+
+           \Delta G_{\mathrm{hyd}} = -(\Delta A_{\mathrm{decouple}} + \Delta W_{\mathrm{decouple}}) = \Delta A_{\mathrm{hyd}} - \Delta W_{\mathrm{decouple}}
+
 
         .. warning:: Not implemented at the moment and simply set to 0.
 
-        :Returns: 0 (although it should be something like Vsim*(p*-p))  [in kJ/mol]
+        :Returns: 0 (not implemented)  [in kJ/mol]
 
+        .. SeeAlso:: :func:`mdpow.correction.DeltaW`
         """
         # TODO: implement this; currently use 0 to leave the logic in place
         self.results.DeltaA.DeltaW = QuantityWithError(0,0)  # in kJ/mol
-        logger.warning("DeltaW correction not implemented: uses 0")
+        logger.warning("DeltaW (NVT->NPT) correction not implemented: uses 0")
         return self.results.DeltaA.DeltaW
 
 
@@ -710,17 +722,24 @@ g
     def analyze(self, p=1.0, force=False, stride=None, autosave=True):
         """Extract dV/dl from output and calculate dG by TI.
 
-        Thermodynamic integration (TI) is performed on the individual component
-        window calculation (typically the Coulomb and the VDW part, DeltaA_coul
-        and DeltaA_vdw). DeltaA_coul is the free energy component of
-        discharging the molecule and DeltaA_vdw of decoupling (switching off LJ
-        interactions with the environment). The free energy components must be
-        interpreted in this way because we defined lambda=0 as interaction
-        switched on and lambda=1 as switched off.
+        Thermodynamic integration (TI) is performed on the individual
+        component window calculation (typically the Coulomb and the
+        VDW part, :math:`\Delta A_{\mathrm{coul}}` and :math:`\Delta
+        A_{\mathrm{vdW}}`). :math:`\Delta A_{\mathrm{coul}}` is the free
+        energy component of discharging the molecule and :math:`\Delta
+        A_{\mathrm{vdW}}` of decoupling (switching off LJ interactions
+        with the environment). The free energy components must be
+        interpreted in this way because we defined ``lambda=0`` as
+        interaction switched on and ``lambda=1`` as switched off.
 
-            Delta A* = -(Delta A_coul + Delta A_vdw)
+        .. math::
+            \Delta A* &= -(\Delta A_{\mathrm{coul}} + \Delta A_{\mathrm{vdw}})\\
+            \Delta G* &= \Delta A* - \Delta W
 
-            Delta_G* = Delta_A* + (p*-p)*V  [not implemented]
+        The second equation corrects for the fact that we want a Gibbs
+        free energy bit really have only simulated at constant volume
+        and thus calculated a Helmholtz free energy; see
+        :meth:`DeltaW` for more details.
 
         Data are stored in :attr:`Gsolv.results`.
 

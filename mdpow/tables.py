@@ -12,7 +12,7 @@ TODO: Move these data into files in the top directory.
 from numkit.observables import QuantityWithError
 
 #: Avogadro's constant from http://physics.nist.gov/cgi-bin/cuu/Value?na
-#: in mol<sup>-1</sup>.
+#: in mol\ :sup:`-1`.
 N_Avogadro = 6.02214129e23 # mol^-1
 
 #: Boltzmann's constant *k* from http://physics.nist.gov/cgi-bin/cuu/Value?k
@@ -88,10 +88,15 @@ solvent_molecular_volume = {
 }
 
 
-bar_kJnm = 1e5 * 1e-3 * (1e9)**(-3)  # in kJ*nm**-3
-bar = bar_kJnm * N_Avogadro          # in kJ mol**-1 nm**-3
+#: 1 bar in kJ nm\ :sup:`-3`
+bar_kJnm = 1e5 * 1e-3 * (1e9)**(-3)
+#: 1 bar in kJ mol\ :sup:`-1` nm\ :sup:`-3`
+bar = bar_kJnm * N_Avogadro
+#: 1 atm in kJ mol\ :sup:`-1` nm\ :sup:`-3`
 atm = 1.01325 * bar
+#: 1 MPa in kJ mol\ :sup:`-1` nm\ :sup:`-3`
 MPa = 0.1 * bar
+#: isothermal compressibility coefficient (in 1/bar)
 kappaT = {
     'water':
         {

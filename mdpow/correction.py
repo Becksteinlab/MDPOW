@@ -3,49 +3,72 @@
 # Released under the GNU Public License 3 (or higher, your choice)
 # See the file COPYING for details.
 
-"""
-================================================
-Volume correction for running NVT instead of NPT
-================================================
+r"""
+:mod:`mdpow.correction` --- Volume correction for running *NVT* instead of *NPT*
+================================================================================
 
-Compute the correction for :math:`\Delta G_\text{hyd}` for
-:math:`\Delta A_\text{hyd}` from NVT sims.
+.. |^-1| replace:: :sup:`-1`
+.. |^-3| replace:: :sup:`-3`
+.. |^3|  replace:: :sup:`3`
+
+Compute the correction for :math:`\Delta G_{\mathrm{hyd}}` for
+:math:`\Delta A_{\mathrm{hyd}}` from NVT sims.
 
 Required quantities for the correction :math:`\Delta W`
-=======================================================
+-------------------------------------------------------
 
 - volume of the solute
+
   * in water
   * in octanol
 
 - volume of the simulation box of the *NVT* FEP simulation
 
 - isothermal compressibility of
+
   * TIP4P water
   * 1-octanol (OPLS-AA)
 
 Solute volume
--------------
+~~~~~~~~~~~~~
 
-1. average volume of the system (solute + water) in the NPT
-   simulations with N_w water molecules: V_NPT
+Calculate the solute volume by Archimedes' principle: as the
+difference in system volumes of the simulation box with solute minus
+the volume of a simulation with the same number of water molecules but
+without the solvent. If the density of the water model is known, one
+can simply calculate the volume of the pure water box.
 
-2. volume of a box with N_w water molecules at the same temperature
-   and pressure is V_wat = N/N_A * M/rho (see :func:`volume`). The
-   water density for TIP4P as a function of T and P (equation of
-   state) only needs to be computed once.
+1. average volume of the system (solute + water) in the *NPT*
+   simulations with :math:`N_w` water molecules: :math:`V_{NPT}`
+
+2. volume of a box with :math:`N_w` water molecules at the same
+   temperature and pressure is :math:`V_{\mathrm{wat}} = \frac{N}{N_A} \cdot
+   \frac{M}{\rho}` (see :func:`volume`). The water density for TIP4P as a
+   function of :math:`T` and :math:`P` (equation of state) only needs
+   to be computed once.
 
    Right now we're actually just storing the value at T=300 K and 1
-   bar: 992.342. kg/m^3 (computed from 15 ns MD with 652 water
+   bar: 992.342 kg/m\ |^3| (computed from 15 ns MD with 652 water
    molecules and stored in :data:`mdpow.tables.solvent_density`)
 
-3. V_solute = V_NPT - V_water
+3. solute volume :math:`V_{\mathrm{solute}} = V_{NPT} - V_{\mathrm{water}}`
 
-Similarly for 1-octanol as a solvent.
+The volume in 1-octanol as a solvent can be computed in an analogous
+fashion.
+
+Alternatively, use another tool such as UCSF Chimera_ to estimate the
+molecular volume::
+
+  sel #0:SOL
+  del sel
+  surface #0
+  measure volume #0
+
+.. _Chimera: http://www.cgl.ucsf.edu/chimera/
 
 
 Volume of the FEP simulation box
---------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The FEP simulations are carried out at constant volume because
 pressure coupling has been shown by Mobley, Shirts and co-workers
@@ -57,12 +80,30 @@ simulation.
 
 
 Isothermal compressibility
---------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-:math:`kappa_T` needs to be calculated for a given :math:`T` and
+:math:`\kappa_T` needs to be calculated for a given :math:`T` and
 :math:`P`. We can compute it from a long *NPT* simulation via the
 fluctuation formula and store the value or use a published computed or
 experimental value (stored in :data:`mdpow.tables.kappaT`).
+
+Correction to obtain Gibbs solvation free energy from Helmholtz solvation free energy
+-------------------------------------------------------------------------------------
+
+Subtract the correction :func:`\DeltaW` (for decoupling a solute) from
+:math:`\Delta G_{\mathrm{hyd}}`:
+
+.. math:: \Delta G_{\mathrm{hyd}} = \Delta A_{\mathrm{hyd}} - \Delta W_{\mathrm{decouple}}
+
+:math:`\Delta W_{\mathrm{decouple}}` is the difference in work (change
+in free energy) for collapsing a solute-sized cavity in the
+isothermal-isobaric ensemble versus the canonical ensemble:
+
+.. math:: \Delta W = \Delta G - \Delta A = W_{NPT} - W_{NVT}
+
+
+Functions and Classes
+---------------------
 
 """
 import tempfile
@@ -225,12 +266,12 @@ def calculate_solute_volume(solute_data, solvent_data=None,
                             solvent="water"):
     """Calculate the volume of the solute.
 
-    Requires the formatted data from :def:`get_observables` for the
-    the NPT simulation of the solute and either the corresponding data
+    Requires the formatted data from :func:`get_observables` for the
+    the *NPT* simulation of the solute and either the corresponding data
     for the same simulation *without* the solute, *or* the number of
     solvent molecules, its density, and (if it's not water), its name
     (so that its molecular weight can be looked up in
-    :data:`molecular_weight`).
+    :data:`mdpow.tables.molecular_weight`).
     """
     solute_Volume = recwhere(solute_data, 'Volume')
     if len(solute_Volume) != 1:
@@ -317,12 +358,12 @@ def count_solvent_molecules(tpr, solvent="water"):
     return N_solvent
 
 def molecular_volume_analysis(tpr, edr, solvent="water", **kwargs):
-    """Calculate molecular volume from NPT simulation data.
+    r"""Calculate molecular volume from NPT simulation data.
 
-    v_mol = V/N
+    .. math:: v_{\mathrm{mol}} = \frac{V}{N}
 
-    with V as the average box volume (from the energy file *edr*) and
-    the number of solvent molecules in the simulation (from the
+    with :math:`V` as the average box volume (from the energy file *edr*) and
+    the number of solvent molecules :math:`N` in the simulation (from the
     *tpr*). *kwargs* is passed to :func:`get_observables`.
     """
     kwargs.setdefault('stderr', False)
@@ -434,7 +475,7 @@ class ThermodynamicAnalysis(object):
            *N*
                average particle number in the open volume
 
-        .. SeeAlso:: :func:`kappaT`
+        .. SeeAlso:: :func:`kappaT_fluctuations`
         """
         # 1 bar = 10^5 J/m^3
         return kappaT_fluctuations(varN, N, self.v_solvent, self.temperature) * 1e5
@@ -461,18 +502,34 @@ from mdpow.tables import bar, k_Boltzmann
 # base energy unit is kJ or kJ/mol
 
 def kJ2kcal(x):
+    """Convert from kJ to kcal"""
     return x/4.184
 
 def energyUnit(x, **kwargs):
+    """Convert from kJ to kcal if requested.
+
+    :Arguments:
+      *x*
+          energy to be converted
+    :Keywords:
+      *unit*
+          If *unit* is "kcal" then convert from kJ to kcal.
+      *kcal*
+          If ``True`` then convert from kJ to kcal.
+
+    .. SeeAlso:; :func:`kJ2kcal`
+    """
     if kwargs.get('unit', None) == 'kcal' or kwargs.get('kcal', False) is True:
         return kJ2kcal(x)
     return x
 
 def DeltaW(*args, **kwargs):
-    """Correction for decoupling as used in POW
+    """Difference in free energy for removing a solvent cavity in *NPT* vs *NVT*.
 
-    The correction :math:`DeltaW` is calculated with
-    :func:`DeltaW_decoupling`.
+    This correction :math:`\Delta W_{\mathrm{decouple}}` (and in short
+    :math:`\Delta W`) is used to obtain a Gibbs hydration free energy
+    from a Helmholtz hydration free energy. :math:`\Delta W` is
+    calculated with :func:`DeltaW_lowestorder`.
 
     :Arguments:
        *vs*
@@ -483,7 +540,7 @@ def DeltaW(*args, **kwargs):
            isothermal compressibility :math:`\kappa_T` in 1/bar (can
            be omitted if *solvent* keyword is supplied)
 
-     :Keywords:
+    :Keywords:
        *solvent*
            "water" or "octanol" (will choose the default
            :math:`\kappa_T` from :data:`mdpow.tables.kappaT` and use
@@ -497,6 +554,7 @@ def DeltaW(*args, **kwargs):
     :Returns: correction in chosen energy units (kJ/mol by default)
 
     .. SeeAlso::
+
        * :func:`DeltaW_decoupling`
        * :func:`DeltaW_growing`
        * :func:`DeltaW_lowestorder`
@@ -507,21 +565,23 @@ def DeltaW(*args, **kwargs):
     return DeltaW_lowestorder(*args, **kwargs)
 
 def DeltaW_decoupling(vs, V0, kappa, **kwargs):
-    """Exact correction for decoupling of the solute.
+    r"""Exact correction for decoupling of the solute.
 
     The difference in work when closing a cavity in a solvent
     in *NPT* vs *NVT*.
 
     .. math::
 
-       \Delta W = -\kappa_{T}^{-1} V_{0} \left[-\frac{v_{s}}{V_{0}} + \left(1+\frac{v_{s}}{V_{0}}\right) \ln\left(1+\frac{v_{s}}{V_{0}}\right)\right].
+       \Delta W = \kappa_{T}^{-1} V_{0} \left[\frac{v_{s}}{V_{0}} + \left(1-\frac{v_{s}}{V_{0}}\right) \ln\left(1-\frac{v_{s}}{V_{0}}\right)\right].
+
+    Assumes that :math:`\kappa_T` does not depend on the volume.
     """
     x = vs/V0
-    y = -V0/(kappa/bar)*(-x + (1+x)*np.log(1+x))
+    y = V0/(kappa/bar)*(x + (1-x)*np.log(1-x))
     return energyUnit(y, **kwargs)
 
 def DeltaW_growing(vs, V0, kappa, **kwargs):
-    """Exact correction for growing a solute cavity (Eq S12)
+    r"""Exact correction for growing a solute cavity (Eq S12)
 
     The difference in work when opening a cavity in a solvent in *NPT*
     vs *NVT*.
@@ -530,21 +590,23 @@ def DeltaW_growing(vs, V0, kappa, **kwargs):
 
        \Delta W = -\kappa_{T}^{-1} V_{0} \left[\frac{v_{s}}{V_{0}} + \left(1-\frac{v_{s}}{V_{0}}\right) \ln\left(1-\frac{v_{s}}{V_{0}}\right)\right].
 
+    Assumes that :math:`\kappa_T` does not depend on the volume.
     """
-    x = vs/V0
-    y = -V0/(kappa/bar)*(x + (1-x)*np.log(1-x))
-    return energyUnit(y, **kwargs)
+    #x = vs/V0
+    #y = -V0/(kappa/bar)*(x + (1-x)*np.log(1-x))
+    #return energyUnit(y, **kwargs)
+    return -DeltaW_decoupling(vs, V0, kappa, **kwargs)
 
 def pV(vs, P=1., **kwargs):
     y = vs*P*bar
     return energyUnit(y, **kwargs)
 
 def DeltaW_lowestorder(vs, V0, kappa, **kwargs):
-    """Lowest order correction for a solvent cavity (Eq 8)
+    r"""Lowest order correction for removing a solvent cavity (Eq S18)
 
     .. math::
 
-       \Delta W = -\frac{1}{2} \kappa_T^{-1} V_)0 \Big(\frac{v_s}{V_0}\Big)^2
+       \Delta W = \frac{1}{2} \kappa_T^{-1} V_{0} \Big(\frac{v_s}{V_0}\Big)^2
     """
     # vs, V0: nm**3
     y = -0.5*vs**2/(kappa/bar * V0)
@@ -552,7 +614,7 @@ def DeltaW_lowestorder(vs, V0, kappa, **kwargs):
 
 
 def kappaT_fluctuations(varN, N, v_solvent, T):
-    """Isothermal compressibility from the number fluctuations.
+    r"""Isothermal compressibility from the number fluctuations.
 
     The fluctuations in the number of particles of a homogenous liquid are
     related to the compressibility through [e.g. Barret & Hansen (2003)]
@@ -563,9 +625,9 @@ def kappaT_fluctuations(varN, N, v_solvent, T):
 
     Hence
 
-      \kappa_T = \langle (\Delta N)^2 \rangle/(kT n N) = \langle (\Delta N)^2 \rangle v_\text{solvent}/(kT N)
+      \kappa_T = \langle (\Delta N)^2 \rangle/(kT n N) = \langle (\Delta N)^2 \rangle v_{\mathrm{solvent}}/(kT N)
 
-    where :math:`n = 1/v_\text{solvent}`.
+    where :math:`n = 1/v_{\mathrm{solvent}}`.
 
     :Arguments:
        *varN*
@@ -573,15 +635,15 @@ def kappaT_fluctuations(varN, N, v_solvent, T):
        *N*
            number of particles in the system
        *v_solvent*
-           average volume of a solvent molecule in nm^-3
+           average volume of a solvent molecule in nm\ :sup:`-3`
        *T*
            temperature in K
 
-    :Returns: :math:`\kappa_T` in m^3/J = 1/Pa
+    :Returns: :math:`\kappa_T` in m\ :sup:`3`/J = 1/Pa
 
     .. Note:: This is slowly converging and not the best way to compute
               kappa. A more straightforward approach uses the volume
-              fluctuations in NPT simulations.
+              fluctuations in *NPT* simulations.
     """
     return varN * v_solvent * 1e-27 / (k_Boltzmann * T * N)
 

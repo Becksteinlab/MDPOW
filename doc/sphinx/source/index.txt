@@ -14,7 +14,7 @@ coefficients* (|Pow|).
 The package is built on top of the `GromacsWrapper`_ framework (which
 can be automatically installed).
 
-.. _GromacsWrapper: http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/
+.. _GromacsWrapper: http://orbeckst.github.io/GromacsWrapper/
 .. |Pow| replace:: *P*\ :sub:`OW`
 .. |P_OW| replace:: *P*\ :sub:`OW`
 .. |POW|  replace:: *P*\ :sub:`OW`
@@ -31,8 +31,10 @@ Contents:
    scripts
    equil
    fep
+   correction
    analysis
    utilities      
+   tables
 
 Indices and tables
 ==================
