@@ -523,95 +523,10 @@ def energyUnit(x, **kwargs):
         return kJ2kcal(x)
     return x
 
-def DeltaW(*args, **kwargs):
-    """Difference in free energy for removing a solvent cavity in *NPT* vs *NVT*.
-
-    This correction :math:`\Delta W_{\mathrm{decouple}}` (and in short
-    :math:`\Delta W`) is used to obtain a Gibbs hydration free energy
-    from a Helmholtz hydration free energy. :math:`\Delta W` is
-    calculated with :func:`DeltaW_lowestorder`.
-
-    :Arguments:
-       *vs*
-           solute volume in nm^3
-       *V0*
-           box volume in nm^3
-       *kappa*
-           isothermal compressibility :math:`\kappa_T` in 1/bar (can
-           be omitted if *solvent* keyword is supplied)
-
-    :Keywords:
-       *solvent*
-           "water" or "octanol" (will choose the default
-           :math:`\kappa_T` from :data:`mdpow.tables.kappaT` and use
-           as *kappa* if no third argument *kappa* was supplied)
-       *unit*
-           "kcal" means kcal/mol and "kJ" is kJ/mol (energy unit);
-           the default is "kJ".
-       *kcal*
-           ``True`` or ``False`` (``True`` is same as *unit* = "kcal")
-
-    :Returns: correction in chosen energy units (kJ/mol by default)
-
-    .. SeeAlso::
-
-       * :func:`DeltaW_decoupling`
-       * :func:`DeltaW_growing`
-       * :func:`DeltaW_lowestorder`
-
-    """
-    if "solvent" in kwargs and len(args) == 2:
-        args = args + (mdpow.tables.kappaT[kwargs.pop('solvent')]['DEFAULT'],)
-    return DeltaW_lowestorder(*args, **kwargs)
-
-def DeltaW_decoupling(vs, V0, kappa, **kwargs):
-    r"""Exact correction for decoupling of the solute.
-
-    The difference in work when closing a cavity in a solvent
-    in *NPT* vs *NVT*.
-
-    .. math::
-
-       \Delta W = \kappa_{T}^{-1} V_{0} \left[\frac{v_{s}}{V_{0}} + \left(1-\frac{v_{s}}{V_{0}}\right) \ln\left(1-\frac{v_{s}}{V_{0}}\right)\right].
-
-    Assumes that :math:`\kappa_T` does not depend on the volume.
-    """
-    x = vs/V0
-    y = V0/(kappa/bar)*(x + (1-x)*np.log(1-x))
-    return energyUnit(y, **kwargs)
-
-def DeltaW_growing(vs, V0, kappa, **kwargs):
-    r"""Exact correction for growing a solute cavity (Eq S12)
-
-    The difference in work when opening a cavity in a solvent in *NPT*
-    vs *NVT*.
-
-    .. math::
-
-       \Delta W = -\kappa_{T}^{-1} V_{0} \left[\frac{v_{s}}{V_{0}} + \left(1-\frac{v_{s}}{V_{0}}\right) \ln\left(1-\frac{v_{s}}{V_{0}}\right)\right].
-
-    Assumes that :math:`\kappa_T` does not depend on the volume.
-    """
-    #x = vs/V0
-    #y = -V0/(kappa/bar)*(x + (1-x)*np.log(1-x))
-    #return energyUnit(y, **kwargs)
-    return -DeltaW_decoupling(vs, V0, kappa, **kwargs)
 
 def pV(vs, P=1., **kwargs):
     y = vs*P*bar
     return energyUnit(y, **kwargs)
-
-def DeltaW_lowestorder(vs, V0, kappa, **kwargs):
-    r"""Lowest order correction for removing a solvent cavity (Eq S18)
-
-    .. math::
-
-       \Delta W = \frac{1}{2} \kappa_T^{-1} V_{0} \Big(\frac{v_s}{V_0}\Big)^2
-    """
-    # vs, V0: nm**3
-    y = -0.5*vs**2/(kappa/bar * V0)
-    return energyUnit(y, **kwargs)
-
 
 def kappaT_fluctuations(varN, N, v_solvent, T):
     r"""Isothermal compressibility from the number fluctuations.
@@ -646,4 +561,14 @@ def kappaT_fluctuations(varN, N, v_solvent, T):
               fluctuations in *NPT* simulations.
     """
     return varN * v_solvent * 1e-27 / (k_Boltzmann * T * N)
+
+def DeltaW(vs, V0, kappa, **kwargs):
+    r"""Lowest order correction for removing a solvent cavity
+
+    .. warning:: Not implemented.
+    """
+    raise NotImplementedError
+    # vs, V0: nm**3
+    #y = -0.5*vs**2/(kappa/bar * V0)
+    #return energyUnit(y, **kwargs)
 
