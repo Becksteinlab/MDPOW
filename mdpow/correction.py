@@ -106,6 +106,7 @@ Functions and Classes
 ---------------------
 
 """
+import os
 import tempfile
 import numpy
 
@@ -490,9 +491,9 @@ def analyze_NPT(sim, **kwargs):
 
     tpr = os.path.join(sim.dirs.MD_NPT, deffnm + ".tpr")
     edr = os.path.join(sim.dirs.MD_NPT, deffnm + ".edr")
-    A = mdpow.correction.ThermodynamicAnalysis(tpr, edr, **kwargs)
+    A = ThermodynamicAnalysis(tpr, edr, **kwargs)
     v_s = A.solute_volume()
-    return {'v_s': vs}
+    return {'v_s': v_s}
 
 #------------------------------------------------------------
 # from NVTcorrection.py
