@@ -11,6 +11,17 @@ run input file and the solvent type as input.
 
 :ref:`mdpow-scripts-label` make use of the building blocks.
 
+Typically, *journalling* is enabled, i.e. the tasks remember which
+stages have already been completed and can be restarted directly from
+the last completed stage. (Restarts are only implemeneted at the level
+of individual steps in a MDPOW protocol, not at the level of
+continuing interrupted simulations using the Gromacs restart files.)
+
+Input is read from the run input *cfg* file.
+
+.. SeeAlso:: :mod:`mdpow.restart` for the journalling required for restarts.
+
+
 Protocols
 ---------
 
@@ -21,6 +32,8 @@ Support
 -------
 
 .. autoclass:: MDrunnerSimple
+.. autofunction:: setupMD
+.. autofunction:: runMD_or_exit
 
 """
 
@@ -54,8 +67,12 @@ def setupMD(S, protocol, cfg):
     """setup MD simulation *protocol* using the runinput file *cfg*"""
 
     simulation_protocol = S.get_protocol(protocol)
+    mdp = cfg.findfile(protocol, "mdp")
+    logger.debug("%(protocol)s: Using MDP file %(mdp)r from config file", vars())
     params = simulation_protocol(runtime=cfg.getfloat(protocol, "runtime"),
-                                 qscript=cfg.getlist(protocol, "qscript"))
+                                 qscript=cfg.getlist(protocol, "qscript"),
+                                 mdp=mdp,
+                                 )
     return params
 
 def runMD_or_exit(S, protocol, params, cfg, **kwargs):
@@ -123,7 +140,7 @@ def equilibrium_simulation(cfg, solvent, **kwargs):
        (``runlocal``), :program:`mdrun` is executed at various stages,
        and hence this process can take a while.
     """
-    deffnm = "md"
+    deffnm = kwargs.pop('deffnm', "md")
     Simulations = {
         'water': mdpow.equil.WaterSimulation,
         'octanol': mdpow.equil.OctanolSimulation,
@@ -197,12 +214,12 @@ def fep_simulation(cfg, solvent, **kwargs):
     See tutorial for the individual steps.
 
     .. Note:: Depending on the settings in the run input file
-       (``runlocal``), :program:`mdrun` is executed sequemtially for
+       (``runlocal``), :program:`mdrun` is executed sequentially for
        all windows and hence this can take a long time. It is
-       recommended to use ``runocal = False`` in the run input file
+       recommended to use ``runlocal = False`` in the run input file
        and submit all window simulations to a cluster.
     """
-    deffnm = "md"
+    deffnm = kwargs.pop('deffnm', "md")
     EquilSimulations = {
         'water': mdpow.equil.WaterSimulation,
         'octanol': mdpow.equil.OctanolSimulation,
@@ -222,7 +239,7 @@ def fep_simulation(cfg, solvent, **kwargs):
     if topdir is None:
         topdir = cfg.get("setup", "name")
     dirname = os.path.join(topdir, Simulation.dirname_default)
-    # XXX nasty ... use same recipe to construct default save fle name as in
+    # XXX nasty ... use same recipe to construct default save file name as in
     # Gsolv ... should be a static method or something else I can use before
     # the class is instantiated. Note that the pickle files live under dirname
     # and NOT topdir (bit of an historic inconsistency)
@@ -251,7 +268,16 @@ def fep_simulation(cfg, solvent, **kwargs):
                        basedir=topdir, deffnm=deffnm)
 
     if S.journal.has_not_completed("setup"):
-        params = S.setup(qscript=cfg.getlist("FEP", "qscript"))
+        mdp = cfg.findfile("FEP", "mdp")
+        schedules = {'coulomb': mdpow.fep.FEPschedule.load(cfg, "FEP_schedule_Coulomb"),
+                     'vdw': mdpow.fep.FEPschedule.load(cfg, "FEP_schedule_VDW"),
+                     }
+        logger.debug("Using MDP file %r from config file", mdp)
+        logger.debug("Loaded FEP schedules %r from config file", schedules.keys())
+        params = S.setup(qscript=cfg.getlist("FEP", "qscript"),
+                         mdp=mdp,
+                         schedules=schedules,
+                         )
         checkpoint("setup", S, savefilename)
     else:
         params = {'deffnm': deffnm}

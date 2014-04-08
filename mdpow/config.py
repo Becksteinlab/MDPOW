@@ -94,6 +94,8 @@ import os, errno
 from pkg_resources import resource_filename, resource_listdir
 from ConfigParser import SafeConfigParser
 
+import numpy as np
+
 import logging
 logger = logging.getLogger("mdpow.config")
 
@@ -113,9 +115,18 @@ class POWConfigParser(SafeConfigParser):
         if value.lower() == "none":
             return None
         return value
+    def getstr(self, section, option):
+        """Return option as string"""
+        return SafeConfigParser.get(self, section, option)
     def getpath(self, section, option):
         """Return option as an expanded path."""
         return os.path.expanduser(os.path.expandvars(self.get(section, option)))
+    def findfile(self, section, option):
+        """Return location of a file ``option``.
+
+        Uses :func:`mdpow.config.get_template`.
+        """
+        return get_template(self.getpath(section, option))
     def getlist(self, section, option):
         """Return option as a list of strings.
 
@@ -123,6 +134,22 @@ class POWConfigParser(SafeConfigParser):
         is stripped and quotes are treated verbatim.
         """
         return [x.strip() for x in str(self.get(section, option)).split(",")]
+    def getarray(self, section, option):
+        """Return option as a numpy array of floats.
+
+        *option* must be comma-separated; leading/trailing whitespace
+        is stripped and quotes are treated verbatim.
+        """
+        return np.asarray(self.getlist(section, option), dtype=np.float)
+    def getintarray(self, section, option):
+        """Return option as a numpy array of integers.
+
+        *option* must be comma-separated; leading/trailing whitespace
+        is stripped and quotes are treated verbatim.
+        """
+        return np.asarray(self.getlist(section, option), dtype=np.int)
+
+
 
 def get_configuration(filename=None):
     """Reads and parses a run input config file.

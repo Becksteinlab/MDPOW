@@ -118,8 +118,6 @@ Additional objects that support :class:`mdpow.fep.Gsolv`.
 
           Boltzmann's constant |kB| in kJ mol\ :sup:`-1` (`kB NIST value`_).
 
-.. autodata:: fep_templates
-
 .. |NA| replace:: *N*\ :sub:`A`
 .. |kB| replace:: *k*\ :sub:`B`
 .. _NA NIST value: http://physics.nist.gov/cgi-bin/cuu/Value?na
@@ -141,6 +139,7 @@ from __future__ import with_statement
 
 import os
 import errno
+import copy
 from subprocess import call
 import warnings
 from pkg_resources import resource_filename
@@ -182,22 +181,64 @@ def kJ_to_kcal(x):
     return x / 4.184
 
 
-#: Template mdp files for different stages of the FEP protocol. (add equilibration, too?)
-fep_templates = {
-    'production_mdp': resource_filename(__name__, 'templates/fep_opls.mdp'),
-    }
-
 class FEPschedule(AttributeDict):
-    """Describe mdp parameter choices as key - value pairs."""
-    mdp_keywords = ('sc_alpha', 'sc_power', 'sc_sigma',
-                    'couple_lambda0', 'couple_lambda1',
-                    )
+    """Describe mdp parameter choices as key - value pairs.
+
+    The FEP schedule can be loaded from a configuration parser with
+    the static method :meth:`FEPschedule.load`.
+
+    See the example runinput file for an example. It contains the sections::
+
+       [FEP_schedule_Coulomb]
+       name = Coulomb
+       description = dis-charging vdw+q --> vdw
+       label = Coul
+       couple_lambda0 = vdw-q
+       couple_lambda1 = vdw
+       # soft core alpha: linear scaling for coulomb
+       sc_alpha = 0
+       lambdas = 0, 0.25, 0.5, 0.75, 1.0
+
+
+       [FEP_schedule_VDW]
+       name = vdw
+       description = decoupling vdw --> none
+       label = VDW
+       couple_lambda0 = vdw
+       couple_lambda1 = none
+       # recommended values for soft cores (Mobley, Shirts et al)
+       sc_alpha = 0.5
+       sc_power = 1.0
+       sc_sigma = 0.3
+       lambdas = 0.0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1
+
+    """
+    mdp_keywords = dict((('sc_alpha', float),
+                         ('sc_power', float),
+                         ('sc_sigma', float),
+                         ('couple_lambda0', str),
+                         ('couple_lambda1', str),
+                         ))
+    meta_keywords = dict((('name', str), ('description', str), ('label', str)))
+    other_keywords = dict((('lambdas', list), ))
 
     @property
     def mdp_dict(self):
         """Dict of key-values that can be set in a mdp file."""
         return dict(((k,v) for k,v in self.items() if k in self.mdp_keywords))
 
+    @staticmethod
+    def load(cfg, section):
+        """Initialize a :class:`FEPschedule` from the *section* in the configuration *cfg*"""
+        keys = {}
+        keys.update(FEPschedule.mdp_keywords)
+        keys.update(FEPschedule.meta_keywords)
+        keys.update(FEPschedule.other_keywords)
+        getter = {float: cfg.getfloat,
+                  str: cfg.getstr,    # literal strings, no conversion of None (which we need for the MDP!)
+                  list: cfg.getarray  # numpy float array from list
+                  }
+        return FEPschedule((key, getter[keytype](section, key)) for key,keytype in keys.items())
 
 class Gsolv(Journalled):
     """Simulations to calculate and analyze the solvation free energy.
@@ -257,27 +298,32 @@ class Gsolv(Journalled):
     dirname_default = os.path.curdir
     solvent_default = "water"
 
-    schedules = {'coulomb':
-                 FEPschedule(name='coulomb',
-                             description="dis-charging vdw+q --> vdw",
-                             label='Coul',
-                             couple_lambda0='vdw-q', couple_lambda1='vdw',
-                             sc_alpha=0,      # linear scaling for coulomb
-                             lambdas=[0, 0.25, 0.5, 0.75, 1.0],  # default values
-                             ),
-                 'vdw':
-                 FEPschedule(name='vdw',
-                             description="decoupling vdw --> none",
-                             label='VDW',
-                             couple_lambda0='vdw', couple_lambda1='none',
-                             sc_alpha=0.5, sc_power=1.0, sc_sigma=0.3, # recommended values
-                             lambdas=[0.0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6,  # defaults
-                                      0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1],
-                             ),
-                 }
+    # TODO: initialize from default cfg
+    schedules_default = {'coulomb':
+                             FEPschedule(name='coulomb',
+                                         description="dis-charging vdw+q --> vdw",
+                                         label='Coul',
+                                         couple_lambda0='vdw-q', couple_lambda1='vdw',
+                                         sc_alpha=0,      # linear scaling for coulomb
+                                         lambdas=[0, 0.25, 0.5, 0.75, 1.0],  # default values
+                                         ),
+                         'vdw':
+                             FEPschedule(name='vdw',
+                                         description="decoupling vdw --> none",
+                                         label='VDW',
+                                         couple_lambda0='vdw', couple_lambda1='none',
+                                         sc_alpha=0.5, sc_power=1.0, sc_sigma=0.3, # recommended values
+                                         lambdas=[0.0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6,  # defaults
+                                                  0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1],
+                                         ),
+                         }
     #: Check list of all methods that can be run as an independent protocol; see also
     #: :meth:`Simulation.get_protocol` and :class:`restart.Journal`
     protocols = ["setup", "fep_run"]
+
+    #: Default Gromacs *MDP* run parameter file for FEP.
+    #: (The file is part of the package and is found with :func:`mdpow.config.get_template`.)
+    mdp_default = 'fep_opls.mdp'
 
 
     def __init__(self, molecule=None, top=None, struct=None, **kwargs):
@@ -318,6 +364,8 @@ class Gsolv(Journalled):
            *simulation*
                Instead of providing the required arguments, obtain the input
                files from a :class:`mdpow.equil.Simulation` instance.
+          *mdp*
+               MDP file name (if no entry then the package defaults are used)
            *filename*
                Instead of providing the required arguments, load from pickle
                file. If either *simulation* or *molecule*, *top*, and *struct*
@@ -338,6 +386,17 @@ class Gsolv(Journalled):
                provided in keyword *simulation*.
            *kwargs*
                other undocumented arguments (see source for the moment)
+
+        .. Note::
+
+           Only a subset of the FEP parameters can currently be set with
+           keywords (lambdas); other parameters such as the soft cores are
+           currently fixed. For advanced use: pass a dict with keys "coulomb"
+           and "vdw" and values of :class:`FEPschedule` in the keyword
+           *schedules*. The *lambdas* will override these settings (which
+           typically come from a cfg). This method allows setting all
+           parameters.
+
         """
         required_args = ('molecule', 'top', 'struct')
 
@@ -393,7 +452,12 @@ class Gsolv(Journalled):
             self.qscript = kwargs.pop('qscript', ['local.sh'])
             self.deffnm = kwargs.pop('deffnm', 'md')
 
-            self.mdp = kwargs.pop('mdp', fep_templates['production_mdp'])
+            self.mdp = kwargs.pop('mdp', config.get_template(self.mdp_default))
+
+            # schedules (deepcopy because we might modify)
+            self.schedules = copy.deepcopy(self.schedules_default)
+            schedules = kwargs.pop('schedules', {})
+            self.schedules.update(schedules)
             self.lambdas = {
                 'coulomb': kwargs.pop('lambda_coulomb', self.schedules['coulomb'].lambdas),
                 'vdw':     kwargs.pop('lambda_vdw', self.schedules['vdw'].lambdas),
@@ -444,6 +508,8 @@ class Gsolv(Journalled):
         logger.info("Base directory is %(basedir)r", vars(self))
         logger.info("Using setup directories under %(dirname)r: %(component_dirs)r", vars(self))
         logger.info("Default checkpoint file is %(filename)r", vars(self))
+        logger.debug("Coulomb lambdas = %(coulomb)r", self.lambdas)
+        logger.debug("VDW lambdas = %(vdw)r", self.lambdas)
 
         super(Gsolv, self).__init__(**kwargs)
 

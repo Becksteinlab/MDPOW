@@ -93,6 +93,13 @@ class Simulation(Journalled):
                  "MD_restrained", "MD_restrained_run",
                  "energy_minimize", "solvate", "topology")
 
+    #: Default Gromacs *MDP* run parameter files for the different stages.
+    #: (All are part of the package and are found with :func:`mdpow.config.get_template`.)
+    mdp_defaults = {'MD_relaxed': 'NPT_opls.mdp',
+                    'MD_restrained': 'NPT_opls.mdp',
+                    'MD_NPT': 'NPT_opls.mdp',
+                    }
+
     def __init__(self, molecule=None, **kwargs):
         """Set up Simulation instance.
 
@@ -111,6 +118,10 @@ class Simulation(Journalled):
               base directory; all other directories are created under it
           *solvent*
               water or octanol
+          *mdp*
+              dict with keys corresponding to the stages ``MD_restrained``, ``MD_relaxed``,
+              ``MD_NPT`` and values *mdp* file names (if no entry then the
+              package defaults are used)
           *kwargs*
               advanced keywords for short-circuiting; see
               :data:`mdpow.equil.Simulation.filekeys`.
@@ -120,6 +131,13 @@ class Simulation(Journalled):
         filename = kwargs.pop('filename', None)
         dirname = kwargs.pop('dirname', self.dirname_default)
         solvent = kwargs.pop('solvent', self.solvent_default)
+        # mdp files --- should get values from default runinput.cfg
+        # None values in the kwarg mdp dict are ignored
+        # self.mdp: key = stage, value = path to MDP file
+        mdp_kw = kwargs.pop('mdp', {})
+        self.mdp = dict((stage, config.get_template(fn)) for stage,fn in self.mdp_defaults.items())
+        self.mdp.update(dict((stage, config.get_template(fn)) for stage,fn in mdp_kw.items() if fn is not None))
+
         if molecule is None and not filename is None:
             # load from pickle file
             self.load(filename)
@@ -208,6 +226,11 @@ class Simulation(Journalled):
             fns = asiterable(val)  # treat them all as lists
             try:
                 self.dirs[key] = assinglet([fn.replace(basedir, prefix) for fn in fns])
+            except AttributeError:
+                pass
+        for key, fn in self.mdp:
+            try:
+                self.mdp[key] = fn.replace(basedir, prefix)
             except AttributeError:
                 pass
         logger.warn("make_paths_relative(): check/manually adjust %s.dirs.includes = %r !",
@@ -329,11 +352,11 @@ class Simulation(Journalled):
 
         kwargs.setdefault('dirname', self.BASEDIR(protocol))
         kwargs.setdefault('deffnm', self.deffnm)
+        kwargs.setdefault('mdp', config.get_template('NPT_opls.mdp'))
         self.dirs[protocol] = realpath(kwargs['dirname'])
-        MD = kwargs.pop('MDfunc', gromacs.setup.MD)
+        setupMD = kwargs.pop('MDfunc', gromacs.setup.MD)
         kwargs['top'] = self.files.topology
         kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.dirs.includes
-        kwargs['mdp'] = config.get_template('NPT_opls.mdp')  # TODO: make this configurable
         kwargs['ndx'] = self.files.ndx
         kwargs['mainselection'] = None # important for SD (use custom mdp and ndx!, gromacs.setup._MD)
         self._checknotempty(kwargs['struct'], 'struct')
@@ -346,8 +369,8 @@ class Simulation(Journalled):
             else:
                 logger.info("Found starting structure %r (instead of %r).", struct, kwargs['struct'])
                 kwargs['struct'] = struct
-        # now setup the whole simulation:
-        params =  MD(**kwargs)
+        # now setup the whole simulation (this is typically gromacs.setup.MD() )
+        params =  setupMD(**kwargs)
         # params['struct'] is md.gro but could also be md.pdb --- depends entirely on qscript
         self.files[protocol] = params['struct']
         # Gromacs 4.5.x 'mdrun -c PDB'  fails if it cannot find 'residuetypes.dat'
@@ -370,6 +393,10 @@ class Simulation(Journalled):
         .. See Also:: :func:`gromacs.setup.MD`
 
         :Keywords:
+          *struct*
+             starting coordinates (typically guessed)
+          *mdp*
+             MDP run parameter file for Gromacs
           *qscript*
              list of queuing system submission scripts; probably a
              good idea to always include the default "local.sh" even
@@ -387,6 +414,7 @@ class Simulation(Journalled):
         kwargs.setdefault('struct', self.files.energy_minimized)
         kwargs.setdefault('dt', 0.0001)  # ps
         kwargs.setdefault('runtime', 5)  # ps
+        kwargs.setdefault('mdp', self.mdp['MD_relaxed'])
         return self._MD('MD_relaxed', **kwargs)
 
     def MD_restrained(self, **kwargs):
@@ -404,6 +432,10 @@ class Simulation(Journalled):
         .. See Also:: :func:`gromacs.setup.MD_restrained`
 
         :Keywords:
+          *struct*
+              starting coordinates (leave empty for inspired guess of file name)
+          *mdp*
+              MDP run parameter file for Gromacs
           *qscript*
              list of queuing system submission scripts; probably a
              good idea to always include the default "local.sh" even
@@ -419,6 +451,7 @@ class Simulation(Journalled):
         """
         kwargs.setdefault('struct',
                           self._lastnotempty([self.files.energy_minimized, self.files.MD_relaxed]))
+        kwargs.setdefault('mdp', self.mdp['MD_restrained'])
         kwargs['MDfunc'] = gromacs.setup.MD_restrained
         return self._MD('MD_restrained', **kwargs)
 
@@ -441,6 +474,8 @@ class Simulation(Journalled):
                from the position restraints run, or, if this file cannot be
                found (e.g. because :meth:`Simulation.MD_restrained` was not run)
                it falls back to the relaxed and then the solvated system.
+          *mdp*
+               MDP run parameter file for Gromacs
           *runtime*
                total run time in ps
           *qscript*
@@ -459,6 +494,7 @@ class Simulation(Journalled):
         """
         # user structure or relaxed or restrained or solvated
         kwargs.setdefault('struct', self.get_last_structure())
+        kwargs.setdefault('mdp', self.mdp['MD_NPT'])
         return self._MD('MD_NPT', **kwargs)
 
     # for convenience and compatibility

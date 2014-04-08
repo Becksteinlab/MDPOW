@@ -49,7 +49,7 @@ class Journal(object):
     (:attr:`~Journal.current`).
 
     All completed stages are recorded in the attribute
-    :attr:`~Journal.history`. 
+    :attr:`~Journal.history`.
 
     The current (incomplete) stage can be reset to its initial state with
     :meth:`Journal.clear`.
@@ -157,10 +157,10 @@ class Journalled(object):
     It installs an instance of :class:`Journal` in the attribute
     :attr:`Journalled.journal` if it does not exist already.
     """
-    #: Class-attribute that contains the names of computation protocols 
+    #: Class-attribute that contains the names of computation protocols
     #: supported by the class. These are either method names or dummy names,
     #: whose logic is provided by an external callback function.
-    #: The method :meth:`get_protocol` raises a :exc:`ValueError` if a 
+    #: The method :meth:`get_protocol` raises a :exc:`ValueError` if a
     #: protocol is not listed in :attr:`~Journalled.protocols`.
     protocols = []
 
@@ -194,7 +194,7 @@ class Journalled(object):
           registered (i.e. not found in :attr:`Journalled.protocols`).
 
         """
-        if not protocol in self.protocols:
+        if protocol not in self.protocols:
             raise ValueError("%r: protocol must be one of %r" % (protocol, self.protocols))
         try:
             return self.__getattribute__(protocol)
@@ -239,7 +239,7 @@ class Journalled(object):
 
     def load(self, filename=None):
         """Re-instantiate class from pickled file.
-        
+
         If no *filename* was supplied then the filename is taken from the
         attribute :attr:`~Journalled.filename`.
         """
