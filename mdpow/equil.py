@@ -98,6 +98,7 @@ class Simulation(Journalled):
     mdp_defaults = {'MD_relaxed': 'NPT_opls.mdp',
                     'MD_restrained': 'NPT_opls.mdp',
                     'MD_NPT': 'NPT_opls.mdp',
+                    'energy_minimize': 'em_opls.mdp',
                     }
 
     def __init__(self, molecule=None, **kwargs):
@@ -119,7 +120,8 @@ class Simulation(Journalled):
           *solvent*
               water or octanol
           *mdp*
-              dict with keys corresponding to the stages ``MD_restrained``, ``MD_relaxed``,
+              dict with keys corresponding to the stages ``energy_minimize``,
+              ``MD_restrained``, ``MD_relaxed``,
               ``MD_NPT`` and values *mdp* file names (if no entry then the
               package defaults are used)
           *kwargs*
@@ -336,6 +338,7 @@ class Simulation(Journalled):
         self.dirs.energy_minimization = realpath(kwargs.setdefault('dirname', self.BASEDIR('em')))
         kwargs['top'] = self.files.topology
         kwargs.setdefault('struct', self.files.solvated)
+        kwargs.setdefault('mdp', self.mdp['energy_minimize'])
         kwargs['mainselection'] = None
         kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.dirs.includes
 

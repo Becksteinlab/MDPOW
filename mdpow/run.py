@@ -33,6 +33,7 @@ Support
 
 .. autoclass:: MDrunnerSimple
 .. autofunction:: setupMD
+.. autofunction:: get_mdp_files
 .. autofunction:: runMD_or_exit
 
 """
@@ -67,13 +68,36 @@ def setupMD(S, protocol, cfg):
     """setup MD simulation *protocol* using the runinput file *cfg*"""
 
     simulation_protocol = S.get_protocol(protocol)
-    mdp = cfg.findfile(protocol, "mdp")
-    logger.debug("%(protocol)s: Using MDP file %(mdp)r from config file", vars())
     params = simulation_protocol(runtime=cfg.getfloat(protocol, "runtime"),
                                  qscript=cfg.getlist(protocol, "qscript"),
-                                 mdp=mdp,
                                  )
     return params
+
+def get_mdp_files(cfg, protocols):
+    """Get file names of MDP files from *cfg* for all *protocols*"""
+    import ConfigParser
+
+    mdpfiles = {}
+    for protocol in protocols:
+        try:
+            mdp = cfg.getpath(protocol, 'mdp')
+        except ConfigParser.NoSectionError:
+            # skip anything for which we do not define sections, such as
+            # the dummy run protocols
+            mdp = None
+        except ConfigParser.NoOptionError:
+            # Should not happen... let's continue and wait for hard-coded defaults
+            logger.error("No 'mdp' config file entry for protocol [%s]---check input files!", protocol)
+            mdp = None
+        except ValueError:
+            # But it is a problem if we can't find a file!
+            logger.critical("Failed to find custom MDP file %r for protocol [%s]",
+                            cfg.get(protocol, 'mdp'), protocol)
+            raise
+        if mdp:
+            mdpfiles[protocol] = mdp
+            logger.debug("%(protocol)s: Using MDP file %(mdp)r from config file", vars())
+    return mdpfiles
 
 def runMD_or_exit(S, protocol, params, cfg, **kwargs):
     """run simulation
@@ -164,8 +188,10 @@ def equilibrium_simulation(cfg, solvent, **kwargs):
     if os.path.exists(savefilename):
         S = Simulation(filename=savefilename)
     else:
+        # custom mdp files
+        mdpfiles = get_mdp_files(cfg, Simulation.protocols)
         S = Simulation(molecule=cfg.get("setup", "molecule"),
-                       dirname=dirname, deffnm=deffnm)
+                       dirname=dirname, deffnm=deffnm, mdp=mdpfiles)
 
     if S.journal.has_not_completed("energy_minimize"):
         maxwarn = cfg.getint("setup", "maxwarn") or None
@@ -272,7 +298,7 @@ def fep_simulation(cfg, solvent, **kwargs):
         schedules = {'coulomb': mdpow.fep.FEPschedule.load(cfg, "FEP_schedule_Coulomb"),
                      'vdw': mdpow.fep.FEPschedule.load(cfg, "FEP_schedule_VDW"),
                      }
-        logger.debug("Using MDP file %r from config file", mdp)
+        logger.debug("Using [FEP] MDP file %r from config file", mdp)
         logger.debug("Loaded FEP schedules %r from config file", schedules.keys())
         params = S.setup(qscript=cfg.getlist("FEP", "qscript"),
                          mdp=mdp,
