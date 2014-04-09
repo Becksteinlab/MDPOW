@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -8,15 +6,15 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>mdpow.equil — Setting up and running equilibrium MD &mdash; MDpow 0.5.2 documentation</title>
+    <title>mdpow.equil — Setting up and running equilibrium MD &mdash; MDpow 0.6.0-dev documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
-        VERSION:     '0.5.2',
+        URL_ROOT:    './',
+        VERSION:     '0.6.0-dev',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,8 +24,8 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="MDpow 0.5.2 documentation" href="index.html" />
-    <link rel="next" title="&lt;no title&gt;" href="fep.html" />
+    <link rel="top" title="MDpow 0.6.0-dev documentation" href="index.html" />
+    <link rel="next" title="mdpow.fep – Calculate free energy of solvation" href="fep.html" />
     <link rel="prev" title="The mdpow-* scripts" href="scripts.html" /> 
   </head>
   <body>
@@ -41,12 +39,12 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="fep.html" title="&lt;no title&gt;"
+          <a href="fep.html" title="mdpow.fep – Calculate free energy of solvation"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="scripts.html" title="The mdpow-* scripts"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">MDpow 0.5.2 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow 0.6.0-dev documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -101,7 +99,7 @@ customized itp, mdp and template top files at various stages.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Keywords :</th><td class="field-body"><dl class="first last docutils">
+<tr class="field-odd field"><th class="field-name">Keywords:</th><td class="field-body"><dl class="first last docutils">
 <dt><em>molecule</em></dt>
 <dd><p class="first last">Identifier for the compound molecule. This is the same as the
 entry in the <tt class="docutils literal"><span class="pre">[</span> <span class="pre">molecule</span> <span class="pre">]</span></tt> section of the itp file. [&#8220;DRUG&#8221;]</p>
@@ -117,9 +115,15 @@ the pickle file <em>filename</em>, which was generated with
 <dt><em>solvent</em></dt>
 <dd><p class="first last">water or octanol</p>
 </dd>
+<dt><em>mdp</em></dt>
+<dd><p class="first last">dict with keys corresponding to the stages <tt class="docutils literal"><span class="pre">energy_minimize</span></tt>,
+<tt class="docutils literal"><span class="pre">MD_restrained</span></tt>, <tt class="docutils literal"><span class="pre">MD_relaxed</span></tt>,
+<tt class="docutils literal"><span class="pre">MD_NPT</span></tt> and values <em>mdp</em> file names (if no entry then the
+package defaults are used)</p>
+</dd>
 <dt><em>kwargs</em></dt>
 <dd><p class="first last">advanced keywords for short-circuiting; see
-<a class="reference internal" href="#mdpow.equil.Simulation.filekeys" title="mdpow.equil.Simulation.filekeys"><tt class="xref py py-data docutils literal"><span class="pre">mdpow.equil.Simulation.filekeys</span></tt></a>.</p>
+<tt class="xref py py-data docutils literal"><span class="pre">mdpow.equil.Simulation.filekeys</span></tt>.</p>
 </dd>
 </dl>
 </td>
@@ -143,12 +147,15 @@ of 2 fs) and <em>runtime</em> = 5 ps as done in <a class="reference internal" hr
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Keywords :</th><td class="field-body"><dl class="first last docutils">
+<tr class="field-odd field"><th class="field-name">Keywords:</th><td class="field-body"><dl class="first last docutils">
 <dt><em>struct</em></dt>
 <dd><p class="first last">starting conformation; by default, the <em>struct</em> is the last frame
 from the position restraints run, or, if this file cannot be
 found (e.g. because <a class="reference internal" href="#mdpow.equil.Simulation.MD_restrained" title="mdpow.equil.Simulation.MD_restrained"><tt class="xref py py-meth docutils literal"><span class="pre">Simulation.MD_restrained()</span></tt></a> was not run)
 it falls back to the relaxed and then the solvated system.</p>
+</dd>
+<dt><em>mdp</em></dt>
+<dd><p class="first last">MDP run parameter file for Gromacs</p>
 </dd>
 <dt><em>runtime</em></dt>
 <dd><p class="first last">total run time in ps</p>
@@ -156,7 +163,7 @@ it falls back to the relaxed and then the solvated system.</p>
 <dt><em>qscript</em></dt>
 <dd><p class="first last">list of queuing system scripts to prepare; available values are
 in <a class="reference external" href="http://orbeckst.github.io/GromacsWrapper/gromacs/core/config.html#gromacs.config.templates" title="(in GromacsWrapper v0.3)"><tt class="xref py py-data docutils literal"><span class="pre">gromacs.config.templates</span></tt></a> or you can provide your own
-filename(s) in the current directory (see <a class="reference external" href="http://orbeckst.github.io/GromacsWrapper/gromacs/blocks/qsub.html#gromacs.qsub" title="(in GromacsWrapper v0.3)"><tt class="xref py py-mod docutils literal"><span class="pre">gromacs.qsub</span></tt></a> for
+filename(s) in the current directory (see <a class="reference external" href="http://orbeckst.github.io/GromacsWrapper/gromacs/blocks/qsub.html#module-gromacs.qsub" title="(in GromacsWrapper v0.3)"><tt class="xref py py-mod docutils literal"><span class="pre">gromacs.qsub</span></tt></a> for
 the format of the templates)</p>
 </dd>
 <dt><em>qname</em></dt>
@@ -192,12 +199,15 @@ of 2 fs) and <em>runtime</em> = 5 ps as done in <a class="reference internal" hr
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Keywords :</th><td class="field-body"><dl class="first last docutils">
+<tr class="field-odd field"><th class="field-name">Keywords:</th><td class="field-body"><dl class="first last docutils">
 <dt><em>struct</em></dt>
 <dd><p class="first last">starting conformation; by default, the <em>struct</em> is the last frame
 from the position restraints run, or, if this file cannot be
 found (e.g. because <a class="reference internal" href="#mdpow.equil.Simulation.MD_restrained" title="mdpow.equil.Simulation.MD_restrained"><tt class="xref py py-meth docutils literal"><span class="pre">Simulation.MD_restrained()</span></tt></a> was not run)
 it falls back to the relaxed and then the solvated system.</p>
+</dd>
+<dt><em>mdp</em></dt>
+<dd><p class="first last">MDP run parameter file for Gromacs</p>
 </dd>
 <dt><em>runtime</em></dt>
 <dd><p class="first last">total run time in ps</p>
@@ -205,7 +215,7 @@ it falls back to the relaxed and then the solvated system.</p>
 <dt><em>qscript</em></dt>
 <dd><p class="first last">list of queuing system scripts to prepare; available values are
 in <a class="reference external" href="http://orbeckst.github.io/GromacsWrapper/gromacs/core/config.html#gromacs.config.templates" title="(in GromacsWrapper v0.3)"><tt class="xref py py-data docutils literal"><span class="pre">gromacs.config.templates</span></tt></a> or you can provide your own
-filename(s) in the current directory (see <a class="reference external" href="http://orbeckst.github.io/GromacsWrapper/gromacs/blocks/qsub.html#gromacs.qsub" title="(in GromacsWrapper v0.3)"><tt class="xref py py-mod docutils literal"><span class="pre">gromacs.qsub</span></tt></a> for
+filename(s) in the current directory (see <a class="reference external" href="http://orbeckst.github.io/GromacsWrapper/gromacs/blocks/qsub.html#module-gromacs.qsub" title="(in GromacsWrapper v0.3)"><tt class="xref py py-mod docutils literal"><span class="pre">gromacs.qsub</span></tt></a> for
 the format of the templates)</p>
 </dd>
 <dt><em>qname</em></dt>
@@ -235,7 +245,13 @@ short integration time step <em>dt</em> tends to solve these problems.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Keywords :</th><td class="field-body"><dl class="first last docutils">
+<tr class="field-odd field"><th class="field-name">Keywords:</th><td class="field-body"><dl class="first last docutils">
+<dt><em>struct</em></dt>
+<dd><p class="first last">starting coordinates (typically guessed)</p>
+</dd>
+<dt><em>mdp</em></dt>
+<dd><p class="first last">MDP run parameter file for Gromacs</p>
+</dd>
 <dt><em>qscript</em></dt>
 <dd><p class="first last">list of queuing system submission scripts; probably a
 good idea to always include the default &#8220;local.sh&#8221; even
@@ -275,7 +291,13 @@ section that is protected by a <tt class="docutils literal"><span class="pre">#i
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Keywords :</th><td class="field-body"><dl class="first last docutils">
+<tr class="field-odd field"><th class="field-name">Keywords:</th><td class="field-body"><dl class="first last docutils">
+<dt><em>struct</em></dt>
+<dd><p class="first last">starting coordinates (leave empty for inspired guess of file name)</p>
+</dd>
+<dt><em>mdp</em></dt>
+<dd><p class="first last">MDP run parameter file for Gromacs</p>
+</dd>
 <dt><em>qscript</em></dt>
 <dd><p class="first last">list of queuing system submission scripts; probably a
 good idea to always include the default &#8220;local.sh&#8221; even
@@ -297,13 +319,6 @@ script(s); see <a class="reference external" href="http://orbeckst.github.io/Gro
 </table>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="mdpow.equil.Simulation.coordinate_structures">
-<tt class="descname">coordinate_structures</tt><em class="property"> = ('solvated', 'energy_minimized', 'MD_relaxed', 'MD_restrained', 'MD_NPT')</em><a class="headerlink" href="#mdpow.equil.Simulation.coordinate_structures" title="Permalink to this definition">¶</a></dt>
-<dd><p>Coordinate files of the full system in increasing order of advancement of
-the protocol; the later the better. The values are keys into <tt class="xref py py-attr docutils literal"><span class="pre">Simulation.files</span></tt>.</p>
-</dd></dl>
-
 <dl class="method">
 <dt id="mdpow.equil.Simulation.energy_minimize">
 <tt class="descname">energy_minimize</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.equil.Simulation.energy_minimize" title="Permalink to this definition">¶</a></dt>
@@ -311,12 +326,6 @@ the protocol; the later the better. The values are keys into <tt class="xref py 
 <p><em>kwargs</em> are passed to <tt class="xref py py-func docutils literal"><span class="pre">gromacs.setup.energ_minimize()</span></tt> but if
 <a class="reference internal" href="#mdpow.equil.Simulation.solvate" title="mdpow.equil.Simulation.solvate"><tt class="xref py py-meth docutils literal"><span class="pre">solvate()</span></tt></a> step has been carried out
 previously all the defaults should just work.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="mdpow.equil.Simulation.filekeys">
-<tt class="descname">filekeys</tt><em class="property"> = ('topology', 'processed_topology', 'structure', 'solvated', 'ndx', 'energy_minimized', 'MD_relaxed', 'MD_restrained', 'MD_NPT')</em><a class="headerlink" href="#mdpow.equil.Simulation.filekeys" title="Permalink to this definition">¶</a></dt>
-<dd><p>Keyword arguments to pre-set some file names; they are keys in <tt class="xref py py-attr docutils literal"><span class="pre">Simulation.files</span></tt>.</p>
 </dd></dl>
 
 <dl class="method">
@@ -349,13 +358,6 @@ manually if necessary.</p>
 <dd><p>Create a portable topology file from the topology and the solvated system.</p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="mdpow.equil.Simulation.protocols">
-<tt class="descname">protocols</tt><em class="property"> = ('MD_NPT', 'MD_NPT_run', 'MD_relaxed', 'MD_relaxed_run', 'MD_restrained', 'MD_restrained_run', 'energy_minimize', 'solvate', 'topology')</em><a class="headerlink" href="#mdpow.equil.Simulation.protocols" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check list of all methods that can be run as an independent protocol; see also
-<tt class="xref py py-meth docutils literal"><span class="pre">Simulation.get_protocol()</span></tt> and <tt class="xref py py-class docutils literal"><span class="pre">restart.Journal</span></tt></p>
-</dd></dl>
-
 <dl class="method">
 <dt id="mdpow.equil.Simulation.save">
 <tt class="descname">save</tt><big>(</big><em>filename=None</em><big>)</big><a class="headerlink" href="#mdpow.equil.Simulation.save" title="Permalink to this definition">¶</a></dt>
@@ -373,7 +375,7 @@ or saved to.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Keywords :</th><td class="field-body"><dl class="first last docutils">
+<tr class="field-odd field"><th class="field-name">Keywords:</th><td class="field-body"><dl class="first last docutils">
 <dt><em>struct</em></dt>
 <dd><p class="first last">pdb or gro coordinate file (if not supplied, the value is used
 that was supplied to the constructor of <a class="reference internal" href="#mdpow.equil.Simulation" title="mdpow.equil.Simulation"><tt class="xref py py-class docutils literal"><span class="pre">Simulation</span></tt></a>)</p>
@@ -397,7 +399,7 @@ set to sensible default values. <em>top</em> and <em>water</em> are always fixed
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Keywords :</th><td class="field-body"><dl class="first last docutils">
+<tr class="field-odd field"><th class="field-name">Keywords:</th><td class="field-body"><dl class="first last docutils">
 <dt><em>itp</em></dt>
 <dd><p class="first last">Gromacs itp file; will be copied to topology dir and
 included in topology</p>
@@ -439,7 +441,7 @@ TIP4P or octanol at 300 K.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Keywords :</th><td class="field-body"><dl class="first last docutils">
+<tr class="field-odd field"><th class="field-name">Keywords:</th><td class="field-body"><dl class="first last docutils">
 <dt><em>molecule</em></dt>
 <dd><p class="first last">Identifier for the compound molecule. This is the same as the
 entry in the <tt class="docutils literal"><span class="pre">[</span> <span class="pre">molecule</span> <span class="pre">]</span></tt> section of the itp file. [&#8220;DRUG&#8221;]</p>
@@ -455,9 +457,15 @@ the pickle file <em>filename</em>, which was generated with
 <dt><em>solvent</em></dt>
 <dd><p class="first last">water or octanol</p>
 </dd>
+<dt><em>mdp</em></dt>
+<dd><p class="first last">dict with keys corresponding to the stages <tt class="docutils literal"><span class="pre">energy_minimize</span></tt>,
+<tt class="docutils literal"><span class="pre">MD_restrained</span></tt>, <tt class="docutils literal"><span class="pre">MD_relaxed</span></tt>,
+<tt class="docutils literal"><span class="pre">MD_NPT</span></tt> and values <em>mdp</em> file names (if no entry then the
+package defaults are used)</p>
+</dd>
 <dt><em>kwargs</em></dt>
 <dd><p class="first last">advanced keywords for short-circuiting; see
-<a class="reference internal" href="#mdpow.equil.Simulation.filekeys" title="mdpow.equil.Simulation.filekeys"><tt class="xref py py-data docutils literal"><span class="pre">mdpow.equil.Simulation.filekeys</span></tt></a>.</p>
+<tt class="xref py py-data docutils literal"><span class="pre">mdpow.equil.Simulation.filekeys</span></tt>.</p>
 </dd>
 </dl>
 </td>
@@ -477,7 +485,7 @@ the pickle file <em>filename</em>, which was generated with
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Keywords :</th><td class="field-body"><dl class="first last docutils">
+<tr class="field-odd field"><th class="field-name">Keywords:</th><td class="field-body"><dl class="first last docutils">
 <dt><em>molecule</em></dt>
 <dd><p class="first last">Identifier for the compound molecule. This is the same as the
 entry in the <tt class="docutils literal"><span class="pre">[</span> <span class="pre">molecule</span> <span class="pre">]</span></tt> section of the itp file. [&#8220;DRUG&#8221;]</p>
@@ -493,9 +501,15 @@ the pickle file <em>filename</em>, which was generated with
 <dt><em>solvent</em></dt>
 <dd><p class="first last">water or octanol</p>
 </dd>
+<dt><em>mdp</em></dt>
+<dd><p class="first last">dict with keys corresponding to the stages <tt class="docutils literal"><span class="pre">energy_minimize</span></tt>,
+<tt class="docutils literal"><span class="pre">MD_restrained</span></tt>, <tt class="docutils literal"><span class="pre">MD_relaxed</span></tt>,
+<tt class="docutils literal"><span class="pre">MD_NPT</span></tt> and values <em>mdp</em> file names (if no entry then the
+package defaults are used)</p>
+</dd>
 <dt><em>kwargs</em></dt>
 <dd><p class="first last">advanced keywords for short-circuiting; see
-<a class="reference internal" href="#mdpow.equil.Simulation.filekeys" title="mdpow.equil.Simulation.filekeys"><tt class="xref py py-data docutils literal"><span class="pre">mdpow.equil.Simulation.filekeys</span></tt></a>.</p>
+<tt class="xref py py-data docutils literal"><span class="pre">mdpow.equil.Simulation.filekeys</span></tt>.</p>
 </dd>
 </dl>
 </td>
@@ -507,19 +521,58 @@ the pickle file <em>filename</em>, which was generated with
 <dl class="data">
 <dt id="mdpow.equil.ITP">
 <tt class="descclassname">mdpow.equil.</tt><tt class="descname">ITP</tt><em class="property"> = {'water': 'tip4p.itp', 'octanol': '1oct.itp'}</em><a class="headerlink" href="#mdpow.equil.ITP" title="Permalink to this definition">¶</a></dt>
-<dd><p>itp files are picked up via include dirs</p>
+<dd><p>dict() -&gt; new empty dictionary
+dict(mapping) -&gt; new dictionary initialized from a mapping object&#8217;s</p>
+<blockquote>
+<div>(key, value) pairs</div></blockquote>
+<dl class="docutils">
+<dt>dict(iterable) -&gt; new dictionary initialized as if via:</dt>
+<dd><p class="first">d = {}
+for k, v in iterable:</p>
+<blockquote class="last">
+<div>d[k] = v</div></blockquote>
+</dd>
+<dt>dict(<a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs) -&gt; new dictionary initialized with the name=value pairs</dt>
+<dd>in the keyword argument list.  For example:  dict(one=1, two=2)</dd>
+</dl>
 </dd></dl>
 
 <dl class="data">
 <dt id="mdpow.equil.BOX">
-<tt class="descclassname">mdpow.equil.</tt><tt class="descname">BOX</tt><em class="property"> = {'water': 'tip4p.gro', 'octanol': '/Volumes/Data/oliver/Biop/Projects/Methods/pow/lib/python/POW/mdpow/top/1oct.gro'}</em><a class="headerlink" href="#mdpow.equil.BOX" title="Permalink to this definition">¶</a></dt>
-<dd><p>solvent boxes</p>
+<tt class="descclassname">mdpow.equil.</tt><tt class="descname">BOX</tt><em class="property"> = {'water': 'tip4p.gro', 'octanol': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top/1oct.gro'}</em><a class="headerlink" href="#mdpow.equil.BOX" title="Permalink to this definition">¶</a></dt>
+<dd><p>dict() -&gt; new empty dictionary
+dict(mapping) -&gt; new dictionary initialized from a mapping object&#8217;s</p>
+<blockquote>
+<div>(key, value) pairs</div></blockquote>
+<dl class="docutils">
+<dt>dict(iterable) -&gt; new dictionary initialized as if via:</dt>
+<dd><p class="first">d = {}
+for k, v in iterable:</p>
+<blockquote class="last">
+<div>d[k] = v</div></blockquote>
+</dd>
+<dt>dict(<a href="#id5"><span class="problematic" id="id6">**</span></a>kwargs) -&gt; new dictionary initialized with the name=value pairs</dt>
+<dd>in the keyword argument list.  For example:  dict(one=1, two=2)</dd>
+</dl>
 </dd></dl>
 
 <dl class="data">
 <dt id="mdpow.equil.DIST">
 <tt class="descclassname">mdpow.equil.</tt><tt class="descname">DIST</tt><em class="property"> = {'water': 1.0, 'octanol': 1.5}</em><a class="headerlink" href="#mdpow.equil.DIST" title="Permalink to this definition">¶</a></dt>
-<dd><p>minimum distance between solute and box surface (in nm)</p>
+<dd><p>dict() -&gt; new empty dictionary
+dict(mapping) -&gt; new dictionary initialized from a mapping object&#8217;s</p>
+<blockquote>
+<div>(key, value) pairs</div></blockquote>
+<dl class="docutils">
+<dt>dict(iterable) -&gt; new dictionary initialized as if via:</dt>
+<dd><p class="first">d = {}
+for k, v in iterable:</p>
+<blockquote class="last">
+<div>d[k] = v</div></blockquote>
+</dd>
+<dt>dict(<a href="#id7"><span class="problematic" id="id8">**</span></a>kwargs) -&gt; new dictionary initialized with the name=value pairs</dt>
+<dd>in the keyword argument list.  For example:  dict(one=1, two=2)</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -535,7 +588,7 @@ the pickle file <em>filename</em>, which was generated with
                         title="previous chapter">The <tt class="docutils literal"><span class="pre">mdpow-*</span></tt> scripts</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="fep.html"
-                        title="next chapter">&lt;no title&gt;</a></p>
+                        title="next chapter"><tt class="docutils literal"><span class="pre">mdpow.fep</span></tt> &#8211; Calculate free energy of solvation</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/equil.txt"
@@ -568,17 +621,17 @@ the pickle file <em>filename</em>, which was generated with
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="fep.html" title="&lt;no title&gt;"
+          <a href="fep.html" title="mdpow.fep – Calculate free energy of solvation"
              >next</a> |</li>
         <li class="right" >
           <a href="scripts.html" title="The mdpow-* scripts"
              >previous</a> |</li>
-        <li><a href="index.html">MDpow 0.5.2 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow 0.6.0-dev documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010–2013, Oliver Beckstein and Bogdan Iorga.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
     </div>
   </body>
 </html>

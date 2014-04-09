@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -8,15 +6,15 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>The mdpow-* scripts &mdash; MDpow 0.5.2 documentation</title>
+    <title>The mdpow-* scripts &mdash; MDpow 0.6.0-dev documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
-        VERSION:     '0.5.2',
+        URL_ROOT:    './',
+        VERSION:     '0.6.0-dev',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="MDpow 0.5.2 documentation" href="index.html" />
+    <link rel="top" title="MDpow 0.6.0-dev documentation" href="index.html" />
     <link rel="next" title="&lt;no title&gt;" href="equil.html" />
     <link rel="prev" title="mdpow — Computing the octanol/water partitioning coefficient" href="init.html" /> 
   </head>
@@ -46,7 +44,7 @@
         <li class="right" >
           <a href="init.html" title="mdpow — Computing the octanol/water partitioning coefficient"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">MDpow 0.5.2 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow 0.6.0-dev documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -64,7 +62,7 @@ layout and filenames. If one uses defaults for all directory and
 filename options then it should &#8220;just work&#8221;.</p>
 <p>In particular, a directory hierarchy such as the following is
 assumed:</p>
-<div class="highlight-python"><pre>moleculename/
+<div class="highlight-python"><div class="highlight"><pre>moleculename/
      water.simulation
      octanol.simulation
      Equilibrium/
@@ -78,7 +76,8 @@ assumed:</p>
            octanol/
                  Goct.fep
                  Coulomb/
-                 VDW/</pre>
+                 VDW/
+</pre></div>
 </div>
 <p><em>moleculename</em> is, for instance, &#8220;benzene&#8221; or &#8220;amantadine&#8221;; in the run
 input file (see <a class="reference internal" href="#equilibrium-simulations">Equilibrium simulations</a>) is the value of the
@@ -110,7 +109,7 @@ be found). The required <strong>input</strong> is</p>
 <p>A template <em>RUNFILE</em> can be generated with
 <a class="reference internal" href="#cmdoption-mdpow-equilibrium--get-template"><em class="xref std std-option">mdpow-equilibrium --get-template</em></a>.</p>
 <p>For an example of a <em>RUNFILE</em> see <a class="reference download internal" href="_downloads/benzene_runinput.cfg"><tt class="xref download docutils literal"><span class="pre">benzene_runinput.cfg</span></tt></a>. It is recommended to use absolute paths
-to file names. The run input file uses <a class="reference external" href="http://docs.python.org/library/configparser.html#ConfigParser" title="(in Python v2.7)"><tt class="xref py py-mod docutils literal"><span class="pre">ConfigParser</span></tt></a>, which describes the
+to file names. The run input file uses <a class="reference external" href="http://docs.python.org/library/configparser.html#module-ConfigParser" title="(in Python v2.7)"><tt class="xref py py-mod docutils literal"><span class="pre">ConfigParser</span></tt></a>, which describes the
 syntax of the file.</p>
 <p>The script keeps track of the stages of the simulation protocol and allows the
 user to <strong>restart from the last completed stage</strong>. For instance, one can use the
@@ -616,7 +615,8 @@ are available.</p>
 <p>Check status of the progress of the project in <em>DIRECTORY</em>.</p>
 <p>Output is only written to the status file (<tt class="file docutils literal"><span class="pre">status.txt</span></tt>). A quick way to find
 problems is to do a</p>
-<div class="highlight-python"><pre>cat status.txt | gawk -F '|' '$2 !~ /OK/ {print $0}'</pre>
+<div class="highlight-python"><div class="highlight"><pre>cat status.txt | gawk -F &#39;|&#39; &#39;$2 !~ /OK/ {print $0}&#39;
+</pre></div>
 </div>
 <p>Options:</p>
 <dl class="cmdoption">
@@ -736,7 +736,7 @@ templates. For example:
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="init.html"
-                        title="previous chapter"><tt class="docutils literal docutils literal docutils literal"><span class="pre">mdpow</span></tt> &#8212; Computing the octanol/water partitioning coefficient</a></p>
+                        title="previous chapter"><tt class="docutils literal"><span class="pre">mdpow</span></tt> &#8212; Computing the octanol/water partitioning coefficient</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="equil.html"
                         title="next chapter">&lt;no title&gt;</a></p>
@@ -777,12 +777,12 @@ templates. For example:
         <li class="right" >
           <a href="init.html" title="mdpow — Computing the octanol/water partitioning coefficient"
              >previous</a> |</li>
-        <li><a href="index.html">MDpow 0.5.2 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MDpow 0.6.0-dev documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010–2013, Oliver Beckstein and Bogdan Iorga.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
     </div>
   </body>
 </html>
