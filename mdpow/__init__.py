@@ -496,18 +496,23 @@ through the thermodynamic integration and the subsequent thermodynamic sums
 
 
 """
-VERSION = 0,5,2
-
 __all__ = ['fep', 'equil']
 
+#: Package version; this is the only place where it is set.
+VERSION = 0,6,0
+#: Set to ``True`` for a release. If set to ``False`` then the patch level
+#: will have the suffix "-dev".
+RELEASE = False
+if not RELEASE:
+    VERSION = VERSION[:2] + (str(VERSION[2]) + '-dev',)
 
 def get_version():
     """Return current package version as a string."""
     return ".".join(map(str,VERSION))
 
 def get_version_tuple():
-    """Return current package version as a (MAJOR,MINOR,PATCHLEVEL)."""
-    return tuple(VERSION)
+    """Return current package version as a tuple (*MAJOR*, *MINOR*, *PATCHLEVEL*)."""
+    return tuple(map(str,VERSION))
 
 import log
 
@@ -525,7 +530,7 @@ def create_logger(logfile="mdpow.log"):
 def log_banner():
     """Log program name and licence at INFO level."""
     logger.info("MDPOW %s starting.", get_version())
-    logger.info("Copyright (c) 2010-2011 Oliver Beckstein and Bogdan Iorga")
+    logger.info("Copyright (c) 2010-2014 Oliver Beckstein and Bogdan Iorga")
     logger.info("Released under the GNU Public Licence, version 3.")
     logger.info("Contact the authors for bug reports or questions about licensing.")
 
