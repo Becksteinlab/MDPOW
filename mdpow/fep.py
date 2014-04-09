@@ -230,15 +230,30 @@ class FEPschedule(AttributeDict):
     @staticmethod
     def load(cfg, section):
         """Initialize a :class:`FEPschedule` from the *section* in the configuration *cfg*"""
+        import ConfigParser
+
         keys = {}
         keys.update(FEPschedule.mdp_keywords)
         keys.update(FEPschedule.meta_keywords)
         keys.update(FEPschedule.other_keywords)
-        getter = {float: cfg.getfloat,
-                  str: cfg.getstr,    # literal strings, no conversion of None (which we need for the MDP!)
-                  list: cfg.getarray  # numpy float array from list
-                  }
-        return FEPschedule((key, getter[keytype](section, key)) for key,keytype in keys.items())
+
+        cfg_get = {float: cfg.getfloat,
+                   str: cfg.getstr,    # literal strings, no conversion of None (which we need for the MDP!)
+                   list: cfg.getarray  # numpy float array from list
+                   }
+        def getter(type, section, key):
+            try:
+                return cfg_get[type](section, key)
+            except ConfigParser.NoOptionError:
+                return None
+        return FEPschedule((key, getter(keytype, section, key)) for key,keytype in keys.items()
+                           if getter(keytype, section, key) is not None)
+
+    def __deepcopy__(self, memo):
+        x = type(self)()
+        for k,v in self.iteritems():
+            x[k] = copy.deepcopy(v, memo)
+        return x
 
 class Gsolv(Journalled):
     """Simulations to calculate and analyze the solvation free energy.

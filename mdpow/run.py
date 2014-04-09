@@ -288,22 +288,23 @@ def fep_simulation(cfg, solvent, **kwargs):
     if os.path.exists(savefilename):
         S = Simulation(filename=savefilename, basedir=topdir)
     else:
-        # TODO: put lambda schedules in [FEP] section and load here!
-        # Note that we set basedir=topdir (and *not* dirname=dirname!)...FEP is a bit convoluted
-        S = Simulation(simulation=equil_S, runtime=cfg.getfloat("FEP", "runtime"),
-                       basedir=topdir, deffnm=deffnm)
-
-    if S.journal.has_not_completed("setup"):
+        # custom mdp file
         mdp = cfg.findfile("FEP", "mdp")
+        logger.debug("Using [FEP] MDP file %r from config file", mdp)
+
+        # lambda schedules can be read from [FEP_schedule_*] sections
         schedules = {'coulomb': mdpow.fep.FEPschedule.load(cfg, "FEP_schedule_Coulomb"),
                      'vdw': mdpow.fep.FEPschedule.load(cfg, "FEP_schedule_VDW"),
                      }
-        logger.debug("Using [FEP] MDP file %r from config file", mdp)
         logger.debug("Loaded FEP schedules %r from config file", schedules.keys())
+
+        # Note that we set basedir=topdir (and *not* dirname=dirname!)...FEP is a bit convoluted
+        S = Simulation(simulation=equil_S, runtime=cfg.getfloat("FEP", "runtime"),
+                       basedir=topdir, deffnm=deffnm, mdp=mdp, schedules=schedules)
+
+    if S.journal.has_not_completed("setup"):
         params = S.setup(qscript=cfg.getlist("FEP", "qscript"),
-                         mdp=mdp,
-                         schedules=schedules,
-                         )
+                         maxwarn=cfg.getint("FEP", "maxwarn"))
         checkpoint("setup", S, savefilename)
     else:
         params = {'deffnm': deffnm}
