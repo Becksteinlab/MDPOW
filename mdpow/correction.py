@@ -491,6 +491,7 @@ def analyze_NPT(sim, **kwargs):
 
     tpr = os.path.join(sim.dirs.MD_NPT, deffnm + ".tpr")
     edr = os.path.join(sim.dirs.MD_NPT, deffnm + ".edr")
+    kwargs.setdefault('solvent', sim.solvent_type)
     A = ThermodynamicAnalysis(tpr, edr, **kwargs)
     v_s = A.solute_volume()
     return {'v_s': v_s}
