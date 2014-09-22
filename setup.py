@@ -38,7 +38,6 @@ octanol. It uses Gromacs (http://www.gromacs.org) for the molecular dynamics
       install_requires = ['numpy>=1.0', 'scipy',
                           'GromacsWrapper>0.2.5',
                           'RecSQL>=0.7.5'],
-      dependency_links = ["http://sbcb.bioch.ox.ac.uk/oliver/download/Python/"],
       zip_safe = True,
 )
 
