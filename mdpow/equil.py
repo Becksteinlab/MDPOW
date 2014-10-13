@@ -540,7 +540,9 @@ class Simulation(Journalled):
         try:
             self.__cache['v_solute'] = correction.analyze_NPT(self)
         except Exception as e:
+            logger.fatal("Solute volume could not computed because no NPT simulation found.")
             logger.exception(e)
+            raise e
         return self.__cache['v_solute']
 
 class WaterSimulation(Simulation):

@@ -144,7 +144,8 @@ def runMD_or_exit(S, protocol, params, cfg, **kwargs):
     else:
         # must check if the simulation was run externally
         logfile = os.path.join(dirname, params['deffnm']+os.extsep+"log")
-        simulation_done = gromacs.run.check_mdrun_success(logfile)
+        logger.debug("Checking logfile %r if simulation has been completed.", logfile)
+        simulation_done = gromacs.run.check_mdrun_success(logfile) ### broken??
         if simulation_done is None:
             logger.info("Now go and run %(protocol)s in directory %(dirname)r.", vars())
             sys.exit(0)
