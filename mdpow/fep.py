@@ -341,7 +341,7 @@ class Gsolv(Journalled):
     mdp_default = 'fep_opls.mdp'
 
 
-    def __init__(self, molecule=None, top=None, struct=None, **kwargs):
+    def __init__(self, molecule=None, top=None, struct=None, method="TI", **kwargs):
         """Set up Gsolv from input files or a equilibrium simulation.
 
         :Arguments:
