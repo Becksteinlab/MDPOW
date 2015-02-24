@@ -1,3 +1,5 @@
+# -*- Mode: python; tab-width: 4; indent-tabs-mode:nil; -*-
+# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
 # mdpow: fep.py
 # Copyright (c) 2010 Oliver Beckstein
 
@@ -312,7 +314,8 @@ class Gsolv(Journalled):
     topdir_default = "FEP"
     dirname_default = os.path.curdir
     solvent_default = "water"
-
+    method = "BAR"
+    
     # TODO: initialize from default cfg
     schedules_default = {'coulomb':
                              FEPschedule(name='coulomb',
@@ -320,7 +323,7 @@ class Gsolv(Journalled):
                                          label='Coul',
                                          couple_lambda0='vdw-q', couple_lambda1='vdw',
                                          sc_alpha=0,      # linear scaling for coulomb
-                                         lambdas=[0, 0.25, 0.5, 0.75, 1.0],  # default values
+                                         lambdas=[0.0, 0.25, 0.5, 0.75, 1.0],  # default values
                                          ),
                          'vdw':
                              FEPschedule(name='vdw',
@@ -580,7 +583,7 @@ class Gsolv(Journalled):
                are set to values that are required for the FEP functionality.
 
                *mdrun_opts*
-                  list of options to :program:`mdrun`; ``-dgdl`` is always added
+                  list of options to :program:`mdrun`; ``-dhdl`` is always added
                   to this list as it is required for the thermodynamic integration
                   calculations
                *includes*
@@ -592,11 +595,15 @@ class Gsolv(Journalled):
 
         .. SeeAlso:: :func:`gromacs.setup.MD` and
                      :func:`gromacs.qsub.generate_submit_scripts`
+
+        .. versionchanged:; 0.6.0
+           Gromacs now uses option ``-dhdl`` instead of ``-dgdl``.
         """
         self.journal.start('setup')
 
         # -dgdl for FEP output (although that seems to have been changed to -dHdl in Gromacs 4.5.3)
-        kwargs['mdrun_opts'] = " ".join([kwargs.pop('mdrun_opts',''), '-dgdl'])
+        # NOW use -dhdl
+        kwargs['mdrun_opts'] = " ".join([kwargs.pop('mdrun_opts',''), '-dhdl'])
         kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.includes
         kwargs['deffnm'] = self.deffnm
         qsubargs = kwargs.copy()
@@ -608,8 +615,18 @@ class Gsolv(Journalled):
         kwargs.setdefault('qscript', qscripts)
 
         for component, lambdas in self.lambdas.items():
-            for l in lambdas:
-                params = self._setup(component, l, **kwargs)   # set up gromacs job for each FEP window
+            if self.method == "TI":
+                for l in lambdas:
+                    params = self._setup(component, l, **kwargs)   # set up gromacs job for each FEP window in TI
+            elif self.method == "BAR":
+                xlambdas = [None] + list(lambdas) + [None]
+                feps = []
+                for l in lambdas:
+                    feps = [xlambdas[xlambdas.index(l)-1],xlambdas[xlambdas.index(l)+1]]
+                    params = self._setup(component, l, feps=feps, **kwargs) # set up gromacs job for each FEP window in BAR
+            else:
+                raise ValueError("Unknown method {}".format(self.method))
+                    
             # generate queuing system script for array job
             directories = [self.wdir(component, l) for l in lambdas]
             qsubargs['jobname'] = self.arraylabel(component)
@@ -624,7 +641,7 @@ class Gsolv(Journalled):
         params.pop('struct',None)   # scrub window-specific params
         return params
 
-    def _setup(self, component, lmbda, **kwargs):
+    def _setup(self, component, lmbda, feps=None, **kwargs):
         """Prepare the input files for an individual Gromacs runs."""
 
         # note that all arguments pertinent to the submission scripts should be in kwargs
@@ -634,19 +651,46 @@ class Gsolv(Journalled):
         wdir = self.wdir(component, lmbda)
         kwargs.setdefault('couple-intramol', 'no')
         kwargs.update(self.schedules[component].mdp_dict)  # sets soft core & lambda0/1 state
-        kwargs.update(dirname=wdir, struct=self.struct, top=self.top,
-                      mdp=self.mdp,
-                      ndx=self.ndx,
-                      mainselection=None,
-                      runtime=self.runtime,
-                      ref_t=self.Temperature,    # TODO: maybe not working yet, check _setup()
-                      gen_temp=self.Temperature, # needed until gromacs.setup() is smarter
-                      qname=self.tasklabel(component,lmbda),
-                      free_energy='yes',
-                      couple_moltype=self.molecule,
-                      init_lambda=lmbda,
-                      delta_lambda=0,
-                      )
+        
+        # for BAR
+        if feps != None: # feps is only passed as an argument if BAR is desired method, defaults to TI otherwise
+            
+            if feps[0]==None:
+                feplambdas = feps[1]
+            elif feps[1]==None:
+                feplambdas = feps[0]
+            else:
+                feplambdas = "{0} {1}".format(feps[0],feps[1])
+            
+            kwargs.update(dirname=wdir, struct=self.struct, top=self.top,
+                          mdp=self.mdp,
+                          ndx=self.ndx,
+                          mainselection=None,
+                          runtime=self.runtime,
+                          ref_t=self.Temperature,    # TODO: maybe not working yet, check _setup()
+                          gen_temp=self.Temperature, # needed until gromacs.setup() is smarter
+                          qname=self.tasklabel(component,lmbda),
+                          free_energy='yes',
+                          couple_moltype=self.molecule,
+                          init_lambda=lmbda,
+                          fep_lambdas=feplambdas,
+                          )
+        
+        # for TI
+        else:
+            kwargs.update(dirname=wdir, struct=self.struct, top=self.top,
+                          mdp=self.mdp,
+                          ndx=self.ndx,
+                          mainselection=None,
+                          runtime=self.runtime,
+                          ref_t=self.Temperature,    # TODO: maybe not working yet, check _setup()
+                          gen_temp=self.Temperature, # needed until gromacs.setup() is smarter
+                          qname=self.tasklabel(component,lmbda),
+                          free_energy='yes',
+                          couple_moltype=self.molecule,
+                          init_lambda=lmbda,
+                          delta_lambda=0,
+                          )
         return gromacs.setup.MD(**kwargs)
 
     def DeltaW(self):
