@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -13,7 +15,7 @@
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '0.6.0-dev',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -60,28 +62,25 @@ dependencies.</p>
 <div class="section" id="standard-installation">
 <h2>Standard installation<a class="headerlink" href="#standard-installation" title="Permalink to this headline">¶</a></h2>
 <p>Example for installation under <tt class="docutils literal"><span class="pre">~/opt</span></tt> with python2.6:</p>
-<div class="highlight-python"><div class="highlight"><pre>export PYTHONPATH=$HOME/opt/lib/python2.6:$PYTHONPATH
-easy_install --prefix=$HOME/opt POW
-</pre></div>
+<div class="highlight-python"><pre>export PYTHONPATH=$HOME/opt/lib/python2.6:$PYTHONPATH
+easy_install --prefix=$HOME/opt POW</pre>
 </div>
 <p>Check that you can import the module:</p>
-<div class="highlight-python"><div class="highlight"><pre>python
+<div class="highlight-python"><pre>python
 &gt;&gt;&gt; import mdpow
-&gt;&gt;&gt; help(mdpow)
-</pre></div>
+&gt;&gt;&gt; help(mdpow)</pre>
 </div>
 <p>In case of problems contact Oliver Beckstein &lt;<a class="reference external" href="mailto:orbeckst&#37;&#52;&#48;gmail&#46;com">orbeckst<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;.</p>
 </div>
 <div class="section" id="developer-installation">
 <h2>Developer installation<a class="headerlink" href="#developer-installation" title="Permalink to this headline">¶</a></h2>
 <p>A development install is useful while hacking away on the code:</p>
-<div class="highlight-python"><div class="highlight"><pre>cd POW
-python setup.py develop
-</pre></div>
+<div class="highlight-python"><pre>cd POW
+python setup.py develop</pre>
 </div>
 <p>Use <tt class="docutils literal"><span class="pre">--prefix</span></tt>/<tt class="docutils literal"><span class="pre">--install-lib</span></tt> as above or use the defaults in
 <tt class="docutils literal"><span class="pre">~/.pydistutils.cfg</span></tt>; I have:</p>
-<div class="highlight-python"><div class="highlight"><pre># Mac OS X user installation:
+<div class="highlight-python"><pre># Mac OS X user installation:
 # http://peak.telecommunity.com/DevCenter/EasyInstall#mac-os-x-user-installation
 # http://peak.telecommunity.com/DevCenter/EasyInstall#downloading-and-installing-a-package
 
@@ -90,8 +89,7 @@ python setup.py develop
 
 [install]
 install_lib = ~/.local/lib/python$py_version_short/site-packages
-install_scripts = ~/bin
-</pre></div>
+install_scripts = ~/bin</pre>
 </div>
 </div>
 </div>
@@ -159,7 +157,7 @@ install_scripts = ~/bin
     </div>
     <div class="footer">
         &copy; Copyright 2010–2013, Oliver Beckstein and Bogdan Iorga.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>
