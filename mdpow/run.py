@@ -144,7 +144,8 @@ def runMD_or_exit(S, protocol, params, cfg, **kwargs):
     else:
         # must check if the simulation was run externally
         logfile = os.path.join(dirname, params['deffnm']+os.extsep+"log")
-        simulation_done = gromacs.run.check_mdrun_success(logfile)
+        logger.debug("Checking logfile %r if simulation has been completed.", logfile)
+        simulation_done = gromacs.run.check_mdrun_success(logfile) ### broken??
         if simulation_done is None:
             logger.info("Now go and run %(protocol)s in directory %(dirname)r.", vars())
             sys.exit(0)
@@ -245,6 +246,7 @@ def fep_simulation(cfg, solvent, **kwargs):
        recommended to use ``runlocal = False`` in the run input file
        and submit all window simulations to a cluster.
     """
+    
     deffnm = kwargs.pop('deffnm', "md")
     EquilSimulations = {
         'water': mdpow.equil.WaterSimulation,
@@ -259,7 +261,7 @@ def fep_simulation(cfg, solvent, **kwargs):
         Simulation = Simulations[solvent]
     except KeyError:
         raise ValueError("solvent must be 'water' or 'octanol'")
-
+    
     # generate a canonical path under dirname
     topdir = kwargs.get("dirname", None)
     if topdir is None:
@@ -288,6 +290,10 @@ def fep_simulation(cfg, solvent, **kwargs):
     if os.path.exists(savefilename):
         S = Simulation(filename=savefilename, basedir=topdir)
     else:
+		# method to be used "TI"/"BAR"
+        method = cfg.get("FEP","method")
+        logger.debug("Implementing the %r method, per config file",method)
+        
         # custom mdp file
         mdp = cfg.findfile("FEP", "mdp")
         logger.debug("Using [FEP] MDP file %r from config file", mdp)
@@ -300,7 +306,7 @@ def fep_simulation(cfg, solvent, **kwargs):
 
         # Note that we set basedir=topdir (and *not* dirname=dirname!)...FEP is a bit convoluted
         S = Simulation(simulation=equil_S, runtime=cfg.getfloat("FEP", "runtime"),
-                       basedir=topdir, deffnm=deffnm, mdp=mdp, schedules=schedules)
+                       basedir=topdir, deffnm=deffnm, mdp=mdp, schedules=schedules,method=method)
 
     if S.journal.has_not_completed("setup"):
         params = S.setup(qscript=cfg.getlist("FEP", "qscript"),
