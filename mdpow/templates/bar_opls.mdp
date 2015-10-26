@@ -89,7 +89,7 @@ Pcoupl                   = no
 ; GENERATE VELOCITIES FOR STARTUP RUN
 gen_vel                  = yes
 gen-temp                 = 300
-gen_seed                 = 173545
+gen_seed                 = 175547
 
 ; Generate a random starting seed for Langevin
 ; (required for restarts, according to the manual)
@@ -106,8 +106,10 @@ lincs-iter               = 1
 
 ; Free energy control stuff
 free_energy              = yes
-init_lambda              = 0.0 ####
-fep_lambda				 = 0 #####
+;  init for bar
+init_lambda              = 0.0
+;  fep lam for bar
+fep_lambdas				 = 0
 sc_alpha                 = 0.5
 sc-power                 = 1.0
 sc-sigma                 = 0.3

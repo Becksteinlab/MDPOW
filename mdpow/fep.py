@@ -314,8 +314,7 @@ class Gsolv(Journalled):
     topdir_default = "FEP"
     dirname_default = os.path.curdir
     solvent_default = "water"
-    method = "BAR"
-    
+    method = config.get_configuration("sol_runinput.cfg").get("FEP","method")
     # TODO: initialize from default cfg
     schedules_default = {'coulomb':
                              FEPschedule(name='coulomb',
@@ -422,7 +421,6 @@ class Gsolv(Journalled):
         basedir = kwargs.pop('basedir', os.path.curdir)  # all other dirs relative to basedir
         simulation = kwargs.pop('simulation', None)
         solvent = kwargs.pop('solvent', self.solvent_default)
-
         if (None in (molecule, top, struct) and simulation is None) and not filename is None:
             # load from pickle file
             self.load(filename)
@@ -617,7 +615,7 @@ class Gsolv(Journalled):
         for component, lambdas in self.lambdas.items():
             if self.method == "TI":
                 for l in lambdas:
-                    params = self._setup(component, l, **kwargs)   # set up gromacs job for each FEP window in TI
+                    params = self._setup(component, l, None, **kwargs)   # set up gromacs job for each FEP window in TI
             elif self.method == "BAR":
                 xlambdas = [None] + list(lambdas) + [None]
                 feps = []
@@ -654,7 +652,6 @@ class Gsolv(Journalled):
         
         # for BAR
         if feps != None: # feps is only passed as an argument if BAR is desired method, defaults to TI otherwise
-            
             if feps[0]==None:
                 feplambdas = feps[1]
             elif feps[1]==None:
