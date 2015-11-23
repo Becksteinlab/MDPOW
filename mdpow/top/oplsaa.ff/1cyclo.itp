@@ -1,0 +1,215 @@
+; input pdb SMILES : C1CCCCC1
+; Script arguments : cyclohexane.mol2
+
+[ moleculetype ]
+; Name      nrexcl
+UNK              3
+
+[ atoms ]
+; atomnr  atomtype   resnr  resname  atomname  chargegrp   charge       mass
+       1  opls_136      1      UNK        C1          1    -0.120   12.01100 ; CT # alkane CH2 
+       2  opls_140      1      UNK        H7          1     0.060    1.00800 ; HC # alkane H.
+       3  opls_140      1      UNK        H8          1     0.060    1.00800 ; HC # alkane H.
+       4  opls_136      1      UNK        C2          5    -0.120   12.01100 ; CT # alkane CH2 
+       5  opls_140      1      UNK        H9          5     0.060    1.00800 ; HC # alkane H.
+       6  opls_140      1      UNK       H10          5     0.060    1.00800 ; HC # alkane H.
+       7  opls_136      1      UNK        C3          9    -0.120   12.01100 ; CT # alkane CH2 
+       8  opls_140      1      UNK       H11          9     0.060    1.00800 ; HC # alkane H.
+       9  opls_140      1      UNK       H12          9     0.060    1.00800 ; HC # alkane H.
+      10  opls_136      1      UNK        C4         13    -0.120   12.01100 ; CT # alkane CH2 
+      11  opls_140      1      UNK       H13         13     0.060    1.00800 ; HC # alkane H.
+      12  opls_140      1      UNK       H14         13     0.060    1.00800 ; HC # alkane H.
+      13  opls_136      1      UNK        C5         17    -0.120   12.01100 ; CT # alkane CH2 
+      14  opls_140      1      UNK       H15         17     0.060    1.00800 ; HC # alkane H.
+      15  opls_140      1      UNK       H16         17     0.060    1.00800 ; HC # alkane H.
+      16  opls_136      1      UNK        C6         21    -0.120   12.01100 ; CT # alkane CH2 
+      17  opls_140      1      UNK       H17         21     0.060    1.00800 ; HC # alkane H.
+      18  opls_140      1      UNK       H18         21     0.060    1.00800 ; HC # alkane H.
+; Total charge : 0.000 ### Number of unassigned atoms : 0/18
+
+[ bonds ]
+; ai   aj  funct  r  k
+   1   16      1  ; CT-CT # CHARMM 22 parameter file
+   1    4      1  ; CT-CT # CHARMM 22 parameter file
+   1    2      1  ; CT-HC # CHARMM 22 parameter file
+   1    3      1  ; CT-HC # CHARMM 22 parameter file
+   4    7      1  ; CT-CT # CHARMM 22 parameter file
+   4    5      1  ; CT-HC # CHARMM 22 parameter file
+   4    6      1  ; CT-HC # CHARMM 22 parameter file
+   7   10      1  ; CT-CT # CHARMM 22 parameter file
+   7    8      1  ; CT-HC # CHARMM 22 parameter file
+   7    9      1  ; CT-HC # CHARMM 22 parameter file
+  10   13      1  ; CT-CT # CHARMM 22 parameter file
+  10   11      1  ; CT-HC # CHARMM 22 parameter file
+  10   12      1  ; CT-HC # CHARMM 22 parameter file
+  13   16      1  ; CT-CT # CHARMM 22 parameter file
+  13   14      1  ; CT-HC # CHARMM 22 parameter file
+  13   15      1  ; CT-HC # CHARMM 22 parameter file
+  16   17      1  ; CT-HC # CHARMM 22 parameter file
+  16   18      1  ; CT-HC # CHARMM 22 parameter file
+
+[ angles ]
+; ai   aj   ak  funct  theta   cth
+  16    1    2      1  ; CT-CT-HC # CHARMM 22 parameter file
+  16    1    3      1  ; CT-CT-HC # CHARMM 22 parameter file
+   4    1   16      1  ; CT-CT-CT # CHARMM 22 parameter file
+   4    1    2      1  ; CT-CT-HC # CHARMM 22 parameter file
+   4    1    3      1  ; CT-CT-HC # CHARMM 22 parameter file
+   2    1    3      1  ; HC-CT-HC # CHARMM 22 parameter file
+   1    4    7      1  ; CT-CT-CT # CHARMM 22 parameter file
+   1    4    5      1  ; CT-CT-HC # CHARMM 22 parameter file
+   1    4    6      1  ; CT-CT-HC # CHARMM 22 parameter file
+   7    4    5      1  ; CT-CT-HC # CHARMM 22 parameter file
+   7    4    6      1  ; CT-CT-HC # CHARMM 22 parameter file
+   5    4    6      1  ; HC-CT-HC # CHARMM 22 parameter file
+   4    7   10      1  ; CT-CT-CT # CHARMM 22 parameter file
+   4    7    8      1  ; CT-CT-HC # CHARMM 22 parameter file
+   4    7    9      1  ; CT-CT-HC # CHARMM 22 parameter file
+  10    7    8      1  ; CT-CT-HC # CHARMM 22 parameter file
+  10    7    9      1  ; CT-CT-HC # CHARMM 22 parameter file
+   8    7    9      1  ; HC-CT-HC # CHARMM 22 parameter file
+   7   10   13      1  ; CT-CT-CT # CHARMM 22 parameter file
+   7   10   11      1  ; CT-CT-HC # CHARMM 22 parameter file
+   7   10   12      1  ; CT-CT-HC # CHARMM 22 parameter file
+  13   10   11      1  ; CT-CT-HC # CHARMM 22 parameter file
+  13   10   12      1  ; CT-CT-HC # CHARMM 22 parameter file
+  11   10   12      1  ; HC-CT-HC # CHARMM 22 parameter file
+  10   13   16      1  ; CT-CT-CT # CHARMM 22 parameter file
+  10   13   14      1  ; CT-CT-HC # CHARMM 22 parameter file
+  10   13   15      1  ; CT-CT-HC # CHARMM 22 parameter file
+  16   13   14      1  ; CT-CT-HC # CHARMM 22 parameter file
+  16   13   15      1  ; CT-CT-HC # CHARMM 22 parameter file
+  14   13   15      1  ; HC-CT-HC # CHARMM 22 parameter file
+   1   16   13      1  ; CT-CT-CT # CHARMM 22 parameter file
+   1   16   17      1  ; CT-CT-HC # CHARMM 22 parameter file
+   1   16   18      1  ; CT-CT-HC # CHARMM 22 parameter file
+  13   16   17      1  ; CT-CT-HC # CHARMM 22 parameter file
+  13   16   18      1  ; CT-CT-HC # CHARMM 22 parameter file
+  17   16   18      1  ; HC-CT-HC # CHARMM 22 parameter file
+
+[ dihedrals ]
+; ai   aj   ak   al  funct   C0  ...  C5
+   4    1   16   13      3     ; CT-CT-CT-CT # hydrocarbon all-atom
+   4    1   16   17      3     ; CT-CT-CT-HC # hydrocarbon all-atom
+   4    1   16   18      3     ; CT-CT-CT-HC # hydrocarbon all-atom
+   2    1   16   13      3     ; HC-CT-CT-CT # (CT-CT-CT-HC)  hydrocarbon all-atom
+   2    1   16   17      3     ; HC-CT-CT-HC # hydrocarbon *new* 11/99
+   2    1   16   18      3     ; HC-CT-CT-HC # hydrocarbon *new* 11/99
+   3    1   16   13      3     ; HC-CT-CT-CT # (CT-CT-CT-HC)  hydrocarbon all-atom
+   3    1   16   17      3     ; HC-CT-CT-HC # hydrocarbon *new* 11/99
+   3    1   16   18      3     ; HC-CT-CT-HC # hydrocarbon *new* 11/99
+  16    1    4    7      3     ; CT-CT-CT-CT # hydrocarbon all-atom
+  16    1    4    5      3     ; CT-CT-CT-HC # hydrocarbon all-atom
+  16    1    4    6      3     ; CT-CT-CT-HC # hydrocarbon all-atom
+   2    1    4    7      3     ; HC-CT-CT-CT # (CT-CT-CT-HC)  hydrocarbon all-atom
+   2    1    4    5      3     ; HC-CT-CT-HC # hydrocarbon *new* 11/99
+   2    1    4    6      3     ; HC-CT-CT-HC # hydrocarbon *new* 11/99
+   3    1    4    7      3     ; HC-CT-CT-CT # (CT-CT-CT-HC)  hydrocarbon all-atom
+   3    1    4    5      3     ; HC-CT-CT-HC # hydrocarbon *new* 11/99
+   3    1    4    6      3     ; HC-CT-CT-HC # hydrocarbon *new* 11/99
+   1    4    7   10      3     ; CT-CT-CT-CT # hydrocarbon all-atom
+   1    4    7    8      3     ; CT-CT-CT-HC # hydrocarbon all-atom
+   1    4    7    9      3     ; CT-CT-CT-HC # hydrocarbon all-atom
+   5    4    7   10      3     ; HC-CT-CT-CT # (CT-CT-CT-HC)  hydrocarbon all-atom
+   5    4    7    8      3     ; HC-CT-CT-HC # hydrocarbon *new* 11/99
+   5    4    7    9      3     ; HC-CT-CT-HC # hydrocarbon *new* 11/99
+   6    4    7   10      3     ; HC-CT-CT-CT # (CT-CT-CT-HC)  hydrocarbon all-atom
+   6    4    7    8      3     ; HC-CT-CT-HC # hydrocarbon *new* 11/99
+   6    4    7    9      3     ; HC-CT-CT-HC # hydrocarbon *new* 11/99
+   4    7   10   13      3     ; CT-CT-CT-CT # hydrocarbon all-atom
+   4    7   10   11      3     ; CT-CT-CT-HC # hydrocarbon all-atom
+   4    7   10   12      3     ; CT-CT-CT-HC # hydrocarbon all-atom
+   8    7   10   13      3     ; HC-CT-CT-CT # (CT-CT-CT-HC)  hydrocarbon all-atom
+   8    7   10   11      3     ; HC-CT-CT-HC # hydrocarbon *new* 11/99
+   8    7   10   12      3     ; HC-CT-CT-HC # hydrocarbon *new* 11/99
+   9    7   10   13      3     ; HC-CT-CT-CT # (CT-CT-CT-HC)  hydrocarbon all-atom
+   9    7   10   11      3     ; HC-CT-CT-HC # hydrocarbon *new* 11/99
+   9    7   10   12      3     ; HC-CT-CT-HC # hydrocarbon *new* 11/99
+   7   10   13   16      3     ; CT-CT-CT-CT # hydrocarbon all-atom
+   7   10   13   14      3     ; CT-CT-CT-HC # hydrocarbon all-atom
+   7   10   13   15      3     ; CT-CT-CT-HC # hydrocarbon all-atom
+  11   10   13   16      3     ; HC-CT-CT-CT # (CT-CT-CT-HC)  hydrocarbon all-atom
+  11   10   13   14      3     ; HC-CT-CT-HC # hydrocarbon *new* 11/99
+  11   10   13   15      3     ; HC-CT-CT-HC # hydrocarbon *new* 11/99
+  12   10   13   16      3     ; HC-CT-CT-CT # (CT-CT-CT-HC)  hydrocarbon all-atom
+  12   10   13   14      3     ; HC-CT-CT-HC # hydrocarbon *new* 11/99
+  12   10   13   15      3     ; HC-CT-CT-HC # hydrocarbon *new* 11/99
+  10   13   16    1      3     ; CT-CT-CT-CT # hydrocarbon all-atom
+  10   13   16   17      3     ; CT-CT-CT-HC # hydrocarbon all-atom
+  10   13   16   18      3     ; CT-CT-CT-HC # hydrocarbon all-atom
+  14   13   16    1      3     ; HC-CT-CT-CT # (CT-CT-CT-HC)  hydrocarbon all-atom
+  14   13   16   17      3     ; HC-CT-CT-HC # hydrocarbon *new* 11/99
+  14   13   16   18      3     ; HC-CT-CT-HC # hydrocarbon *new* 11/99
+  15   13   16    1      3     ; HC-CT-CT-CT # (CT-CT-CT-HC)  hydrocarbon all-atom
+  15   13   16   17      3     ; HC-CT-CT-HC # hydrocarbon *new* 11/99
+  15   13   16   18      3     ; HC-CT-CT-HC # hydrocarbon *new* 11/99
+
+[ dihedrals ]
+; impropers
+; ai   aj   ak   al  funct  improper
+
+[ pairs ]
+; ai   aj  funct
+   1   10      1
+   1   14      1
+   1   15      1
+   1    8      1
+   1    9      1
+   4   13      1
+   4   17      1
+   4   18      1
+   4   11      1
+   4   12      1
+   7   16      1
+   7    2      1
+   7    3      1
+   7   14      1
+   7   15      1
+  10    5      1
+  10    6      1
+  10   17      1
+  10   18      1
+  13    8      1
+  13    9      1
+  13    2      1
+  13    3      1
+  16    5      1
+  16    6      1
+  16   11      1
+  16   12      1
+   2   17      1
+   2   18      1
+   2    5      1
+   2    6      1
+   3   17      1
+   3   18      1
+   3    5      1
+   3    6      1
+   5    8      1
+   5    9      1
+   6    8      1
+   6    9      1
+   8   11      1
+   8   12      1
+   9   11      1
+   9   12      1
+  11   14      1
+  11   15      1
+  12   14      1
+  12   15      1
+  14   17      1
+  14   18      1
+  15   17      1
+  15   18      1
+
+#ifdef POSRES
+[ position_restraints ]
+; atom  type      fx      fy      fz
+     1     1    1000    1000    1000
+     4     1    1000    1000    1000
+     7     1    1000    1000    1000
+    10     1    1000    1000    1000
+    13     1    1000    1000    1000
+    16     1    1000    1000    1000
+#endif
+

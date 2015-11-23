@@ -552,7 +552,8 @@ class WaterSimulation(Simulation):
 
 class CyclohexaneSimulation(Simulation):
     """Equilibrium MD of a solute in a box of cyclohexane."""
-
+    solvent_default = 'cyclohexane'
+    dirname_default = os.path.join(Simulation.topdir_default, solvent_default)
 
 class OctanolSimulation(Simulation):
     """Equilibrium MD of a solute in a box of octanol."""
