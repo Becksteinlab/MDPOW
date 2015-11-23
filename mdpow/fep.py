@@ -3,7 +3,7 @@
 # mdpow: fep.py
 # Copyright (c) 2010 Oliver Beckstein
 
-r"""
+"""
 :mod:`mdpow.fep` -- Calculate free energy of solvation
 ======================================================
 
@@ -1106,6 +1106,12 @@ class Ghyd(Gsolv):
     solvent_default = "water"
     dirname_default = os.path.join(Gsolv.topdir_default, solvent_default)
 
+
+class Gcyclo(Gsolv):
+    solvent_default = "cyclohexane"
+    dirname_default = os.path.join(Gsolv.topdir_default, solvent_default)
+
+    
 class Goct(Gsolv):
     """Sets up and analyses MD to obtain the solvation free energy of a solute in octanol.
 
