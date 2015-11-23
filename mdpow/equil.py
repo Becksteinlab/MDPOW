@@ -51,11 +51,11 @@ import logging
 logger = logging.getLogger('mdpow.equil')
 
 #: itp files are picked up via include dirs
-ITP = {'water': 'tip4p.itp', 'octanol': '1oct.itp'}
+ITP = {'water': 'tip4p.itp', 'octanol': '1oct.itp','cyclohexane':'1cyclo.itp'}
 #: solvent boxes
-BOX = {'water': 'tip4p.gro', 'octanol': config.topfiles['1oct.gro']}
+BOX = {'water': 'tip4p.gro', 'octanol': config.topfiles['1oct.gro'],'cyclohexane':config.topfiles['1cyclo.gro']}
 #: minimum distance between solute and box surface (in nm)
-DIST = {'water': 1.0, 'octanol': 1.5}
+DIST = {'water': 1.0, 'octanol': 1.5,'cyclohexane':1.5}
 
 class Simulation(Journalled):
     """Simple MD simulation of a single compound molecule in water.
@@ -549,6 +549,10 @@ class WaterSimulation(Simulation):
     """Equilibrium MD of a solute in a box of water."""
     solvent_default = 'water'
     dirname_default = os.path.join(Simulation.topdir_default, solvent_default)
+
+class CyclohexaneSimulation(Simulation):
+    """Equilibrium MD of a solute in a box of cyclohexane."""
+
 
 class OctanolSimulation(Simulation):
     """Equilibrium MD of a solute in a box of octanol."""

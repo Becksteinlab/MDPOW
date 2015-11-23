@@ -169,6 +169,7 @@ def equilibrium_simulation(cfg, solvent, **kwargs):
     Simulations = {
         'water': mdpow.equil.WaterSimulation,
         'octanol': mdpow.equil.OctanolSimulation,
+        'cyclohexane':mdpow.equil.CyclohexaneSimulation,
         }
     try:
         Simulation = Simulations[solvent]
