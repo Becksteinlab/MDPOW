@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -13,7 +15,7 @@
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '0.6.0-dev',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -70,7 +72,7 @@ mechanism with a global configuration file has been implemented.</p>
 Gromacs 4.5.3 distribution, with the following differences:</p>
 <ul class="simple">
 <li>For ions we use the new alkali and halide ion parameters from Table 2 in
-<a class="reference internal" href="#jensen2006" id="id1">[Jensen2006]</a> which had shown some small improvements in the paper. They
+<a class="reference internal" href="#jensen2006">[Jensen2006]</a> which had shown some small improvements in the paper. They
 should only be used with the TIP4P water model.</li>
 <li>OPLS/AA parameters for 1-octanol were added. These parameters were validated
 against experimental data by computing the density (neat), hydration free
@@ -101,67 +103,48 @@ egg we actually have to unwrap these files at this stage but this is
 completely transparent to the user.</p>
 <dl class="data">
 <dt id="mdpow.config.templates">
-<tt class="descclassname">mdpow.config.</tt><tt class="descname">templates</tt><em class="property"> = {'NPT_opls.mdp': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/templates/NPT_opls.mdp', 'em_opls.mdp': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/templates/em_opls.mdp', 'runinput.cfg': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/templates/runinput.cfg', 'system.top': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/templates/system.top', 'fep_opls.mdp': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/templates/fep_opls.mdp'}</em><a class="headerlink" href="#mdpow.config.templates" title="Permalink to this definition">¶</a></dt>
-<dd><p>dict() -&gt; new empty dictionary
-dict(mapping) -&gt; new dictionary initialized from a mapping object&#8217;s</p>
+<tt class="descclassname">mdpow.config.</tt><tt class="descname">templates</tt><em class="property"> = {'NPT_opls.mdp': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/templates/NPT_opls.mdp', 'runinput.cfg': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/templates/runinput.cfg', 'fep_opls.mdp': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/templates/fep_opls.mdp', 'system.top': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/templates/system.top', 'em_opls.mdp': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/templates/em_opls.mdp'}</em><a class="headerlink" href="#mdpow.config.templates" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>POW</em> comes with a number of templates for run input files
+and queuing system scripts. They are provided as a convenience and
+examples but <strong>WITHOUT ANY GUARANTEE FOR CORRECTNESS OR SUITABILITY FOR
+ANY PURPOSE</strong>.</p>
+<p>All template filenames are stored in
+<a class="reference external" href="http://orbeckst.github.io/GromacsWrapper/gromacs/core/config.html#gromacs.config.templates" title="(in GromacsWrapper v0.3)"><tt class="xref py py-data docutils literal"><span class="pre">gromacs.config.templates</span></tt></a>. Templates have to be extracted from
+the GromacsWrapper python egg file because they are used by external
+code: find the actual file locations from this variable.</p>
+<p><strong>Gromacs mdp templates</strong></p>
 <blockquote>
-<div>(key, value) pairs</div></blockquote>
-<dl class="docutils">
-<dt>dict(iterable) -&gt; new dictionary initialized as if via:</dt>
-<dd><p class="first">d = {}
-for k, v in iterable:</p>
-<blockquote class="last">
-<div>d[k] = v</div></blockquote>
-</dd>
-<dt>dict(<a href="#id2"><span class="problematic" id="id3">**</span></a>kwargs) -&gt; new dictionary initialized with the name=value pairs</dt>
-<dd>in the keyword argument list.  For example:  dict(one=1, two=2)</dd>
-</dl>
+<div><p>These are supplied as examples and there is <em>NO GUARANTEE THAT THEY
+PRODUCE SENSIBLE OUTPUT</em> &#8212; check for yourself!  Note that only
+existing parameter names can be modified with
+<a class="reference external" href="http://orbeckst.github.io/GromacsWrapper/gromacs/blocks/cbook.html#gromacs.cbook.edit_mdp" title="(in GromacsWrapper v0.3)"><tt class="xref py py-func docutils literal"><span class="pre">gromacs.cbook.edit_mdp()</span></tt></a> at the moment; if in doubt add the
+parameter with its gromacs default value (or empty values) and
+modify later with <a class="reference external" href="http://orbeckst.github.io/GromacsWrapper/gromacs/blocks/cbook.html#gromacs.cbook.edit_mdp" title="(in GromacsWrapper v0.3)"><tt class="xref py py-func docutils literal"><span class="pre">edit_mdp()</span></tt></a>.</p>
+<p>The safest bet is to use one of the <tt class="docutils literal"><span class="pre">mdout.mdp</span></tt> files produced by
+<tt class="xref py py-func docutils literal"><span class="pre">gromacs.grompp()</span></tt> as a template as this mdp contains all
+parameters that are legal in the current version of Gromacs.</p>
+</div></blockquote>
 </dd></dl>
 
 <dl class="data">
 <dt id="mdpow.config.topfiles">
-<tt class="descclassname">mdpow.config.</tt><tt class="descname">topfiles</tt><em class="property"> = {'ffoplsaa.itp': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top/ffoplsaa.itp', 'aminoacids.hdb': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top/oplsaa.ff/aminoacids.hdb', '1propanol.itp': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top/oplsaa.ff/1propanol.itp', 'aminoacids.n.tdb': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top/oplsaa.ff/aminoacids.n.tdb', 'spc.itp': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top/oplsaa.ff/spc.itp', 'tip4p.gro': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top/tip4p.gro', 'aminoacids.r2b': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top/oplsaa.ff/aminoacids.r2b', 'gbsa.itp': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top/oplsaa.ff/gbsa.itp', 'methanol.itp': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top/oplsaa.ff/methanol.itp', 'ffnonbonded.itp': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top/oplsaa.ff/ffnonbonded.itp', 'aminoacids.c.tdb': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top/oplsaa.ff/aminoacids.c.tdb', 'tip5p.itp': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top/oplsaa.ff/tip5p.itp', 'aminoacids.rtp': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top/oplsaa.ff/aminoacids.rtp', 'residuetypes.dat': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top/residuetypes.dat', '1oct.itp': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top/oplsaa.ff/1oct.itp', 'aminoacids.vsd': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top/oplsaa.ff/aminoacids.vsd', 'spce.itp': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top/oplsaa.ff/spce.itp', 'oplsaa.ff': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top/oplsaa.ff', 'forcefield.doc': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top/oplsaa.ff/forcefield.doc', 'ions.itp': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top/oplsaa.ff/ions.itp', 'tip4p.itp': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top/oplsaa.ff/tip4p.itp', 'watermodels.dat': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top/oplsaa.ff/watermodels.dat', 'vdwradii.dat': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top/vdwradii.dat', 'elements.dat': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top/elements.dat', 'ffbonded.itp': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top/oplsaa.ff/ffbonded.itp', 'ions_opls.itp': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top/oplsaa.ff/ions_opls.itp', 'tip3p.itp': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top/oplsaa.ff/tip3p.itp', 'atomtypes.atp': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top/oplsaa.ff/atomtypes.atp', '1oct.gro': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top/1oct.gro', 'ethanol.itp': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top/oplsaa.ff/ethanol.itp', 'forcefield.itp': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top/oplsaa.ff/forcefield.itp', 'atomname2type.n2t': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top/oplsaa.ff/atomname2type.n2t', 'atommass.dat': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top/atommass.dat'}</em><a class="headerlink" href="#mdpow.config.topfiles" title="Permalink to this definition">¶</a></dt>
-<dd><p>dict() -&gt; new empty dictionary
-dict(mapping) -&gt; new dictionary initialized from a mapping object&#8217;s</p>
-<blockquote>
-<div>(key, value) pairs</div></blockquote>
-<dl class="docutils">
-<dt>dict(iterable) -&gt; new dictionary initialized as if via:</dt>
-<dd><p class="first">d = {}
-for k, v in iterable:</p>
-<blockquote class="last">
-<div>d[k] = v</div></blockquote>
-</dd>
-<dt>dict(<a href="#id4"><span class="problematic" id="id5">**</span></a>kwargs) -&gt; new dictionary initialized with the name=value pairs</dt>
-<dd>in the keyword argument list.  For example:  dict(one=1, two=2)</dd>
-</dl>
+<tt class="descclassname">mdpow.config.</tt><tt class="descname">topfiles</tt><em class="property"> = {'ffoplsaa.itp': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/top/ffoplsaa.itp', 'aminoacids.hdb': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/top/oplsaa.ff/aminoacids.hdb', '1propanol.itp': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/top/oplsaa.ff/1propanol.itp', 'aminoacids.n.tdb': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/top/oplsaa.ff/aminoacids.n.tdb', 'methanol.itp': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/top/oplsaa.ff/methanol.itp', 'tip4p.gro': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/top/tip4p.gro', 'aminoacids.r2b': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/top/oplsaa.ff/aminoacids.r2b', 'gbsa.itp': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/top/oplsaa.ff/gbsa.itp', 'forcefield.doc': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/top/oplsaa.ff/forcefield.doc', 'aminoacids.c.tdb': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/top/oplsaa.ff/aminoacids.c.tdb', 'tip5p.itp': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/top/oplsaa.ff/tip5p.itp', 'aminoacids.rtp': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/top/oplsaa.ff/aminoacids.rtp', 'residuetypes.dat': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/top/residuetypes.dat', '1oct.itp': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/top/oplsaa.ff/1oct.itp', 'aminoacids.vsd': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/top/oplsaa.ff/aminoacids.vsd', 'spce.itp': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/top/oplsaa.ff/spce.itp', 'oplsaa.ff': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/top/oplsaa.ff', 'ffnonbonded.itp': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/top/oplsaa.ff/ffnonbonded.itp', 'ions.itp': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/top/oplsaa.ff/ions.itp', 'tip4p.itp': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/top/oplsaa.ff/tip4p.itp', 'watermodels.dat': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/top/oplsaa.ff/watermodels.dat', 'vdwradii.dat': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/top/vdwradii.dat', 'elements.dat': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/top/elements.dat', 'ffbonded.itp': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/top/oplsaa.ff/ffbonded.itp', 'ions_opls.itp': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/top/oplsaa.ff/ions_opls.itp', 'tip3p.itp': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/top/oplsaa.ff/tip3p.itp', 'spc.itp': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/top/oplsaa.ff/spc.itp', 'atomtypes.atp': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/top/oplsaa.ff/atomtypes.atp', '1oct.gro': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/top/1oct.gro', 'ethanol.itp': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/top/oplsaa.ff/ethanol.itp', 'forcefield.itp': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/top/oplsaa.ff/forcefield.itp', 'atomname2type.n2t': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/top/oplsaa.ff/atomname2type.n2t', 'atommass.dat': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/top/atommass.dat'}</em><a class="headerlink" href="#mdpow.config.topfiles" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of all topology files that are included in the package.
+(includes force field files under <tt class="docutils literal"><span class="pre">top/oplsaa.ff</span></tt>)</p>
 </dd></dl>
 
 <dl class="data">
 <dt id="mdpow.config.includedir">
-<tt class="descclassname">mdpow.config.</tt><tt class="descname">includedir</tt><em class="property"> = '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/top'</em><a class="headerlink" href="#mdpow.config.includedir" title="Permalink to this definition">¶</a></dt>
-<dd><p>str(object=&#8217;&#8216;) -&gt; string</p>
-<p>Return a nice string representation of the object.
-If the argument is a string, the return value is the same object.</p>
+<tt class="descclassname">mdpow.config.</tt><tt class="descname">includedir</tt><em class="property"> = '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/top'</em><a class="headerlink" href="#mdpow.config.includedir" title="Permalink to this definition">¶</a></dt>
+<dd><p>The package&#8217;s include directory for <tt class="xref py py-func docutils literal"><span class="pre">gromacs.grompp()</span></tt>; the
+environment variable <span class="target" id="index-3"></span><tt class="xref std std-envvar docutils literal"><span class="pre">GMXLIB</span></tt> is set to <a class="reference internal" href="#mdpow.config.includedir" title="mdpow.config.includedir"><tt class="xref py py-data docutils literal"><span class="pre">includedir</span></tt></a>
+so that the bundled version of the force field is picked up.</p>
 </dd></dl>
 
 <dl class="data">
 <dt id="mdpow.config.defaults">
-<tt class="descclassname">mdpow.config.</tt><tt class="descname">defaults</tt><em class="property"> = {'runinput': '/Users/oliver/.python-eggs/POW-0.6.0_dev-py2.7.egg-tmp/mdpow/templates/runinput.cfg'}</em><a class="headerlink" href="#mdpow.config.defaults" title="Permalink to this definition">¶</a></dt>
-<dd><p>dict() -&gt; new empty dictionary
-dict(mapping) -&gt; new dictionary initialized from a mapping object&#8217;s</p>
-<blockquote>
-<div>(key, value) pairs</div></blockquote>
-<dl class="docutils">
-<dt>dict(iterable) -&gt; new dictionary initialized as if via:</dt>
-<dd><p class="first">d = {}
-for k, v in iterable:</p>
-<blockquote class="last">
-<div>d[k] = v</div></blockquote>
-</dd>
-<dt>dict(<a href="#id6"><span class="problematic" id="id7">**</span></a>kwargs) -&gt; new dictionary initialized with the name=value pairs</dt>
-<dd>in the keyword argument list.  For example:  dict(one=1, two=2)</dd>
-</dl>
+<tt class="descclassname">mdpow.config.</tt><tt class="descname">defaults</tt><em class="property"> = {'runinput': '/nfs/homes/oliver/.local/lib/python2.7/site-packages/POW-0.6.0_dev-py2.7.egg/mdpow/templates/runinput.cfg'}</em><a class="headerlink" href="#mdpow.config.defaults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Locations of default run input files and configurations.</p>
 </dd></dl>
 
 </div>
@@ -187,11 +170,11 @@ of strings.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><em>t</em> : template file or key (string or list of strings)</td>
+<tr class="field-odd field"><th class="field-name">Arguments :</th><td class="field-body"><em>t</em> : template file or key (string or list of strings)</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">os.path.realpath(<em>t</em>) (or a list thereof)</td>
+<tr class="field-even field"><th class="field-name">Returns :</th><td class="field-body">os.path.realpath(<em>t</em>) (or a list thereof)</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><tt class="xref py py-exc docutils literal"><span class="pre">ValueError</span></tt> if no file can be located.</td>
+<tr class="field-odd field"><th class="field-name">Raises :</th><td class="field-body"><tt class="xref py py-exc docutils literal"><span class="pre">ValueError</span></tt> if no file can be located.</td>
 </tr>
 </tbody>
 </table>
@@ -214,11 +197,11 @@ be one of</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><em>t</em> : template file or key (string or list of strings)</td>
+<tr class="field-odd field"><th class="field-name">Arguments :</th><td class="field-body"><em>t</em> : template file or key (string or list of strings)</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list of os.path.realpath(<em>t</em>)</td>
+<tr class="field-even field"><th class="field-name">Returns :</th><td class="field-body">list of os.path.realpath(<em>t</em>)</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><tt class="xref py py-exc docutils literal"><span class="pre">ValueError</span></tt> if no file can be located.</td>
+<tr class="field-odd field"><th class="field-name">Raises :</th><td class="field-body"><tt class="xref py py-exc docutils literal"><span class="pre">ValueError</span></tt> if no file can be located.</td>
 </tr>
 </tbody>
 </table>
@@ -310,7 +293,7 @@ attribute <a class="reference internal" href="#mdpow.restart.Journal.incomplete"
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><dl class="first last docutils">
+<tr class="field-odd field"><th class="field-name">Arguments :</th><td class="field-body"><dl class="first last docutils">
 <dt><em>stages</em></dt>
 <dd><p class="first last">list of the stage identifiers, in the order that they
 should per performed. Stage identifiers are checked
@@ -400,7 +383,7 @@ with the stage set to <em>protocol</em>.</p>
 
 </li>
 <li><p class="first">Raises a <tt class="xref py py-exc docutils literal"><span class="pre">ValueError</span></tt> if the <em>protocol</em> is not
-registered (i.e. not found in <tt class="xref py py-attr docutils literal"><span class="pre">Journalled.protocols</span></tt>).</p>
+registered (i.e. not found in <a class="reference internal" href="#mdpow.restart.Journalled.protocols" title="mdpow.restart.Journalled.protocols"><tt class="xref py py-attr docutils literal"><span class="pre">Journalled.protocols</span></tt></a>).</p>
 </li>
 </ul>
 </dd></dl>
@@ -411,6 +394,16 @@ registered (i.e. not found in <tt class="xref py py-attr docutils literal"><span
 <dd><p>Re-instantiate class from pickled file.</p>
 <p>If no <em>filename</em> was supplied then the filename is taken from the
 attribute <tt class="xref py py-attr docutils literal"><span class="pre">filename</span></tt>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mdpow.restart.Journalled.protocols">
+<tt class="descname">protocols</tt><em class="property"> = []</em><a class="headerlink" href="#mdpow.restart.Journalled.protocols" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class-attribute that contains the names of computation protocols
+supported by the class. These are either method names or dummy names,
+whose logic is provided by an external callback function.
+The method <a class="reference internal" href="#mdpow.restart.Journalled.get_protocol" title="mdpow.restart.Journalled.get_protocol"><tt class="xref py py-meth docutils literal"><span class="pre">get_protocol()</span></tt></a> raises a <tt class="xref py py-exc docutils literal"><span class="pre">ValueError</span></tt> if a
+protocol is not listed in <a class="reference internal" href="#mdpow.restart.Journalled.protocols" title="mdpow.restart.Journalled.protocols"><tt class="xref py py-attr docutils literal"><span class="pre">protocols</span></tt></a>.</p>
 </dd></dl>
 
 <dl class="method">
@@ -431,118 +424,6 @@ the absolute path of the saved file.</p>
 </dd></dl>
 
 </div>
-<span class="target" id="module-mdpow.run"></span><div class="section" id="mdpow-run-performing-complete-simulation-protocols">
-<h2><a class="reference internal" href="#module-mdpow.run" title="mdpow.run"><tt class="xref py py-mod docutils literal"><span class="pre">mdpow.run</span></tt></a> &#8212; Performing complete simulation protocols<a class="headerlink" href="#mdpow-run-performing-complete-simulation-protocols" title="Permalink to this headline">¶</a></h2>
-<p>The module provides building blocks for complete simulation protocols
-(or pipelines). Each protocol is written as a function that takes a
-run input file and the solvent type as input.</p>
-<p><a class="reference internal" href="scripts.html#mdpow-scripts-label"><em>The mdpow-* scripts</em></a> make use of the building blocks.</p>
-<p>Typically, <em>journalling</em> is enabled, i.e. the tasks remember which
-stages have already been completed and can be restarted directly from
-the last completed stage. (Restarts are only implemeneted at the level
-of individual steps in a MDPOW protocol, not at the level of
-continuing interrupted simulations using the Gromacs restart files.)</p>
-<p>Input is read from the run input <em>cfg</em> file.</p>
-<div class="admonition seealso">
-<p class="first admonition-title">See also</p>
-<p class="last"><a class="reference internal" href="#module-mdpow.restart" title="mdpow.restart"><tt class="xref py py-mod docutils literal"><span class="pre">mdpow.restart</span></tt></a> for the journalling required for restarts.</p>
-</div>
-<div class="section" id="protocols">
-<h3>Protocols<a class="headerlink" href="#protocols" title="Permalink to this headline">¶</a></h3>
-<dl class="function">
-<dt id="mdpow.run.equilibrium_simulation">
-<tt class="descclassname">mdpow.run.</tt><tt class="descname">equilibrium_simulation</tt><big>(</big><em>cfg</em>, <em>solvent</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.run.equilibrium_simulation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set up and run equilibrium simulation.</p>
-<p>See tutorial for the individual steps.</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">Depending on the settings in the run input file
-(<tt class="docutils literal"><span class="pre">runlocal</span></tt>), <strong class="program">mdrun</strong> is executed at various stages,
-and hence this process can take a while.</p>
-</div>
-</dd></dl>
-
-<dl class="function">
-<dt id="mdpow.run.fep_simulation">
-<tt class="descclassname">mdpow.run.</tt><tt class="descname">fep_simulation</tt><big>(</big><em>cfg</em>, <em>solvent</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.run.fep_simulation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set up and run FEP simulation.</p>
-<p>See tutorial for the individual steps.</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">Depending on the settings in the run input file
-(<tt class="docutils literal"><span class="pre">runlocal</span></tt>), <strong class="program">mdrun</strong> is executed sequentially for
-all windows and hence this can take a long time. It is
-recommended to use <tt class="docutils literal"><span class="pre">runlocal</span> <span class="pre">=</span> <span class="pre">False</span></tt> in the run input file
-and submit all window simulations to a cluster.</p>
-</div>
-</dd></dl>
-
-</div>
-<div class="section" id="support">
-<h3>Support<a class="headerlink" href="#support" title="Permalink to this headline">¶</a></h3>
-<dl class="class">
-<dt id="mdpow.run.MDrunnerSimple">
-<em class="property">class </em><tt class="descclassname">mdpow.run.</tt><tt class="descname">MDrunnerSimple</tt><big>(</big><em>dirname='.'</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.run.MDrunnerSimple" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gromacs mdrun.</p>
-<p>Use Gromacs 4.5.x with threaded mdrun to get max performance and
-just leave everything as it is. For older version you can change
-the name and add a mpiexec binary to launch a multiprocessor
-job. See <a class="reference external" href="http://orbeckst.github.io/GromacsWrapper/gromacs/blocks/simulation.html#module-gromacs.run" title="(in GromacsWrapper v0.3)"><tt class="xref py py-mod docutils literal"><span class="pre">gromacs.run</span></tt></a> for details.</p>
-<p>Set up a simple run with <tt class="docutils literal"><span class="pre">mdrun</span></tt>.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Keywords:</th><td class="field-body"><dl class="first last docutils">
-<dt><em>dirname</em></dt>
-<dd><p class="first last">Change to this directory before launching the job. Input
-files must be supplied relative to this directory.</p>
-</dd>
-<dt><em>keywords</em></dt>
-<dd><p class="first last">All other keword arguments are used to construct the
-<tt class="xref py py-class docutils literal"><span class="pre">mdrun</span></tt> commandline. Note that only
-keyword arguments are allowed.</p>
-</dd>
-</dl>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="mdpow.run.setupMD">
-<tt class="descclassname">mdpow.run.</tt><tt class="descname">setupMD</tt><big>(</big><em>S</em>, <em>protocol</em>, <em>cfg</em><big>)</big><a class="headerlink" href="#mdpow.run.setupMD" title="Permalink to this definition">¶</a></dt>
-<dd><p>setup MD simulation <em>protocol</em> using the runinput file <em>cfg</em></p>
-</dd></dl>
-
-<dl class="function">
-<dt id="mdpow.run.get_mdp_files">
-<tt class="descclassname">mdpow.run.</tt><tt class="descname">get_mdp_files</tt><big>(</big><em>cfg</em>, <em>protocols</em><big>)</big><a class="headerlink" href="#mdpow.run.get_mdp_files" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get file names of MDP files from <em>cfg</em> for all <em>protocols</em></p>
-</dd></dl>
-
-<dl class="function">
-<dt id="mdpow.run.runMD_or_exit">
-<tt class="descclassname">mdpow.run.</tt><tt class="descname">runMD_or_exit</tt><big>(</big><em>S</em>, <em>protocol</em>, <em>params</em>, <em>cfg</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#mdpow.run.runMD_or_exit" title="Permalink to this definition">¶</a></dt>
-<dd><p>run simulation</p>
-<p>Can launch <strong class="program">mdrun</strong> itself (<a class="reference internal" href="#mdpow.run.MDrunnerSimple" title="mdpow.run.MDrunnerSimple"><tt class="xref py py-class docutils literal"><span class="pre">MDrunnerSimple</span></tt></a>) or exit so
-that the user can run the simulation independently. Checks if the
-simulation has completed and sets the return value to <tt class="docutils literal"><span class="pre">True</span></tt> if this is
-the case.</p>
-<ul class="simple">
-<li>Configuration parameters are taken from the section <em>protocol</em> of the
-runinput configuration <em>cfg</em>.</li>
-<li>The directory in which the simulation input files reside can be provided
-as keyword argument <em>dirname</em> or taken from <cite>S.dirs[protocol]</cite>.</li>
-<li>Other <em>kwargs</em> are interpreted as options for
-<tt class="xref py py-class docutils literal"><span class="pre">mdrun</span></tt>.</li>
-</ul>
-<p>It never returns <tt class="docutils literal"><span class="pre">False</span></tt> but instead does a <a class="reference external" href="http://docs.python.org/library/sys.html#sys.exit" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">sys.exit()</span></tt></a>.</p>
-</dd></dl>
-
-</div>
-</div>
 </div>
 
 
@@ -562,18 +443,13 @@ as keyword argument <em>dirname</em> or taken from <cite>S.dirs[protocol]</cite>
 </li>
 <li><a class="reference internal" href="#mdpow-log-configure-logging-for-pow-analysis"><tt class="docutils literal"><span class="pre">mdpow.log</span></tt> &#8212; Configure logging for POW analysis</a></li>
 <li><a class="reference internal" href="#mdpow-restart-restarting-and-checkpointing"><tt class="docutils literal"><span class="pre">mdpow.restart</span></tt> &#8212; Restarting and checkpointing</a></li>
-<li><a class="reference internal" href="#mdpow-run-performing-complete-simulation-protocols"><tt class="docutils literal"><span class="pre">mdpow.run</span></tt> &#8212; Performing complete simulation protocols</a><ul>
-<li><a class="reference internal" href="#protocols">Protocols</a></li>
-<li><a class="reference internal" href="#support">Support</a></li>
-</ul>
-</li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="analysis.html"
-                        title="previous chapter"><tt class="docutils literal"><span class="pre">mdpow.analysis</span></tt> &#8212; Collection of analysis and plotting functions</a></p>
+                        title="previous chapter"><tt class="docutils literal docutils literal docutils literal"><span class="pre">mdpow.analysis</span></tt> &#8212; Collection of analysis and plotting functions</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="tables.html"
                         title="next chapter">Tables of hard-coded values used in mdpow</a></p>
@@ -619,7 +495,7 @@ as keyword argument <em>dirname</em> or taken from <cite>S.dirs[protocol]</cite>
     </div>
     <div class="footer">
         &copy; Copyright 2010–2013, Oliver Beckstein and Bogdan Iorga.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>

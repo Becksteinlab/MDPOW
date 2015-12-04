@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -13,7 +15,7 @@
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '0.6.0-dev',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -26,7 +28,7 @@
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="MDpow 0.6.0-dev documentation" href="index.html" />
     <link rel="next" title="mdpow.analysis — Collection of analysis and plotting functions" href="analysis.html" />
-    <link rel="prev" title="mdpow.fep – Calculate free energy of solvation" href="fep.html" /> 
+    <link rel="prev" title="&lt;no title&gt;" href="fep.html" /> 
   </head>
   <body>
     <div class="related">
@@ -42,7 +44,7 @@
           <a href="analysis.html" title="mdpow.analysis — Collection of analysis and plotting functions"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="fep.html" title="mdpow.fep – Calculate free energy of solvation"
+          <a href="fep.html" title="&lt;no title&gt;"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">MDpow 0.6.0-dev documentation</a> &raquo;</li> 
       </ul>
@@ -90,7 +92,7 @@ function of <span class="math">\(T\)</span> and <span class="math">\(P\)</span> 
 to be computed once.</p>
 <p>Right now we&#8217;re actually just storing the value at T=300 K and 1
 bar: 992.342 kg/m<sup>3</sup> (computed from 15 ns MD with 652 water
-molecules and stored in <tt class="xref py py-data docutils literal"><span class="pre">mdpow.tables.solvent_density</span></tt>)</p>
+molecules and stored in <a class="reference internal" href="tables.html#mdpow.tables.solvent_density" title="mdpow.tables.solvent_density"><tt class="xref py py-data docutils literal"><span class="pre">mdpow.tables.solvent_density</span></tt></a>)</p>
 </li>
 <li><p class="first">solute volume <span class="math">\(V_{\mathrm{solute}} = V_{NPT} - V_{\mathrm{water}}\)</span></p>
 </li>
@@ -99,11 +101,10 @@ molecules and stored in <tt class="xref py py-data docutils literal"><span class
 fashion.</p>
 <p>Alternatively, use another tool such as UCSF <a class="reference external" href="http://www.cgl.ucsf.edu/chimera/">Chimera</a> to estimate the
 molecular volume:</p>
-<div class="highlight-python"><div class="highlight"><pre>sel #0:SOL
+<div class="highlight-python"><pre>sel #0:SOL
 del sel
 surface #0
-measure volume #0
-</pre></div>
+measure volume #0</pre>
 </div>
 </div>
 <div class="section" id="volume-of-the-fep-simulation-box">
@@ -120,7 +121,7 @@ simulation.</p>
 <p><span class="math">\(\kappa_T\)</span> needs to be calculated for a given <span class="math">\(T\)</span> and
 <span class="math">\(P\)</span>. We can compute it from a long <em>NPT</em> simulation via the
 fluctuation formula and store the value or use a published computed or
-experimental value (stored in <tt class="xref py py-data docutils literal"><span class="pre">mdpow.tables.kappaT</span></tt>).</p>
+experimental value (stored in <a class="reference internal" href="tables.html#mdpow.tables.kappaT" title="mdpow.tables.kappaT"><tt class="xref py py-data docutils literal"><span class="pre">mdpow.tables.kappaT</span></tt></a>).</p>
 </div>
 </div>
 <div class="section" id="correction-to-obtain-gibbs-solvation-free-energy-from-helmholtz-solvation-free-energy">
@@ -186,7 +187,7 @@ of a NPT simulation and calculate the solute volume.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><dl class="first last docutils">
+<tr class="field-odd field"><th class="field-name">Arguments :</th><td class="field-body"><dl class="first last docutils">
 <dt><em>varN</em></dt>
 <dd><p class="first last">fluctuation in the particle number</p>
 </dd>
@@ -198,7 +199,7 @@ of a NPT simulation and calculate the solute volume.</p>
 </tr>
 </tbody>
 </table>
-<div class="admonition seealso">
+<div class="admonition-see-also admonition seealso">
 <p class="first admonition-title">See also</p>
 <p class="last"><a class="reference internal" href="#mdpow.correction.kappaT_fluctuations" title="mdpow.correction.kappaT_fluctuations"><tt class="xref py py-func docutils literal"><span class="pre">kappaT_fluctuations()</span></tt></a></p>
 </div>
@@ -218,7 +219,7 @@ of a NPT simulation and calculate the solute volume.</p>
 need to be set to values to match the system defined by this tpr (such
 as <em>N_solvent</em> and <em>solvent</em>). Useful keywords are <em>rho_solvent</em> or
 <em>v_solvent</em>.</p>
-<div class="admonition seealso">
+<div class="admonition-see-also admonition seealso">
 <p class="first admonition-title">See also</p>
 <p class="last"><a class="reference internal" href="#mdpow.correction.ThermodynamicAnalysis.v_solute" title="mdpow.correction.ThermodynamicAnalysis.v_solute"><tt class="xref py py-attr docutils literal"><span class="pre">v_solute</span></tt></a> and <a class="reference internal" href="#mdpow.correction.calculate_solute_volume" title="mdpow.correction.calculate_solute_volume"><tt class="xref py py-func docutils literal"><span class="pre">calculate_solute_volume()</span></tt></a></p>
 </div>
@@ -240,7 +241,7 @@ as <em>N_solvent</em> and <em>solvent</em>). Useful keywords are <em>rho_solvent
 <dt id="mdpow.correction.ThermodynamicAnalysis.v_solute">
 <tt class="descname">v_solute</tt><a class="headerlink" href="#mdpow.correction.ThermodynamicAnalysis.v_solute" title="Permalink to this definition">¶</a></dt>
 <dd><p>Volume of the solute in nm^3.</p>
-<div class="admonition seealso">
+<div class="admonition-see-also admonition seealso">
 <p class="first admonition-title">See also</p>
 <p class="last"><a class="reference internal" href="#mdpow.correction.ThermodynamicAnalysis.solute_volume" title="mdpow.correction.ThermodynamicAnalysis.solute_volume"><tt class="xref py py-meth docutils literal"><span class="pre">solute_volume()</span></tt></a> (which
 accepts <em>kwargs</em> and also updates this managed attribute).</p>
@@ -276,7 +277,7 @@ the <em>NPT</em> simulation of the solute and either the corresponding data
 for the same simulation <em>without</em> the solute, <em>or</em> the number of
 solvent molecules, its density, and (if it&#8217;s not water), its name
 (so that its molecular weight can be looked up in
-<tt class="xref py py-data docutils literal"><span class="pre">mdpow.tables.molecular_weight</span></tt>).</p>
+<a class="reference internal" href="tables.html#mdpow.tables.molecular_weight" title="mdpow.tables.molecular_weight"><tt class="xref py py-data docutils literal"><span class="pre">mdpow.tables.molecular_weight</span></tt></a>).</p>
 </dd></dl>
 
 <dl class="function">
@@ -298,14 +299,14 @@ selections can be added to <tt class="xref py py-data docutils literal"><span cl
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><dl class="first docutils">
+<tr class="field-odd field"><th class="field-name">Arguments :</th><td class="field-body"><dl class="first docutils">
 <dt><em>x</em></dt>
 <dd><p class="first last">energy to be converted</p>
 </dd>
 </dl>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Keywords:</th><td class="field-body"><dl class="first last docutils">
+<tr class="field-even field"><th class="field-name">Keywords :</th><td class="field-body"><dl class="first last docutils">
 <dt><em>unit</em></dt>
 <dd><p class="first last">If <em>unit</em> is &#8220;kcal&#8221; then convert from kJ to kcal.</p>
 </dd>
@@ -327,7 +328,7 @@ selections can be added to <tt class="xref py py-data docutils literal"><span cl
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><dl class="first docutils">
+<tr class="field-odd field"><th class="field-name">Arguments :</th><td class="field-body"><dl class="first docutils">
 <dt><em>edr</em></dt>
 <dd><p class="first last">Gromacs energy file</p>
 </dd>
@@ -346,7 +347,7 @@ the start time (in ps) and <em>o</em> sets the output file name</p>
 </dl>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><tt class="xref py py-class docutils literal"><span class="pre">recarray</span></tt> with the
+<tr class="field-even field"><th class="field-name">Returns :</th><td class="field-body"><p class="first last"><tt class="xref py py-class docutils literal"><span class="pre">recarray</span></tt> with the
 observable name in the first column (&#8220;<em>Energy</em>&#8221;) and
 subsequent columns containing the exact averages
 produced by <strong class="program">g_energy</strong>.</p>
@@ -378,7 +379,7 @@ related to the compressibility through [e.g. Barret &amp; Hansen (2003)]</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><dl class="first docutils">
+<tr class="field-odd field"><th class="field-name">Arguments :</th><td class="field-body"><dl class="first docutils">
 <dt><em>varN</em></dt>
 <dd><p class="first last">fluctuations</p>
 </dd>
@@ -394,7 +395,7 @@ related to the compressibility through [e.g. Barret &amp; Hansen (2003)]</p>
 </dl>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><span class="math">\(\kappa_T\)</span> in m<sup>3</sup>/J = 1/Pa</p>
+<tr class="field-even field"><th class="field-name">Returns :</th><td class="field-body"><p class="first last"><span class="math">\(\kappa_T\)</span> in m<sup>3</sup>/J = 1/Pa</p>
 </td>
 </tr>
 </tbody>
@@ -423,15 +424,14 @@ the number of solvent molecules <span class="math">\(N\)</span> in the simulatio
 <tt class="descclassname">mdpow.correction.</tt><tt class="descname">parse_energy</tt><big>(</big><em>data</em><big>)</big><a class="headerlink" href="#mdpow.correction.parse_energy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Put output from <strong class="program">g_energy</strong> into a recarray.</p>
 <p>Input <em>data</em> needs to look like</p>
-<div class="highlight-python"><div class="highlight"><pre>Statistics over 10064096 steps [ 0.0000 through 20128.1900 ps ], 3 data sets
+<div class="highlight-python"><pre>Statistics over 10064096 steps [ 0.0000 through 20128.1900 ps ], 3 data sets
 All statistics are over 2012820 points
 
 Energy                      Average   Err.Est.       RMSD  Tot-Drift
 -------------------------------------------------------------------------------
 Pressure                   0.973056       0.08    616.702   0.358289  (bar)
 Volume                      8.91529     0.0015  0.0856889 -0.000560363  (nm^3)
-Density                     993.321       0.17    9.54136    0.04978  (kg/m^3)
-</pre></div>
+Density                     993.321       0.17    9.54136    0.04978  (kg/m^3)</pre>
 </div>
 <p>Only the lines starting with the keyword <em>Energy</em> up to the next
 blank line are considered. Data are considered white-space separated.</p>
@@ -466,7 +466,7 @@ blank line are considered. Data are considered white-space separated.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">V = N/N_Avogadro * M / rho (in nm&lt;sup&gt;3&lt;/sup&gt;)</td>
+<tr class="field-odd field"><th class="field-name">Returns :</th><td class="field-body">V = N/N_Avogadro * M / rho (in nm&lt;sup&gt;3&lt;/sup&gt;)</td>
 </tr>
 </tbody>
 </table>
@@ -490,7 +490,7 @@ blank line are considered. Data are considered white-space separated.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">V = N * v_w</td>
+<tr class="field-odd field"><th class="field-name">Returns :</th><td class="field-body">V = N * v_w</td>
 </tr>
 </tbody>
 </table>
@@ -522,10 +522,10 @@ blank line are considered. Data are considered white-space separated.</p>
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="fep.html"
-                        title="previous chapter"><tt class="docutils literal"><span class="pre">mdpow.fep</span></tt> &#8211; Calculate free energy of solvation</a></p>
+                        title="previous chapter">&lt;no title&gt;</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="analysis.html"
-                        title="next chapter"><tt class="docutils literal"><span class="pre">mdpow.analysis</span></tt> &#8212; Collection of analysis and plotting functions</a></p>
+                        title="next chapter"><tt class="docutils literal docutils literal"><span class="pre">mdpow.analysis</span></tt> &#8212; Collection of analysis and plotting functions</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/correction.txt"
@@ -561,14 +561,14 @@ blank line are considered. Data are considered white-space separated.</p>
           <a href="analysis.html" title="mdpow.analysis — Collection of analysis and plotting functions"
              >next</a> |</li>
         <li class="right" >
-          <a href="fep.html" title="mdpow.fep – Calculate free energy of solvation"
+          <a href="fep.html" title="&lt;no title&gt;"
              >previous</a> |</li>
         <li><a href="index.html">MDpow 0.6.0-dev documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010–2013, Oliver Beckstein and Bogdan Iorga.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.1.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>
