@@ -3,28 +3,28 @@
 
 [ moleculetype ]
 ; Name      nrexcl
-UNK              3
+SOL              3
 
 [ atoms ]
 ; atomnr  atomtype   resnr  resname  atomname  chargegrp   charge       mass
-       1  opls_136      1      UNK        C1          1    -0.120   12.01100 ; CT # alkane CH2 
-       2  opls_140      1      UNK        H7          1     0.060    1.00800 ; HC # alkane H.
-       3  opls_140      1      UNK        H8          1     0.060    1.00800 ; HC # alkane H.
-       4  opls_136      1      UNK        C2          5    -0.120   12.01100 ; CT # alkane CH2 
-       5  opls_140      1      UNK        H9          5     0.060    1.00800 ; HC # alkane H.
-       6  opls_140      1      UNK       H10          5     0.060    1.00800 ; HC # alkane H.
-       7  opls_136      1      UNK        C3          9    -0.120   12.01100 ; CT # alkane CH2 
-       8  opls_140      1      UNK       H11          9     0.060    1.00800 ; HC # alkane H.
-       9  opls_140      1      UNK       H12          9     0.060    1.00800 ; HC # alkane H.
-      10  opls_136      1      UNK        C4         13    -0.120   12.01100 ; CT # alkane CH2 
-      11  opls_140      1      UNK       H13         13     0.060    1.00800 ; HC # alkane H.
-      12  opls_140      1      UNK       H14         13     0.060    1.00800 ; HC # alkane H.
-      13  opls_136      1      UNK        C5         17    -0.120   12.01100 ; CT # alkane CH2 
-      14  opls_140      1      UNK       H15         17     0.060    1.00800 ; HC # alkane H.
-      15  opls_140      1      UNK       H16         17     0.060    1.00800 ; HC # alkane H.
-      16  opls_136      1      UNK        C6         21    -0.120   12.01100 ; CT # alkane CH2 
-      17  opls_140      1      UNK       H17         21     0.060    1.00800 ; HC # alkane H.
-      18  opls_140      1      UNK       H18         21     0.060    1.00800 ; HC # alkane H.
+       1  opls_136      1      SOL        C1          1    -0.120   12.01100 ; CT # alkane CH2 
+       2  opls_140      1      SOL        H7          1     0.060    1.00800 ; HC # alkane H.
+       3  opls_140      1      SOL        H8          1     0.060    1.00800 ; HC # alkane H.
+       4  opls_136      1      SOL        C2          5    -0.120   12.01100 ; CT # alkane CH2 
+       5  opls_140      1      SOL        H9          5     0.060    1.00800 ; HC # alkane H.
+       6  opls_140      1      SOL       H10          5     0.060    1.00800 ; HC # alkane H.
+       7  opls_136      1      SOL        C3          9    -0.120   12.01100 ; CT # alkane CH2 
+       8  opls_140      1      SOL       H11          9     0.060    1.00800 ; HC # alkane H.
+       9  opls_140      1      SOL       H12          9     0.060    1.00800 ; HC # alkane H.
+      10  opls_136      1      SOL        C4         13    -0.120   12.01100 ; CT # alkane CH2 
+      11  opls_140      1      SOL       H13         13     0.060    1.00800 ; HC # alkane H.
+      12  opls_140      1      SOL       H14         13     0.060    1.00800 ; HC # alkane H.
+      13  opls_136      1      SOL        C5         17    -0.120   12.01100 ; CT # alkane CH2 
+      14  opls_140      1      SOL       H15         17     0.060    1.00800 ; HC # alkane H.
+      15  opls_140      1      SOL       H16         17     0.060    1.00800 ; HC # alkane H.
+      16  opls_136      1      SOL        C6         21    -0.120   12.01100 ; CT # alkane CH2 
+      17  opls_140      1      SOL       H17         21     0.060    1.00800 ; HC # alkane H.
+      18  opls_140      1      SOL       H18         21     0.060    1.00800 ; HC # alkane H.
 ; Total charge : 0.000 ### Number of unassigned atoms : 0/18
 
 [ bonds ]

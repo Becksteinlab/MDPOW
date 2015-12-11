@@ -252,17 +252,18 @@ def fep_simulation(cfg, solvent, **kwargs):
     EquilSimulations = {
         'water': mdpow.equil.WaterSimulation,
         'octanol': mdpow.equil.OctanolSimulation,
+        'cyclohexane':mdpow.equil.CyclohexaneSimulation
         }
     Simulations = {
         'water': mdpow.fep.Ghyd,
         'octanol': mdpow.fep.Goct,
+        'cyclohexane':mdpow.fep.Gcyclo
         }
     try:
         EquilSimulation = EquilSimulations[solvent]
         Simulation = Simulations[solvent]
     except KeyError:
-        raise ValueError("solvent must be 'water' or 'octanol'")
-    
+        raise ValueError("solvent must be 'water', 'octanol', or 'cyclohexane'")
     # generate a canonical path under dirname
     topdir = kwargs.get("dirname", None)
     if topdir is None:
@@ -273,7 +274,6 @@ def fep_simulation(cfg, solvent, **kwargs):
     # the class is instantiated. Note that the pickle files live under dirname
     # and NOT topdir (bit of an historic inconsistency)
     savefilename = os.path.join(dirname, Simulation.__name__ + os.extsep + 'fep')
-
     # need pickle files for the equilibrium simulation ... another nasty guess:
     equil_savefilename = os.path.join(topdir, "%(solvent)s.simulation" % vars())
     try:
@@ -286,7 +286,6 @@ def fep_simulation(cfg, solvent, **kwargs):
 
     # output to screen or hidden?
     set_gromacsoutput(cfg)
-
     # start pipeline
     if os.path.exists(savefilename):
         S = Simulation(filename=savefilename, basedir=topdir)
@@ -294,7 +293,6 @@ def fep_simulation(cfg, solvent, **kwargs):
 		# method to be used "TI"/"BAR"
         method = cfg.get("FEP","method")
         logger.debug("Implementing the %r method, per config file",method)
-        
         # custom mdp file
         mdp = cfg.findfile("FEP", "mdp")
         logger.debug("Using [FEP] MDP file %r from config file", mdp)
@@ -308,7 +306,6 @@ def fep_simulation(cfg, solvent, **kwargs):
         # Note that we set basedir=topdir (and *not* dirname=dirname!)...FEP is a bit convoluted
         S = Simulation(simulation=equil_S, runtime=cfg.getfloat("FEP", "runtime"),
                        basedir=topdir, deffnm=deffnm, mdp=mdp, schedules=schedules,method=method)
-
     if S.journal.has_not_completed("setup"):
         params = S.setup(qscript=cfg.getlist("FEP", "qscript"),
                          maxwarn=cfg.getint("FEP", "maxwarn"))

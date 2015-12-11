@@ -488,7 +488,7 @@ def analyze_NPT(sim, **kwargs):
     except AttributeError:
         sim_deffnm = "md"
     deffnm = kwargs.pop("deffnm", sim_deffnm)
-
+    
     tpr = os.path.join(sim.dirs.MD_NPT, deffnm + ".tpr")
     edr = os.path.join(sim.dirs.MD_NPT, deffnm + ".edr")
     kwargs.setdefault('solvent', sim.solvent_type)
