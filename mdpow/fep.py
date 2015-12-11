@@ -440,7 +440,6 @@ class Gsolv(Journalled):
                         (simulation.solvent_type, solvent)
                     logger.error(errmsg)
                     raise ValueError(errmsg)
-                self.v_solute = kwargs.pop('v_solute', None) or simulation.v_solute
             else:
                 self.molecule = molecule   # should check that this is in top (?)
                 self.top = top

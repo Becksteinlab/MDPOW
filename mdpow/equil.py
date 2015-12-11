@@ -519,34 +519,6 @@ class Simulation(Journalled):
         """Returns the coordinates of the most advanced step in the protocol."""
         return self._lastnotempty([self.files[name] for name in self.coordinate_structures])
 
-    @property
-    def v_solute(self):
-        """Calculate the volume of the solute molecule.
-
-        The volume is calculated by subtracting the average volume of
-        a pure solvent box with the same number of solvent molecules
-        from the average volume of the NPT simulation box with the
-        solute. At the moment, this uses the known density of solvents
-        TIP4P or octanol at 300 K.
-
-        .. SeeAlso
-
-           * :func:`mdpow.correction.analyze_NPT`
-           * :attr:`mdpow.correction.ThermodynamicAnalysis.v_solute`
-           * :func:`mdpow.correction.calculate_solute_volume`
-
-        """
-        if 'v_solute' in self.__cache:
-            return self.__cache['v_solute']
-        import correction
-        try:
-            self.__cache['v_solute'] = correction.analyze_NPT(self)
-        except Exception as e:
-            logger.fatal("Solute volume could not computed because no NPT simulation found.")
-            logger.exception(e)
-            raise e
-        return self.__cache['v_solute']
-
 class WaterSimulation(Simulation):
     """Equilibrium MD of a solute in a box of water."""
     solvent_default = 'water'
