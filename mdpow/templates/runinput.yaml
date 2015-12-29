@@ -58,6 +58,8 @@ MD_NPT:
          # special index groups  __main__ __environment__ can be used
 
 FEP:
+    method: BAR
+         # BAR or TI
     qscript: (qscripts)s
          # queuing system scripts to produce
     runtime: 5000

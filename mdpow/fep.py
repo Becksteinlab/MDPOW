@@ -314,7 +314,7 @@ class Gsolv(Journalled):
     topdir_default = "FEP"
     dirname_default = os.path.curdir
     solvent_default = "water"
-    method = config.get_configuration("sol_runinput.cfg").get("FEP","method")
+    method = config.get_configuration("runinput.yaml").get("FEP","method")
     # TODO: initialize from default cfg
     schedules_default = {'coulomb':
                              FEPschedule(name='coulomb',

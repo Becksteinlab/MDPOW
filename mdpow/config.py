@@ -109,10 +109,10 @@ defaults = {
     }
 
 class POWConfigParser():
-    self.conf = None
-    def __init__():
+    def __init__(self):
+        self.conf = None
         return 
-    def readfp(fn):
+    def readfp(self,fn):
         self.conf = yaml.load(fn)
         return True
     def get(self, section, option):
@@ -127,6 +127,8 @@ class POWConfigParser():
     def getpath(self, section, option):
         """Return option as an expanded path."""
         return os.path.expanduser(os.path.expandvars(self.get(section, option)))
+    def getfloat(self,section,option):
+        return self.conf[section][option]
     def findfile(self, section, option):
         """Return location of a file ``option``.
 
@@ -140,6 +142,8 @@ class POWConfigParser():
         is stripped and quotes are treated verbatim.
         """
         return [x.strip() for x in str(self.get(section, option)).split(",")]
+    def getint(self, section, option):
+        return self.conf[section][option]
     def getarray(self, section, option):
         """Return option as a numpy array of floats.
 
@@ -147,6 +151,8 @@ class POWConfigParser():
         is stripped and quotes are treated verbatim.
         """
         return np.asarray(self.getlist(section, option), dtype=np.float)
+    def getboolean(self, section, option):
+        return self.conf[section][option]
     def getintarray(self, section, option):
         """Return option as a numpy array of integers.
 

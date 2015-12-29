@@ -81,7 +81,7 @@ def get_mdp_files(cfg, protocols):
     for protocol in protocols:
         try:
             mdp = cfg.getpath(protocol, 'mdp')
-        except ConfigParser.NoSectionError:
+        except KeyError:
             # skip anything for which we do not define sections, such as
             # the dummy run protocols
             mdp = None
