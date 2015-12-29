@@ -92,7 +92,7 @@ Gromacs force field files are ok).
 
 import os, errno
 from pkg_resources import resource_filename, resource_listdir
-from ConfigParser import SafeConfigParser
+import yaml
 
 import numpy as np
 
@@ -105,19 +105,25 @@ logger = logging.getLogger("mdpow.config")
 
 #: Locations of default run input files and configurations.
 defaults = {
-    "runinput": resource_filename(__name__, "templates/runinput.cfg"),
+    "runinput": resource_filename(__name__, "templates/runinput.yaml"),
     }
 
-class POWConfigParser(SafeConfigParser):
+class POWConfigParser():
+    self.conf = None
+    def __init__():
+        return 
+    def readfp(fn):
+        self.conf = yaml.load(fn)
+        return True
     def get(self, section, option):
         """Return option as string, unless its "None/NONE/none" --> ``None``"""
-        value = SafeConfigParser.get(self, section, option)
+        value = self.conf[section][option]
         if value.lower() == "none":
             return None
         return value
     def getstr(self, section, option):
         """Return option as string"""
-        return SafeConfigParser.get(self, section, option)
+        return self.get(self, section, option)
     def getpath(self, section, option):
         """Return option as an expanded path."""
         return os.path.expanduser(os.path.expandvars(self.get(section, option)))

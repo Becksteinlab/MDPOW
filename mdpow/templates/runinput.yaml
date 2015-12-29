@@ -89,12 +89,7 @@ FEP_schedule_Coulomb:
          # soft core alpha: linear scaling for coulomb (sc_alpha = 0)
          # ignore the other sc_*
     sc_alpha: 0
-    lambdas: 
-             - 0
-             - 0.25 
-             - 0.5
-             - 0.75
-             - 1.0
+    lambdas: 0, 0.25, 0.5, 0.75, 1.0
 
 FEP_schedule_VDW:
     name: vdw
@@ -106,23 +101,7 @@ FEP_schedule_VDW:
     sc_alpha: 0.5
     sc_power: 1.0 
     sc_sigma: 0.3
-    lambdas: 
-             - 0.0
-             - 0.05
-             - 0.1 
-             - 0.2 
-             - 0.3 
-             - 0.4 
-             - 0.5 
-             - 0.6 
-             - 0.65 
-             - 0.7 
-             - 0.75 
-             - 0.8 
-             - 0.85 
-             - 0.9 
-             - 0.95 
-             - 1
+    lambdas: 0.0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1
 
 
 mdrun:
