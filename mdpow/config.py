@@ -123,7 +123,7 @@ class POWConfigParser():
         return value
     def getstr(self, section, option):
         """Return option as string"""
-        return self.get(self, section, option)
+        return self.get(section, option)
     def getpath(self, section, option):
         """Return option as an expanded path."""
         return os.path.expanduser(os.path.expandvars(self.get(section, option)))
