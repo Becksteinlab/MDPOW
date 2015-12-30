@@ -105,7 +105,7 @@ logger = logging.getLogger("mdpow.config")
 
 #: Locations of default run input files and configurations.
 defaults = {
-    "runinput": resource_filename(__name__, "templates/runinput.yaml"),
+    "runinput": resource_filename(__name__, "templates/runinput.yml"),
     }
 
 class POWConfigParser():

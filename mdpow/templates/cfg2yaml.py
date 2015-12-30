@@ -7,7 +7,7 @@ import os
 # check extension
 
 if not sys.argv[1].split(".")[1] == "cfg":
-    print("Please include *file*.cfg to convert to *file*.yaml. Exiting...")
+    print("Please include *file*.cfg to convert to *file*.yml. Exiting...")
     exit(1)
 
 if len(sys.argv) < 3:
@@ -48,12 +48,12 @@ for x in yaml_formatting:
     d = dict((key,value) for (key,value) in yaml_formatting[x])
     yaml_formatting[x] = d
 
-with open("result.yaml",'w') as f:
+with open("result.yml",'w') as f:
     f.write(yaml.dump(yaml_formatting,default_flow_style=False))
 
-with open("result.yaml",'r') as infile, open(sys.argv[-1],'w') as outfile:
+with open("result.yml",'r') as infile, open(sys.argv[-1],'w') as outfile:
     data = infile.read()
     data = data.replace("'","")
     outfile.write(data)
 
-os.remove("result.yaml")
+os.remove("result.yml")
