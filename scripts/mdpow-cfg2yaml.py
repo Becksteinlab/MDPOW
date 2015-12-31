@@ -6,12 +6,12 @@ import os
 
 # check extension
 
-if not sys.argv[1].split(".")[1] == "cfg":
-    print("Please include *file*.cfg to convert to *file*.yml. Exiting...")
-    exit(1)
-
 if len(sys.argv) < 3:
     print("Need input file and output file. Exiting...")
+    exit(1)
+
+if not sys.argv[1].split(".")[1] == "cfg":
+    print("Please include *file*.cfg to convert to *file*.yml. Exiting...")
     exit(1)
 
 print("Converting %s.cfg ..." % sys.argv[1].split(".")[0])
