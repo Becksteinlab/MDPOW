@@ -91,6 +91,8 @@ FEP_schedule_Coulomb:
          # soft core alpha: linear scaling for coulomb (sc_alpha = 0)
          # ignore the other sc_*
     sc_alpha: 0
+    sc_power: 1
+    sc_sigma: 0.3
     lambdas: 0, 0.25, 0.5, 0.75, 1.0
 
 FEP_schedule_VDW:
