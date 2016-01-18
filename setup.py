@@ -32,7 +32,8 @@ octanol. It uses Gromacs (http://www.gromacs.org) for the molecular dynamics
 		 'scripts/mdpow-rebuild-simulation',
                  'scripts/mdpow-equilibrium',
                  'scripts/mdpow-fep',
-		 'scripts/mdpow-cfg2yaml.py'
+		 'scripts/mdpow-cfg2yaml.py',
+         'scripts/mdpow-solvationenergy'
                  ],
       package_data={'mdpow': ['top/*.dat', 'top/*.gro', 'top/*.itp',
                               'top/oplsaa.ff/*',

@@ -56,10 +56,14 @@ import mdpow.filelock
 import logging
 logger = logging.getLogger('mdpow')
 
-def load_gsolv(directory, **kwargs):
+suffix = {'cyclohexane':'cyclo'
+          ,'water':'hyd'
+          ,'octanol':'oct'}
+
+def load_gsolv(solvent, directory, **kwargs):
     FEPdir = os.path.join(directory, "FEP")
 
-    files = {solvent: os.path.join(FEPdir, solvent, 'G{}.fep'.format(solvent)),
+    files = {solvent: os.path.join(FEPdir, solvent, 'G{}.fep'.format(suffix[solvent])),
              }
     files_not_found = dict(((solv,fn) for solv,fn in files.items()
                             if not os.path.exists(fn)))
@@ -98,7 +102,7 @@ def run_gsolv(solvent, directory, **kwargs):
     def datstat(g):
         return _datastatus[g.contains_corrupted_xvgs()]
 
-    gsolv = load_gsolv(directory, permissive=kwargs.pop('permissive',False),solvent=solvent,)
+    gsolv = load_gsolv(solvent, directory, permissive=kwargs.pop('permissive',False),)
 
     # do the analysis (only use keywords that are needed for FEP.analysis())
     akw = {'stride': kwargs.pop('stride', None), 'force': kwargs.pop('force', False)}
@@ -114,13 +118,13 @@ def run_gsolv(solvent, directory, **kwargs):
         logger.info("[%(directory)s] Analyzing hydration free energy data for the first time", vars())
         gsolv.analyze(**akw)
 
-    if datstat(gwat) == 'BAD':
+    if datstat(gsolv) == 'BAD':
         logger.warning("[%s] Possible file corruption: water:%s", directory, datstat(gsolv))
 
     if kwargs.get('energyfile', None):
         with mdpow.filelock.FileLock(kwargs['energyfile'], timeout=2):
             with open(kwargs['energyfile'], mode='a') as out:
-                out.write(fmt_energy % (gwat.summary(), directory))
+                out.write(fmt_energy % (gsolv.summary(), directory))
             logger.info("[%s] Wrote solvation energy terms to %r", directory, kwargs['energyfile'])
 
     plotfile = kwargs.get('plotfile', None)
@@ -194,7 +198,7 @@ if __name__ == "__main__":
                       metavar="N")
     parser.add_option('--solvent', '-S', dest='solvent',
                       metavar="NAME",
-                      help="solvent NAME for compound, 'water' or 'octanol' [%default]")
+                      help="solvent NAME for compound, 'water', 'octanol', or 'cyclohexane' [%default]")
     parser.add_option('--ignore-corrupted', dest="permissive",
                       action="store_true",
                       help="skip lines in the md.xvg files that cannot be parsed. "
@@ -203,7 +207,7 @@ if __name__ == "__main__":
                       "WRONG RESULTS CAN OCCUR! USE AT YOUR OWN RISK [%default]")
     parser.set_defaults(plotfile="auto",
                         energyfile="ghyd.txt",
-                        force=False, stride=10, permissive=False)
+                        force=False, stride=10, permissive=False,solvent='water')
     opts,args = parser.parse_args()
 
     if len(args) == 0:
@@ -222,7 +226,7 @@ if __name__ == "__main__":
         opts.plotfile = parse_filename_option(opts.plotfile)
 
         try:
-            run_gsolv(solvent, directory, plotfile=opts.plotfile,
+            run_gsolv(opts.solvent, directory, plotfile=opts.plotfile,
                      energyfile=realpath_or_none(opts.energyfile),
                      force=opts.force, stride=opts.stride, permissive=opts.permissive)
         except (OSError, IOError), err:
