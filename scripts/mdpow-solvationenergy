@@ -35,7 +35,7 @@ average.
 molecule
     molecule name as used in the itp
 DeltaG*
-    hydration free energy vacuum --> water, in kJ/mol
+    solvation free energy vacuum --> solvent, in kJ/mol
 coulomb
     discharging contribution to the DeltaG*
 vdw
