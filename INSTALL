@@ -2,19 +2,14 @@
  Quick installation instructions for *POW*
 =============================================
 
-Use easy_install_ (setuptools_) because it will fetch additional
-dependencies. 
-
-.. _easy_install: http://peak.telecommunity.com/DevCenter/EasyInstall 
-.. _setuptools: http://pypi.python.org/pypi/setuptools
+Use `pip`.
 
 Standard installation
 ---------------------
 
-Example for installation under ``~/opt`` with python2.6::
+Example for installation as a user::
 
-  export PYTHONPATH=$HOME/opt/lib/python2.6:$PYTHONPATH
-  easy_install --prefix=$HOME/opt POW
+  pip install --user MDPOW/
 
 Check that you can import the module::
 
@@ -22,7 +17,8 @@ Check that you can import the module::
   >>> import mdpow
   >>> help(mdpow)
 
-In case of problems contact Oliver Beckstein <orbeckst@gmail.com>.
+In case of problems  file an issue at
+https://github.com/Becksteinlab/MDPOW/issues
 
 
 Developer installation
@@ -30,20 +26,7 @@ Developer installation
 
 A development install is useful while hacking away on the code::
 
- cd POW
- python setup.py develop
+ cd MDPOW
+ python setup.py develop --user
 
-Use ``--prefix``/``--install-lib`` as above or use the defaults in
-``~/.pydistutils.cfg``; I have::
-
-   # Mac OS X user installation:
-   # http://peak.telecommunity.com/DevCenter/EasyInstall#mac-os-x-user-installation
-   # http://peak.telecommunity.com/DevCenter/EasyInstall#downloading-and-installing-a-package
-
-   # note python 2.6 uses ~/.local
-   # http://docs.python.org/whatsnew/2.6.html
-
-   [install]
-   install_lib = ~/.local/lib/python$py_version_short/site-packages
-   install_scripts = ~/bin
   
