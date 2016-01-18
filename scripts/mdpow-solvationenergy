@@ -5,7 +5,8 @@ Run the free energy analysis for a solvent  in <DIRECTORY>/FEP
 and return DeltaG.
 
 DIRECTORY should contain all the files resulting from running
-``mdpow.fep.Ghyd.setup()`` and the results of the MD FEP
+``mdpow.fep.Ghyd.setup()`` (or the corresponding ``Goct.setup()`` or
+``Gcyclohexane.setup()`` and the results of the MD FEP
 simulations. It relies on the canonical naming scheme (basically: just
 use the defaults as in the tutorial).
 
@@ -15,7 +16,7 @@ None).
 
 The total solvation free energy is calculated as
 
-  DeltaG* = -(DeltaA_coul + DeltaA_vdw) + Vdp
+  DeltaG* = -(DeltaA_coul + DeltaA_vdw)
 
 Note that the standard state refers to the "Ben-Naim" standard state
 of transferring 1 M of compound in the gas phase to 1 M in the aqueous
@@ -23,8 +24,8 @@ phase.
 
 Results are *appended* to a data file with **Output file format**::
 
-          .                 ---------- kJ/mol ------
-          molecule solvent  DeltaG*  coulomb  vdw  Vdp
+          .                 ---------- kJ/mol ---
+          molecule solvent  DeltaG*  coulomb  vdw
 
 All observables are quoted with an error estimate, which is derived
 from the correlation time and error propagation through Simpson's rule
@@ -40,8 +41,6 @@ coulomb
     discharging contribution to the DeltaG*
 vdw
     decoupling contribution to the DeltaG*
-Vdp
-    pressure correction (NOT IMPLEMENTED, always 0)
 directory
     folder in which the simulations were stored
 
@@ -75,7 +74,7 @@ def load_gsolv(solvent, directory, **kwargs):
     return mdpow.fep.Gsolv(filename=files[solvent], basedir=directory, permissive=permissive)
 
 def run_gsolv(solvent, directory, **kwargs):
-    """Do the Ghyd analysis
+    """Do the solvation free analysis
 
     :Arguments:
         *directory*
@@ -89,7 +88,7 @@ def run_gsolv(solvent, directory, **kwargs):
 
     **Output file format:**
 
-        molecule DeltaGhyd  Coulomb VDW pressure     directory
+        molecule DeltaGhyd  Coulomb VDW directory
 
         (all values as average and error)
     """
@@ -115,11 +114,11 @@ def run_gsolv(solvent, directory, **kwargs):
         logger.info("[%(directory)s] Reading existing data from pickle file.", vars())
         gsolv.logger_DeltaA0()
     except (KeyError, AttributeError):   # KeyError because results is a AttributeDict
-        logger.info("[%(directory)s] Analyzing hydration free energy data for the first time", vars())
+        logger.info("[%(directory)s] Analyzing %(solvent)s solvation free energy data for the first time", vars())
         gsolv.analyze(**akw)
 
     if datstat(gsolv) == 'BAD':
-        logger.warning("[%s] Possible file corruption: water:%s", directory, datstat(gsolv))
+        logger.warning("[%s] Possible file corruption: %s:%s", directory, solvent, datstat(gsolv))
 
     if kwargs.get('energyfile', None):
         with mdpow.filelock.FileLock(kwargs['energyfile'], timeout=2):
@@ -147,7 +146,7 @@ def run_gsolv(solvent, directory, **kwargs):
 
 
 def auto_plotfile(directory, gsolv):
-    return os.path.join(directory, "dVdl_%s.pdf" % gsolv.molecule)
+    return os.path.join(directory, "dVdl_%s_%s.pdf" % (gsolv.molecule, gsolv.solvent_type))
 
 
 def activate_subplot(numPlot):
@@ -183,7 +182,7 @@ if __name__ == "__main__":
     parser.add_option('-p', '--plotfile', dest="plotfile",
                       help="plot dV/dlambda to FILE; use png or pdf suffix to "
                       "determine the file type. 'auto' generates a pdf file "
-                      "DIRECTORY/dVdl.pdf and 'None' disables it [%default]",
+                      "DIRECTORY/dVdl_<molname>_<solvent>.pdf and 'None' disables it [%default]",
                       metavar="FILE")
     parser.add_option('-e', '--energies', dest="energyfile",
                       help="append solvation free energies to FILE [%default]",
@@ -206,8 +205,8 @@ if __name__ == "__main__":
                       "such a way that they appear correct but are in fact wrong. "
                       "WRONG RESULTS CAN OCCUR! USE AT YOUR OWN RISK [%default]")
     parser.set_defaults(plotfile="auto",
-                        energyfile="ghyd.txt",
-                        force=False, stride=10, permissive=False,solvent='water')
+                        energyfile="gsolv.txt",
+                        force=False, stride=10, permissive=False, solvent='water')
     opts,args = parser.parse_args()
 
     if len(args) == 0:
