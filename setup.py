@@ -38,6 +38,7 @@ octanol. It uses Gromacs (http://www.gromacs.org) for the molecular dynamics
                               'top/oplsaa.ff/*',
                               'templates/*'], },
       install_requires = ['numpy>=1.0', 'scipy',
+                          'pyyaml',
                           'GromacsWrapper>0.2.5',
                           'RecSQL>=0.7.5'],
       zip_safe = True,
