@@ -13,32 +13,33 @@ setup(name="POW",
       description="A library for computing octanol/water partitioning coefficients",
       long_description="""The POW module simplifies the setup and
 execution of free energy calculations of small molecules in water and
-octanol. It uses Gromacs (http://www.gromacs.org) for the molecular dynamics
+and other solvents such as octanol and cyclohexane. 
+It uses Gromacs (http://www.gromacs.org) for the molecular dynamics
 (MD) simulations and relies on GromacsWrapper
-(http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper).
+(https://github.com/Becksteinlab/GromacsWrapper)
 """,
       author="Oliver Beckstein",
       author_email="orbeckst@gmail.com",
       license="GPLv3",
-      url="http://sbcb.bioch.ox.ac.uk/oliver/software/POW/",
-      download_url="http://sbcb.bioch.ox.ac.uk/oliver/download/Python/",
+      url="https://github.com/Becksteinlab/MDPOW",
       keywords="science Gromacs analysis 'molecular dynamics'",
       packages=find_packages(exclude=['examples']),
-      scripts = ['scripts/mdpow-pow', 'scripts/mdpow-ghyd',
+      scripts = ['scripts/mdpow-pow', 
+                 'scripts/mdpow-ghyd',
                  'scripts/mdpow-check',
                  'scripts/mdpow-rebuild-fep', 
-		 'scripts/mdpow-rebuild-simulation',
+		         'scripts/mdpow-rebuild-simulation',
                  'scripts/mdpow-equilibrium',
                  'scripts/mdpow-fep',
-		 'scripts/mdpow-cfg2yaml.py',
-         'scripts/mdpow-solvationenergy'
+		         'scripts/mdpow-cfg2yaml.py',
+                 'scripts/mdpow-solvationenergy'
                  ],
       package_data={'mdpow': ['top/*.dat', 'top/*.gro', 'top/*.itp',
                               'top/oplsaa.ff/*',
                               'templates/*'], },
-      install_requires = ['numpy>=1.0', 'scipy',
+      install_requires = ['numpy>=1.6', 'scipy',
                           'pyyaml',
-                          'GromacsWrapper>0.2.5',
+                          'GromacsWrapper>0.3',
                           'RecSQL>=0.7.5'],
       zip_safe = True,
 )
