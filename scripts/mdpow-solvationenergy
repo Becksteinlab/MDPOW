@@ -1,0 +1,233 @@
+#!/usr/bin/env python
+"""%prog [options] DIRECTORY [DIRECTORY ...]
+
+Run the free energy analysis for a solvent  in <DIRECTORY>/FEP
+and return DeltaG.
+
+DIRECTORY should contain all the files resulting from running
+``mdpow.fep.Ghyd.setup()`` and the results of the MD FEP
+simulations. It relies on the canonical naming scheme (basically: just
+use the defaults as in the tutorial).
+
+The dV/dlambda plots can be produced automatically (--plot=auto). If multiple
+DIRECTORY arguments are provided then one has to choose the auto option (or
+None).
+
+The total solvation free energy is calculated as
+
+  DeltaG* = -(DeltaA_coul + DeltaA_vdw) + Vdp
+
+Note that the standard state refers to the "Ben-Naim" standard state
+of transferring 1 M of compound in the gas phase to 1 M in the aqueous
+phase.
+
+Results are *appended* to a data file with **Output file format**::
+
+          .                 ---------- kJ/mol ------
+          molecule solvent  DeltaG*  coulomb  vdw  Vdp
+
+All observables are quoted with an error estimate, which is derived
+from the correlation time and error propagation through Simpson's rule
+(see :meth:`mdpow.fep.Gsolv`). It ultimately comes from the error on
+<dV/dlambda>, which is estimated as the error to determine the
+average.
+
+molecule
+    molecule name as used in the itp
+DeltaG*
+    hydration free energy vacuum --> water, in kJ/mol
+coulomb
+    discharging contribution to the DeltaG*
+vdw
+    decoupling contribution to the DeltaG*
+Vdp
+    pressure correction (NOT IMPLEMENTED, always 0)
+directory
+    folder in which the simulations were stored
+
+"""
+
+from __future__ import with_statement
+
+import os
+import mdpow.fep
+import mdpow.filelock
+
+import logging
+logger = logging.getLogger('mdpow')
+
+def load_gsolv(directory, **kwargs):
+    FEPdir = os.path.join(directory, "FEP")
+
+    files = {solvent: os.path.join(FEPdir, solvent, 'G{}.fep'.format(solvent)),
+             }
+    files_not_found = dict(((solv,fn) for solv,fn in files.items()
+                            if not os.path.exists(fn)))
+    if len(files_not_found) > 0:
+        raise OSError("Missing input files: %r" % files_not_found)
+
+    permissive = kwargs.pop('permissive', False)
+    logger.info("[%s] Reading {} data %r".format(solvent), directory, files[solvent])
+    return mdpow.fep.Gsolv(filename=files[solvent], basedir=directory, permissive=permissive)
+
+def run_gsolv(solvent, directory, **kwargs):
+    """Do the Ghyd analysis
+
+    :Arguments:
+        *directory*
+             directory under which the project is stored
+        *plotfile*
+             name of a file to plot dV/dlambda graphs to
+        *energyfile*
+             append individual energy terms to this file
+        *force*
+             force rereading data files [False]
+
+    **Output file format:**
+
+        molecule DeltaGhyd  Coulomb VDW pressure     directory
+
+        (all values as average and error)
+    """
+    import gc
+
+    fmt_energy = "%s  %s\n"
+    _datastatus = {True: 'BAD',  # suspect file corruption
+                   False: 'OK'}
+
+    def datstat(g):
+        return _datastatus[g.contains_corrupted_xvgs()]
+
+    gsolv = load_gsolv(directory, permissive=kwargs.pop('permissive',False),solvent=solvent,)
+
+    # do the analysis (only use keywords that are needed for FEP.analysis())
+    akw = {'stride': kwargs.pop('stride', None), 'force': kwargs.pop('force', False)}
+    if akw['force']:
+        logger.info("[%(directory)s] Forcing (re)analysis of hydration free energy data", vars())
+        gsolv.analyze(**akw)
+    # make sure that we have data
+    try:
+        gsolv.results.DeltaA.Gibbs
+        logger.info("[%(directory)s] Reading existing data from pickle file.", vars())
+        gsolv.logger_DeltaA0()
+    except (KeyError, AttributeError):   # KeyError because results is a AttributeDict
+        logger.info("[%(directory)s] Analyzing hydration free energy data for the first time", vars())
+        gsolv.analyze(**akw)
+
+    if datstat(gwat) == 'BAD':
+        logger.warning("[%s] Possible file corruption: water:%s", directory, datstat(gsolv))
+
+    if kwargs.get('energyfile', None):
+        with mdpow.filelock.FileLock(kwargs['energyfile'], timeout=2):
+            with open(kwargs['energyfile'], mode='a') as out:
+                out.write(fmt_energy % (gwat.summary(), directory))
+            logger.info("[%s] Wrote solvation energy terms to %r", directory, kwargs['energyfile'])
+
+    plotfile = kwargs.get('plotfile', None)
+    if plotfile:
+        if plotfile == 'auto':
+            plotfile = auto_plotfile(directory, gsolv)
+        import matplotlib
+        matplotlib.use('agg')  # quick non-interactive plotting
+        from pylab import clf, title, savefig
+        clf()
+        gsolv.plot(color='k', ls='--')
+        activate_subplot(1)
+        title(r"[%s] \Delta G")
+        activate_subplot(2)
+        savefig(plotfile)
+        logger.info("Wrote graph to %(plotfile)r", vars())
+
+    del gsolv
+    gc.collect()  # try to free as much memory as possible
+
+
+def auto_plotfile(directory, gsolv):
+    return os.path.join(directory, "dVdl_%s.pdf" % gsolv.molecule)
+
+
+def activate_subplot(numPlot):
+    """Make subplot *numPlot* active on the canvas.
+
+    Use this if a simple ``subplot(numRows, numCols, numPlot)``
+    overwrites the subplot instead of activating it.
+    """
+    # see http://www.mail-archive.com/matplotlib-users@lists.sourceforge.net/msg07156.html
+    from pylab import gcf, axes
+    numPlot -= 1  # index is 0-based, plots are 1-based
+    return axes(gcf().get_axes()[numPlot])
+
+
+def parse_filename_option(fn):
+    if fn.lower() == "none":
+        fn = None
+    elif fn.lower() == "auto":
+        fn = "auto"
+    return fn
+
+def realpath_or_none(fn):
+    if not fn is None:
+        fn = os.path.realpath(fn)
+    return fn
+
+if __name__ == "__main__":
+    import sys
+    import os.path
+    from optparse import OptionParser
+
+    parser = OptionParser(usage=__doc__)
+    parser.add_option('-p', '--plotfile', dest="plotfile",
+                      help="plot dV/dlambda to FILE; use png or pdf suffix to "
+                      "determine the file type. 'auto' generates a pdf file "
+                      "DIRECTORY/dVdl.pdf and 'None' disables it [%default]",
+                      metavar="FILE")
+    parser.add_option('-e', '--energies', dest="energyfile",
+                      help="append solvation free energies to FILE [%default]",
+                      metavar="FILE")
+    parser.add_option('--force', dest='force',
+                      action="store_true",
+                      help="force rereading all data [%default]")
+    parser.add_option('-s', '--stride', dest="stride", type='int',
+                      help="Use every N-th datapoint from the original dV/dlambda data. "
+                      "Using a number larger than 1 can significantly reduce memory usage "
+                      "with little impact on the precision of the final output. [%default]",
+                      metavar="N")
+    parser.add_option('--solvent', '-S', dest='solvent',
+                      metavar="NAME",
+                      help="solvent NAME for compound, 'water' or 'octanol' [%default]")
+    parser.add_option('--ignore-corrupted', dest="permissive",
+                      action="store_true",
+                      help="skip lines in the md.xvg files that cannot be parsed. "
+                      "WARNING: Other lines in the file might have been corrupted in "
+                      "such a way that they appear correct but are in fact wrong. "
+                      "WRONG RESULTS CAN OCCUR! USE AT YOUR OWN RISK [%default]")
+    parser.set_defaults(plotfile="auto",
+                        energyfile="ghyd.txt",
+                        force=False, stride=10, permissive=False)
+    opts,args = parser.parse_args()
+
+    if len(args) == 0:
+        logger.fatal("A directory is required. See --help.")
+        sys.exit(1)
+    elif len(args) > 1 and not opts.plotfile.lower() in ('none', 'auto'):
+        logger.fatal("Can only use --plotfile=None or --plotfile=auto with multiple directories.")
+        sys.exit(1)
+
+    for directory in args:
+        if not os.path.exists(directory):
+            logger.warn("Directory %r not found, skipping...", directory)
+            continue
+        logger.info("Analyzing directory %r... (can take a while)", directory)
+
+        opts.plotfile = parse_filename_option(opts.plotfile)
+
+        try:
+            run_gsolv(solvent, directory, plotfile=opts.plotfile,
+                     energyfile=realpath_or_none(opts.energyfile),
+                     force=opts.force, stride=opts.stride, permissive=opts.permissive)
+        except (OSError, IOError), err:
+            logger.error("Running analysis in directory %r failed: %s", directory, str(err))
+        except Exception, err:
+            logger.fatal("Running analysis in directory %r failed", directory)
+            logger.exception("Catastrophic problem occurred, see the stack trace for hints.")
+            raise
