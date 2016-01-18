@@ -108,33 +108,52 @@ defaults = {
     "runinput": resource_filename(__name__, "templates/runinput.yml"),
     }
 
-class POWConfigParser():
+class POWConfigParser(object):
+    """Parse YAML config file."""
+
     def __init__(self):
         self.conf = None
-        return 
-    def readfp(self,fn):
+
+    def readfp(self, fn):
         self.conf = yaml.load(fn)
         return True
+
     def get(self, section, option):
-        """Return option as string, unless its "None/NONE/none" --> ``None``"""
+        """Return option, unless its "None/NONE/none" --> ``None``,
+        
+        Conversion to basic python types str, float, int, boolean is
+        carried out automatically (unless it was None).
+        """
         value = self.conf[section][option]
-        if value.lower() == "none":
-            return None
-        return value
-    def getstr(self, section, option):
-        """Return option as string"""
-        return self.get(section, option)
+        try:
+            if value.lower() == "none":
+                value = None
+        except AttributeError:
+            pass
+        finally:
+            return value
+
+    # TODO:
+    # The YAML parser does automatic conversion: the following
+    # methods are for backward compatibility with the old ini parser
+    # and should be cleaned up. --- orbeckst 2016-01-18
+    getstr = get
+    getfloat = get
+    getint = get
+    getboolean = get
+
     def getpath(self, section, option):
         """Return option as an expanded path."""
         return os.path.expanduser(os.path.expandvars(self.get(section, option)))
-    def getfloat(self,section,option):
-        return self.conf[section][option]
+
     def findfile(self, section, option):
         """Return location of a file ``option``.
 
         Uses :func:`mdpow.config.get_template`.
         """
         return get_template(self.getpath(section, option))
+
+    # TODO: Change input file format to use yaml lists and make this method superfluous
     def getlist(self, section, option):
         """Return option as a list of strings.
 
@@ -142,8 +161,7 @@ class POWConfigParser():
         is stripped and quotes are treated verbatim.
         """
         return [x.strip() for x in str(self.get(section, option)).split(",")]
-    def getint(self, section, option):
-        return self.conf[section][option]
+
     def getarray(self, section, option):
         """Return option as a numpy array of floats.
 
@@ -151,8 +169,7 @@ class POWConfigParser():
         is stripped and quotes are treated verbatim.
         """
         return np.asarray(self.getlist(section, option), dtype=np.float)
-    def getboolean(self, section, option):
-        return self.conf[section][option]
+
     def getintarray(self, section, option):
         """Return option as a numpy array of integers.
 
@@ -160,8 +177,6 @@ class POWConfigParser():
         is stripped and quotes are treated verbatim.
         """
         return np.asarray(self.getlist(section, option), dtype=np.int)
-
-
 
 def get_configuration(filename=None):
     """Reads and parses a run input config file.
