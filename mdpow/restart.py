@@ -90,8 +90,7 @@ class Journal(object):
             return self.__current
         def fset(self, stage):
             if not stage in self.stages:
-                raise ValueError("Can only assign a registered stage from %r, not %r" %
-                                 (self.stages, stage))
+                raise ValueError("Can only assign a registered stage from {0!r}, not {1!r}".format(self.stages, stage))
             self.__current = stage
         def fdel(self):
             self.__current = None
@@ -104,7 +103,7 @@ class Journal(object):
             return self.__incomplete
         def fset(self, stage):
             if not stage in self.stages:
-                raise ValueError("can only assign a registered stage from %(stages)r" % vars(self))
+                raise ValueError("can only assign a registered stage from {stages!r}".format(**vars(self)))
             self.__incomplete = stage
         def fdel(self):
             self.__incomplete = None
@@ -149,7 +148,7 @@ class Journal(object):
         del self.current
 
     def __repr__(self):
-        return "%s(%r)" % (self.__class__.__name__, self.stages)
+        return "{0!s}({1!r})".format(self.__class__.__name__, self.stages)
 
 class Journalled(object):
     """A base class providing methods for journalling and restarts.
@@ -195,7 +194,7 @@ class Journalled(object):
 
         """
         if protocol not in self.protocols:
-            raise ValueError("%r: protocol must be one of %r" % (protocol, self.protocols))
+            raise ValueError("{0!r}: protocol must be one of {1!r}".format(protocol, self.protocols))
         try:
             return self.__getattribute__(protocol)
         except AttributeError:
@@ -235,7 +234,7 @@ class Journalled(object):
             self.filename = os.path.abspath(filename)
         with open(self.filename, 'wb') as f:
             cPickle.dump(self, f, protocol=cPickle.HIGHEST_PROTOCOL)
-        logger.debug("Instance pickled to %(filename)r" % vars(self))
+        logger.debug("Instance pickled to {filename!r}".format(**vars(self)))
 
     def load(self, filename=None):
         """Re-instantiate class from pickled file.
@@ -256,4 +255,4 @@ class Journalled(object):
         with open(filename, 'rb') as f:
             instance = cPickle.load(f)
         self.__dict__.update(instance.__dict__)
-        logger.debug("Instance loaded from %(filename)r" % vars())
+        logger.debug("Instance loaded from {filename!r}".format(**vars()))

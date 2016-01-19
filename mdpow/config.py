@@ -293,7 +293,7 @@ def _get_template(t):
             else:
                 _t_found = True
         if not _t_found:            # 4) nothing else to try... or introduce a PATH?
-            raise ValueError("Failed to locate the template file %(t)r." % vars())
+            raise ValueError("Failed to locate the template file {t!r}.".format(**vars()))
     return os.path.realpath(t)
 
 
