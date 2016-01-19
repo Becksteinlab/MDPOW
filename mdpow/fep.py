@@ -1002,18 +1002,6 @@ g
 
         logger.info("[%r] Submitted jobs locally for %r", self.dirname, self.scripts.keys())
 
-    # analysis ... maybe move into a gromacs.analysis.plugin?
-    def correlationtime(self, nstep=100):
-        """Calculate the correlation time from the ACF.
-
-        The autocorrelation function is calculated via FFT on every *nstep* of
-        the data. It is assumed to decay exponentially, f(t) = exp(-t/tau) and
-        the decay constant is estimated as the integral of the ACF from the
-        start up to its first root.
-        """
-        from gromacs.collections import Collection
-        raise NotImplementedError
-
     def __repr__(self):
         return "%s(filename=%r)" % (self.__class__.__name__, self.filename)
 

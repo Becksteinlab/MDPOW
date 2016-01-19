@@ -505,12 +505,14 @@ class Simulation(Journalled):
     # for convenience and compatibility
     MD = MD_NPT
 
-    def _checknotempty(self, value, name):
+    @staticmethod
+    def _checknotempty(value, name):
         if value is None or value == "":
             raise ValueError("Parameter %s cannot be empty." % name)
         return value
 
-    def _lastnotempty(self, l):
+    @staticmethod
+    def _lastnotempty(l):
         """Return the last non-empty value in list *l* (or None :-p)"""
         nonempty = [None] + [x for x in l if not (x is None or x == "" or x == [])]
         return nonempty[-1]
