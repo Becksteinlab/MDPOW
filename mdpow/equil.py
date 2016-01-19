@@ -168,7 +168,7 @@ class Simulation(Journalled):
                 self.solvent = AttributeDict(itp=ITP[solvent], box=BOX[solvent],
                                              distance=DIST[solvent])
             except KeyError:
-                raise ValueError("solvent must be one of %r" % ITP.keys())
+                raise ValueError("solvent must be one of {0!r}".format(ITP.keys()))
 
             self.filename = filename or self.solvent_type+'.simulation'
 
@@ -192,7 +192,7 @@ class Simulation(Journalled):
             self.filename = filename
         with open(filename, 'wb') as f:
             cPickle.dump(self, f, protocol=cPickle.HIGHEST_PROTOCOL)
-        logger.debug("Instance pickled to %(filename)r" % vars())
+        logger.debug("Instance pickled to {filename!r}".format(**vars()))
 
     def load(self, filename=None):
         """Re-instantiate class from pickled file."""
@@ -204,7 +204,7 @@ class Simulation(Journalled):
         with open(filename, 'rb') as f:
             instance = cPickle.load(f)
         self.__dict__.update(instance.__dict__)
-        logger.debug("Instance loaded from %(filename)r" % vars())
+        logger.debug("Instance loaded from {filename!r}".format(**vars()))
 
     def make_paths_relative(self, prefix=os.path.curdir):
         """Hack to be able to copy directories around: prune basedir from paths.
@@ -302,7 +302,7 @@ class Simulation(Journalled):
         kwargs['struct'] = self._checknotempty(struct or self.files.structure, 'struct')
         kwargs['top'] = self._checknotempty(self.files.topology, 'top')
         kwargs['water'] = self.solvent.box
-        kwargs.setdefault('mainselection', '"%s"' % self.molecule)  # quotes are needed for make_ndx
+        kwargs.setdefault('mainselection', '"{0!s}"'.format(self.molecule))  # quotes are needed for make_ndx
         kwargs.setdefault('distance', self.solvent.distance)
         kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.dirs.includes
 
@@ -369,7 +369,7 @@ class Simulation(Journalled):
             # struct is not reliable as it depends on qscript so now we just try everything...
             struct = gromacs.utilities.find_first(kwargs['struct'], suffices=['pdb', 'gro'])
             if struct is None:
-                logger.error("Starting structure %(struct)r does not exist (yet)" % kwargs)
+                logger.error("Starting structure {struct!r} does not exist (yet)".format(**kwargs))
                 raise IOError(errno.ENOENT, "Starting structure not found", kwargs['struct'])
             else:
                 logger.info("Found starting structure %r (instead of %r).", struct, kwargs['struct'])
@@ -507,7 +507,7 @@ class Simulation(Journalled):
 
     def _checknotempty(self, value, name):
         if value is None or value == "":
-            raise ValueError("Parameter %s cannot be empty." % name)
+            raise ValueError("Parameter {0!s} cannot be empty.".format(name))
         return value
 
     def _lastnotempty(self, l):

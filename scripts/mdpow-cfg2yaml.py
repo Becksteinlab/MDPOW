@@ -14,7 +14,7 @@ if not sys.argv[1].split(".")[1] == "cfg":
     print("Please include *file*.cfg to convert to *file*.yml. Exiting...")
     exit(1)
 
-print("Converting %s.cfg ..." % sys.argv[1].split(".")[0])
+print("Converting {0!s}.cfg ...".format(sys.argv[1].split(".")[0]))
 
 full_file = []
 

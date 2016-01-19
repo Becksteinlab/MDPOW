@@ -123,7 +123,7 @@ def runMD_or_exit(S, protocol, params, cfg, **kwargs):
         try:
             dirname = S.dirs[protocol]
         except KeyError:
-            raise ValueError("S.dirs does not have protocol %r" % protocol)
+            raise ValueError("S.dirs does not have protocol {0!r}".format(protocol))
         except AttributeError:
             raise ValueError("supply dirname as a keyword argument")
     simulation_done = False
@@ -181,7 +181,7 @@ def equilibrium_simulation(cfg, solvent, **kwargs):
     if topdir is None:
         topdir = cfg.get("setup", "name")
     dirname = os.path.join(topdir, Simulation.dirname_default)
-    savefilename = os.path.join(topdir, "%(solvent)s.simulation" % vars())
+    savefilename = os.path.join(topdir, "{solvent!s}.simulation".format(**vars()))
 
     # output to screen or hidden?
     set_gromacsoutput(cfg)
@@ -275,7 +275,7 @@ def fep_simulation(cfg, solvent, **kwargs):
     # and NOT topdir (bit of an historic inconsistency)
     savefilename = os.path.join(dirname, Simulation.__name__ + os.extsep + 'fep')
     # need pickle files for the equilibrium simulation ... another nasty guess:
-    equil_savefilename = os.path.join(topdir, "%(solvent)s.simulation" % vars())
+    equil_savefilename = os.path.join(topdir, "{solvent!s}.simulation".format(**vars()))
     try:
         equil_S = EquilSimulation(filename=equil_savefilename)
     except IOError, err:

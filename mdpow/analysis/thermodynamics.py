@@ -262,11 +262,11 @@ def calculate_solute_volume(solute_data, solvent_data=None,
     """
     solute_Volume = recwhere(solute_data, 'Volume')
     if len(solute_Volume) != 1:
-        errmsg = "There should only be ONE Volume entry, not %r" % solute_Volume
+        errmsg = "There should only be ONE Volume entry, not {0!r}".format(solute_Volume)
         logger.error(errmsg)
         raise ValueError(errmsg)
     if not solute_Volume.unit[0] == "nm^3":
-        errmsg = "Unit of Volume should be nm^3, not %r" % solute_Volume.unit[0]
+        errmsg = "Unit of Volume should be nm^3, not {0!r}".format(solute_Volume.unit[0])
         logger.error(errmsg)
         raise ValueError(errmsg)
     solute_Vbox = Observable(solute_data, "Volume")
@@ -307,12 +307,12 @@ def count_solvent_molecules(tpr, solvent="water"):
     # This would be MUCH easier in MDAnalysis but I don't want to add
     # this as a dependency to mdpow. g_select would also work but that's
     # more recent and also requires reading of an xvg file.
-    solventgroup = "solvent_%(solvent)s" % vars()   # should not start with a number for make_ndx!!
+    solventgroup = "solvent_{solvent!s}".format(**vars())   # should not start with a number for make_ndx!!
     try:
         cmd = ['keep 0', 'del 0', solvent_selections[solvent],
-               'name 0 %(solventgroup)s' % vars(), 'q']
+               'name 0 {solventgroup!s}'.format(**vars()), 'q']
     except KeyError:
-        raise NotImplementedError("solvent %(solvent)r not supported" % vars())
+        raise NotImplementedError("solvent {solvent!r} not supported".format(**vars()))
 
     fd, tmpndx = tempfile.mkstemp(suffix=".ndx")
     try:
@@ -320,7 +320,7 @@ def count_solvent_molecules(tpr, solvent="water"):
         rc,output,junk = gromacs.cbook.make_ndx_captured(f=tpr, o=tmpndx,
                                                          input=cmd, stderr=False)
         if rc != 0:
-            out = "\n".join(["GMX_FATAL: %s" % s for s in (junk + "\n\n" + output).split("\n")])
+            out = "\n".join(["GMX_FATAL: {0!s}".format(s) for s in (junk + "\n\n" + output).split("\n")])
             errmsg = "Failed to build index. Look at the output below for hints:\n" + out
             logger.error(errmsg)
             raise GromacsError(errmsg)
@@ -338,7 +338,7 @@ def count_solvent_molecules(tpr, solvent="water"):
             N_solvent = rec['natoms'] # == number of molecules as one atom per molecule
             break
     if N_solvent is None:
-        errmsg = "Failed to find solvent %(solvent)r in %(tpr)r" % vars()
+        errmsg = "Failed to find solvent {solvent!r} in {tpr!r}".format(**vars())
         logger.error(errmsg)
         raise ValueError(errmsg)
     logger.info("Found %(N_solvent)d %(solvent)s solvent molecules in %(tpr)r", vars())

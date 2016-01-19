@@ -342,7 +342,7 @@ class ExpComp(object):
                                 connection=experimental.connection)
 
         for num,filename in enumerate(data[1:]):
-            dbname = "logPow_computed_%d" % (num+1)
+            dbname = "logPow_computed_{0:d}".format((num+1))
             compute2 = ComputedData(filename=filename,
                                     name=dbname,
                                     connection=experimental.connection)  # add to experimental db
@@ -357,7 +357,7 @@ class ExpComp(object):
                 if not os.path.exists(exclusions):
                     continue
                 logger.info("Loading exclusions from %(exclusions)r.", vars())
-                dbname = "exclusions_%d" % num
+                dbname = "exclusions_{0:d}".format(num)
                 excl = recsql.SQLarray_fromfile(exclusions, connection=experimental.connection, name=dbname)
                 if first_excl:
                     first_excl.merge_table(dbname)
@@ -651,7 +651,7 @@ class GsolvData(object):
         self.computed = computed  # for testing ... needs to be kept against gc :-p
 
         for num,filename in enumerate(data[1:]):
-            dbname = "energies_computed_%d" % (num+1)
+            dbname = "energies_computed_{0:d}".format((num+1))
             compute2 = ComputedData(filename=filename,
                                     name=dbname,
                                     connection=experimental.connection)  # add to experimental db
@@ -666,7 +666,7 @@ class GsolvData(object):
                 if not os.path.exists(exclusions):
                     continue
                 logger.info("Loading exclusions from %(exclusions)r.", vars())
-                dbname = "exclusions_%d" % num
+                dbname = "exclusions_{0:d}".format(num)
                 excl = recsql.SQLarray_fromfile(exclusions, connection=experimental.connection, name=dbname)
                 if first_excl:
                     first_excl.merge_table(dbname)
@@ -746,10 +746,10 @@ class GsolvData(object):
 
         mode = mode.lower()
         if not mode in ("hyd","oct"):
-            raise ValueError("mode must be either 'hyd' or 'oct', not %r" % mode)
-        fields = "CommonName, comment, ExpG%(mode)s AS ExpG, ExpG%(mode)sErr AS ExpErr, CompG%(mode)s AS CompG, CompG%(mode)sErr AS CompErr" % vars()
+            raise ValueError("mode must be either 'hyd' or 'oct', not {0!r}".format(mode))
+        fields = "CommonName, comment, ExpG{mode!s} AS ExpG, ExpG{mode!s}Err AS ExpErr, CompG{mode!s} AS CompG, CompG{mode!s}Err AS CompErr".format(**vars())
         c = self.database.SELECT(fields)
-        ExpG = "ExpG%(mode)s" % vars()
+        ExpG = "ExpG{mode!s}".format(**vars())
 
         #subplot(121)
         norm = colors.normalize(0,len(c))
@@ -773,8 +773,8 @@ class GsolvData(object):
         dy = kwargs.pop('dy', kcalmol)
         _plot_ideal(X=self.database.limits(ExpG), dy=dy, dy2=1.5*dy)
 
-        xlabel(r'experimental $\Delta G_{\rm %(mode)s}$ (kJ/mol)' % vars())
-        ylabel(r'computed $\Delta G_{\rm %(mode)s}$ (kJ/mol)' % vars())
+        xlabel(r'experimental $\Delta G_{{\rm {mode!s}}}$ (kJ/mol)'.format(**vars()))
+        ylabel(r'computed $\Delta G_{{\rm {mode!s}}}$ (kJ/mol)'.format(**vars()))
         if figname:
             savefig(figname)
             logger.info("Wrote plot to %r", figname)

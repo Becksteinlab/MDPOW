@@ -400,8 +400,7 @@ class Gsolv(Journalled):
                 if simulation.solvent_type == solvent:
                     self.solvent_type = simulation.solvent_type
                 else:
-                    errmsg = "Solvent mismatch: simulation was run for %s but Gsolv is set up for %s" % \
-                        (simulation.solvent_type, solvent)
+                    errmsg = "Solvent mismatch: simulation was run for {0!s} but Gsolv is set up for {1!s}".format(simulation.solvent_type, solvent)
                     logger.error(errmsg)
                     raise ValueError(errmsg)
             else:
@@ -413,7 +412,7 @@ class Gsolv(Journalled):
 
             for attr in required_args:
                 if self.__getattribute__(attr) is None:
-                    raise ValueError("A value is required for %(attr)r." % vars())
+                    raise ValueError("A value is required for {attr!r}.".format(**vars()))
 
             # fix struct (issue with qscripts being independent from rest of code)
             if not os.path.exists(self.struct):
@@ -504,7 +503,7 @@ class Gsolv(Journalled):
 
         Typically something like ``VDW/0000``, ``VDW/0500``, ..., ``Coulomb/1000``
         """
-        return os.path.join(self.component_dirs[component], "%04d" % (1000 * lmbda))
+        return os.path.join(self.component_dirs[component], "{0:04d}".format((1000 * lmbda)))
 
     def wdir(self, component, lmbda):
         """Return rooted path to the work directory for *component* and *lmbda*.
@@ -519,7 +518,7 @@ class Gsolv(Journalled):
 
     def tasklabel(self, component, lmbda):
         """Batch submission script name for a single task job."""
-        return self.molecule[:3]+'_'+self.schedules[component].label+"%04d" % (1000 * lmbda)
+        return self.molecule[:3]+'_'+self.schedules[component].label+"{0:04d}".format((1000 * lmbda))
 
     def arraylabel(self, component):
         """Batch submission script name for a job array."""
@@ -606,7 +605,7 @@ class Gsolv(Journalled):
 
         # note that all arguments pertinent to the submission scripts should be in kwargs
         # and have been set in setup() so that it is easy to generate array job scripts
-        logger.info("Preparing %(component)s for lambda=%(lmbda)g" % vars())
+        logger.info("Preparing {component!s} for lambda={lmbda:g}".format(**vars()))
 
         wdir = self.wdir(component, lmbda)
         kwargs.setdefault('couple-intramol', 'no')
@@ -956,18 +955,17 @@ g
             iplot = i+1
             subplot(1, nplots, iplot)
             energy = self.results.DeltaA[component]
-            label = r"$\Delta A^{\rm{%s}}_{\rm{%s}} = %.2f\pm%.2f$ kJ/mol" \
-                    % (component, self.solvent_type, energy.value, energy.error)
+            label = r"$\Delta A^{{\rm{{{0!s}}}}}_{{\rm{{{1!s}}}}} = {2:.2f}\pm{3:.2f}$ kJ/mol".format(component, self.solvent_type, energy.value, energy.error)
             errorbar(x, y, yerr=dy, label=label, **kwargs)
             xlabel(r'$\lambda$')
             legend(loc='best')
             xlim(-0.05, 1.05)
         subplot(1, nplots, 1)
         ylabel(r'$dV/d\lambda$ in kJ/mol')
-        title(r"Free energy difference $\Delta A^{0}_{\rm{%s}}$" % self.solvent_type)
+        title(r"Free energy difference $\Delta A^{{0}}_{{\rm{{{0!s}}}}}$".format(self.solvent_type))
         subplot(1, nplots, 2)
-        title(r"for %s: $%.2f\pm%.2f$ kJ/mol" %
-              ((self.molecule,) + self.results.DeltaA.Helmholtz.astuple()))
+        title(r"for {0!s}: ${1:.2f}\pm{2:.2f}$ kJ/mol".format(*
+              ((self.molecule,) + self.results.DeltaA.Helmholtz.astuple())))
 
 
     def qsub(self, script=None):
@@ -984,7 +982,7 @@ g
             elif script in scripts:
                 s = script
             else:
-                errmsg = "No script matching %(script)r in %(scripts)r" % vars()
+                errmsg = "No script matching {script!r} in {scripts!r}".format(**vars())
                 logger.error(errmsg)
                 raise ValueError(errmsg)
             return s
@@ -996,7 +994,7 @@ g
                 logger.debug("[%s] submitting locally: %s", " ".join(cmd), component)
                 rc = call(cmd)
                 if rc != 0:
-                    errmsg = "submitting job %(s)r failed with rc=%(rc)d" % vars()
+                    errmsg = "submitting job {s!r} failed with rc={rc:d}".format(**vars())
                     logger.error(errmsg)
                     raise OSError(errmsg)
 
@@ -1015,7 +1013,7 @@ g
         raise NotImplementedError
 
     def __repr__(self):
-        return "%s(filename=%r)" % (self.__class__.__name__, self.filename)
+        return "{0!s}(filename={1!r})".format(self.__class__.__name__, self.filename)
 
 class Ghyd(Gsolv):
     """Sets up and analyses MD to obtain the hydration free energy of a solute."""
