@@ -25,6 +25,7 @@ It uses Gromacs (http://www.gromacs.org) for the molecular dynamics
       keywords="science Gromacs analysis 'molecular dynamics'",
       packages=find_packages(exclude=['examples']),
       scripts = ['scripts/mdpow-pow', 
+                 'scripts/mdpow-pcw',
                  'scripts/mdpow-ghyd',
                  'scripts/mdpow-check',
                  'scripts/mdpow-rebuild-fep', 

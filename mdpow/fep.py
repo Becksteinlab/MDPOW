@@ -95,6 +95,7 @@ solvation free energy in octanol there is
 .. autoclass:: Ghyd
 .. autoclass:: Goct
 .. autofunction:: pOW
+.. autofunction:: pCW
 
 
 Developer notes
@@ -1143,6 +1144,66 @@ class Goct(Gsolv):
 
 
 
+def p_transfer(G1, G2, **kwargs):
+    """Compute partition coefficient from two :class:`Gsolv` objects.
+
+       The order determines the direction of transfer: G1 --> G2.
+
+       E.g.: ``G1 = Gwat`` and ``G2 = Goct`` will compute a water-octanol 
+       transfer free energy and a water-octanol partition coefficient.
+
+       transfer free energy from water into octanol
+            DeltaDeltaA0 = DeltaA0_oct - DeltaA0_water
+       water-octanol partition coefficient
+            log P_oct/wat =  log [X]_oct/[X]_wat
+
+    :Arguments:
+       *G1*, *G2*
+           *G1* and *G2* should be two  :class:`Gsolv` instances,
+           order matters.
+       *force*
+           force rereading of data files even if some data were already stored [False]
+       *stride*
+           analyze every *stride*-th datapoint in the dV/dlambda files
+    :Returns: (transfer free energy, log10 of the water-octanol partition coefficient = log Pow)
+    """
+
+    kwargs.setdefault('force', False)
+
+    if G1.molecule != G2.molecule:
+        raise ValueError("The two simulations were done for different molecules.")
+    if G1.Temperature != G2.Temperature:
+        raise ValueError("The two simulations were done at different temperatures.")
+        
+    logger.info("[%s] transfer free energy %s --> %s calculation",
+                G1.molecule, G1.solvent_type, G2.solvent_type)
+    for G in (G1, G2):
+        if kwargs['force']:
+            G.analyze(**kwargs)
+        try:
+            G.results.DeltaA.Gibbs
+            G.logger_DeltaA0()
+        except (KeyError, AttributeError):   # KeyError because results is a AttributeDict
+            logger.warn("Must analyze simulation because no hydration free energy data available...")
+            G.analyze(**kwargs)
+
+    # x.Gibbs are QuantityWithError so they do error propagation
+    transferFE = G2.results.DeltaA.Gibbs - G1.results.DeltaA.Gibbs
+    logPow = -transferFE / (kBOLTZ * G1.Temperature) * numpy.log10(numpy.e)
+
+    molecule = G1.molecule
+    logger.info("[%s] Values at T = %g K", molecule, G1.Temperature)
+    logger.info("[%s] Free energy of transfer %s --> %s: %.3f (%.3f) kJ/mol",
+                molecule,
+                G1.solvent_type, G2.solvent_type,
+                transferFE.value, transferFE.error)
+    logger.info("[%s] log P_%s%s: %.3f (%.3f)",
+                molecule, 
+                G1.solvent_type[0], G2.solvent_type[0],  # initials
+                logPow.value, logPow.error)
+
+    return transferFE, logPow
+
 def pOW(G1, G2, **kwargs):
     """Compute water-octanol partition coefficient from two :class:`Gsolv` objects.
 
@@ -1161,44 +1222,42 @@ def pOW(G1, G2, **kwargs):
            analyze every *stride*-th datapoint in the dV/dlambda files
     :Returns: (transfer free energy, log10 of the water-octanol partition coefficient = log Pow)
     """
+    if G1.solvent_type == "water" and G2.solvent_type == "octanol":
+        args = (G1, G2)
+    elif G1.solvent_type == "octanol" and G2.solvent_type == "water":
+        args = (G2, G1)
+    else:
+        msg = "For pOW need water and octanol simulations but instead got {0} and {1}".format(
+            G1.solvent_type, G2.solvent_type)
+        logger.error(msg)
+        raise ValueError(msg)
+    return p_transfer(*args, **kwargs)
 
-    kwargs.setdefault('force', False)
+def pCW(G1, G2, **kwargs):
+    """Compute water-cyclohexane partition coefficient from two :class:`Gsolv` objects.
 
-    args = (G1, G2)
-    if G1.molecule != G2.molecule:
-        raise ValueError("The two simulations were done for different molecules.")
-    if G1.Temperature != G2.Temperature:
-        raise ValueError("The two simulations were done at different temperatures.")
-    Gsolvs = {}
-    for solv in ('water', 'octanol'):
-        for G in args:
-            if G.solvent_type == solv:
-                Gsolvs[solv] = G
-    if len(Gsolvs) != 2:
-        errmsg = "Supply one octanol and one water solvation "\
-            "energy simulation object; %r were provided." \
-            % [G1.solvent_type, G2.solvent_type]
-        logger.error(errmsg)
-        raise ValueError(errmsg)
+       transfer free energy from water into octanol
+            DeltaDeltaA0 = DeltaA0_cyclohexane - DeltaA0_water
+       water-octanol partition coefficient
+            log P_CW =  log [X]_cyclohexane/[X]_water
 
-    for G in Gsolvs.values():
-        if kwargs['force']:
-            G.analyze(**kwargs)
-        try:
-            G.results.DeltaA.Gibbs
-            G.logger_DeltaA0()
-        except (KeyError, AttributeError):   # KeyError because results is a AttributeDict
-            G.analyze(**kwargs)
-
-    # x.Gibbs are QuantityWithError so they do error propagation
-    transferFE = Gsolvs['octanol'].results.DeltaA.Gibbs - Gsolvs['water'].results.DeltaA.Gibbs
-    logPow = -transferFE / (kBOLTZ * Gsolvs['octanol'].Temperature) * numpy.log10(numpy.e)
-
-    molecule = G1.molecule
-    logger.info("[%s] Values at T = %g K", molecule, Gsolvs['octanol'].Temperature)
-    logger.info("[%s] Free energy of transfer wat --> oct: %.3f (%.3f) kJ/mol",
-                molecule, transferFE.value, transferFE.error)
-    logger.info("[%s] log P_ow: %.3f (%.3f)",
-                molecule, logPow.value, logPow.error)
-
-    return transferFE, logPow
+    :Arguments:
+       *G1*, *G2*
+           *G1* and *G2* should be a :class:`Ghyd` and a :class:`Goct` instance,
+           but order does not matter
+       *force*
+           force rereading of data files even if some data were already stored [False]
+       *stride*
+           analyze every *stride*-th datapoint in the dV/dlambda files
+    :Returns: (transfer free energy, log10 of the water-cyclohexane partition coefficient = log Pcw)
+    """
+    if G1.solvent_type == "water" and G2.solvent_type == "cyclohexane":
+        args = (G1, G2)
+    elif G1.solvent_type == "cyclohexane" and G2.solvent_type == "water":
+        args = (G2, G1)
+    else:
+        msg = "For pCW need water and cyclohexane simulations but instead got {0} and {1}".format(
+            G1.solvent_type, G2.solvent_type)
+        logger.error(msg)
+        raise ValueError(msg)
+    return p_transfer(*args, **kwargs)

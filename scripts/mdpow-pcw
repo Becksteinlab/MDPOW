@@ -5,7 +5,7 @@ Run the free energy analysis for water and cyclohexane in <DIRECTORY>/FEP
 and return the cyclohexane-water partition coefficient log P_cw.
 
 DIRECTORY should contain all the files resulting from running
-``mdpow.fep.Goct.setup()`` and ``mdpow.fep.Goct.setup()`` and the results of
+``mdpow.fep.Ghyd.setup()`` and ``mdpow.fep.Gcylo.setup()`` and the results of
 the MD FEP simulations. It relies on the canonical naming scheme (basically:
 just use the defaults as in the tutorial).
 
@@ -57,7 +57,7 @@ def load_gsolv(directory, **kwargs):
     logger.info("Reading water data %(water)r", files)
     gwat = mdpow.fep.Ghyd(filename=files['water'], basedir=directory, permissive=permissive)
     logger.info("Reading cyclohexane data %(cyclohexane)r", files)
-    gcyc = mdpow.fep.Gcyc(filename=files['cyclohexane'], basedir=directory, permissive=permissive)
+    gcyc = mdpow.fep.Gcyclo(filename=files['cyclohexane'], basedir=directory, permissive=permissive)
     
     return gwat, gcyc
 
@@ -147,7 +147,7 @@ def run_pcw(directory, **kwargs):
     
 
 def auto_plotfile(directory, gsolv):
-    return os.path.join(directory, "dVdl_%s.pdf" % gsolv.molecule)
+    return os.path.join(directory, "dVdl_%s_%s.pdf" % (gsolv.molecule, gsolv.solvent_type))
 
 
 def activate_subplot(numPlot):
