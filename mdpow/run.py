@@ -67,9 +67,15 @@ class MDrunnerSimple(gromacs.run.MDrunner):
 def setupMD(S, protocol, cfg):
     """setup MD simulation *protocol* using the runinput file *cfg*"""
 
+    try:
+        maxwarn = cfg.getint(protocol, "maxwarn")
+    except KeyError:
+        maxwarn = 0
+
     simulation_protocol = S.get_protocol(protocol)
     params = simulation_protocol(runtime=cfg.getfloat(protocol, "runtime"),
                                  qscript=cfg.getlist(protocol, "qscript"),
+                                 maxwarn=maxwarn,
                                  )
     return params
 
