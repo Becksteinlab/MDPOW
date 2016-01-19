@@ -650,10 +650,10 @@ class Gsolv(Journalled):
         kwargs.update(self.schedules[component].mdp_dict)  # sets soft core & lambda0/1 state
         
         # for BAR
-        if feps != None: # feps is only passed as an argument if BAR is desired method, defaults to TI otherwise
-            if feps[0]==None:
+        if feps is not None: # feps is only passed as an argument if BAR is desired method, defaults to TI otherwise
+            if feps[0]isNone:
                 feplambdas = feps[1]
-            elif feps[1]==None:
+            elif feps[1]isNone:
                 feplambdas = feps[0]
             else:
                 feplambdas = "{0} {1}".format(feps[0],feps[1])
