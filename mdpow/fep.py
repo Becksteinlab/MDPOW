@@ -51,28 +51,9 @@ Some notes on how the approach encoded here differs from what others
 
       \Delta A = - (\Delta A_{\mathrm{coul}}(\mathrm{sol}) + \Delta A_{\mathrm{vdw}}(\mathrm{sol}))
 
+- simulations are run as NPT (but make sure to use Langevin dynamics
+  for temperature control)
 
-- Pressure and Volume: Mobley scales the box size with an affine transformation
-  to the density corresponding to the average pressure of the equilibration
-  run. We simply take the last frame from the trajectory (and also assume that
-  the pressure is exactly what we set, namely 1 bar).
-
-  Our protocol could be improved by
-
-  - scaling the box to the average volume obtained from the second half of the
-    simulation. This is potentially more important because the density of the
-    water has an effect on the interactions but we would need to run tests to
-    check how big the effect typically is.
-
-  - correct for difference in pressures between equilibrium
-    :math:`NPT` and FEP :math:`NVT` where the pressure of the last
-    frame is unlikely to be even close to the desired average pressure
-    because pressure fluctuates so much in small systems
-
-  - correcting for the fact that we run FEP at constant volume
-    (i.e. calculate a Helmholtz free energy instead of a Gibbs free
-    energy) --- see :mod:`mdpow.correction` (which is not fully
-    implemented yet)
 
 Example
 -------
@@ -94,6 +75,7 @@ solvation free energy in octanol there is
    :members:
 .. autoclass:: Ghyd
 .. autoclass:: Goct
+.. autoclass:: Gcyclo
 .. autofunction:: pOW
 
 
@@ -260,28 +242,6 @@ class FEPschedule(AttributeDict):
 class Gsolv(Journalled):
     """Simulations to calculate and analyze the solvation free energy.
 
-    The simulations are run at constant volume so this is in fact a Helmholtz
-    solvation free energy, :math:`\Delta A(V)`. To compute the Gibbs solvation free
-    energy (which is the experimental quantity) at the standard state (1 M
-    solution and 1 M in the gas phase, also known as the "Ben-Naim standard
-    state") add a correction term :math:`Delta W(V_{\mathrm{sim}}, v_s)`:
-
-    .. math::
-
-           \Delta G^{*} = \Delta A + \Delta W(V_{\mathrm{sim}}, v_s)
-
-    which depends on simulation cell volume :math:`V_{\mathrm{sim}}` and
-    the volume of the solute :math:`v_s`.  :math:`V_{\mathrm{sim}}` is the
-    constant simulations box volume (taken from the last frame of the
-    equilibrium simulation that is the starting point for the FEP
-    simulations.)
-
-    (We neglect the negligible correction :math:`-kT \ln
-    V_x/V_{\mathrm{sim}} = -kT \ln(1 - v_s/V_{\mathrm{sim}})` where
-    :math:`V_x` is the volume of the system without the solute but the
-    same number of water molecules as in the fully interacting case
-    [see Michael Shirts' Thesis, p82].)
-
     :math:`\Delta A` is computed from the decharging and the
     decoupling step. With our choice of ``lambda=0`` being the fully
     interacting and ``lambda=1`` the non-interacting state, it is computed
@@ -295,6 +255,13 @@ class Gsolv(Journalled):
     phase is the same. (Under the assumption of ideal solution/ideal
     gas behaviour this directly relates to the Ben-Naim 1M/1M standard
     state.)
+
+    (We neglect the negligible correction :math:`-kT \ln
+    V_x/V_{\mathrm{sim}} = -kT \ln(1 - v_s/V_{\mathrm{sim}})` where
+    :math:`V_x` is the volume of the system without the solute but the
+    same number of water molecules as in the fully interacting case
+    [see Michael Shirts' Thesis, p82].)
+
 
     Typical work flow::
 
@@ -314,7 +281,7 @@ class Gsolv(Journalled):
     topdir_default = "FEP"
     dirname_default = os.path.curdir
     solvent_default = "water"
-    method = config.get_configuration("runinput.yml").get("FEP","method")
+    method = config.get_configuration("runinput.yml").get("FEP", "method")
     # TODO: initialize from default cfg
     schedules_default = {'coulomb':
                              FEPschedule(name='coulomb',
@@ -397,10 +364,6 @@ class Gsolv(Journalled):
                the value set in a loaded pickle file. [``False``]
            *stride*
                collect every *stride* data line, see :meth:`Gsolv.collect` [1]
-           *v_solute*
-               solute volume (required for the correction :meth:`DeltaW`); if not
-               provided then we try to compute it from the equilibrium simulation
-               provided in keyword *simulation*.
            *kwargs*
                other undocumented arguments (see source for the moment)
 
@@ -446,7 +409,6 @@ class Gsolv(Journalled):
                 self.struct = struct
                 self.ndx = kwargs.pop('ndx', None)
                 self.solvent_type = solvent
-                self.v_solute = kwargs.pop('v_solute', None)
 
             for attr in required_args:
                 if self.__getattribute__(attr) is None:
@@ -689,45 +651,6 @@ class Gsolv(Journalled):
                           )
         return gromacs.setup.MD(**kwargs)
 
-    def DeltaW(self):
-        """Difference in work between *NPT* and *NVT* to remove a solute cavity.
-
-        .. math::
-
-           \Delta W := \Delta G - \Delta A = W_{NPT} - W_{NVT}
-
-        This correction for the decoupling process can be added to a
-        Helmholtz free energy of decoupling to estimate the Gibbs free
-        energy of decoupling:
-
-        .. math::
-
-          \Delta G = \Delta A + \Delta W
-
-        Our FEP describes a decoupling process *aquaeous (fully
-        coupled)* :math:`rightarrow` *gaseous (decoupled)* whereas the
-        hydration free energy is by convention the process in the
-        opposite direction. Therefore, the correction :math:`\Delta W`
-        for decoupling is *subtracted* from the Helmholtz hydration
-        free energy:
-
-        .. math::
-
-           \Delta G_{\mathrm{hyd}} = -(\Delta A_{\mathrm{decouple}} + \Delta W_{\mathrm{decouple}}) = \Delta A_{\mathrm{hyd}} - \Delta W_{\mathrm{decouple}}
-
-
-        .. warning:: Not implemented at the moment and simply set to 0.
-
-        :Returns: 0 (not implemented)  [in kJ/mol]
-
-        .. SeeAlso:: :func:`mdpow.correction.DeltaW`
-        """
-        # TODO: implement this; currently use 0 to leave the logic in place
-        self.results.DeltaA.DeltaW = QuantityWithError(0,0)  # in kJ/mol
-        logger.warning("DeltaW (NVT->NPT) correction not implemented: uses 0")
-        return self.results.DeltaA.DeltaW
-
-
     def dgdl_xvg(self, *args):
         """Return filename of the dgdl XVG file.
 
@@ -840,7 +763,7 @@ g
             self._corrupted[component] = dict(((l, _lencorrupted(xvg)) for l,xvg in izip(lambdas, xvgs)))
         return numpy.any([x for x in corrupted.values()])
 
-    def analyze(self, p=1.0, force=False, stride=None, autosave=True):
+    def analyze(self, force=False, stride=None, autosave=True):
         """Extract dV/dl from output and calculate dG by TI.
 
         Thermodynamic integration (TI) is performed on the individual
@@ -855,12 +778,6 @@ g
 
         .. math::
             \Delta A* &= -(\Delta A_{\mathrm{coul}} + \Delta A_{\mathrm{vdw}})\\
-            \Delta G* &= \Delta A* - \Delta W
-
-        The second equation corrects for the fact that we want a Gibbs
-        free energy bit really have only simulated at constant volume
-        and thus calculated a Helmholtz free energy; see
-        :meth:`DeltaW` for more details.
 
         Data are stored in :attr:`Gsolv.results`.
 
@@ -897,9 +814,6 @@ g
                        2010. 10.1021/ct900661c.
 
         :Keywords:
-          *p*
-              pressure in bar [1.0]
-              TODO: should be obtained from equilib sim
           *force*
               reload raw data even though it is already loaded
           *stride*
@@ -918,6 +832,8 @@ g
         else:
             logger.info("Analyzing stored data.")
 
+        # TODO: because now do NPT this is really Gibbs free energy
+        #       but I will fix this another time ... [orbeckst] 
         Helmholtz = QuantityWithError(0,0)   # total free energy difference at const V
 
         for component, (lambdas, xvgs) in self.results.xvg.items():
@@ -944,9 +860,8 @@ g
         Helmholtz *= -1
         self.results.DeltaA.Helmholtz = Helmholtz
 
-        # Gibbs energy
-        # TODO:  implement (currently just adds 0)
-        self.results.DeltaA.Gibbs = self.results.DeltaA.Helmholtz + self.DeltaW()
+        # Gibbs energy (note: we run NPT so we already got the Gibbs energy)
+        self.results.DeltaA.Gibbs = self.results.DeltaA.Helmholtz
 
         if autosave:
             self.save()
@@ -964,8 +879,8 @@ g
                  'w' for overwrite or 'a' for append ['w']
 
         Format::
-          .                 ---------- kJ/mol ---------
-          molecule solvent  total  coulomb  vdw  DeltaW
+          .                 ----- kJ/mol ------
+          molecule solvent  total  coulomb  vdw
         """
         with open(filename, mode) as tab:
             tab.write(self.summary() + '\n')
@@ -977,15 +892,15 @@ g
 
         Format::
 
-          .                 ---------- kJ/mol ---------
-          molecule solvent  total  coulomb  vdw  DeltaW
+          .                 ------ kJ/mol -----
+          molecule solvent  total  coulomb  vdw
 
         """
-        fmt = "%-10s %-10s %+8.2f %8.2f  %+8.2f %8.2f  %+8.2f %8.2f  %+8.2f %8.2f"
+        fmt = "%-10s %-14s %+8.2f %8.2f  %+8.2f %8.2f  %+8.2f %8.2f"
         d = self.results.DeltaA
         return fmt % ((self.molecule, self.solvent_type) + \
             d.Gibbs.astuple() +  d.coulomb.astuple() + \
-            d.vdw.astuple() +  d.DeltaW.astuple())
+            d.vdw.astuple())
 
     def logger_DeltaA0(self):
         """Print the free energy contributions (errors in parentheses)."""
@@ -993,7 +908,7 @@ g
             logger.info("No DeltaA free energies computed yet.")
             return
 
-        logger.info("DeltaG0 = -(DeltaA_coul + DeltaA_vdw) + DeltaW")
+        logger.info("DeltaG0 = -(DeltaA_coul + DeltaA_vdw)")
         for component, energy in self.results.DeltaA.items():
             logger.info("[%s] %s solvation free energy (%s) %g (%.2f) kJ/mol",
                         self.molecule, self.solvent_type.capitalize(), component,
