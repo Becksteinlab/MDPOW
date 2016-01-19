@@ -84,41 +84,45 @@ class Journal(object):
         self.__history = []
         self.__incomplete = None
 
-    def current():
-        doc = """Current stage identifier"""
-        def fget(self):
-            return self.__current
-        def fset(self, stage):
-            if not stage in self.stages:
-                raise ValueError("Can only assign a registered stage from %r, not %r" %
-                                 (self.stages, stage))
-            self.__current = stage
-        def fdel(self):
-            self.__current = None
-        return locals()
-    current = property(**current())
+    @property
+    def current(self):
+        """Current stage identifier"""
+        return self.__current
+    
+    @current.setter
+    def current(self, stage):
+        if not stage in self.stages:
+            raise ValueError("Can only assign a registered stage from %r, not %r" %
+                             (self.stages, stage))
+        self.__current = stage
 
-    def incomplete():
-        doc = """This last stage was not completed."""
-        def fget(self):
-            return self.__incomplete
-        def fset(self, stage):
-            if not stage in self.stages:
-                raise ValueError("can only assign a registered stage from %(stages)r" % vars(self))
-            self.__incomplete = stage
-        def fdel(self):
-            self.__incomplete = None
-        return locals()
-    incomplete = property(**incomplete())
+    @current.deleter
+    def current(self):
+        self.__current = None
 
-    def history():
-        doc = """List of stages completed"""
-        def fget(self):
-            return self.__history
-        def fdel(self):
-            self.__history = []
-        return locals()
-    history = property(**history())
+    @property
+    def incomplete(self):
+        """This last stage was not completed."""
+        return self.__incomplete
+
+    @incomplete.setter
+    def incomplete(self, stage):
+        if not stage in self.stages:
+            raise ValueError("can only assign a registered stage from %(stages)r" % vars(self))
+        self.__incomplete = stage
+
+    @incomplete.deleter
+    def incomplete(self):
+        self.__incomplete = None
+
+    @property
+    def history(self):
+        """List of stages completed"""
+        return self.__history
+
+    @history.deleter
+    def history(self):
+        self.__history = []
 
     def completed(self, stage):
         """Record completed stage and reset :attr:`Journal.current`"""
@@ -128,7 +132,7 @@ class Journal(object):
 
     def start(self, stage):
         """Record that *stage* is starting."""
-        if not self.current is None:
+        if self.current is not None:
             errmsg = "Cannot start stage %s because previously started stage %s " \
                 "has not been completed." % (stage, self.current)
             logger.error(errmsg)
