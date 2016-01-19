@@ -87,20 +87,6 @@ Isothermal compressibility
 fluctuation formula and store the value or use a published computed or
 experimental value (stored in :data:`mdpow.tables.kappaT`).
 
-Correction to obtain Gibbs solvation free energy from Helmholtz solvation free energy
--------------------------------------------------------------------------------------
-
-Subtract the correction :func:`\DeltaW` (for decoupling a solute) from
-:math:`\Delta G_{\mathrm{hyd}}`:
-
-.. math:: \Delta G_{\mathrm{hyd}} = \Delta A_{\mathrm{hyd}} - \Delta W_{\mathrm{decouple}}
-
-:math:`\Delta W_{\mathrm{decouple}}` is the difference in work (change
-in free energy) for collapsing a solute-sized cavity in the
-isothermal-isobaric ensemble versus the canonical ensemble:
-
-.. math:: \Delta W = \Delta G - \Delta A = W_{NPT} - W_{NVT}
-
 
 Functions and Classes
 ---------------------
@@ -563,14 +549,4 @@ def kappaT_fluctuations(varN, N, v_solvent, T):
               fluctuations in *NPT* simulations.
     """
     return varN * v_solvent * 1e-27 / (k_Boltzmann * T * N)
-
-def DeltaW(vs, V0, kappa, **kwargs):
-    r"""Lowest order correction for removing a solvent cavity
-
-    .. warning:: Not implemented.
-    """
-    raise NotImplementedError
-    # vs, V0: nm**3
-    #y = -0.5*vs**2/(kappa/bar * V0)
-    #return energyUnit(y, **kwargs)
 
