@@ -15,7 +15,7 @@ None).
 
 Results are *appended* to a data file with **Output file format**::
 
- molecule  DeltaA0(kJ/mol) ErrorDeltaA0   log P_OW  Error logPow wat_ok octa_ok  directory  
+ molecule  DeltaA0(kJ/mol) ErrorDeltaA0  "logPow" log P_OW  Error logPow directory  
 
 molecule
     molecule name as used in the itp
@@ -77,7 +77,7 @@ def run_pow(directory, **kwargs):
         *force*
              force rereading data files [False]
 
-    **Output file format (energies and lo P_ow with errors) :**
+    **Output file format (energies and log P_ow) :**
 
         molecule   DeltaA0(kJ/mol)    log P_OW    directory
 
@@ -88,8 +88,8 @@ def run_pow(directory, **kwargs):
     """
     import gc
 
-    fmt_result = "%-8s %+8.2f %8.2f  %+8.2f %8.2f   %s\n"
-    fmt_energy = "%s  %+8.2f %8.2f   %+8.2f %8.2f  %s\n"
+    fmt_result = "%-8s %+8.2f %8.2f  logPow %+8.2f %8.2f   %s\n"
+    fmt_energy = "%s  %+8.2f %8.2f   logPow %+8.2f %8.2f  %s\n"
     _datastatus = {True: 'BAD',  # suspect file corruption
                    False: 'OK'}
 

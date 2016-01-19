@@ -15,7 +15,7 @@ None).
 
 Results are *appended* to a data file with **Output file format**::
 
- molecule  DeltaA0(kJ/mol) ErrorDeltaA0   log P_CW  Error logPcw wat_ok cyc_ok  directory  
+ molecule  DeltaA0(kJ/mol) ErrorDeltaA0  "logPcw"  log P_CW  Error logPcw   directory  
 
 molecule
     molecule name as used in the itp
@@ -88,8 +88,8 @@ def run_pcw(directory, **kwargs):
     """
     import gc
 
-    fmt_result = "%-8s %+8.2f %8.2f  %+8.2f %8.2f   %s\n"
-    fmt_energy = "%s  %+8.2f %8.2f   %+8.2f %8.2f  %s\n"
+    fmt_result = "%-8s %+8.2f %8.2f  logPcw %+8.2f %8.2f   %s\n"
+    fmt_energy = "%s  %+8.2f %8.2f   logPcw %+8.2f %8.2f  %s\n"
     _datastatus = {True: 'BAD',  # suspect file corruption
                    False: 'OK'}
 
