@@ -119,19 +119,20 @@ class POWConfigParser(object):
         return True
 
     def get(self, section, option):
-        """Return option, unless its "None/NONE/none" --> ``None``,
+        """Return option, unless its "None" --> ``None``,
         
         Conversion to basic python types str, float, int, boolean is
         carried out automatically (unless it was None).
+
+        .. Note:: "none" remains a string, which is essential, see
+                  `Issue 20 <https://github.com/Becksteinlab/MDPOW/issues/20>`_
+
+        .. versionchanged:: 0.6.0
+           Prior versions would convert case-insensitively (e.g. "NONE"
+           and "none")
         """
         value = self.conf[section][option]
-        try:
-            if value.lower() == "none":
-                value = None
-        except AttributeError:
-            pass
-        finally:
-            return value
+        return value if value != "None" else None
 
     # TODO:
     # The YAML parser does automatic conversion: the following
@@ -186,7 +187,7 @@ def get_configuration(filename=None):
     cfg = POWConfigParser()
     cfg.readfp(open(defaults["runinput"]))
     logger.debug("Loaded runinput defaults from %r", defaults["runinput"])
-    if not filename is None:
+    if filename is not None:
         cfg.readfp(open(filename))   # override package defaults
         logger.debug("Loaded user runinput from %r", filename)
     else:
