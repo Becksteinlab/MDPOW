@@ -1111,15 +1111,20 @@ def p_transfer(G1, G2, **kwargs):
     logPow = -transferFE / (kBOLTZ * G1.Temperature) * numpy.log10(numpy.e)
 
     molecule = G1.molecule
+
+    # lower case initials, in reverse order of transfer, e.g.
+    # water -> octanol:      P_ow
+    # water -> cyclohexane:  P_cw
+    coefficient = "P_{0}{1}".format(
+        G2.solvent_type.lower()[0], G1.solvent_type.lower()[0])
+
     logger.info("[%s] Values at T = %g K", molecule, G1.Temperature)
     logger.info("[%s] Free energy of transfer %s --> %s: %.3f (%.3f) kJ/mol",
                 molecule,
                 G1.solvent_type, G2.solvent_type,
                 transferFE.value, transferFE.error)
-    logger.info("[%s] log P_%s%s: %.3f (%.3f)",
-                molecule, 
-                G1.solvent_type[0], G2.solvent_type[0],  # initials
-                logPow.value, logPow.error)
+    logger.info("[%s] log %s: %.3f (%.3f)",
+                molecule, coefficient, logPow.value, logPow.error)
 
     return transferFE, logPow
 
