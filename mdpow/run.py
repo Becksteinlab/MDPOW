@@ -295,10 +295,12 @@ def fep_simulation(cfg, solvent, **kwargs):
     # start pipeline
     if os.path.exists(savefilename):
         S = Simulation(filename=savefilename, basedir=topdir)
+        logger.info("Running FEP with saved settings from %r", savefilename)
+        logger.info("Note: all configuration file options are ignored!")
     else:
 		# method to be used "TI"/"BAR"
-        method = cfg.get("FEP","method")
-        logger.debug("Implementing the %r method, per config file",method)
+        method = cfg.get("FEP", "method")
+        logger.info("Running FEP with the %r implementation in Gromacs", method)
         # custom mdp file
         mdp = cfg.findfile("FEP", "mdp")
         logger.debug("Using [FEP] MDP file %r from config file", mdp)
@@ -311,7 +313,8 @@ def fep_simulation(cfg, solvent, **kwargs):
 
         # Note that we set basedir=topdir (and *not* dirname=dirname!)...FEP is a bit convoluted
         S = Simulation(simulation=equil_S, runtime=cfg.getfloat("FEP", "runtime"),
-                       basedir=topdir, deffnm=deffnm, mdp=mdp, schedules=schedules,method=method)
+                       basedir=topdir, deffnm=deffnm, mdp=mdp, schedules=schedules,
+                       method=method)
     if S.journal.has_not_completed("setup"):
         params = S.setup(qscript=cfg.getlist("FEP", "qscript"),
                          maxwarn=cfg.getint("FEP", "maxwarn"))
