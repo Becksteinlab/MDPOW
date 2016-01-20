@@ -215,7 +215,6 @@ class FEPschedule(AttributeDict):
     @staticmethod
     def load(cfg, section):
         """Initialize a :class:`FEPschedule` from the *section* in the configuration *cfg*"""
-        import ConfigParser
 
         keys = {}
         keys.update(FEPschedule.mdp_keywords)
@@ -282,36 +281,36 @@ class Gsolv(Journalled):
     topdir_default = "FEP"
     dirname_default = os.path.curdir
     solvent_default = "water"
-    method = config.get_configuration("runinput.yml").get("FEP", "method")
-    # TODO: initialize from default cfg
-    schedules_default = {'coulomb':
-                             FEPschedule(name='coulomb',
-                                         description="dis-charging vdw+q --> vdw",
-                                         label='Coul',
-                                         couple_lambda0='vdw-q', couple_lambda1='vdw',
-                                         sc_alpha=0,      # linear scaling for coulomb
-                                         lambdas=[0.0, 0.25, 0.5, 0.75, 1.0],  # default values
-                                         ),
-                         'vdw':
-                             FEPschedule(name='vdw',
-                                         description="decoupling vdw --> none",
-                                         label='VDW',
-                                         couple_lambda0='vdw', couple_lambda1='none',
-                                         sc_alpha=0.5, sc_power=1.0, sc_sigma=0.3, # recommended values
-                                         lambdas=[0.0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6,  # defaults
-                                                  0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1],
-                                         ),
-                         }
     #: Check list of all methods that can be run as an independent protocol; see also
     #: :meth:`Simulation.get_protocol` and :class:`restart.Journal`
     protocols = ["setup", "fep_run"]
+
+    # TODO: initialize from default cfg
+    schedules_default = {'coulomb':
+                         FEPschedule(name='coulomb',
+                                     description="dis-charging vdw+q --> vdw",
+                                     label='Coul',
+                                     couple_lambda0='vdw-q', couple_lambda1='vdw',
+                                     sc_alpha=0,      # linear scaling for coulomb
+                                     lambdas=[0.0, 0.25, 0.5, 0.75, 1.0],  # default values
+                                 ),
+                         'vdw':
+                         FEPschedule(name='vdw',
+                                     description="decoupling vdw --> none",
+                                     label='VDW',
+                                     couple_lambda0='vdw', couple_lambda1='none',
+                                     sc_alpha=0.5, sc_power=1.0, sc_sigma=0.3, # recommended values
+                                     lambdas=[0.0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6,  # defaults
+                                              0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1],
+                                 ),
+                     }
 
     #: Default Gromacs *MDP* run parameter file for FEP.
     #: (The file is part of the package and is found with :func:`mdpow.config.get_template`.)
     mdp_default = 'fep_opls.mdp'
 
 
-    def __init__(self, molecule=None, top=None, struct=None, method="TI", **kwargs):
+    def __init__(self, molecule=None, top=None, struct=None, method="BAR", **kwargs):
         """Set up Gsolv from input files or a equilibrium simulation.
 
         :Arguments:
@@ -349,7 +348,11 @@ class Gsolv(Journalled):
            *simulation*
                Instead of providing the required arguments, obtain the input
                files from a :class:`mdpow.equil.Simulation` instance.
-          *mdp*
+           *method*
+               "TI" for thermodynamic integration or "BAR" for Bennett acceptance
+               ratio; using "BAR" in Gromacs also writes TI data so this is the
+               default.
+           *mdp*
                MDP file name (if no entry then the package defaults are used)
            *filename*
                Instead of providing the required arguments, load from pickle
@@ -381,11 +384,16 @@ class Gsolv(Journalled):
         """
         required_args = ('molecule', 'top', 'struct')
 
+        # should this be below somewhere?
+        if not method in ("TI", "BAR"):
+            raise ValueError("method can only be TI or BAR")
+        self.method = method
+
         filename = kwargs.pop('filename', None)
         basedir = kwargs.pop('basedir', os.path.curdir)  # all other dirs relative to basedir
         simulation = kwargs.pop('simulation', None)
         solvent = kwargs.pop('solvent', self.solvent_default)
-        if (None in (molecule, top, struct) and simulation is None) and not filename is None:
+        if (None in (molecule, top, struct) and simulation is None) and filename is not None:
             # load from pickle file
             self.load(filename)
             self.filename = filename
@@ -556,7 +564,7 @@ class Gsolv(Journalled):
         .. SeeAlso:: :func:`gromacs.setup.MD` and
                      :func:`gromacs.qsub.generate_submit_scripts`
 
-        .. versionchanged:; 0.6.0
+        .. versionchanged:: 0.6.0
            Gromacs now uses option ``-dhdl`` instead of ``-dgdl``.
         """
         self.journal.start('setup')
@@ -577,13 +585,16 @@ class Gsolv(Journalled):
         for component, lambdas in self.lambdas.items():
             if self.method == "TI":
                 for l in lambdas:
-                    params = self._setup(component, l, None, **kwargs)   # set up gromacs job for each FEP window in TI
+                    # set up gromacs job for each FEP window in TI
+                    params = self._setup(component, l, **kwargs)
             elif self.method == "BAR":
                 xlambdas = [None] + list(lambdas) + [None]
-                feps = []
                 for l in lambdas:
-                    feps = [xlambdas[xlambdas.index(l)-1],xlambdas[xlambdas.index(l)+1]]
-                    params = self._setup(component, l, feps=feps, **kwargs) # set up gromacs job for each FEP window in BAR
+                    foreign_lambdas = [xlambdas[xlambdas.index(l) - 1],
+                                       xlambdas[xlambdas.index(l) + 1]]
+                    # set up gromacs job for each FEP window in BAR
+                    params = self._setup(component, l, 
+                                         foreign_lambdas=foreign_lambdas, **kwargs)
             else:
                 raise ValueError("Unknown method {}".format(self.method))
                     
@@ -598,10 +609,10 @@ class Gsolv(Journalled):
         self.save(self.filename)
         logger.info("Saved state information to %r; reload later with G = %r.", self.filename, self)
         logger.info("Finished setting up all individual simulations. Now run them...")
-        params.pop('struct',None)   # scrub window-specific params
+        params.pop('struct', None)   # scrub window-specific params
         return params
 
-    def _setup(self, component, lmbda, feps=None, **kwargs):
+    def _setup(self, component, lmbda, foreign_lambdas=None, **kwargs):
         """Prepare the input files for an individual Gromacs runs."""
 
         # note that all arguments pertinent to the submission scripts should be in kwargs
@@ -610,17 +621,21 @@ class Gsolv(Journalled):
 
         wdir = self.wdir(component, lmbda)
         kwargs.setdefault('couple-intramol', 'no')
+
+        ### XXX Issue 20: if an entry is None then the dict will not be updated:
+        ###     I *must* keep "none" as a legal string value
         kwargs.update(self.schedules[component].mdp_dict)  # sets soft core & lambda0/1 state
         
         # for BAR
-        if feps is not None: 
-            # feps is only passed as an argument if BAR is desired method, defaults to TI otherwise
-            if feps[0] is None:
-                feplambdas = feps[1]
-            elif feps[1] is None:
-                feplambdas = feps[0]
+        if foreign_lambdas is not None: 
+            # foreign_lambdas is only passed as an argument if BAR is 
+            # desired method, defaults to TI otherwise
+            if foreign_lambdas[0] is None:
+                feplambdas = foreign_lambdas[1]
+            elif foreign_lambdas[1] is None:
+                feplambdas = foreign_lambdas[0]
             else:
-                feplambdas = "{0} {1}".format(feps[0], feps[1])
+                feplambdas = "{0} {1}".format(foreign_lambdas[0], foreign_lambdas[1])
             
             kwargs.update(dirname=wdir, struct=self.struct, top=self.top,
                           mdp=self.mdp,
