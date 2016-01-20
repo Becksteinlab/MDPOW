@@ -55,22 +55,24 @@ import mdpow.filelock
 import logging
 logger = logging.getLogger('mdpow')
 
-suffix = {'cyclohexane':'cyclo'
-          ,'water':'hyd'
-          ,'octanol':'oct'}
+suffix = {'water':'hyd',
+          'octanol':'oct',
+          'cyclohexane':'cyclo'
+      }
 
 def load_gsolv(solvent, directory, **kwargs):
     FEPdir = os.path.join(directory, "FEP")
 
-    files = {solvent: os.path.join(FEPdir, solvent, 'G{}.fep'.format(suffix[solvent])),
-             }
+    files = {solvent: os.path.join(FEPdir, solvent, 
+                                   'G{0}.fep'.format(suffix[solvent])),
+         }
     files_not_found = dict(((solv,fn) for solv,fn in files.items()
                             if not os.path.exists(fn)))
     if len(files_not_found) > 0:
         raise OSError("Missing input files: %r" % files_not_found)
 
     permissive = kwargs.pop('permissive', False)
-    logger.info("[%s] Reading {} data %r".format(solvent), directory, files[solvent])
+    logger.info("[%s] Reading {0} data %r".format(solvent), directory, files[solvent])
     return mdpow.fep.Gsolv(filename=files[solvent], basedir=directory, permissive=permissive)
 
 def run_gsolv(solvent, directory, **kwargs):
@@ -136,7 +138,7 @@ def run_gsolv(solvent, directory, **kwargs):
         clf()
         gsolv.plot(color='k', ls='--')
         activate_subplot(1)
-        title(r"[%s] \Delta G")
+        title(r"[{0}] $\Delta G$".format(gsolv.molecule))
         activate_subplot(2)
         savefig(plotfile)
         logger.info("Wrote graph to %(plotfile)r", vars())
