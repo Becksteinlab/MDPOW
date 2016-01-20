@@ -38,8 +38,8 @@ source_suffix = '.txt'
 master_doc = 'index'
 
 # General information about the project.
-project = u'MDpow'
-copyright = u'2010–2013, Oliver Beckstein and Bogdan Iorga'
+project = u'MDPOW'
+copyright = u'2010–2016, Ian Kenney, Bogdan Iorga, and Oliver Beckstein'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -162,7 +162,7 @@ html_static_path = ['_static']
 #html_file_suffix = ''
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'MDpowdoc'
+htmlhelp_basename = 'MDPOWdoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -177,7 +177,7 @@ htmlhelp_basename = 'MDpowdoc'
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
   ('index', 'MDpow.tex', u'MDpow Documentation',
-   u'Oliver Beckstein and Bogdan Iorga', 'manual'),
+   u'Ian Kenney, Bogdan Iorga, and Oliver Beckstein', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -206,8 +206,9 @@ latex_documents = [
 intersphinx_mapping = {'http://docs.python.org/': None,
                        'http://docs.scipy.org/doc/numpy/': None,
                        'http://docs.scipy.org/doc/scipy/reference/': None,
-                       'http://orbeckst.github.io/RecSQL/': None,
-                       'http://orbeckst.github.io/GromacsWrapper/': None}
+                       'http://recsql.readthedocs.org/en/latest/': None,
+                       'http://gromacswrapper.readthedocs.org/en/latest/': None,
+                   }
 
 
 

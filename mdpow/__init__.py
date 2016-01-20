@@ -530,9 +530,9 @@ def create_logger(logfile="mdpow.log"):
 def log_banner():
     """Log program name and licence at INFO level."""
     logger.info("MDPOW %s starting.", get_version())
-    logger.info("Copyright (c) 2010-2014 Oliver Beckstein and Bogdan Iorga")
+    logger.info("Copyright (c) 2010-2016 Ian Kenney, Bogdan Iorga, and Oliver Beckstein")
     logger.info("Released under the GNU Public Licence, version 3.")
-    logger.info("Contact the authors for bug reports or questions about licensing.")
+    logger.info("For bug reports and help: https://github.com/Becksteinlab/MDPOW/issues")
 
 logger = create_logger()
 log_banner()
@@ -543,9 +543,4 @@ import config
 N_AVOGADRO = 6.02214179e23
 #: Boltzmann's constant |kB| in kJ mol^-1 (`kB NIST value`_).
 kBOLTZ = 1.3806504e-23 *1e-3 * N_AVOGADRO
-
-
-# commented out so that one can get at version without importing
-# GromacsWrapper etc
-#import fep, equil
 

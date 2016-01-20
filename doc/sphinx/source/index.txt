@@ -1,27 +1,37 @@
 .. MDpow documentation master file, created by
    sphinx-quickstart on Wed Mar 24 13:28:55 2010.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
 
-MDpow documentation
-===================
-
-*MDpow* is a python package that automates the calculation of
-solvation free energies via molecular dynamics (MD) simulations. In
-particular, it facilitates the computation of *water-octanol partition
-coefficients* (|Pow|).
-
-The package is built on top of the `GromacsWrapper`_ framework (which
-can be automatically installed).
-
-.. _GromacsWrapper: http://orbeckst.github.io/GromacsWrapper/
+.. Common replacements for MDPOW docs
+..
 .. |Pow| replace:: *P*\ :sub:`OW`
 .. |P_OW| replace:: *P*\ :sub:`OW`
 .. |POW|  replace:: *P*\ :sub:`OW`
 .. |P_ow| replace:: *P*\ :sub:`OW`
+.. |P_cw| replace:: *P*\ :sub:`CW`
 
+MDPOW documentation
+===================
 
-Contents:
+*MDPOW* is a python package that automates the calculation of
+solvation free energies via molecular dynamics (MD) simulations. In
+particular, it facilitates the computation of partition coeffcients. Currently implemented:
+
+- *water-octanol* partition coefficient (|P_ow|)
+- *water-cyclohexane* partition coefficient (|P_cw|)
+
+Calculations are performed with the Gromacs_ MD software
+package [#GromacsWrapper]_. Currently, *OPLS-AA force field* parameters are supported.
+
+As *input*, the user only needs to provide a structure file (PDB or
+GRO) and a Gromacs ITP file containing the parametrization of the
+small molecule (e.g. from LigandBook_ or ParamChem_).
+
+.. _Gromacs: http://www.gromacs.org
+.. _GromacsWrapper: http://gromacswrapper.readthedocs.org/en/latest/
+.. _LigandBook: http://ligandbook.icsn.cnrs-gif.fr/
+.. _ParamChem: https://cgenff.paramchem.org/
+
+.. rubric:: Contents:
 
 .. toctree::
    :maxdepth: 2
@@ -31,10 +41,15 @@ Contents:
    scripts
    equil
    fep
-   correction
    analysis
    utilities      
    tables
+
+.. rubric:: Footnotes
+
+.. [#GromacsWrapper] The package is built on top of the `GromacsWrapper`_
+                     framework (which is automatically installed).
+
 
 Indices and tables
 ==================
