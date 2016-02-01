@@ -1071,10 +1071,26 @@ def p_transfer(G1, G2, **kwargs):
        E.g.: ``G1 = Gwat`` and ``G2 = Goct`` will compute a water-octanol 
        transfer free energy and a water-octanol partition coefficient.
 
-       transfer free energy from water into octanol
+       transfer free energy from water into octanol::
+
             DeltaDeltaA0 = DeltaA0_oct - DeltaA0_water
-       water-octanol partition coefficient
+
+       water-octanol partition coefficient::
+
             log P_oct/wat =  log [X]_oct/[X]_wat
+
+    .. note:: 
+
+       The partition coefficient corresponds to a transfer in the *opposite*
+       direction compared to the free energy difference computed here. For
+       instance, ``log P_oct/water`` is related to the free energy of transfer
+       from octanol to water, ``Delta G_water - Delta G_oct``. ``log
+       P_oct/water < 0`` means that the water phase is preferred, i.e. the
+       probability to find the solute in octanol is *smaller* than the
+       probability to find it in the water phase, or in other words, the
+       hydration free energy ``Delta G_water`` is smaller (more negative) than
+       the octanol solvation free energy ``Delta G_oct``.
+         
 
     :Arguments:
        *G1*, *G2*
@@ -1085,6 +1101,7 @@ def p_transfer(G1, G2, **kwargs):
        *stride*
            analyze every *stride*-th datapoint in the dV/dlambda files
     :Returns: (transfer free energy, log10 of the water-octanol partition coefficient = log Pow)
+
     """
 
     kwargs.setdefault('force', False)
@@ -1108,6 +1125,8 @@ def p_transfer(G1, G2, **kwargs):
 
     # x.Gibbs are QuantityWithError so they do error propagation
     transferFE = G2.results.DeltaA.Gibbs - G1.results.DeltaA.Gibbs
+    # note minus sign, with our convention of the free energy difference to be
+    # opposite to the partition coefficient.
     logPow = -transferFE / (kBOLTZ * G1.Temperature) * numpy.log10(numpy.e)
 
     molecule = G1.molecule
@@ -1131,9 +1150,12 @@ def p_transfer(G1, G2, **kwargs):
 def pOW(G1, G2, **kwargs):
     """Compute water-octanol partition coefficient from two :class:`Gsolv` objects.
 
-       transfer free energy from water into octanol
+    transfer free energy from water into octanol::
+
             DeltaDeltaA0 = DeltaA0_oct - DeltaA0_water
-       water-octanol partition coefficient
+
+    octanol/water partition coefficient::
+
             log P_oct/wat =  log [X]_oct/[X]_wat
 
     :Arguments:
@@ -1144,7 +1166,8 @@ def pOW(G1, G2, **kwargs):
            force rereading of data files even if some data were already stored [False]
        *stride*
            analyze every *stride*-th datapoint in the dV/dlambda files
-    :Returns: (transfer free energy, log10 of the water-octanol partition coefficient = log Pow)
+
+    :Returns: (transfer free energy, log10 of the octanol/water partition coefficient = log Pow)
     """
     if G1.solvent_type == "water" and G2.solvent_type == "octanol":
         args = (G1, G2)
@@ -1160,20 +1183,24 @@ def pOW(G1, G2, **kwargs):
 def pCW(G1, G2, **kwargs):
     """Compute water-cyclohexane partition coefficient from two :class:`Gsolv` objects.
 
-       transfer free energy from water into octanol
+    transfer free energy from water into cyclohexane::
+
             DeltaDeltaA0 = DeltaA0_cyclohexane - DeltaA0_water
-       water-octanol partition coefficient
+
+    cyclohexane/water partition coefficient::
+
             log P_CW =  log [X]_cyclohexane/[X]_water
 
     :Arguments:
        *G1*, *G2*
-           *G1* and *G2* should be a :class:`Ghyd` and a :class:`Goct` instance,
+           *G1* and *G2* should be a :class:`Ghyd` and a :class:`Gcyclo` instance,
            but order does not matter
        *force*
            force rereading of data files even if some data were already stored [False]
        *stride*
            analyze every *stride*-th datapoint in the dV/dlambda files
-    :Returns: (transfer free energy, log10 of the water-cyclohexane partition coefficient = log Pcw)
+
+    :Returns: (transfer free energy, log10 of the cyclohexane/water partition coefficient = log Pcw)
     """
     if G1.solvent_type == "water" and G2.solvent_type == "cyclohexane":
         args = (G1, G2)
