@@ -77,7 +77,7 @@ tau_t                    = 0.1
 tc-grps                  = System
 ref_t                    = 300
 
-Pcoupl                   = Berendsen
+Pcoupl                   = parrinello-rahman
 Pcoupltype               = isotropic
 tau_p                    = 1.0
 compressibility          = 4.6e-5
