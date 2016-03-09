@@ -77,7 +77,7 @@ tau_t                    = 0.1
 tc-grps                  = System
 ref_t                    = 300
 
-Pcoupl                   = parrinello-rahman
+Pcoupl                   = Parrinello-Rahman
 Pcoupltype               = isotropic
 tau_p                    = 1.0
 compressibility          = 4.6e-5
@@ -87,7 +87,6 @@ refcoord_scaling         = No
 
 
 ; GENERATE VELOCITIES FOR STARTUP RUN
-gen_vel                  = yes
 gen-temp                 = 300
 gen_seed                 = 173545
 
