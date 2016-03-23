@@ -84,7 +84,11 @@ Tcoupl                   = no
 tau_t                    = 0.1
 tc-grps                  = System
 ref_t                    = 300
-Pcoupl                   = no
+Pcoupl                   = parrinello-rahman
+Pcoupltype		 = isotropic
+tau_p			 = 1.0
+compressibility		 = .000045
+ref_p			 = 1.0
 
 ; GENERATE VELOCITIES FOR STARTUP RUN
 gen_vel                  = yes

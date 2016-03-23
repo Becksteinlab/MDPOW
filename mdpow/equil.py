@@ -85,6 +85,8 @@ class Simulation(Journalled):
     #: the protocol; the later the better. The values are keys into :attr:`Simulation.files`.
     coordinate_structures = ('solvated', 'energy_minimized', 'MD_relaxed',
                              'MD_restrained', 'MD_NPT')
+    checkpoints = ('solvated','energy_minimized','MD_relaxed','MD_restrained','MD_NPT')
+    
 
     #: Check list of all methods that can be run as an independent protocol; see also
     #: :meth:`Simulation.get_protocol` and :class:`restart.Journal`
@@ -164,9 +166,15 @@ class Simulation(Journalled):
                 self.dirs.includes.append(self.dirs.topology)
 
             self.solvent_type = solvent
+
+            distance = kwargs.pop('distance')
+
+            if distance is None:
+                distance = DIST[solvent]
+
             try:
                 self.solvent = AttributeDict(itp=ITP[solvent], box=BOX[solvent],
-                                             distance=DIST[solvent])
+                                             distance=distance)
             except KeyError:
                 raise ValueError("solvent must be one of %r" % ITP.keys())
 
@@ -499,6 +507,7 @@ class Simulation(Journalled):
         """
         # user structure or relaxed or restrained or solvated
         kwargs.setdefault('struct', self.get_last_structure())
+        kwargs.setdefault('t',self.get_last_checkpoint()) # Pass checkpoint file from md_relaxed
         kwargs.setdefault('mdp', self.mdp['MD_NPT'])
         return self._MD('MD_NPT', **kwargs)
 
@@ -520,6 +529,12 @@ class Simulation(Journalled):
     def get_last_structure(self):
         """Returns the coordinates of the most advanced step in the protocol."""
         return self._lastnotempty([self.files[name] for name in self.coordinate_structures])
+
+    def get_last_checkpoint(self):
+        """Returns the checkpoint of the most advanced step in the protocol.
+        Relies on md.gro being present from previous simulation, assumes that checkpoint is then present.
+        """
+        return self._lastnotempty([self.files[name] for name in self.checkpoints]).replace('.gro','.cpt')
 
 class WaterSimulation(Simulation):
     """Equilibrium MD of a solute in a box of water."""
