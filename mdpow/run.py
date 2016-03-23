@@ -198,8 +198,12 @@ def equilibrium_simulation(cfg, solvent, **kwargs):
     else:
         # custom mdp files
         mdpfiles = get_mdp_files(cfg, Simulation.protocols)
+        try:
+            distance = cfg.get('setup','distance') 
+        except KeyError:
+            distance = None # if no distance is specified, None = default
         S = Simulation(molecule=cfg.get("setup", "molecule"),
-                       dirname=dirname, deffnm=deffnm, mdp=mdpfiles)
+                       dirname=dirname, deffnm=deffnm, mdp=mdpfiles,distance=distance)
 
     if S.journal.has_not_completed("energy_minimize"):
         maxwarn = cfg.getint("setup", "maxwarn") or None

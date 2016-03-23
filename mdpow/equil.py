@@ -166,9 +166,15 @@ class Simulation(Journalled):
                 self.dirs.includes.append(self.dirs.topology)
 
             self.solvent_type = solvent
+
+            distance = kwargs.pop('distance')
+
+            if distance is None:
+                distance = DIST[solvent]
+
             try:
                 self.solvent = AttributeDict(itp=ITP[solvent], box=BOX[solvent],
-                                             distance=DIST[solvent])
+                                             distance=distance)
             except KeyError:
                 raise ValueError("solvent must be one of %r" % ITP.keys())
 
