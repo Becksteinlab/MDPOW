@@ -86,7 +86,7 @@ tc-grps                  = System
 ref_t                    = 300.0
 Pcoupl                   = Parrinello-Rahman
 Pcoupltype               = isotropic
-compressibility          = 0.000045
+compressibility          = 4.6e-5
 tau_p                    = 1.0
 ref_p                    = 1.0
 

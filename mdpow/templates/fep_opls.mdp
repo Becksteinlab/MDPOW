@@ -87,7 +87,7 @@ ref_t                    = 300
 Pcoupl                   = parrinello-rahman
 Pcoupltype		 = isotropic
 tau_p			 = 1.0
-compressibility		 = .000045
+compressibility		 = 4.6e-5
 ref_p			 = 1.0
 
 ; GENERATE VELOCITIES FOR STARTUP RUN
