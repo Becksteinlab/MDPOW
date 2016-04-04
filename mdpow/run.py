@@ -180,7 +180,7 @@ def equilibrium_simulation(cfg, solvent, **kwargs):
     try:
         Simulation = Simulations[solvent]
     except KeyError:
-        raise ValueError("solvent must be 'water' or 'octanol'")
+        raise ValueError("solvent must be 'water','octanol', or 'cyclohexane'")
 
     # generate a canonical path under dirname
     topdir = kwargs.get("dirname", None)

@@ -1,8 +1,6 @@
 ; Gromacs mdp file
-; Template for MD Hydration FEP with OPLS-AA (part of POW)
-;
-; grompp -pp -c ../../../MD_POSRES/md.gro -p ../../../top/system.top -f fep_opls.mdp -o md.tpr
-
+; Template for MD in NPT with OPLS-AA (part of POW)
+; (isotropic P, T via Langevin dynamics)
 
 include                  = 
 define                   = 
@@ -12,19 +10,19 @@ tinit                    = 0.0
 dt                       = 0.002
 nsteps                   = 2500000
 
-nstxout                  = 5000
-nstvout                  = 5000
+nstxout                  = 50000
+nstvout                  = 50000
 nstfout                  = 0
 ; Output frequency for energies to log file and energy file
 nstlog                   = 500
 nstenergy                = 200
 ; Output frequency and precision for xtc file
-nstxtcout                = 250
+nstxtcout                = 500
 xtc-precision            = 1000
 
 
 comm-mode                = Linear
-nstcomm                  = 100
+nstcomm                  = 1000
 comm-grps                = SYSTEM
 
 ; Selection of energy groups
@@ -73,22 +71,20 @@ epsilon_surface          = 0
 optimize_fft             = yes
 
 ; OPTIONS FOR WEAK COUPLING ALGORITHMS
-; Temperature coupling (use Langevin for free energy calculations, see
-; Mobley and Shirt papers)
+; Temperature coupling (use Langevin)
 Tcoupl                   = no
-; Note that we have the SD integrator AND set bd_fric=0 hence the
-; friction coefficient is particle-dependent: mass/tau_t
-; (There wasn't really a compelling reason for doing this instead of
-; setting bd_fric = 10 apart from the fact that bd_fric=0/tau_t=0.1
-; was the default setting in Gromacs. -- OB 2011-06-29)
 tau_t                    = 0.1
 tc-grps                  = System
 ref_t                    = 300
-Pcoupl                   = parrinello-rahman
-Pcoupltype		 = isotropic
-tau_p			 = 1.0
-compressibility		 = 4.6e-5
-ref_p			 = 1.0
+
+Pcoupl                   = Berendsen
+Pcoupltype               = isotropic
+tau_p                    = 1.0
+compressibility          = 4.6e-5
+ref_p                    = 1.0
+; Scaling of reference coordinates, No, All or COM
+refcoord_scaling         = No
+
 
 ; GENERATE VELOCITIES FOR STARTUP RUN
 gen_vel                  = yes
@@ -98,40 +94,9 @@ gen_seed                 = 173545
 ; Generate a random starting seed for Langevin
 ; (required for restarts, according to the manual)
 ld_seed                  = -1
-; Brownian dynamics friction coefficient [amu/ps]. When bd_fric=0, the friction
-; coefficient for each particle is calculated as mass/tau_t.
-bd_fric                  =  0
 
 ; OPTIONS FOR BONDS    
 constraints              = h-bonds
 constraint-algorithm     = Lincs
-lincs-order              = 12
+lincs-order              = 4
 lincs-iter               = 1
-
-; Free energy control stuff
-free_energy              = yes
-init_lambda              = 0.0
-delta_lambda             = 0
-sc_alpha                 = 0.5
-sc-power                 = 1.0
-sc-sigma                 = 0.3 
-
-; for decoupling
-couple-moltype = SOLUTE
-
-; decharging free energy
-;    couple-lambda0 = vdw-q
-;    couple-lambda1 = vdw
-; LJ decoupling free energy
-;    couple-lambda0 = vdw
-;    couple-lambda1 = none
-;
-; fully coupled (change for FEP!)
-couple-lambda0 = vdw-q
-couple-lambda1 = vdw-q
-
-
-; no = decoupling (intra-molecular interactions remain)
-; yes = annihilation (all selected interactions are removed)
-; An additional vacuum simulation is required for 'yes'.
-couple-intramol = no
