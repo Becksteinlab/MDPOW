@@ -1,12 +1,9 @@
-from unittest import TestCase
-from nose.tools import assert_in, assert_equal
-
 import numpy as np
 from numpy.testing import assert_array_almost_equal
 
 import mdpow
 
-class TestAlteredConfig(TestCase):
+class TestAlteredConfig:
     params_altered = {
         'DEFAULT':
             {
@@ -81,7 +78,7 @@ class TestAlteredConfig(TestCase):
             }
     }
 
-    def setUp(self):
+    def setup(self):
     # load default bundled configuration
         self.cfg = mdpow.config.get_configuration('test_configurations/altered_runinput.yml')
 
@@ -92,7 +89,7 @@ class TestAlteredConfig(TestCase):
                 parsed = np.array([float(x.strip()) for x in self.cfg.get(section,k).split(",")])
                 assert_array_almost_equal(parsed, section_dict[k],err_msg="mismatch in lambdas")
             else:
-                assert_equal(self.cfg.get(section,k), section_dict[k],msg="mismatch in {}:{}".format(section,k))
+                assert self.cfg.get(section,k) == section_dict[k], "mismatch in {}:{}".format(section,k)
 
     def test_DEFAULT(self):
         return self._test_section("DEFAULT")

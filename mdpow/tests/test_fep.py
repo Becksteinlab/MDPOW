@@ -1,13 +1,10 @@
-from unittest import TestCase
-from nose.tools import assert_in, assert_equal
-
 import numpy as np
 from numpy.testing import assert_array_almost_equal
 
 import mdpow
 import mdpow.fep
 
-class TestFEPschedule(TestCase):
+class TestFEPschedule:
     reference = {
         'VDW':
         {'couple_lambda0': 'vdw',
@@ -32,7 +29,7 @@ class TestFEPschedule(TestCase):
          'sc_sigma': 0.3}
     }
 
-    def setUp(self):
+    def setup(self):
         # load default bundled configuration
         self.cfg = mdpow.config.get_configuration()
 
@@ -48,18 +45,16 @@ class TestFEPschedule(TestCase):
         reference = self.reference[component]
 
         for k in schedule:
-            assert_in(k, reference, msg="additional entry {0} in runinput.yml".format(k))
+            assert k in reference, "additional entry {0} in runinput.yml".format(k)
 
         for k in reference:
-            assert_in(k, schedule, msg="missing entry {0} in runinput.yml".format(k))
+            assert k in schedule, "missing entry {0} in runinput.yml".format(k)
 
         for k in schedule.keys():
             if k == "lambdas":
                 assert_array_almost_equal(schedule[k], reference[k],
                                           err_msg="FEP schedule {0} mismatch".format(k))
             else:
-                assert_equal(schedule[k], reference[k],
-                             msg=("mismatch between loaded FEP schedule entry {0} "
-                                  "and reference".format(k)))
+                assert schedule[k] == reference[k], "mismatch between loaded FEP schedule entry {0} and reference".format(k)
 
 
