@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 
 # Dynamically calculate the version based on VERSION.
 # version = __import__('mdpow').get_version()
-version = 0.6.0 # dynamic calculation breaks clean installation
+version = '0.6.0' # dynamic calculation breaks clean installation
 setup(name="POW",
       version=version,
       description="A library for computing octanol/water partitioning coefficients",
