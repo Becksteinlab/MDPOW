@@ -80,7 +80,7 @@ class TestAlteredConfig:
 
     def setup(self):
     # load default bundled configuration
-        self.cfg = mdpow.config.get_configuration('test_configurations/altered_runinput.yml')
+        self.cfg = mdpow.config.get_configuration('mdpow/tests/test_configurations/altered_runinput.yml')
 
     def _test_section(self,section):
         section_dict = self.params_altered[section]
