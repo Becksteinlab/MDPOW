@@ -39,7 +39,7 @@ install:
 
 # run tests
 script: 
-  - py.test --cov mdpow --pep8 mdpow
+  - py.test --cov mdpow/tests --pep8 mdpow/tests
 
 after_success:
   - codecov
