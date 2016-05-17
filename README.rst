@@ -2,6 +2,8 @@
  README for MDPOW
 =================== 
 
+|build| |cov|
+
 .. |P_ow| replace:: *P*\ :sub:`OW`
 .. |P_cw| replace:: *P*\ :sub:`CW`
 
@@ -25,6 +27,7 @@ small molecule (e.g. from LigandBook_ or ParamChem_).
 .. _GromacsWrapper: http://gromacswrapper.readthedocs.org/en/latest/
 .. _LigandBook: http://ligandbook.icsn.cnrs-gif.fr/
 .. _ParamChem: https://cgenff.paramchem.org/
+
 
 
 Installation
@@ -53,3 +56,13 @@ Footnotes
 
 .. [#GromacsWrapperNote] The package is built on top of the GromacsWrapper_
                          framework (which is automatically installed).
+
+.. |build| image:: https://travis-ci.org/Becksteinlab/MDPOW.svg?branch=develop
+   :alt: Build Status
+   :target: https://travis-ci.org/Becksteinlab/MDPOW
+
+.. |cov| image:: https://codecov.io/github/Becksteinlab/MDPOW/coverage.svg?branch=develop
+   :alt: Coverage Status
+   :target: https://codecov.io/github/Becksteinlab/MDPOW?branch=develop
+
+   
