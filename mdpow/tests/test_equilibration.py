@@ -10,7 +10,6 @@ gromacs.environment.flags['capture_output'] = True
 class TestEquilibration(object):
     sim_filename = ".simulation"
     sims = {"water": mdpow.equil.WaterSimulation,  "octanol":mdpow.equil.OctanolSimulation, "cyclohexane":mdpow.equil.CyclohexaneSimulation}
-    #sims = {"water": mdpow.equil.WaterSimulation}
     
     def setup(self):
         self.basedir = os.getcwd()
