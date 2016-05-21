@@ -11,7 +11,7 @@ class TestEquilibration(object):
     sims = {"water": mdpow.equil.WaterSimulation,  
             "octanol":mdpow.equil.OctanolSimulation, 
             "cyclohexane":mdpow.equil.CyclohexaneSimulation}
-    
+
     def setup(self):
         self.basedir = os.getcwd()
         self.directory_name = tempfile.mkdtemp()
