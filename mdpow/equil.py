@@ -56,7 +56,7 @@ logger = logging.getLogger('mdpow.equil')
 
 
 #: minimum distance between solute and box surface (in nm)
-DIST = {'water': 1.0, 'octanol': 1.5,'cyclohexane':1.5}
+DIST = {'water': 1.2, 'octanol': 1.5,'cyclohexane':1.5}
 
 
 class Simulation(Journalled):
