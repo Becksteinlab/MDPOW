@@ -6,10 +6,11 @@ import mdpow.run
 import gromacs.environment
 gromacs.environment.flags['capture_output'] = True
 
-
 class TestEquilibration(object):
     sim_filename = ".simulation"
-    sims = {"water": mdpow.equil.WaterSimulation,  "octanol":mdpow.equil.OctanolSimulation, "cyclohexane":mdpow.equil.CyclohexaneSimulation}
+    sims = {"water": mdpow.equil.WaterSimulation,  
+            "octanol":mdpow.equil.OctanolSimulation, 
+            "cyclohexane":mdpow.equil.CyclohexaneSimulation}
     
     def setup(self):
         self.basedir = os.getcwd()
@@ -28,7 +29,7 @@ class TestEquilibration(object):
             W.solvate(struct="benzene.pdb")
             W.energy_minimize()
             W.MD_relaxed()
-            mdrun = mdpow.run.MDrunnerSimple(dirname="/".join([self.directory_name,"Equilibrium",k,"MD_relaxed"]),deffnm="md")
+            mdrun = mdpow.run.MDrunnerSimple(dirname="/".join([self.directory_name,"Equilibrium",k,"MD_relaxed"]),deffnm="md",nsteps=500)
             simulation_done = mdrun.run_check()
             W.MD(runtime=5,qscript=['local.sh'])
             W.save(k + self.sim_filename)
@@ -41,7 +42,7 @@ class TestEquilibration(object):
         for k in self.sims.keys():
             assert os.path.exists("{0}/{1}".format(self.directory_name,k + self.sim_filename))
     
-    def test_equilibrium_solvent_dir(self):
+    def test_equilibrium_solvent_dirs(self):
         contents = ["em","MD_relaxed","solvation","top"]
         for k in self.sims.keys():
             solvent_dir = "{0}/{1}/{2}/".format(self.directory_name, "Equilibrium", k)
