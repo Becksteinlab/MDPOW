@@ -31,7 +31,9 @@ class TestEquilibration(object):
             W.MD_relaxed()
             mdrun = mdpow.run.MDrunnerSimple(dirname="/".join([self.directory_name,"Equilibrium",k,"MD_relaxed"]),deffnm="md",nsteps=500)
             simulation_done = mdrun.run_check()
-            W.MD(runtime=5,qscript=['local.sh'])
+            W.MD(qscript=['local.sh'])
+            mdrun = mdpow.run.MDrunnerSimple(dirname="/".join([self.directory_name,"Equilibrium",k,"MD_NPT"]),deffnm="md",nsteps=500)
+            simulation_done = mdrun.run_check()
             W.save(k + self.sim_filename)
         
     def teardown(self):
@@ -43,9 +45,13 @@ class TestEquilibration(object):
             assert os.path.exists("{0}/{1}".format(self.directory_name,k + self.sim_filename))
     
     def test_equilibrium_solvent_dirs(self):
-        contents = ["em","MD_relaxed","solvation","top"]
+        contents = ["em","MD_relaxed","solvation","top","MD_NPT"]
         for k in self.sims.keys():
             solvent_dir = "{0}/{1}/{2}/".format(self.directory_name, "Equilibrium", k)
             assert os.path.exists(solvent_dir)
             for c in contents:
                 assert os.path.exists(solvent_dir+c)
+    
+    def test_NPT_structure(self):
+        for k in self.sims.keys():
+            assert os.path.exists("{0}/{1}/{2}/{3}/{4}".format(self.directory_name,"Equilibrium",k,"MD_NPT","md.gro"))
