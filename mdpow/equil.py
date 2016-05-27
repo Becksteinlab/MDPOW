@@ -50,12 +50,17 @@ from .restart import Journalled
 import logging
 logger = logging.getLogger('mdpow.equil')
 
-#: itp files are picked up via include dirs
+
+#: Default solvent itp files are picked up via include dirs (but note that the
+#: water model is configurable.)
 ITP = {'water': 'tip4p.itp', 'octanol': '1oct.itp','cyclohexane':'1cyclo.itp'}
+
 #: solvent boxes
 BOX = {'water': 'tip4p.gro', 'octanol': config.topfiles['1oct.gro'],'cyclohexane':config.topfiles['1cyclo.gro']}
+
 #: minimum distance between solute and box surface (in nm)
 DIST = {'water': 1.0, 'octanol': 1.5,'cyclohexane':1.5}
+
 
 class Simulation(Journalled):
     """Simple MD simulation of a single compound molecule in water.
@@ -120,7 +125,7 @@ class Simulation(Journalled):
           *dirname*
               base directory; all other directories are created under it
           *solvent*
-              water or octanol
+              water or octanol or cyclohexane
           *mdp*
               dict with keys corresponding to the stages ``energy_minimize``,
               ``MD_restrained``, ``MD_relaxed``,
@@ -144,7 +149,7 @@ class Simulation(Journalled):
         self.mdp = dict((stage, config.get_template(fn)) for stage,fn in self.mdp_defaults.items())
         self.mdp.update(dict((stage, config.get_template(fn)) for stage,fn in mdp_kw.items() if fn is not None))
 
-        if molecule is None and not filename is None:
+        if molecule is None and filename is not None:
             # load from pickle file
             self.load(filename)
             self.filename = filename
