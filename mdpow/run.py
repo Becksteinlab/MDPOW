@@ -38,15 +38,18 @@ Support
 
 """
 
+from __future__ import absolute_import
+
 import sys
-import os, errno
+import os
+import errno
 
 import gromacs.run
 
-import mdpow.equil
-import mdpow.fep
-from mdpow.config import get_configuration, set_gromacsoutput
-from mdpow.restart import checkpoint
+from . import equil
+from . import fep
+from .config import get_configuration, set_gromacsoutput
+from .restart import checkpoint
 
 import logging
 logger = logging.getLogger('mdpow.run')
@@ -173,9 +176,9 @@ def equilibrium_simulation(cfg, solvent, **kwargs):
     """
     deffnm = kwargs.pop('deffnm', "md")
     Simulations = {
-        'water': mdpow.equil.WaterSimulation,
-        'octanol': mdpow.equil.OctanolSimulation,
-        'cyclohexane':mdpow.equil.CyclohexaneSimulation,
+        'water': equil.WaterSimulation,
+        'octanol': equil.OctanolSimulation,
+        'cyclohexane':equil.CyclohexaneSimulation,
         }
     try:
         Simulation = Simulations[solvent]
@@ -199,7 +202,7 @@ def equilibrium_simulation(cfg, solvent, **kwargs):
         # custom mdp files
         mdpfiles = get_mdp_files(cfg, Simulation.protocols)
         try:
-            distance = cfg.get('setup','distance') 
+            distance = cfg.get('setup','distance')
         except KeyError:
             distance = None # if no distance is specified, None = default
         S = Simulation(molecule=cfg.get("setup", "molecule"),
@@ -258,17 +261,17 @@ def fep_simulation(cfg, solvent, **kwargs):
        recommended to use ``runlocal = False`` in the run input file
        and submit all window simulations to a cluster.
     """
-    
+
     deffnm = kwargs.pop('deffnm', "md")
     EquilSimulations = {
-        'water': mdpow.equil.WaterSimulation,
-        'octanol': mdpow.equil.OctanolSimulation,
-        'cyclohexane':mdpow.equil.CyclohexaneSimulation
+        'water': equil.WaterSimulation,
+        'octanol': equil.OctanolSimulation,
+        'cyclohexane':equil.CyclohexaneSimulation
         }
     Simulations = {
-        'water': mdpow.fep.Ghyd,
-        'octanol': mdpow.fep.Goct,
-        'cyclohexane':mdpow.fep.Gcyclo
+        'water': fep.Ghyd,
+        'octanol': fep.Goct,
+        'cyclohexane':fep.Gcyclo
         }
     try:
         EquilSimulation = EquilSimulations[solvent]
@@ -303,7 +306,7 @@ def fep_simulation(cfg, solvent, **kwargs):
         logger.info("Running FEP with saved settings from %r", savefilename)
         logger.info("Note: all configuration file options are ignored!")
     else:
-		# method to be used "TI"/"BAR"
+                # method to be used "TI"/"BAR"
         method = cfg.get("FEP", "method")
         logger.info("Running FEP with the %r implementation in Gromacs", method)
         # custom mdp file
@@ -311,8 +314,8 @@ def fep_simulation(cfg, solvent, **kwargs):
         logger.debug("Using [FEP] MDP file %r from config file", mdp)
 
         # lambda schedules can be read from [FEP_schedule_*] sections
-        schedules = {'coulomb': mdpow.fep.FEPschedule.load(cfg, "FEP_schedule_Coulomb"),
-                     'vdw': mdpow.fep.FEPschedule.load(cfg, "FEP_schedule_VDW"),
+        schedules = {'coulomb': fep.FEPschedule.load(cfg, "FEP_schedule_Coulomb"),
+                     'vdw': fep.FEPschedule.load(cfg, "FEP_schedule_VDW"),
                      }
         logger.debug("Loaded FEP schedules %r from config file", schedules.keys())
 

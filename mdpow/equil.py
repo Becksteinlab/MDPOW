@@ -31,7 +31,7 @@ model.
 .. autodata:: DIST
 """
 
-from __future__ import with_statement
+from __future__ import abolute_import, with_statement
 
 import os, errno
 import shutil
@@ -44,8 +44,8 @@ except (ImportError, OSError):
 from gromacs.utilities import in_dir, realpath, asiterable, AttributeDict
 import gromacs.utilities
 
-import config
-from restart import Journalled
+from . import config
+from .restart import Journalled
 
 import logging
 logger = logging.getLogger('mdpow.equil')

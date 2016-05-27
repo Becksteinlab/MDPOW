@@ -90,6 +90,8 @@ Gromacs force field files are ok).
 
 """
 
+from __future__ import absolute_import
+
 import os, errno
 from pkg_resources import resource_filename, resource_listdir
 import yaml
@@ -120,7 +122,7 @@ class POWConfigParser(object):
 
     def get(self, section, option):
         """Return option, unless its "None" --> ``None``,
-        
+
         Conversion to basic python types str, float, int, boolean is
         carried out automatically (unless it was None).
 

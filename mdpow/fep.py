@@ -120,7 +120,7 @@ TODO
   See `Free Energy Tutorial`_.
 
 """
-from __future__ import with_statement
+from __future__ import absolute_import, with_statement
 
 import os
 import errno
@@ -142,9 +142,9 @@ from numkit.observables import QuantityWithError
 import logging
 logger = logging.getLogger('mdpow.fep')
 
-import config
-from restart import Journalled
-from mdpow import kBOLTZ, N_AVOGADRO
+from . import config
+from .restart import Journalled
+from . import kBOLTZ, N_AVOGADRO
 
 def molar_to_nm3(c):
     """Convert a concentration in Molar to nm|^-3|."""
@@ -593,11 +593,11 @@ class Gsolv(Journalled):
                     foreign_lambdas = [xlambdas[xlambdas.index(l) - 1],
                                        xlambdas[xlambdas.index(l) + 1]]
                     # set up gromacs job for each FEP window in BAR
-                    params = self._setup(component, l, 
+                    params = self._setup(component, l,
                                          foreign_lambdas=foreign_lambdas, **kwargs)
             else:
                 raise ValueError("Unknown method {}".format(self.method))
-                    
+
             # generate queuing system script for array job
             directories = [self.wdir(component, l) for l in lambdas]
             qsubargs['jobname'] = self.arraylabel(component)
@@ -625,10 +625,10 @@ class Gsolv(Journalled):
         ### XXX Issue 20: if an entry is None then the dict will not be updated:
         ###     I *must* keep "none" as a legal string value
         kwargs.update(self.schedules[component].mdp_dict)  # sets soft core & lambda0/1 state
-        
+
         # for BAR
-        if foreign_lambdas is not None: 
-            # foreign_lambdas is only passed as an argument if BAR is 
+        if foreign_lambdas is not None:
+            # foreign_lambdas is only passed as an argument if BAR is
             # desired method, defaults to TI otherwise
             if foreign_lambdas[0] is None:
                 feplambdas = foreign_lambdas[1]
@@ -636,7 +636,7 @@ class Gsolv(Journalled):
                 feplambdas = foreign_lambdas[0]
             else:
                 feplambdas = "{0} {1}".format(foreign_lambdas[0], foreign_lambdas[1])
-            
+
             kwargs.update(dirname=wdir, struct=self.struct, top=self.top,
                           mdp=self.mdp,
                           ndx=self.ndx,
@@ -650,7 +650,7 @@ class Gsolv(Journalled):
                           init_lambda=lmbda,
                           fep_lambdas=feplambdas,
                           )
-        
+
         # for TI
         else:
             kwargs.update(dirname=wdir, struct=self.struct, top=self.top,
@@ -850,7 +850,7 @@ g
             logger.info("Analyzing stored data.")
 
         # TODO: because now do NPT this is really Gibbs free energy
-        #       but I will fix this another time ... [orbeckst] 
+        #       but I will fix this another time ... [orbeckst]
         Helmholtz = QuantityWithError(0,0)   # total free energy difference at const V
 
         for component, (lambdas, xvgs) in self.results.xvg.items():
@@ -1030,7 +1030,7 @@ class Gcyclo(Gsolv):
     solvent_default = "cyclohexane"
     dirname_default = os.path.join(Gsolv.topdir_default, solvent_default)
 
-    
+
 class Goct(Gsolv):
     """Sets up and analyses MD to obtain the solvation free energy of a solute in octanol.
 
@@ -1068,7 +1068,7 @@ def p_transfer(G1, G2, **kwargs):
 
        The order determines the direction of transfer: G1 --> G2.
 
-       E.g.: ``G1 = Gwat`` and ``G2 = Goct`` will compute a water-octanol 
+       E.g.: ``G1 = Gwat`` and ``G2 = Goct`` will compute a water-octanol
        transfer free energy and a water-octanol partition coefficient.
 
        transfer free energy from water into octanol::
@@ -1079,7 +1079,7 @@ def p_transfer(G1, G2, **kwargs):
 
             log P_oct/wat =  log [X]_oct/[X]_wat
 
-    .. note:: 
+    .. note::
 
        The partition coefficient corresponds to a transfer in the *opposite*
        direction compared to the free energy difference computed here. For
@@ -1090,7 +1090,7 @@ def p_transfer(G1, G2, **kwargs):
        probability to find it in the water phase, or in other words, the
        hydration free energy ``Delta G_water`` is smaller (more negative) than
        the octanol solvation free energy ``Delta G_oct``.
-         
+
 
     :Arguments:
        *G1*, *G2*
@@ -1110,7 +1110,7 @@ def p_transfer(G1, G2, **kwargs):
         raise ValueError("The two simulations were done for different molecules.")
     if G1.Temperature != G2.Temperature:
         raise ValueError("The two simulations were done at different temperatures.")
-        
+
     logger.info("[%s] transfer free energy %s --> %s calculation",
                 G1.molecule, G1.solvent_type, G2.solvent_type)
     for G in (G1, G2):

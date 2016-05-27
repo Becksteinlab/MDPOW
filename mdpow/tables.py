@@ -9,7 +9,15 @@ Tables of hard-coded values used in mdpow
 
 TODO: Move these data into files in the top directory.
 """
+
+from __future__ import absolute_import
+
 from numkit.observables import QuantityWithError
+
+
+#------------------------------------------------------------
+# constants
+#------------------------------------------------------------
 
 #: Avogadro's constant from http://physics.nist.gov/cgi-bin/cuu/Value?na
 #: in mol\ :sup:`-1`.

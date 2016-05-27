@@ -152,13 +152,16 @@ Functions
 .. autofunction:: load_exp
 .. autofunction:: gsolv2logpow
 """
+
+from __future__ import absolute_import
+
 import os.path
 import numpy
 import recsql
 import logging
 logger = logging.getLogger('mdpow.analysis')
 
-from mdpow import kBOLTZ
+from . import kBOLTZ
 
 #: Default paths to ``pow.txt`` for *experiments*, *run01*, *SAMPL2*, and *Ref*.
 DEFAULTS_POW = {

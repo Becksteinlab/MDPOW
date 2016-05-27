@@ -19,6 +19,7 @@ In modules simply use::
   logger = logging.getLogger(logname)
 """
 
+from __future__ import absolute_import
 
 import logging
 
@@ -49,7 +50,7 @@ def create(logname, logfile):
     return logger
 
 def clear_handlers(logger):
-    """clean out handlers in the library top level logger 
+    """clean out handlers in the library top level logger
 
     (only important for reload/debug cycles...)
     """

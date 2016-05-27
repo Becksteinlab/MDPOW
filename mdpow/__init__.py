@@ -496,6 +496,10 @@ through the thermodynamic integration and the subsequent thermodynamic sums
 
 
 """
+from __future__ import absolute_import
+
+from . import log
+
 __all__ = ['fep', 'equil']
 
 #: Package version; this is the only place where it is set.
@@ -514,7 +518,7 @@ def get_version_tuple():
     """Return current package version as a tuple (*MAJOR*, *MINOR*, *PATCHLEVEL*)."""
     return tuple(map(str,VERSION))
 
-import log
+
 
 def create_logger(logfile="mdpow.log"):
     """Create the default logger.
@@ -537,8 +541,11 @@ def log_banner():
 logger = create_logger()
 log_banner()
 
-import config
+# config can write status messages: they should come AFTER the banner
+# so the import should not be at the top.
+from . import config
 
+# XXX move to tables XXX
 #: Avogadro's constant |NA| in mol^-1 (`NA NIST value`_).
 N_AVOGADRO = 6.02214179e23
 #: Boltzmann's constant |kB| in kJ mol^-1 (`kB NIST value`_).

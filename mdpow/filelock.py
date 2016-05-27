@@ -25,6 +25,9 @@ be writable. I hope this code helps you. Of course, if you have a better
 recipe, please share it in the comments. ;)
 
 """
+
+from __future__ import absolute_import
+
 import os
 import time
 import errno

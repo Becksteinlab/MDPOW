@@ -21,8 +21,10 @@ restartable simulation protocols (for example :program:`mdpow-equilibrium`).
 
 .. autofunction:: checkpoint
 """
+from __future__ import absolute_import
 
-import os, errno
+import os
+import errno
 import cPickle
 
 import logging
@@ -88,7 +90,7 @@ class Journal(object):
     def current(self):
         """Current stage identifier"""
         return self.__current
-    
+
     @current.setter
     def current(self, stage):
         if not stage in self.stages:
