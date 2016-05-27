@@ -46,9 +46,9 @@ import errno
 
 import gromacs.run
 
+from .config import get_configuration, set_gromacsoutput
 from . import equil
 from . import fep
-from .config import get_configuration, set_gromacsoutput
 from .restart import checkpoint
 
 import logging

@@ -498,26 +498,10 @@ through the thermodynamic integration and the subsequent thermodynamic sums
 """
 from __future__ import absolute_import
 
+from .version import VERSION, get_version, get_version_tuple
 from . import log
 
 __all__ = ['fep', 'equil']
-
-#: Package version; this is the only place where it is set.
-VERSION = 0,6,0
-#: Set to ``True`` for a release. If set to ``False`` then the patch level
-#: will have the suffix "-dev".
-RELEASE = False
-if not RELEASE:
-    VERSION = VERSION[:2] + (str(VERSION[2]) + '-dev',)
-
-def get_version():
-    """Return current package version as a string."""
-    return ".".join(map(str,VERSION))
-
-def get_version_tuple():
-    """Return current package version as a tuple (*MAJOR*, *MINOR*, *PATCHLEVEL*)."""
-    return tuple(map(str,VERSION))
-
 
 
 def create_logger(logfile="mdpow.log"):
@@ -541,9 +525,11 @@ def log_banner():
 logger = create_logger()
 log_banner()
 
-# config can write status messages: they should come AFTER the banner
-# so the import should not be at the top.
-from . import config
+# AVOID IMPORTS OF OTHER PACKAGES IN __init__.py; only standard
+# library and mdpow.log are allowed. Anything else will break 'pip
+# install' because in setup.py we import mdpow.version (and thus
+# __init__.py) for the dynamic version information BEFORE pip has a
+# chance to install dependencies.
 
 # XXX move to tables XXX
 #: Avogadro's constant |NA| in mol^-1 (`NA NIST value`_).

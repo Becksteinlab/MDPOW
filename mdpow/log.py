@@ -21,6 +21,12 @@ In modules simply use::
 
 from __future__ import absolute_import
 
+# log is the only package that is imported in __init__ so it MAY NOT
+# HAVE ANY DEPENDENCIES except standard library; in particular, DO NOT
+# 'from . import config' or similar because it will break pip install
+# (because in setup.py we import mdpow.version (and thus __init__.py)
+# for the dynamic version information)
+
 import logging
 
 def create(logname, logfile):

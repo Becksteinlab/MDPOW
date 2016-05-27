@@ -6,14 +6,14 @@
 from setuptools import setup, find_packages
 
 # Dynamically calculate the version based on VERSION.
-# version = __import__('mdpow').get_version()
-version = '0.6.0' # dynamic calculation breaks clean installation
+version = __import__('mdpow.version').get_version()
+
 setup(name="POW",
       version=version,
       description="A library for computing octanol/water partitioning coefficients",
       long_description="""The POW module simplifies the setup and
 execution of free energy calculations of small molecules in water and
-and other solvents such as octanol and cyclohexane. 
+and other solvents such as octanol and cyclohexane.
 It uses Gromacs (http://www.gromacs.org) for the molecular dynamics
 (MD) simulations and relies on GromacsWrapper
 (https://github.com/Becksteinlab/GromacsWrapper)
@@ -24,15 +24,15 @@ It uses Gromacs (http://www.gromacs.org) for the molecular dynamics
       url="https://github.com/Becksteinlab/MDPOW",
       keywords="science Gromacs analysis 'molecular dynamics'",
       packages=find_packages(exclude=['examples']),
-      scripts = ['scripts/mdpow-pow', 
+      scripts = ['scripts/mdpow-pow',
                  'scripts/mdpow-pcw',
                  'scripts/mdpow-ghyd',
                  'scripts/mdpow-check',
-                 'scripts/mdpow-rebuild-fep', 
-		         'scripts/mdpow-rebuild-simulation',
+                 'scripts/mdpow-rebuild-fep',
+                         'scripts/mdpow-rebuild-simulation',
                  'scripts/mdpow-equilibrium',
                  'scripts/mdpow-fep',
-		         'scripts/mdpow-cfg2yaml.py',
+                         'scripts/mdpow-cfg2yaml.py',
                  'scripts/mdpow-solvationenergy'
                  ],
       package_data={'mdpow': ['top/*.dat', 'top/*.gro', 'top/*.itp',

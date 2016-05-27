@@ -46,7 +46,7 @@ copyright = u'2010–2016, Ian Kenney, Bogdan Iorga, and Oliver Beckstein'
 # built documents.
 #
 # Dynamically calculate the version based on mdpow.VERSION.
-packageversion = __import__('mdpow').get_version()
+packageversion = __import__('mdpow.version').get_version()
 
 # The short X.Y version.
 version = '.'.join(packageversion.split('.')[:2])
