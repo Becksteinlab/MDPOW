@@ -30,7 +30,7 @@ energy_minimize:
          # in the package templates)
 
 MD_relaxed:
-    qscript: (qscripts)s
+    qscript: local.sh
          # queuing system scripts to produce
     runlocal: True
          # True: launch Gromacs mdrun and wait for it
@@ -44,7 +44,7 @@ MD_relaxed:
          # special index groups  __main__ __environment__ can be used
 
 MD_NPT:
-    qscript: (qscripts)s
+    qscript: local.sh
          # queuing system scripts to produce
     runtime: 50000
          # simulation run time in ps [50 ns is generous, probably can be shorter]
@@ -60,7 +60,7 @@ MD_NPT:
 FEP:
     method: BAR
          # BAR or TI
-    qscript: (qscripts)s
+    qscript: local.sh
          # queuing system scripts to produce
     runtime: 5000
          # run time in ps for each free energy window
@@ -76,7 +76,7 @@ FEP:
          #  necessarily cancel.  It may be necessary to decrease the reciprocal space
          #  energy, and increase the cutoff radius to get sufficiently close matches
          #  to energies with free energy turned off.
-    mdp: fep_opls.mdp
+    mdp: bar_opls.mdp
          # run parameter file for Gromacs;
          # (will be searched as (1) absolute path, (2) in current directory (3)
          # in the package templates)
