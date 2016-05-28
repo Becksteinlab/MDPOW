@@ -23,6 +23,8 @@ Different **water models** are already supported.
 
 from __future__ import absolute_import
 
+from collections import defaultdict
+
 import logging
 logger = logging.getLogger("mdpow.forecefields")
 
@@ -63,6 +65,15 @@ class GromacsWaterModel(object):
     def __repr__(self):
         return "<{0[name]} water: identifier={0[identifier]}, ff={0[forcefield]}>".format(vars(self))
 
+#: For some water models we cannot derive the filename for the equilibrated box
+#: so we supply them explicitly.
+SPECIAL_WATER_COORDINATE_FILES = defaultdict(
+    lambda: None,
+    spc='spc216.gro',
+    spce='spc216.gro',
+    tip3p='spc216.gro',
+)
+
 def _create_water_models(watermodelsdat):
     models = {}
     for line in GMX_WATERMODELS_DAT.split('\n'):
@@ -72,7 +83,9 @@ def _create_water_models(watermodelsdat):
         fields = line.split()
         identifier, name = fields[:2]
         description = " ".join(fields[2:])
-        models[identifier] = GromacsWaterModel(identifier, name=name, description=description)
+        models[identifier] = GromacsWaterModel(identifier, name=name,
+                                               coordinates=SPECIAL_WATER_COORDINATE_FILES[identifier],
+                                               description=description)
     return models
 
 #: Use the default water model unless another water model is chosen in the runinput

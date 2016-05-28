@@ -1,3 +1,5 @@
+import pytest
+
 import mdpow.config
 import mdpow.forcefields
 
@@ -54,7 +56,7 @@ class TestIncludedSolvents(object):
         self._test_solvent('cyclohexane')
 
 class TestWatermodels(object):
-    watermodels = ['tip4p', 'tip3p', 'spc', 'spce']
+    watermodels = ('tip4p', 'tip3p', 'tip5p', 'spc', 'spce')
 
     def test_default_water_model(self):
         assert mdpow.forcefields.DEFAULT_WATER_MODEL == "tip4p"
@@ -87,3 +89,12 @@ class TestWatermodels(object):
             if not line or line.startswith('#'):
                 continue
             yield line
+
+    def test_get_water_model(self):
+        model = mdpow.forcefields.DEFAULT_WATER_MODEL
+        assert mdpow.forcefields.get_water_model(model) is mdpow.forcefields.GROMACS_WATER_MODELS[model]
+
+    def test_get_water_model_ValueError(self):
+        with pytest.raises(ValueError):
+            mdpow.forcefields.get_water_model("The Jabberwock is an imaginary beast.")
+
