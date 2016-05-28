@@ -3,7 +3,7 @@ from numpy.testing import assert_array_almost_equal
 
 import mdpow
 
-class TestAlteredConfig:
+class TestAlteredConfig(object):
     params_altered = {
         'DEFAULT':
             {
@@ -84,7 +84,7 @@ class TestAlteredConfig:
 
     def _test_section(self,section):
         section_dict = self.params_altered[section]
-        for k in section_dict.keys(): 
+        for k in section_dict.keys():
             if k == 'lambdas':
                 parsed = np.array([float(x.strip()) for x in self.cfg.get(section,k).split(",")])
                 assert_array_almost_equal(parsed, section_dict[k],err_msg="mismatch in lambdas")
@@ -117,4 +117,4 @@ class TestAlteredConfig:
 
     def test_mdrun(self):
         return self._test_section("mdrun")
-        
+
