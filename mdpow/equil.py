@@ -31,7 +31,7 @@ model.
 .. autodata:: DIST
 """
 
-from __future__ import abolute_import, with_statement
+from __future__ import absolute_import, with_statement
 
 import os, errno
 import shutil
@@ -86,7 +86,7 @@ class Simulation(Journalled):
     coordinate_structures = ('solvated', 'energy_minimized', 'MD_relaxed',
                              'MD_restrained', 'MD_NPT')
     checkpoints = ('solvated','energy_minimized','MD_relaxed','MD_restrained','MD_NPT')
-    
+
 
     #: Check list of all methods that can be run as an independent protocol; see also
     #: :meth:`Simulation.get_protocol` and :class:`restart.Journal`
@@ -134,12 +134,12 @@ class Simulation(Journalled):
         self.__cache = {}
         filename = kwargs.pop('filename', None)
         dirname = kwargs.pop('dirname', self.dirname_default)
-        
+
         solvent = kwargs.pop('solvent', self.solvent_default)
         # mdp files --- should get values from default runinput.cfg
         # None values in the kwarg mdp dict are ignored
         # self.mdp: key = stage, value = path to MDP file
-        
+
         mdp_kw = kwargs.pop('mdp', {})
         self.mdp = dict((stage, config.get_template(fn)) for stage,fn in self.mdp_defaults.items())
         self.mdp.update(dict((stage, config.get_template(fn)) for stage,fn in mdp_kw.items() if fn is not None))
