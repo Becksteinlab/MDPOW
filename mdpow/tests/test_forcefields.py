@@ -3,6 +3,10 @@ import pytest
 import mdpow.config
 import mdpow.forcefields
 
+# currently supported
+WATERMODELS = ('tip4p', 'tip3p', 'tip5p', 'spc', 'spce')
+SOLVENTMODELS = ('water', 'cyclohexane', 'octanol')
+
 class TestIncludedForcefiels(object):
     def test_default_forcefield(self):
         assert mdpow.forcefields.DEFAULT_FORCEFIELD == "OPLS-AA"
@@ -56,7 +60,7 @@ class TestIncludedSolvents(object):
         self._test_solvent('cyclohexane')
 
 class TestWatermodels(object):
-    watermodels = ('tip4p', 'tip3p', 'tip5p', 'spc', 'spce')
+    watermodels = WATERMODELS
 
     def test_default_water_model(self):
         assert mdpow.forcefields.DEFAULT_WATER_MODEL == "tip4p"
@@ -98,3 +102,62 @@ class TestWatermodels(object):
         with pytest.raises(ValueError):
             mdpow.forcefields.get_water_model("The Jabberwock is an imaginary beast.")
 
+
+class TestSolventModels(object):
+    watermodels = WATERMODELS
+    solventmodels = [model for model in SOLVENTMODELS if model != "water"]
+
+    def test_get_solvent_default_water(self):
+        model = "water"
+        defaultmodel = mdpow.forcefields.DEFAULT_WATER_MODEL
+        assert mdpow.forcefields.get_solvent_model(model) is mdpow.forcefields.GROMACS_WATER_MODELS[defaultmodel]
+
+    def test_get_solvent_model_ValueError(self):
+        with pytest.raises(ValueError):
+            mdpow.forcefields.get_solvent_model("The Jabberwock is an imaginary beast.")
+
+    def test_get_solvent_cyclohexane(self):
+        model = 'cyclohexane'
+        assert mdpow.forcefields.get_solvent_model(model) is mdpow.forcefields.GROMACS_SOLVENT_MODELS[model]
+
+    def test_get_solvent_octanol(self):
+        model = 'octanol'
+        assert mdpow.forcefields.get_solvent_model(model) is mdpow.forcefields.GROMACS_SOLVENT_MODELS[model]
+
+    def test_get_solvent(self):
+        def _assert_water_model(model):
+            assert mdpow.forcefields.get_solvent_model(model) is mdpow.forcefields.GROMACS_WATER_MODELS[model]
+
+        def _assert_solvent_model(model):
+            assert mdpow.forcefields.get_solvent_model(model) is mdpow.forcefields.GROMACS_SOLVENT_MODELS[model]
+
+        for model in mdpow.forcefields.GROMACS_WATER_MODELS:
+            yield _assert_water_model, model
+
+        for model in mdpow.forcefields.GROMACS_SOLVENT_MODELS:
+            yield _assert_solvent_model, model
+
+    def test_get_solvent_identifier_default_is_water(self):
+        assert mdpow.forcefields.get_solvent_identifier('water') is mdpow.forcefields.DEFAULT_WATER_MODEL
+
+    def test_get_solvent_identifier_water(self):
+        def _assert_model(model):
+            assert mdpow.forcefields.get_solvent_identifier('water', model=model) is model
+
+        for model in self.watermodels:
+            yield _assert_model, model
+
+    def test_get_solvent_identifier_solvents(self):
+        def _assert_model(solvent, model):
+            assert mdpow.forcefields.get_solvent_identifier(solvent, model=model) is solvent
+
+        for solvent in self.solventmodels:
+            yield _assert_model, solvent, None
+
+        # make sure that model is ignored
+        for solvent in self.solventmodels:
+            yield _assert_model, solvent, "Jabberwock model"
+
+    def test_get_solvent_identifier_None(self):
+        assert mdpow.forcefields.get_solvent_identifier('water', model="foobar") is None
+        assert mdpow.forcefields.get_solvent_identifier('benzene') is None

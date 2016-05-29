@@ -47,8 +47,8 @@ spc     SPC    simple point charge
 spce    SPC/E  extended simple point charge
 """
 
-class GromacsWaterModel(object):
-    """Data for a water model."""
+class GromacsSolventModel(object):
+    """Data for a solvent model in Gromacs."""
     def __init__(self, identifier, name=None, itp=None, coordinates=None,
                  description=None,
                  forcefield="OPLS-AA"):
@@ -83,23 +83,24 @@ def _create_water_models(watermodelsdat):
         fields = line.split()
         identifier, name = fields[:2]
         description = " ".join(fields[2:])
-        models[identifier] = GromacsWaterModel(identifier, name=name,
-                                               coordinates=SPECIAL_WATER_COORDINATE_FILES[identifier],
-                                               description=description)
+        models[identifier] = GromacsSolventModel(
+            identifier, name=name,
+            coordinates=SPECIAL_WATER_COORDINATE_FILES[identifier],
+            description=description)
     return models
 
 #: Use the default water model unless another water model is chosen in the runinput
 #: file (``setup.watermodel``).
 DEFAULT_WATER_MODEL = "tip4p"
 
-#: Dictionary of :class:`GromacsWaterModel` instances, one for each Gromacs water
+#: Dictionary of :class:`GromacsSolventModel` instances, one for each Gromacs water
 #: model  available under the force field directory. The keys are the water model
 #: identifiers.
 #: For OPLS-AA the following ones are available.
 GROMACS_WATER_MODELS = _create_water_models(GMX_WATERMODELS_DAT)
 
 def get_water_model(watermodel=DEFAULT_WATER_MODEL):
-    """Return a :class:`GromacsWaterModel` corresponding to identifier *watermodel*"""
+    """Return a :class:`GromacsSolventModel` corresponding to identifier *watermodel*"""
 
     try:
         return GROMACS_WATER_MODELS[watermodel]
@@ -108,3 +109,60 @@ def get_water_model(watermodel=DEFAULT_WATER_MODEL):
             watermodel, ", ".join(GROMACS_WATER_MODELS.keys()))
         logger.error(msg)
         raise ValueError(msg)
+
+#: Other solvents (not water, see :data:`GROMACS_WATER_MODELS` for those).
+GROMACS_SOLVENT_MODELS = {
+    'octanol': GromacsSolventModel(
+        identifier="octanol", itp="1oct.itp", coordinates="1oct.gro"),
+    'cyclohexane': GromacsSolventModel(
+        identifier="cyclohexane", itp="1cyclo.itp", coordinates="1cyclo.gro"),
+    }
+
+def get_solvent_identifier(solvent_type, model=None):
+    """Get the identifier for a solvent model.
+
+    The identifier is needed to access a water model (i.e., a
+    :class:`GromacsSolventModel`) through
+    :func:`get_solvent_model`. Because we have multiple water models
+    but only limited other solvents, the organization of these models
+    is a bit convoluted and it is best to obtain the desired water
+    model in these two steps::
+
+      identifier = get_solvent_identifier("water", model="tip3p")
+      model = get_solvent_model(identifier)
+
+
+    For ``solvent_type`` *water*: either provide ``None`` or "water"
+    for the specific ``model`` (and the default
+    :data:`DEFAULT_WATER_MODEL` will be selected, or a specific water
+    model such as "tip3p" or "spce" (see
+    :data:`GROMACS_WATER_MODELS`). For other solvent types, the
+    ``model`` is ignored.
+
+    :Returns: Either an identifier or ``None``
+
+    """
+    if solvent_type is "water":
+        identifier = model if not model in (None, 'water') else DEFAULT_WATER_MODEL
+        return identifier if identifier in GROMACS_WATER_MODELS else None
+    return solvent_type if solvent_type in GROMACS_SOLVENT_MODELS else None
+
+
+def get_solvent_model(identifier):
+    """Return a :class:`GromacsSolventModel` corresponding to identifier *identifier*.
+
+    If identifier is "water" then the :data:`DEFAULT_WATER_MODEL` is assumed.
+    """
+
+    if identifier is "water":
+        identifier = DEFAULT_WATER_MODEL
+    try:
+        return GROMACS_WATER_MODELS[identifier]
+    except KeyError:
+        try:
+            return GROMACS_SOLVENT_MODELS[identifier]
+        except KeyError:
+            msg = "No solvent model with name {0} is available.".format(identifier)
+            logger.critical(msg)
+            raise ValueError(msg)
+
