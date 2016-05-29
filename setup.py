@@ -42,6 +42,7 @@ It uses Gromacs (http://www.gromacs.org) for the molecular dynamics
                           'pyyaml',
                           'GromacsWrapper>0.3',
                           'RecSQL>=0.7.5'],
+      tests_require = ['pytest'],
       zip_safe = True,
 )
 

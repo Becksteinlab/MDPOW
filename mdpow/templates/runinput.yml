@@ -13,6 +13,9 @@ setup:
          # common, descriptive name, e.g. benzene
     molecule: None
          # Gromacs [ molecule ] identifier from the itp file (typically a 3-letter code)
+    watermodel: tip4p
+         # water model available in Gromacs (OPLS-AA):
+         # tip4p, tip5p, tip3p, spc, spce     
     itp: None
          # Gromacs itp file name 
     structure: None

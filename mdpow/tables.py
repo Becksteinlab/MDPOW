@@ -8,6 +8,8 @@ Tables of hard-coded values used in mdpow
 =========================================
 
 TODO: Move these data into files in the top directory.
+
+.. SeeAlso:: :mod:`mdpow.forcefields`
 """
 
 from __future__ import absolute_import

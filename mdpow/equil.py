@@ -45,17 +45,19 @@ from gromacs.utilities import in_dir, realpath, asiterable, AttributeDict
 import gromacs.utilities
 
 from . import config
+from . import forcefields
 from .restart import Journalled
 
 import logging
 logger = logging.getLogger('mdpow.equil')
 
-#: itp files are picked up via include dirs
-ITP = {'water': 'tip4p.itp', 'octanol': '1oct.itp','cyclohexane':'1cyclo.itp'}
-#: solvent boxes
-BOX = {'water': 'tip4p.gro', 'octanol': config.topfiles['1oct.gro'],'cyclohexane':config.topfiles['1cyclo.gro']}
+# ITP <-- forcefields.get_solvent_model(id).itp
+# BOX <-- forcefields.get_solvent_model(id).coordinates
+
+
 #: minimum distance between solute and box surface (in nm)
 DIST = {'water': 1.0, 'octanol': 1.5,'cyclohexane':1.5}
+
 
 class Simulation(Journalled):
     """Simple MD simulation of a single compound molecule in water.
@@ -120,7 +122,12 @@ class Simulation(Journalled):
           *dirname*
               base directory; all other directories are created under it
           *solvent*
-              water or octanol
+              'water' or 'octanol' or 'cyclohexane'
+          *solventmodel*
+              ``None`` chooses the default (e.g, :data:`mdpow.forcefields.DEFAULT_WATER_MODEL`
+              for ``solvent == "water"``. Other options are the models defined in
+              :data:`mdpow.forcefields.GROMACS_WATER_MODELS`. At the moment, there are no
+              alternative parameterizations included for other solvents.
           *mdp*
               dict with keys corresponding to the stages ``energy_minimize``,
               ``MD_restrained``, ``MD_relaxed``,
@@ -140,11 +147,16 @@ class Simulation(Journalled):
         # None values in the kwarg mdp dict are ignored
         # self.mdp: key = stage, value = path to MDP file
 
+        # 'water' will choose the default ('tip4p'), other choices are
+        # 'tip3p', 'spc', 'spce', for water; no choices
+        # available for 'cyclohexane' and 'octanol'
+        solventmodel = kwargs.pop('solventmodel', None)
+
         mdp_kw = kwargs.pop('mdp', {})
         self.mdp = dict((stage, config.get_template(fn)) for stage,fn in self.mdp_defaults.items())
         self.mdp.update(dict((stage, config.get_template(fn)) for stage,fn in mdp_kw.items() if fn is not None))
 
-        if molecule is None and not filename is None:
+        if molecule is None and filename is not None:
             # load from pickle file
             self.load(filename)
             self.filename = filename
@@ -166,17 +178,24 @@ class Simulation(Journalled):
                 self.dirs.includes.append(self.dirs.topology)
 
             self.solvent_type = solvent
+            self.solventmodel_identifier = forcefields.get_solvent_identifier(solvent, solventmodel)
+            if self.solventmodel_identifier is None:
+                msg = "No parameters for solvent {0} and solventmodel {1} available.".format(
+                    solvent, solventmodel)
+                logger.error(msg)
+                raise ValueError(msg)
+            self.solventmodel = forcefields.get_solvent_model(self.solventmodel_identifier)
 
             distance = kwargs.pop('distance')
 
             if distance is None:
                 distance = DIST[solvent]
 
-            try:
-                self.solvent = AttributeDict(itp=ITP[solvent], box=BOX[solvent],
-                                             distance=distance)
-            except KeyError:
-                raise ValueError("solvent must be one of %r" % ITP.keys())
+            # Do I need to use
+            #    box=config.topfiles['self.solventmodel.coordinates'] ?
+            self.solvent = AttributeDict(itp=self.solventmodel.itp,
+                                         box=self.solventmodel.coordinates,
+                                         distance=distance)
 
             self.filename = filename or self.solvent_type+'.simulation'
 

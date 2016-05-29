@@ -4,7 +4,7 @@ from numpy.testing import assert_array_almost_equal
 import mdpow
 import mdpow.fep
 
-class TestFEPschedule:
+class TestFEPschedule(object):
     reference = {
         'VDW':
         {'couple_lambda0': 'vdw',
