@@ -17,6 +17,9 @@ setup:
          # Gromacs itp file name 
     structure: some_molecules_structure
          # coordinate file name (pdb, gro, ... anything that Gromacs can read)
+    watermodel: spce
+         # water model available in Gromacs (OPLS-AA):
+         # tip4p, tip5p, tip3p, spc, spce              
     maxwarn: 2
          # maximum number of warnings tolerated by grompp during setup
     gromacsoutput: True

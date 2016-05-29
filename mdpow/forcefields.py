@@ -23,6 +23,7 @@ Different **water models** are already supported.
 
 from __future__ import absolute_import
 
+import os
 from collections import defaultdict
 
 import logging
@@ -60,7 +61,7 @@ class GromacsSolventModel(object):
         self.forcefield = forcefield
 
     def guess_filename(self, extension):
-        return self.identifier.lower() + '.' + str(extension)
+        return self.identifier.lower() + os.extsep + str(extension)
 
     def __repr__(self):
         return "<{0[name]} water: identifier={0[identifier]}, ff={0[forcefield]}>".format(vars(self))

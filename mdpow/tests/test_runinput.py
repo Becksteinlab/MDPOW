@@ -15,6 +15,7 @@ class TestAlteredConfig(object):
             'molecule': 'some_molecule_ident',
             'itp': 'some_molecules_itp',
             'structure': 'some_molecules_structure',
+            'watermodel': 'spce',
             'maxwarn': 2,
             'gromacsoutput': True,
             },

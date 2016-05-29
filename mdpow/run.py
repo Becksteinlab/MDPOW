@@ -123,7 +123,7 @@ def runMD_or_exit(S, protocol, params, cfg, **kwargs):
       as keyword argument *dirname* or taken from `S.dirs[protocol]`.
 
     - Other *kwargs* are interpreted as options for
-      :class:`~gromacs,tools.mdrun`.
+      :class:`~gromacs.tools.Mdrun`.
 
     It never returns ``False`` but instead does a :func:`sys.exit`.
     """
@@ -183,7 +183,8 @@ def equilibrium_simulation(cfg, solvent, **kwargs):
     try:
         Simulation = Simulations[solvent]
     except KeyError:
-        raise ValueError("solvent must be 'water','octanol', or 'cyclohexane'")
+        raise ValueError("solvent must be one of {0}".format(
+            ", ".join(Simulations.keys())))
 
     # generate a canonical path under dirname
     topdir = kwargs.get("dirname", None)
@@ -205,9 +206,23 @@ def equilibrium_simulation(cfg, solvent, **kwargs):
             distance = cfg.get('setup','distance')
         except KeyError:
             distance = None # if no distance is specified, None = default
+
+        solventmodel = None
+        if solvent == "water":
+            try:
+                solventmodel = cfg.get('setup', 'watermodel')
+                logger.info("Selected water model: {0}".format(solventmodel))
+            except KeyError:
+                solventmodel = None
+                logger.info("Using default water model")
+        # for other solvents we currently only have a single OPLS-AA
+        # parameterization included and hence there is no mechanism to
+        # choose between different models.
+
         S = Simulation(molecule=cfg.get("setup", "molecule"),
                        dirname=dirname, deffnm=deffnm, mdp=mdpfiles,
-                       distance=distance)
+                       distance=distance,
+                       solventmodel=solventmodel)
 
     if S.journal.has_not_completed("energy_minimize"):
         maxwarn = cfg.getint("setup", "maxwarn") or None

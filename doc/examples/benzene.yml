@@ -42,7 +42,7 @@ MD_relaxed:
     runlocal: True
          # True: launch Gromacs mdrun and wait for it
          # False: produce queuing system scripts and stop
-    runtime: 5
+    runtime: 1
          # run time in ps
     mdp: NPT_opls.mdp
          #  run parameter file for Gromacs;
