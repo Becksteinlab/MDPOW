@@ -435,7 +435,7 @@ class ExpComp(object):
 
         #subplot(121)
         norm = colors.normalize(0,len(c))
-        for i, (name,comment,DeltaA0,xmean,xstd,xmin,xmax,exp,comp,errcomp) in enumerate(c):
+        for i, (name,comment,DeltaG0,xmean,xstd,xmin,xmax,exp,comp,errcomp) in enumerate(c):
             if exp is None or comp is None:
                 continue
 

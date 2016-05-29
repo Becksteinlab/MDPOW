@@ -15,19 +15,19 @@ None).
 
 Results are *appended* to a data file with **Output file format**::
 
- molecule  DeltaA0(kJ/mol) ErrorDeltaA0  "logPow" log P_OW  Error logPow directory  
+ molecule  DeltaG0(kJ/mol) ErrorDeltaG0  "logPow" log P_OW  Error logPow directory
 
 molecule
     molecule name as used in the itp
-DeltaA0, ErrorDeltaA0
+DeltaG0, ErrorDeltaG0
     transfer free energy water --> octanol, in kJ/mol; error from correlation time
     and error propagation through Simpson's rule (see :meth:`mdpow.fep.Gsolv`)
 log P_OW
     base-10 logarithm of the octanol-water partition coefficient; >0: partitions into
     octanol, <0: partitions preferrably into water
 wat_ok, octa_ok
-    "OK": input data was clean; "BAD": some input data xvg files contained 
-    unparseable lines that were skipped; this can mean that the data became 
+    "OK": input data was clean; "BAD": some input data xvg files contained
+    unparseable lines that were skipped; this can mean that the data became
     corrupted and caution should be used.
 directory
     folder in which the simulations were stored
@@ -44,7 +44,7 @@ logger = logging.getLogger('mdpow')
 
 def load_gsolv(directory, **kwargs):
     FEPdir = os.path.join(directory, "FEP")
-    
+
     files = {'water': os.path.join(FEPdir, 'water', 'Ghyd.fep'),
              'octanol': os.path.join(FEPdir, 'octanol', 'Goct.fep'),
              }
@@ -52,13 +52,13 @@ def load_gsolv(directory, **kwargs):
                             if not os.path.exists(fn)))
     if len(files_not_found) > 0:
         raise OSError("Missing input files: %r" % files_not_found)
-        
+
     permissive = kwargs.pop('permissive', False)
     logger.info("Reading water data %(water)r", files)
     gwat = mdpow.fep.Ghyd(filename=files['water'], basedir=directory, permissive=permissive)
     logger.info("Reading octanol data %(octanol)r", files)
     goct = mdpow.fep.Goct(filename=files['octanol'], basedir=directory, permissive=permissive)
-    
+
     return gwat, goct
 
 
@@ -79,7 +79,7 @@ def run_pow(directory, **kwargs):
 
     **Output file format (energies and log P_ow) :**
 
-        molecule   DeltaA0(kJ/mol)    log P_OW    directory
+        molecule   DeltaG0(kJ/mol)    log P_OW    directory
 
     Removed from output (>0.2.1):
      * wat_ok and octa_ok are "OK" if no lines were skipped in the input data files due to
@@ -97,7 +97,7 @@ def run_pow(directory, **kwargs):
         return _datastatus[g.contains_corrupted_xvgs()]
 
     gwat, goct = load_gsolv(directory, permissive=kwargs.pop('permissive',False),)
-    transferFE, logPow = mdpow.fep.pOW(goct, gwat, stride=kwargs.pop('stride', None), 
+    transferFE, logPow = mdpow.fep.pOW(goct, gwat, stride=kwargs.pop('stride', None),
                                        force=kwargs.pop('force', False))
 
     if datstat(gwat) == 'BAD' or datstat(goct) == 'BAD':
@@ -111,7 +111,7 @@ def run_pow(directory, **kwargs):
                               (gwat.molecule, transferFE.value, transferFE.error,
                                logPow.value, logPow.error, directory))
                 # removed (>0.2.1):
-                # datstat(gwat), datstat(goct) --> wat_ok octa_ok            
+                # datstat(gwat), datstat(goct) --> wat_ok octa_ok
             logger.info("Wrote results to %(outfile)r", kwargs)
 
     if kwargs.get('energyfile', None):
@@ -122,7 +122,7 @@ def run_pow(directory, **kwargs):
                                   (g.summary(), transferFE.value, transferFE.error,
                                    logPow.value, logPow.error,  directory))
             logger.info("Wrote solvation energy terms to %(energyfile)r", kwargs)
-                
+
     plotfile = kwargs.get('plotfile', None)
     if plotfile:
         if plotfile == 'auto':
@@ -144,10 +144,10 @@ def run_pow(directory, **kwargs):
     del gwat
     del goct
     gc.collect()  # try to free as much memory as possible
-    
+
 
 def auto_plotfile(directory, gsolv):
-    return os.path.join(directory, 
+    return os.path.join(directory,
                         "dVdl_{0}_pow.pdf".format(gsolv.molecule))
 
 
@@ -169,7 +169,7 @@ def parse_filename_option(fn):
         elif fn.lower() == "auto":
             fn = "auto"
         return fn
-            
+
 def realpath_or_none(fn):
         if not fn is None:
             fn = os.path.realpath(fn)
@@ -184,7 +184,7 @@ if __name__ == "__main__":
     parser.add_option('-p', '--plotfile', dest="plotfile",
                       help="plot dV/dlambda to FILE; use png or pdf suffix to "
                       "determine the file type. 'auto' generates a pdf file "
-                      "DIRECTORY/dVdl_MOLID_pow.pdf and 'None' disables it [%default]", 
+                      "DIRECTORY/dVdl_MOLID_pow.pdf and 'None' disables it [%default]",
                       metavar="FILE")
     parser.add_option('-o', '--outfile', dest="outfile",
                       help="append one-line results summary to FILE [%default]",
@@ -206,7 +206,7 @@ if __name__ == "__main__":
                       "WARNING: Other lines in the file might have been corrupted in "
                       "such a way that they appear correct but are in fact wrong. "
                       "WRONG RESULTS CAN OCCUR! USE AT YOUR OWN RISK [%default]")
-    parser.set_defaults(plotfile="auto", 
+    parser.set_defaults(plotfile="auto",
                         outfile="pow.txt", energyfile="energies.txt",
                         force=False, stride=10, permissive=False)
     opts,args = parser.parse_args()
@@ -227,8 +227,8 @@ if __name__ == "__main__":
         opts.plotfile = parse_filename_option(opts.plotfile)
 
         try:
-            run_pow(directory, plotfile=opts.plotfile, 
-                    outfile=realpath_or_none(opts.outfile), 
+            run_pow(directory, plotfile=opts.plotfile,
+                    outfile=realpath_or_none(opts.outfile),
                     energyfile=realpath_or_none(opts.energyfile),
                     force=opts.force, stride=opts.stride, permissive=opts.permissive)
         except (OSError, IOError), err:

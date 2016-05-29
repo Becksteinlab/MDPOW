@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """%prog [options] DIRECTORY [DIRECTORY ...]
 
-Re-create the ``Goct.fep`` or ``Ghyd.fep`` file using the appropriate 
+Re-create the ``Goct.fep`` or ``Ghyd.fep`` file using the appropriate
 equilibrium simulation file under <DIRECTORY>/FEP.
 
 (This should only be necessary when the fep file was destroyed due to
@@ -35,13 +35,13 @@ def fixFEP(solvent, fepfile, simfile, basedir):
         G = Gsolv[solvent](filename=fepfile)
 
     # remove pre-0.2 standard-state correction (wrong!) and pdV (wrong)
-    # total not used anymore since 0.3.0 
+    # total not used anymore since 0.3.0
     for crap in ('standardstate', 'pdV', 'total'):
         try:
             del G.results.DeltaA0[crap]
         except:
             pass
-        # cannot remember if this was DeltaA0 (probably not) or DeltaA 
+        # cannot remember if this was DeltaA0 (probably not) or DeltaA
         try:
             del G.results.DeltaA[crap]
         except:
@@ -77,7 +77,7 @@ if __name__ == "__main__":
     parser.set_defaults(solvent="all")
 
     opts,args = parser.parse_args()
-    
+
     gsolvnames = {'water':'Ghyd.fep', 'octanol':'Goct.fep'}
     if opts.solvent == "all":
         opts.solvent = gsolvnames.keys()
@@ -97,7 +97,7 @@ if __name__ == "__main__":
             continue
         if not os.path.exists(directory):
             logger.warn("Directory %r not found, skipping!", directory)
-            continue        
+            continue
         logger.info("Rebuilding under directory %r... (can take a while)", directory)
         with in_dir(directory, create=False):
             for solvent in opts.solvent:
@@ -105,7 +105,7 @@ if __name__ == "__main__":
                 fepfile = os.path.join(os.path.curdir, 'FEP', solvent, gsolvnames[solvent])
                 logger.info("[%(solvent)8s] equilibrim simulation: %(simfile)s", vars())
                 logger.info("[%(solvent)8s] fep simulations:       %(fepfile)s", vars())
-            
+
                 try:
                     G = fixFEP(solvent, fepfile, simfile, os.path.realpath(os.path.curdir))
                 except Exception,err:

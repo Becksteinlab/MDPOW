@@ -3,8 +3,7 @@
 # Released under the GNU Public License 3 (or higher, your choice)
 # See the file COPYING for details.
 
-"""
-=====================================================================
+"""=====================================================================
 :mod:`mdpow` --- Computing the octanol/water partitioning coefficient
 =====================================================================
 
@@ -433,21 +432,20 @@ Free energy of transfer from water to octanol::
 
 The individual components are
 
- *Helmholtz*, *Gibbs*
+ *Gibbs*
    total free energy difference of transfer from solvent to vacuum at the
    Ben-Naim standard state (i.e. 1M solution/1M gas phase) in kJ/mol;
 
-      DeltaA0 = (A_solv - A_vac)
+      DeltaG0 = (A_solv - A_vac)
 
-   In principle, we calculate the Helmholtz free energy (at constant volume V).
-   In order to obtain the Gibbs free energy (at constant pressure) a small
-   correction Vdp is required. *This correction is currently ignored.*
+   We calculate the Gibbs free energy (at constant pressure P) by
+   using the NPT ensemble for all MD simulations.
 
  *coulomb*
-   contribution of the de-charging process to DeltaA
+   contribution of the de-charging process to DeltaG
 
  *vdw*
-   contribution of the de-coupling process to DeltaA
+   contribution of the de-coupling process to DeltaG
 
 To plot the data (de-charging and de-coupling)::
 
@@ -493,7 +491,6 @@ through the thermodynamic integration and the subsequent thermodynamic sums
   large (up to 4 kJ/mol) and thus completely swamp the final
   estimate. Additional lambdas 0.125 and 0.375 should improve the precision of
   the calculations.
-
 
 """
 

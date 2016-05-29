@@ -16,7 +16,7 @@ None).
 
 The total solvation free energy is calculated as
 
-  DeltaG* = -(DeltaA_coul + DeltaA_vdw)
+  DeltaG* = -(DeltaG_coul + DeltaG_vdw)
 
 Note that the standard state refers to the "Ben-Naim" standard state
 of transferring 1 M of compound in the gas phase to 1 M in the aqueous
@@ -63,7 +63,7 @@ suffix = {'water':'hyd',
 def load_gsolv(solvent, directory, **kwargs):
     FEPdir = os.path.join(directory, "FEP")
 
-    files = {solvent: os.path.join(FEPdir, solvent, 
+    files = {solvent: os.path.join(FEPdir, solvent,
                                    'G{0}.fep'.format(suffix[solvent])),
          }
     files_not_found = dict(((solv,fn) for solv,fn in files.items()

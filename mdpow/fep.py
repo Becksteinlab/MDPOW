@@ -849,9 +849,8 @@ g
         else:
             logger.info("Analyzing stored data.")
 
-        # TODO: because now do NPT this is really Gibbs free energy
-        #       but I will fix this another time ... [orbeckst]
-        Helmholtz = QuantityWithError(0,0)   # total free energy difference at const V
+        # total free energy difference at const P (all simulations are done in NPT)
+        GibbsFreeEnergy = QuantityWithError(0,0)
 
         for component, (lambdas, xvgs) in self.results.xvg.items():
             logger.info("[%s %s] Computing averages <dV/dl> and errors for %d lambda values.",
@@ -871,14 +870,11 @@ g
             a = scipy.integrate.simps(Y, x=lambdas, even='last')
             da = numkit.integration.simps_error(DY, x=lambdas, even='last')
             self.results.DeltaA[component] = QuantityWithError(a, da)
-            Helmholtz += self.results.DeltaA[component]  # error propagation is automagic!
+            GibbsFreeEnergy += self.results.DeltaA[component]  # error propagation is automagic!
 
         # hydration free energy Delta A = -(Delta A_coul + Delta A_vdw)
-        Helmholtz *= -1
-        self.results.DeltaA.Helmholtz = Helmholtz
-
-        # Gibbs energy (note: we run NPT so we already got the Gibbs energy)
-        self.results.DeltaA.Gibbs = self.results.DeltaA.Helmholtz
+        GibbsFreeEnergy *= -1
+        self.results.DeltaA.Gibbs = GibbsFreeEnergy
 
         if autosave:
             self.save()
@@ -925,7 +921,7 @@ g
             logger.info("No DeltaA free energies computed yet.")
             return
 
-        logger.info("DeltaG0 = -(DeltaA_coul + DeltaA_vdw)")
+        logger.info("DeltaG0 = -(DeltaG_coul + DeltaG_vdw)")
         for component, energy in self.results.DeltaA.items():
             logger.info("[%s] %s solvation free energy (%s) %g (%.2f) kJ/mol",
                         self.molecule, self.solvent_type.capitalize(), component,
@@ -958,7 +954,7 @@ g
         kwargs.setdefault('elinewidth', 2)
 
         try:
-            if self.results.DeltaA.Helmholtz is None or len(self.results.dvdl) == 0:
+            if self.results.DeltaA.Gibbs is None or len(self.results.dvdl) == 0:
                 raise KeyError
         except KeyError:
             logger.info("Data were not analyzed yet -- doing that now... patience.")
@@ -982,7 +978,7 @@ g
         title(r"Free energy difference $\Delta A^{0}_{\rm{%s}}$" % self.solvent_type)
         subplot(1, nplots, 2)
         title(r"for %s: $%.2f\pm%.2f$ kJ/mol" %
-              ((self.molecule,) + self.results.DeltaA.Helmholtz.astuple()))
+              ((self.molecule,) + self.results.DeltaA.Gibbs.astuple()))
 
 
     def qsub(self, script=None):
@@ -1073,7 +1069,7 @@ def p_transfer(G1, G2, **kwargs):
 
        transfer free energy from water into octanol::
 
-            DeltaDeltaA0 = DeltaA0_oct - DeltaA0_water
+            DeltaDeltaG0 = DeltaG0_oct - DeltaG0_water
 
        water-octanol partition coefficient::
 
@@ -1152,7 +1148,7 @@ def pOW(G1, G2, **kwargs):
 
     transfer free energy from water into octanol::
 
-            DeltaDeltaA0 = DeltaA0_oct - DeltaA0_water
+            DeltaDeltaG0 = DeltaG0_oct - DeltaG0_water
 
     octanol/water partition coefficient::
 
@@ -1185,7 +1181,7 @@ def pCW(G1, G2, **kwargs):
 
     transfer free energy from water into cyclohexane::
 
-            DeltaDeltaA0 = DeltaA0_cyclohexane - DeltaA0_water
+            DeltaDeltaG0 = DeltaG0_cyclohexane - DeltaG0_water
 
     cyclohexane/water partition coefficient::
 
