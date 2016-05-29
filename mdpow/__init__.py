@@ -3,7 +3,8 @@
 # Released under the GNU Public License 3 (or higher, your choice)
 # See the file COPYING for details.
 
-"""=====================================================================
+"""\
+=====================================================================
 :mod:`mdpow` --- Computing the octanol/water partitioning coefficient
 =====================================================================
 
@@ -27,7 +28,7 @@ Before you can start you will need
 
   -  a coordinate file for the small molecule
   -  a Gromacs OPLS/AA topology (itp) file
-  -  an installation of Gromacs_ 4.0.x.
+  -  an installation of Gromacs_ 4.6.x.
 
 Basic work flow
 ---------------
@@ -82,7 +83,7 @@ section on `writing queuing system templates`_ . You will have to
     qsub my_script.sh
 
 .. _writing queuing system templates:
-   http://sbcb.bioch.ox.ac.uk/oliver/software/GromacsWrapper/html/gromacs/blocks/qsub.html#queuing-system-templates
+   http://gromacswrapper.readthedocs.io/en/latest/gromacs/blocks/qsub.html#queuing-system-templates
 
 
 
@@ -111,7 +112,7 @@ OPLS/AA topology for benzene (:download:`benzene.itp
 <../../examples/benzene/benzene.itp>`) and a starting structure
 (:download:`benzene.pdb <../../examples/benzene/benzene.pdb>`) together with a
 *run input configuration file* for the mdpow scripts
-(:download:`benzene_runinput.cfg <../../examples/benzene_runinput.cfg>`).
+(:download:`benzene.yml <../../examples/benzene.yml>`).
 
 .. image:: ../../examples/benzene/benzene.pdb.png
    :width: 200
@@ -135,7 +136,7 @@ OPLS/AA topology for benzene (:download:`benzene.itp
 #. Generate the input files for a equilibrium simulation of benzene in
    **water** (TIP4P) and run the simulation::
 
-     mdpow-equilibrium --solvent water benzene/benzene_runinput.cfg
+     mdpow-equilibrium --solvent water benzene/benzene.yml
 
    The example file provided will only set up very short simulations and it
    will also directly call :program:`mdrun` to run the simulations. This is
@@ -161,7 +162,7 @@ OPLS/AA topology for benzene (:download:`benzene.itp
 #. Generate the input files for a equilibrium simulation of benzene in
    **octanol** (OPLS/AA parameters) and run the simulation::
 
-     mdpow-equilibrium --solvent octanol benzene/benzene_runinput.cfg
+     mdpow-equilibrium --solvent octanol benzene/benzene.yml
 
    The steps are analogous to the ones described under 4.
 
@@ -176,14 +177,14 @@ OPLS/AA topology for benzene (:download:`benzene.itp
 
    The FEP windows for benzene in **water** are generated and run by ::
 
-     mdpow-fep --solvent water benzene/benzene_runinput.cfg
+     mdpow-fep --solvent water benzene/benzene.yml
 
    (In order to run the FEP windows on a cluster see
    :ref:`advanced-mdpow-qscript-label`.)
 
 #. The FEP windows for benzene in **octanol** are generated and run by ::
 
-     mdpow-fep --solvent octanol benzene/benzene_runinput.cfg
+     mdpow-fep --solvent octanol benzene/benzene.yml
 
 #. Analyse the simulation output with :ref:`mdpow-pow <mdpow-pow-label>`.  It
    collects the raw data from the FEP simulations and computes the free
@@ -226,38 +227,31 @@ in ``~/Projects/POW``. We will end up with a directory layout under
   benzene/
          benzene.itp
          benzene.pdb
-         benzene_runinput.cfg
+         benzene.yml
   WORK/
        benzene/
                water/
                octanol/
 
-Edit :file:`benzene_runinput.cfg` to put in *absolute paths* to the input
-files. It is convenient to use the variable substitution feature of
-:mod:`ConfigParser` by defining a default variable ``topdir`` in
-``[DEFAULT]``::
-
- [DEFAULT]
- topdir = ~/Projects/POW/
-
-In the ``[setup]`` section use ``topdir`` to define absolute paths to the itp
+Edit :file:`benzene.yml` to put in *absolute paths* to the input
+files: In the ``setup`` section use absolute paths to the itp
 and pdb files of benzene::
 
  [setup]
  name = benzene
  molecule = BNZ
- structure = %(topdir)s/benzene/benzene.pdb
- itp = %(topdir)s/benzene/benzene.itp
+ structure = ~/Projects/POW/benzene/benzene.pdb
+ itp = ~/Projects/POW/benzene/benzene.itp
 
 With absolute paths defined, it is easy to generate all other files under
 ``WORK/benzene`` (the directory name "benzene" is the *name* entry from the
-``[setup]`` section of the configuration file)::
+``setup`` section of the configuration file)::
 
  cd WORK
- mdpow-equilibrium --solvent water ../benzene/benzene_runinput.cfg
- mdpow-equilibrium --solvent octanol ../benzene/benzene_runinput.cfg
- mdpow-fep --solvent water ../benzene/benzene_runinput.cfg
- mdpow-fep --solvent octanol ../benzene/benzene_runinput.cfg
+ mdpow-equilibrium --solvent water ../benzene/benzene.yml
+ mdpow-equilibrium --solvent octanol ../benzene/benzene.yml
+ mdpow-fep --solvent water ../benzene/benzene.yml
+ mdpow-fep --solvent octanol ../benzene/benzene.yml
 
 Finally, calculate |logPow|::
 
@@ -276,7 +270,7 @@ example for a solute; all files are present in the package so one can
 work through the example immediately.
 
 Before starting :program:`python` (preferrably ipython_) make sure that the
-Gromacs_ 4.0.x tools can be found, e.g. ``which grompp`` should show you the
+Gromacs_ 4.6.x tools can be found, e.g. ``which grompp`` should show you the
 path to :program:`grompp`.
 
 .. _ipython: http://ipython.scipy.org
@@ -436,10 +430,10 @@ The individual components are
    total free energy difference of transfer from solvent to vacuum at the
    Ben-Naim standard state (i.e. 1M solution/1M gas phase) in kJ/mol;
 
-      DeltaG0 = (A_solv - A_vac)
+      DeltaG0 = (G_solv - G_vac)
 
    We calculate the Gibbs free energy (at constant pressure P) by
-   using the NPT ensemble for all MD simulations.
+   using the *NPT* ensemble for all MD simulations.
 
  *coulomb*
    contribution of the de-charging process to DeltaG
@@ -460,18 +454,18 @@ For comparison to experimental values see :mod:`mdpow.analysis`.
 Error analysis
 --------------
 
-The data points are the (time) **average <A>** of A = dV/dl over each
-window. The **error bars** s_A are the error of the mean <A>. They are computed
+The data points are the (time) **average <G>** of G = dV/dl over each
+window. The **error bars** s_G are the error of the mean <G>. They are computed
 from the auto-correlation time of the fluctuations and the standard deviation
 (see Frenkel and Smit, p526 and :meth:`numkit.timeseries.tcorrel`)::
 
-  s_A**2 = 2*tc*acf(0)/T
+  s_G**2 = 2*tc*acf(0)/T
 
-where tc is the decay time of the ACF of <(A-<A>)**2> (assumed to follow f(t) =
+where tc is the decay time of the ACF of <(G-<G>)**2> (assumed to follow f(t) =
 exp(-t/tc) and hence calculated from the integral of the ACF to its first
 root); T is the total runtime.
 
-Errors on the energies are calculated via the propagation of the errors s_A
+Errors on the energies are calculated via the propagation of the errors s_G
 through the thermodynamic integration and the subsequent thermodynamic sums
 (see :func:`numkit.integration.simps_error`
 :class:`numkit.observables.QuantityWithError` for details).

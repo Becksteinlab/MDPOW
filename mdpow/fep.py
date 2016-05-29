@@ -275,7 +275,7 @@ class Gsolv(Journalled):
     queuing system scripts (in particular `queuing system templates`_).
 
     .. _queuing system templates:
-       http://orbeckst.github.io/GromacsWrapper/gromacs/blocks/qsub.html#queuing-system-templates
+       http://gromacswrapper.readthedocs.io/en/latest/gromacs/blocks/qsub.html#queuing-system-templates
     """
 
     topdir_default = "FEP"
