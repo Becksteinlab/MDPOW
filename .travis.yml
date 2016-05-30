@@ -37,6 +37,9 @@ install:
   - pip install pytest-pep8
   - pip install -e .
 
+  # install gromacs from package manager
+  - apt-get install gromacs
+
 # run tests
 script: 
   - py.test --cov mdpow mdpow/tests
