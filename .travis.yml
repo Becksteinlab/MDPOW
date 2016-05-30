@@ -10,6 +10,10 @@ branches:
         - master
         - develop
 
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install gromacs
+
 # install python dependencies
 install:
   # We do this conditionally because it saves us some downloading if the
@@ -36,9 +40,6 @@ install:
   - pip install pytest-cov
   - pip install pytest-pep8
   - pip install -e .
-
-  # install gromacs from package manager
-  - apt-get install gromacs
 
 # run tests
 script: 
