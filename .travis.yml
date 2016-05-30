@@ -11,8 +11,8 @@ branches:
         - develop
 
 before_install:
-  - sudo apt-get update
-  - sudo apt-get install gromacs
+  - apt-get update
+  - apt-get install gromacs
 
 # install python dependencies
 install:
