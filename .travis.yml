@@ -12,7 +12,7 @@ branches:
 
 before_install:
   - sudo apt-get update
-  - sudo apt-get install gromacs
+  - sudo apt-get install gromacs-dev
 
 # install python dependencies
 install:
