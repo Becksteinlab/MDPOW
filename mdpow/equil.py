@@ -185,13 +185,8 @@ class Simulation(Journalled):
                 raise ValueError(msg)
             self.solventmodel = forcefields.get_solvent_model(self.solventmodel_identifier)
 
-            distance = kwargs.pop('distance')
+            distance = kwargs.pop('distance', DIST[solvent])
 
-            if distance is None:
-                distance = DIST[solvent]
-
-            # Do I need to use
-            #    box=config.topfiles['self.solventmodel.coordinates'] ?
             self.solvent = AttributeDict(itp=self.solventmodel.itp,
                                          box=self.solventmodel.coordinates,
                                          distance=distance)
