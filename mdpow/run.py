@@ -203,7 +203,7 @@ def equilibrium_simulation(cfg, solvent, **kwargs):
         # custom mdp files
         mdpfiles = get_mdp_files(cfg, Simulation.protocols)
         try:
-            distance = cfg.get('setup','distance')
+            distance = cfg.get('setup', 'distance')
         except KeyError:
             distance = None # if no distance is specified, None = default
 
