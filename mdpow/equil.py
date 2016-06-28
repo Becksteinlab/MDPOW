@@ -55,8 +55,10 @@ logger = logging.getLogger('mdpow.equil')
 # BOX <-- forcefields.get_solvent_model(id).coordinates
 
 
+# TODO: change to water distance 1.2 in the future (1.0 for
+#       compatibility with our SAMPL5 runs)
 #: minimum distance between solute and box surface (in nm)
-DIST = {'water': 1.2, 'octanol': 1.5,'cyclohexane':1.5}
+DIST = {'water': 1.0, 'octanol': 1.5, 'cyclohexane': 1.5}
 
 
 class Simulation(Journalled):
@@ -186,7 +188,8 @@ class Simulation(Journalled):
                 raise ValueError(msg)
             self.solventmodel = forcefields.get_solvent_model(self.solventmodel_identifier)
 
-            distance = kwargs.pop('distance', DIST[solvent])
+            distance = kwargs.pop('distance', None)
+            distance = distance if distance is not None else DIST[solvent]
 
             self.solvent = AttributeDict(itp=self.solventmodel.itp,
                                          box=self.solventmodel.coordinates,
