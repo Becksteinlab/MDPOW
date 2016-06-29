@@ -1,0 +1,38 @@
+=================
+CHANGES for MDPOW
+=================
+
+Add summary of changes for each release. Use ISO dates. Reference
+GitHub issues numbers and PR numbers.
+
+
+2016-06-29    0.6.0
+orbeckst, ianmkenney
+
+Code and development are now public on GitHub https://github.com/Becksteinlab/MDPOW
+
+* supported solvents: water, octanol, cyclohexane (new) (#11, #16)
+* supported water models: TIP4P, and new: TIP3P, TIP5P, SPC, SPC/E (#38)
+* FEP simulations are now done in NPT (Parrinello-Rahman barostat)
+  instead of NVT (#28)
+* can run with Gromacs BAR and/or TI
+* input file format was changed from ini to YAML (#1, #5, #6)
+* additional configuration options in the runinput.yml file (#30, #38)
+
+
+
+2011-09-06    0.5.1
+orbeckst
+
+Bug fixes and the mdpow-rebuild-simulation script to fix-up the state
+files. For details see the git log commit messages.
+
+
+2011-08-25    0.5.0
+orbeckst, iorga
+
+Fully working version with all scripts in place. Was used for the SAMPL3
+challenge. For details see the git log commit messages.
+
+
+For earlier releases see the commit messages.
