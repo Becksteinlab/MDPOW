@@ -32,10 +32,10 @@ User code should use :func:`get_version` or `get_version_tuple`.
 """
 
 #: Package version; this is the only place where it is set.
-VERSION = 0,6,0
+VERSION = 0,6,1
 #: Set to ``True`` for a release. If set to ``False`` then the patch level
 #: will have the suffix "-dev".
-RELEASE = True
+RELEASE = False
 if not RELEASE:
     VERSION = VERSION[:2] + (str(VERSION[2]) + '-dev',)
 
