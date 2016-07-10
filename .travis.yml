@@ -12,7 +12,7 @@ branches:
 
 before_install:
   - sudo apt-get update
-  - sudo apt-get install gromacs-dev
+  - sudo apt-get install libgomp1
 
 # install python dependencies
 install:
@@ -34,9 +34,6 @@ install:
   # Replace dep1 dep2 ... with your dependencies
   - conda env create -f environment.yml
   - source activate mdpow_test
-  
-  # pull Gromacs 5.1.2 binaries
-  - conda install -c becksteinlab gromacs-5.1.2
 
   # install test tools
   - pip install codecov
