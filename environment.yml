@@ -2,7 +2,7 @@ name: mdpow_test
 channels:
 - becksteinlab
 dependencies:
-- gromacs-5.1.2
+- gromacs-4.6.7
 - numpy>=1.9
 - scipy
 - pip:

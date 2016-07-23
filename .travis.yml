@@ -42,8 +42,8 @@ install:
   - pip install -e .
 
   # source gromacs 5.1.2
-  - source $($HOME/get_gmx 5.1.2)
-  - gmx grompp -h
+  - source $($HOME/get_gmx 4.6.7)
+  - grompp -h
 
 # run tests
 script: 
