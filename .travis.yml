@@ -1,5 +1,5 @@
 language: python
-sudo: false
+sudo: true
 
 python:
   - "2.7"
@@ -9,6 +9,10 @@ branches:
     only:
         - master
         - develop
+
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install libgomp1
 
 # install python dependencies
 install:
@@ -36,6 +40,10 @@ install:
   - pip install pytest-cov
   - pip install pytest-pep8
   - pip install -e .
+
+  # source gromacs 5.1.2
+  - source $($HOME/get_gmx 4.6.7)
+  - grompp -h
 
 # run tests
 script: 
