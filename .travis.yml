@@ -41,6 +41,10 @@ install:
   - pip install pytest-pep8
   - pip install -e .
 
+  # source gromacs 5.1.2
+  - source $($HOME/get_gmx 5.1.2)
+  - gmx grompp -h
+
 # run tests
 script: 
   - py.test --cov mdpow mdpow/tests
