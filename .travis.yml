@@ -9,6 +9,10 @@ branches:
         - master
         - develop
 
+env:
+    - GMX_VERSION=4.6.7
+    - GMX_VERSION=5.1.2
+
 before_install:
   - sudo apt-get update
   - sudo apt-get install libgomp1
@@ -33,6 +37,7 @@ install:
   # Replace dep1 dep2 ... with your dependencies
   - conda env create -f environment.yml
   - source activate mdpow_test
+  - conda install -c becksteinlab gromacs-$GMX_VERSION
 
   # install test tools
   - pip install codecov
@@ -41,8 +46,8 @@ install:
   - pip install -e .
 
   # source gromacs 5.1.2
-  - source $($HOME/get_gmx 5.1.2)
-  - gmx grompp -h
+  - source $($HOME/get_gmx $GMX_VERSION)
+  - mdrun -h
 
 # run tests
 script: 
