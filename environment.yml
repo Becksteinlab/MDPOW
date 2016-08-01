@@ -1,6 +1,1 @@
 name: mdpow_test
-channels:
-- becksteinlab
-dependencies:
-- numpy>=1.9
-- scipy
