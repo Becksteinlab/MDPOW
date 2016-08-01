@@ -33,7 +33,7 @@ install:
   - conda update -q conda
   # Useful for debugging any issues with conda
   - conda info -a
-
+  - echo $TRAVIS_PYTHON_VERSION
   # Replace dep1 dep2 ... with your dependencies
   - conda env create -f environment.yml python=$TRAVIS_PYTHON_VERSION
   - source activate mdpow_test
