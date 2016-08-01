@@ -4,5 +4,3 @@ channels:
 dependencies:
 - numpy>=1.9
 - scipy
-- pip:
-  - recsql>=0.7
