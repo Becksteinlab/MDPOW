@@ -37,9 +37,6 @@ install:
   - conda create --yes -q -n mdpow_test python=$TRAVIS_PYTHON_VERSION numpy scipy
   - source activate mdpow_test
   - conda install -c becksteinlab gromacs-$GMX_VERSION
-  - ls $HOME
-
-  - $HOME/get_gmx $GMX_VERSION
 
   # install test tools
   - pip install recsql>=0.7
@@ -48,9 +45,8 @@ install:
   - pip install pytest-pep8
   - pip install -e .
 
-  # source gromacs 5.1.2
+  # source gromacs
   - source $($HOME/get_gmx $GMX_VERSION)
-  - mdrun -h
 
 # run tests
 script: 
