@@ -4,18 +4,22 @@ import os
 import shutil
 
 class TestSolvation(object):
-    sim_filename = ".simulation"
+
     sims = {"water" : mdpow.equil.WaterSimulation,
             "octanol" : mdpow.equil.OctanolSimulation,
             "cyclohexane" : mdpow.equil.CyclohexaneSimulation,
-           }
+    }
 
     def setup(self):
         self.tmpdir = td.TempDir()
         self.old_path = os.getcwd()
         self.resources = self.old_path + "/mdpow/tests/testing_resources"
         self.solvation_paths = self.resources + "/stages/solvation/water/benzene"
-        [shutil.copy('{0}/molecules/benzene/{1}'.format(self.resources, x), self.tmpdir.name) for x in ['benzene.pdb','benzene.itp']]
+        
+        files = ['benzene.pdb','benzene.itp']
+        for f in files:
+            orig = '{0}/molecules/benzene/{1}'.format(self.resources,f)
+            shutil.copy(orig, self.tmpdir.name)
 
     def _test_solvation(self, solvent):
         os.chdir(self.tmpdir.name)
@@ -24,6 +28,8 @@ class TestSolvation(object):
             S.topology(itp='benzene.itp')
             S.solvate(struct='benzene.pdb')
             assert 1
+        except:
+            assert 0
         finally:
             os.chdir(self.old_path)
 
