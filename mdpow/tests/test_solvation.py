@@ -1,5 +1,6 @@
 import mdpow.equil
-import tempdir
+import tempdir as td
+import os
 
 class TestSolvation(object):
     sim_filename = ".simulation"
@@ -7,9 +8,11 @@ class TestSolvation(object):
             "octanol" : mdpow.equil.OctanolSimulation,
             "cyclohexane" : mdpow.equil.CyclohexaneSimulation}
 
-    def setup(self,tempdir.TempDir):
-        self.tmpdir = Tempdir.in_tempdir()
-        print(self.tmpdir.old_path)
+    def setup(self):
+        self.tmpdir = td.TempDir()
+        self.old_path = os.getcwd()
+        print(self.tmpdir.name)
+        print(self.old_path)
         assert 0
 
     def _test_solvation(structure,solvent):
