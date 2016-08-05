@@ -24,11 +24,17 @@ class TestSolvation(object):
     def _test_solvation(self, solvent):
         os.chdir(self.tmpdir.name)
         try:
-            S = self.sims[solvent](molecule='BNZ')
-            S.topology(itp='benzene.itp')
-            S.solvate(struct='benzene.pdb')
+            if isinstance(solvent, list):
+                for sol in solvent:
+                    S = self.sims[sol](molecule='BNZ')
+                    S.topology(itp='benzene.itp')
+                    S.solvate(struct='benzene.pdb')
+            else:    
+                S = self.sims[solvent](molecule='BNZ')
+                S.topology(itp='benzene.itp')
+                S.solvate(struct='benzene.pdb')
             assert 1
-        except:
+        except Exception:
             assert 0
         finally:
             os.chdir(self.old_path)
@@ -41,3 +47,6 @@ class TestSolvation(object):
 
     def test_solvation_cyclohexane(self):
         return self._test_solvation('cyclohexane')
+
+    def test_all_solvents(self):
+        return self._test_solvation([k for k in self.sims])
