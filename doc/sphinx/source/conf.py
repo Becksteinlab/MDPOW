@@ -206,7 +206,6 @@ latex_documents = [
 intersphinx_mapping = {'http://docs.python.org/': None,
                        'http://docs.scipy.org/doc/numpy/': None,
                        'http://docs.scipy.org/doc/scipy/reference/': None,
-                       'http://recsql.readthedocs.org/en/latest/': None,
                        'http://gromacswrapper.readthedocs.org/en/latest/': None,
                    }
 

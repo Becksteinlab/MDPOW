@@ -6,6 +6,9 @@ Add summary of changes for each release. Use ISO dates. Reference
 GitHub issues numbers and PR numbers.
 
 2016-xx-xx    0.6.1
+orbeckst
+
+* removed unused analysis.py and analysis/thermodynamics.py
 
 
 2016-06-29    0.6.0
