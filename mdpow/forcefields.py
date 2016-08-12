@@ -41,11 +41,12 @@ DEFAULT_FORCEFIELD = "OPLS-AA"
 #: See the file ``top/oplsaa.ff/watermodels.dat`` for a description of
 #: available water models that are bundled with MDPOW.
 GMX_WATERMODELS_DAT="""
-tip4p   TIP4P  TIP 4-point, recommended
-tip3p   TIP3P  TIP 3-point
-tip5p   TIP5P  TIP 5-point
-spc     SPC    simple point charge
-spce    SPC/E  extended simple point charge
+tip4p       TIP4P      TIP 4-point, recommended
+tip3p       TIP3P      TIP 3-point
+tip5p       TIP5P      TIP 5-point
+spc         SPC        simple point charge
+spce        SPC/E      extended simple point charge
+m24         M24        TIP 3-point with modified LJ (M24)
 """
 
 class GromacsSolventModel(object):
@@ -73,6 +74,7 @@ SPECIAL_WATER_COORDINATE_FILES = defaultdict(
     spc='spc216.gro',
     spce='spc216.gro',
     tip3p='spc216.gro',
+    m24='spc216.gro',
 )
 
 def _create_water_models(watermodelsdat):

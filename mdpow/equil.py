@@ -150,7 +150,7 @@ class Simulation(Journalled):
         # self.mdp: key = stage, value = path to MDP file
 
         # 'water' will choose the default ('tip4p'), other choices are
-        # 'tip3p', 'spc', 'spce', for water; no choices
+        # 'tip3p', 'spc', 'spce', 'm24', for water; no choices
         # available for 'cyclohexane' and 'octanol'
         solventmodel = kwargs.pop('solventmodel', None)
 
