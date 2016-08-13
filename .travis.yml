@@ -10,6 +10,10 @@ branches:
         - master
         - develop
 
+env:
+    - GMX_VERSION=4.6.7
+    - GMX_VERSION=5.1.2
+
 # install python dependencies
 install:
   # We do this conditionally because it saves us some downloading if the
@@ -27,15 +31,20 @@ install:
   # Useful for debugging any issues with conda
   - conda info -a
 
-  # Replace dep1 dep2 ... with your dependencies
-  - conda env create -f environment.yml
+  - conda create --yes -q -n mdpow_test python=$TRAVIS_PYTHON_VERSION numpy scipy
   - source activate mdpow_test
+  - conda install -c becksteinlab gromacs-$GMX_VERSION
 
   # install test tools
   - pip install codecov
   - pip install pytest-cov
   - pip install pytest-pep8
   - pip install -e .
+
+  # source gromacs
+  - if [[ $GMX_VERSION == "4.6.7" ]]; then curl https://raw.githubusercontent.com/Becksteinlab/GromacsWrapper/develop/gromacs/templates/gromacswrapper_465.cfg -o ~/.gromacswrapper.cfg;
+    fi 
+  - source $($HOME/get_gmx $GMX_VERSION)
 
 # run tests
 script: 
