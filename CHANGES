@@ -6,6 +6,7 @@ Add summary of changes for each release. Use ISO dates. Reference
 GitHub issues numbers and PR numbers.
 
 2016-xx-xx    0.6.1
+iorga
 
 * supported water models: TIP4P, TIP3P, TIP5P, SPC, SPC/E, and new: M24 (modified TIP3P, #46)
 
