@@ -19,7 +19,7 @@ setup:
          # coordinate file name (pdb, gro, ... anything that Gromacs can read)
     watermodel: spce
          # water model available in Gromacs (OPLS-AA):
-         # tip4p, tip5p, tip3p, spc, spce              
+         # tip4p, tip5p, tip3p, spc, spce, m24              
     maxwarn: 2
          # maximum number of warnings tolerated by grompp during setup
     gromacsoutput: True

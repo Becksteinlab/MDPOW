@@ -6,9 +6,10 @@ Add summary of changes for each release. Use ISO dates. Reference
 GitHub issues numbers and PR numbers.
 
 2016-xx-xx    0.6.1
-orbeckst
+orbeckst, iorga
 
 * removed unused analysis.py and analysis/thermodynamics.py
+* supported water models: TIP4P, TIP3P, TIP5P, SPC, SPC/E, and new: M24 (modified TIP3P, #46)
 
 
 2016-06-29    0.6.0

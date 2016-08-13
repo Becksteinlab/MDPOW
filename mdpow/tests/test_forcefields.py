@@ -4,7 +4,7 @@ import mdpow.config
 import mdpow.forcefields
 
 # currently supported
-WATERMODELS = ('tip4p', 'tip3p', 'tip5p', 'spc', 'spce')
+WATERMODELS = ('tip4p', 'tip3p', 'tip5p', 'spc', 'spce', 'm24')
 SOLVENTMODELS = ('water', 'cyclohexane', 'octanol')
 
 class TestIncludedForcefiels(object):
