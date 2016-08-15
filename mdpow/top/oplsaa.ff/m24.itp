@@ -3,9 +3,10 @@
 ; epsilon: 0.24 kcal/mol
 ; sigma: 3.111 Å
 
-[ atomtypes ]
+; the new atom type was inserted in the ffnonbonded.itp file, as opls_111_m24
+;[ atomtypes ]
 ; name  bond_type    mass    charge   ptype          sigma      epsilon
- opls_111   OW  8      9.95140    -0.834       A    3.11100e-01  1.00440e-00
+; opls_111   OW  8      9.95140    -0.834       A    3.11100e-01  1.00440e-00
 
 [ moleculetype ]
 ; molname	nrexcl
@@ -13,9 +14,9 @@ SOL		2
 
 [ atoms ]
 ; id	at type	res nr 	residu name	at name		cg nr	charge
-1     opls_111  1       SOL              OW             1       -0.834
-2     opls_112  1       SOL             HW1             1        0.417
-3     opls_112  1       SOL             HW2             1        0.417
+1     opls_111_m24  1       SOL              OW             1       -0.834
+2     opls_112      1       SOL             HW1             1        0.417
+3     opls_112      1       SOL             HW2             1        0.417
 
 #ifndef FLEXIBLE
 [ settles ]

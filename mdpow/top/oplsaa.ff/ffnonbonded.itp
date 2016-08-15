@@ -846,3 +846,8 @@
  opls_9008  Rb+   37     5.46780     1.000       A    5.60000e-01  2.09200e-03 
  opls_9009  Cs+   55   132.90540     1.000       A    6.20000e-01  2.09200e-03 
  opls_9010  NH4+   7    18.03870     1.000       A    5.34000e-01  2.09200e-03 
+
+; TIP3P-M24 water model from Shirts and Pande. J. Chem. Phys., 122(13), 2005. doi:10.1063/1.1877132
+; TIP3P geometry, epsilon: 0.24 kcal/mol, sigma: 3.111 Å
+ opls_111_m24   OW  8      9.95140    -0.834       A    3.11100e-01  1.00440e-00
+
