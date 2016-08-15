@@ -9,11 +9,11 @@
 ; Include forcefield parameters
 #include "oplsaa.ff/forcefield.itp"
 
-; Include solvent topology
-#include "oplsaa.ff/tip4p.itp"
-
 ; Include compound topology
 #include "compound.itp"
+
+; Include solvent topology
+#include "oplsaa.ff/tip4p.itp"
 
 ; Include topology for OPLS/AA ions 
 #include "oplsaa.ff/ions_opls.itp"
