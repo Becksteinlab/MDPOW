@@ -36,6 +36,7 @@ install:
   - conda install -c becksteinlab gromacs-$GMX_VERSION
 
   # install test tools
+  - pip install git+git://github.com/ianmkenney/manifest_parser.git
   - pip install codecov
   - pip install pytest-cov
   - pip install pytest-pep8
@@ -46,9 +47,6 @@ install:
     fi 
   - source $($HOME/get_gmx $GMX_VERSION)
   
-  # download Manifest parser 
-  - curl -o mdpow/tests/Manifest.py 'https://raw.githubusercontent.com/ianmkenney/manifest_parser/master/Manifest.py'
-
 # run tests
 script: 
   - py.test --cov mdpow mdpow/tests

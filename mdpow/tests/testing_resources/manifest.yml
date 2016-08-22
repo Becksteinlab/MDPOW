@@ -1,0 +1,23 @@
+path: mdpow/tests/testing_resources/states
+
+# After solvation is complete
+solvated:
+    files:
+        - []
+
+# After energy minimization is complete
+energy_min:
+    files:
+        - []
+
+# After MD_NPT
+md_npt:
+    files:
+        - []
+
+# After FEP
+FEP:
+    files:
+        - []
+
+

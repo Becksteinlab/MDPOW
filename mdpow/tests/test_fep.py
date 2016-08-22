@@ -3,7 +3,7 @@ from numpy.testing import assert_array_almost_equal
 
 import mdpow
 import mdpow.fep
-import Manifest
+import manifest
 
 class TestFEPschedule(object):
     reference = {
