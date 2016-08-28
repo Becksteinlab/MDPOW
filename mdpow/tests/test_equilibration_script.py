@@ -26,7 +26,14 @@ class TestEquilibriumScript(object):
         os.chdir(self.tmpdir.name)
         try:
             self._run_equil('water','benzene/')
+            self._new_structures()
         except:
             assert False
         finally:
             os.chdir(self.old_path)
+    
+    def _new_structures(self):
+        assert os.path.exists(os.path.join(self.tmpdir.name,'benzene','Equilibrium','water','em','em.pdb'))
+        assert os.path.exists(os.path.join(self.tmpdir.name,'benzene','Equilibrium','water','solvation','solvated.gro'))
+        assert os.path.exists(os.path.join(self.tmpdir.name,'benzene','Equilibrium','water','MD_NPT','md.gro'))
+
