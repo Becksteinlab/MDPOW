@@ -38,7 +38,7 @@ MD_relaxed:
     runlocal: True
          # True: launch Gromacs mdrun and wait for it
          # False: produce queuing system scripts and stop
-    runtime: 5
+    runtime: 2
          # run time in ps
     mdp: NPT_opls.mdp
          #  run parameter file for Gromacs;
@@ -49,7 +49,7 @@ MD_relaxed:
 MD_NPT:
     qscript: local.sh
          # queuing system scripts to produce
-    runtime: 100
+    runtime: 10
          # simulation run time in ps [50 ns is generous, probably can be shorter]
     runlocal: True
          # True: launch Gromacs mdrun and wait for it
@@ -65,12 +65,12 @@ FEP:
          # BAR or TI
     qscript: local.sh
          # queuing system scripts to produce
-    runtime: 50
+    runtime: 5
          # run time in ps for each free energy window
     runlocal: True
          # True: launch Gromacs mdrun and run all windows in a serial fashion
          # False: produce queuing system scripts and stop
-    maxwarn: 0
+    maxwarn: 1
          # maximum number of warnings tolerated by grompp during setting up FEP runs
          # Set to 1 if you want to ignore the warning (in 4.6.x):
          #
@@ -113,7 +113,7 @@ FEP_schedule_VDW:
 
 mdrun:
         # options to control a mdrun process
-    stepout: 1000
+    stepout: 2000
          # how often to report progress (-stepout)
     verbose: True
          # report progress verbosely (True is -v)

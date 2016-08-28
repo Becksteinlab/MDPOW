@@ -1,4 +1,3 @@
-import mdpow.equil
 import tempdir as td
 import os
 import manifest
