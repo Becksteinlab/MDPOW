@@ -24,7 +24,7 @@ def fixSimulation(solvent, simfile, basedir):
         S.make_paths_relative(simbasedir)
         # TODO: fix includedir
         # S.dirs.includes[0] = '/sansom/gfio/oliver/Projects/pow/lib/python/POW/mdpow/top'
-    except Exception, err:
+    except Exception as err:
         logger.error(str(err))
 
     S.save(simfile)

@@ -256,7 +256,7 @@ class Simulation(Journalled):
                 self.dirs[key] = assinglet([fn.replace(basedir, prefix) for fn in fns])
             except AttributeError:
                 pass
-        for key, fn in self.mdp:
+        for key, fn in self.mdp.items():
             try:
                 self.mdp[key] = fn.replace(basedir, prefix)
             except AttributeError:

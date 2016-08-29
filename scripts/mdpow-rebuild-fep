@@ -28,7 +28,7 @@ def fixFEP(solvent, fepfile, simfile, basedir):
         # TODO: fix includedir
         # S.dirs.includes[0] = '/sansom/gfio/oliver/Projects/pow/lib/python/POW/mdpow/top'
         G = Gsolv[solvent](simulation=S, basedir=basedir, permissive=True)
-    except Exception, err:
+    except Exception as err:
         logger.error(str(err))
         logger.warn("Could not get the simulation pickle file %(simfile)r", vars())
         logger.warn("The FEP pickle file will be fixed as it is (no path adjustments)")
