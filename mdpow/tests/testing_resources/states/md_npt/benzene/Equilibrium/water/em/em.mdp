@@ -1,0 +1,41 @@
+; Gromacs mdp file
+; Template for energy minimization with OPLS-AA (part of POW)
+
+include                  =   -I. -I.. -I/nfs/homes/ikenney/Projects/mdpow_testing_environment/defaults/benzene/Equilibrium/water/top -I/nfs/homes/ikenney/Library/python/MDPOW/mdpow/top -I/nfs/homes/ikenney/Projects/mdpow_testing_environment/defaults/benzene/Equilibrium/water/top
+define                   =
+
+integrator               = steep
+
+emtol                    = 500
+emstep                   = 0.01
+nsteps                   = 1000
+nstcgsteep               = 100
+
+nstxout                  = 0 ; write coords every # step
+
+constraints              = none
+
+
+ns_type                  = grid
+pbc                      = xyz
+periodic_molecules       = no
+
+rlist                    = 1.0
+
+coulombtype              = PME
+rcoulomb                 = 1.0
+fourierspacing           = 0.12
+pme_order                = 6
+ewald_rtol               = 1e-06
+ewald_geometry           = 3d
+epsilon_surface          = 0
+optimize_fft             = no
+
+vdwtype                  = cut-off   ; use shift for L-BFGS
+rvdw                     = 1.0
+rvdw-switch              = 0         ; 0.8 for l-bfcg
+
+Tcoupl                   = no
+Pcoupl                   = no
+gen_vel                  = no
+
