@@ -636,7 +636,6 @@ class Gsolv(Journalled):
                 feplambdas = foreign_lambdas[0]
             else:
                 feplambdas = "{0} {1}".format(foreign_lambdas[0], foreign_lambdas[1])
-
             kwargs.update(dirname=wdir, struct=self.struct, top=self.top,
                           mdp=self.mdp,
                           ndx=self.ndx,

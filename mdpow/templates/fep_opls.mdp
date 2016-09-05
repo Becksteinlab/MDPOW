@@ -112,6 +112,7 @@ lincs-iter               = 1
 free_energy              = yes
 init_lambda              = 0.0
 delta_lambda             = 0
+fep_lambdas              = 0 1
 sc_alpha                 = 0.5
 sc-power                 = 1.0
 sc-sigma                 = 0.3 
