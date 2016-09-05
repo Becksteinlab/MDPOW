@@ -1,36 +1,32 @@
 import tempdir as td
 import os
 import manifest
+from gromacs.utilities import in_dir
 
 from mdpow.run import equilibrium_simulation
 from mdpow.config import get_configuration
+
 
 class TestEquilibriumScript(object):
     
     def setup(self):
         self.tmpdir = td.TempDir()
         self.old_path = os.getcwd()
-        self.resources = self.old_path + "/mdpow/tests/testing_resources"
+        self.resources = os.path.join(self.old_path, 'mdpow', 'tests', 'testing_resources')
         m = manifest.Manifest(os.path.join(self.resources,'manifest.yml'))
         m.assemble('base',self.tmpdir.name)
 
     def _run_equil(self, solvent, dirname):
-        try:
-            print(os.listdir('.'))
-            cfg = get_configuration('runinput.yml')
-            self.S = equilibrium_simulation(cfg, solvent, dirname=dirname)
-        except:
-            assert False
+        cfg = get_configuration('runinput.yml')
+        self.S = equilibrium_simulation(cfg, solvent, dirname=dirname)
 
     def test_basic_run(self):
-        os.chdir(self.tmpdir.name)
-        try:
-            self._run_equil('water','benzene/')
-            self._new_structures()
-        except:
-            assert False
-        finally:
-            os.chdir(self.old_path)
+        with in_dir(self.tmpdir.name, create=False)
+            try:
+                self._run_equil('water','benzene/')
+                self._new_structures()
+            except:
+                raise AssertionError('Equilibration simulations failed.')
     
     def _new_structures(self):
         assert os.path.exists(os.path.join(self.tmpdir.name,'benzene','Equilibrium','water','em','em.pdb'))

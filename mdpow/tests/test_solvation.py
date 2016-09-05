@@ -2,6 +2,7 @@ import mdpow.equil
 import tempdir as td
 import os
 import shutil
+from gromacs.utilities import in_dir
 
 class TestSolvation(object):
 
@@ -13,31 +14,34 @@ class TestSolvation(object):
     def setup(self):
         self.tmpdir = td.TempDir()
         self.old_path = os.getcwd()
-        self.resources = self.old_path + "/mdpow/tests/testing_resources"
-        self.solvation_paths = self.resources + "/stages/solvation/water/benzene"
+        self.resources = os.path.join(self.old_path, 'mdpow', 'tests', 'testing_resources')
+        self.solvation_paths = os.path.join(self.resources, 'stages', 'solvation', 'water', 'benzene')
         
+        # TODO replace by using manifest
+        """
+        m = manifest.Manifest('manifest.yml')
+        m.assemble('base')
+        """
+
         files = ['benzene.pdb','benzene.itp']
         for f in files:
-            orig = '{0}/molecules/benzene/{1}'.format(self.resources,f)
+            orig = os.path.join(self.resources, 'molecules', 'benzene', f)
             shutil.copy(orig, self.tmpdir.name)
 
     def _test_solvation(self, solvent):
-        os.chdir(self.tmpdir.name)
-        try:
-            if isinstance(solvent, list):
-                for sol in solvent:
-                    S = self.sims[sol](molecule='BNZ')
+        with in_dir(self.tmpdir.name, create=False):
+            try:
+                if isinstance(solvent, list):
+                    for sol in solvent:
+                        S = self.sims[sol](molecule='BNZ')
+                        S.topology(itp='benzene.itp')
+                        S.solvate(struct='benzene.pdb')
+                else:    
+                    S = self.sims[solvent](molecule='BNZ')
                     S.topology(itp='benzene.itp')
                     S.solvate(struct='benzene.pdb')
-            else:    
-                S = self.sims[solvent](molecule='BNZ')
-                S.topology(itp='benzene.itp')
-                S.solvate(struct='benzene.pdb')
-            assert 1
-        except Exception:
-            assert 0
-        finally:
-            os.chdir(self.old_path)
+            except Exception:
+                raise AssertionError('Solvation failed.')
 
     def test_solvation_water(self):
         return self._test_solvation('water')
