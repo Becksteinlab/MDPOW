@@ -307,7 +307,7 @@ class Gsolv(Journalled):
 
     #: Default Gromacs *MDP* run parameter file for FEP.
     #: (The file is part of the package and is found with :func:`mdpow.config.get_template`.)
-    mdp_default = 'fep_opls.mdp'
+    mdp_default = 'bar_opls.mdp'
 
 
     def __init__(self, molecule=None, top=None, struct=None, method="BAR", **kwargs):
