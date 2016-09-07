@@ -16,12 +16,15 @@ class TestEquilibriumScript(object):
         m = manifest.Manifest(os.path.join(self.resources,'manifest.yml'))
         m.assemble('base',self.tmpdir.name)
 
+    def teardown(self):
+        self.tmpdir.dissolve()
+
     def _run_equil(self, solvent, dirname):
         cfg = get_configuration('runinput.yml')
         self.S = equilibrium_simulation(cfg, solvent, dirname=dirname)
 
     def test_basic_run(self):
-        with in_dir(self.tmpdir.name, create=False)
+        with in_dir(self.tmpdir.name, create=False):
             try:
                 self._run_equil('water','benzene/')
                 self._new_structures()

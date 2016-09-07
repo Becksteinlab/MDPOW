@@ -28,6 +28,9 @@ class TestSolvation(object):
             orig = os.path.join(self.resources, 'molecules', 'benzene', f)
             shutil.copy(orig, self.tmpdir.name)
 
+    def teardown(self):
+        self.tmpdir.dissolve()
+
     def _test_solvation(self, solvent):
         with in_dir(self.tmpdir.name, create=False):
             try:

@@ -21,12 +21,15 @@ class TestFEPScript(object):
         S.dirs.includes = os.path.join(self.tmpdir.name, 'top')
         S.save()
 
+    def teardown(self):
+        self.tmpdir.dissolve()
+    
     def _run_fep(self, solvent, dirname):
         cfg = get_configuration('runinput.yml')
         self.S = fep_simulation(cfg, solvent, dirname=dirname)
     
     def test_basic_run(self):
-        with in_dir(self.tempdir.name, create=False):
+        with in_dir(self.tmpdir.name, create=False):
             try:
                 self._run_fep('water','benzene/')
             except:
