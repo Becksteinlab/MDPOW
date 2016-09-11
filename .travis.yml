@@ -12,7 +12,7 @@ branches:
 
 env:
     - GMX_VERSION=4.6.7
-    - GMX_VERSION=5.1.2
+#    - GMX_VERSION=5.1.2
 
 # install python dependencies
 install:
@@ -36,6 +36,7 @@ install:
   - conda install -c becksteinlab gromacs-$GMX_VERSION
 
   # install test tools
+  - pip install git+git://github.com/ianmkenney/manifest_parser.git
   - pip install codecov
   - pip install pytest-cov
   - pip install pytest-pep8
@@ -45,7 +46,7 @@ install:
   - if [[ $GMX_VERSION == "4.6.7" ]]; then curl https://raw.githubusercontent.com/Becksteinlab/GromacsWrapper/develop/gromacs/templates/gromacswrapper_465.cfg -o ~/.gromacswrapper.cfg;
     fi 
   - source $($HOME/get_gmx $GMX_VERSION)
-
+  
 # run tests
 script: 
   - py.test --cov mdpow mdpow/tests

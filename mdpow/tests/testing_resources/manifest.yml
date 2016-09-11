@@ -1,0 +1,42 @@
+path: mdpow/tests/testing_resources/states
+
+base:
+    options:
+        - full_transfer
+    files:
+        - []
+
+# After solvation is complete
+solvated:
+    options:
+        - full_transfer
+    files:
+        - []
+
+# After energy minimization is complete
+energy_min:
+    options:
+        - full_transfer
+    files:
+        - []
+
+# After MD_NPT
+md_npt:
+    options:
+        - full_transfer
+    files:
+        - []
+
+# After FEP
+FEP:
+    options:
+        - full_transfer
+    files:
+        - []
+
+analysis:
+    options:
+        - full_transfer
+    files:
+        - []
+

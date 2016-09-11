@@ -7,10 +7,8 @@ class TestEnergyMinimization(object):
     def setup(self):
         self.tmpdir = td.TempDir()
         self.old_path = os.getcwd()
-        self.resources = self.old_path + "/mdpow/tests/testing_resources"
-
-        # Instantiate Simulation object from existing files in resources
-        pass
+        self.resources = os.path.join(self.old_path, 'mdpow', 'tests', 'testing_resources')
+        # TODO Instantiate Simulation object from existing files in resources
 
     def _run_emin(self):
         """To be used as a helper function in tests."""
