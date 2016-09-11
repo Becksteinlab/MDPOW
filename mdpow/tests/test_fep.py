@@ -55,6 +55,7 @@ class TestFEPschedule(object):
                 assert_array_almost_equal(schedule[k], reference[k],
                                           err_msg="FEP schedule {0} mismatch".format(k))
             else:
-                assert schedule[k] == reference[k], "mismatch between loaded FEP schedule entry {0} and reference".format(k)
+                assert schedule[k] == reference[k], \
+                    "mismatch between loaded FEP schedule entry {0} and reference".format(k)
 
 

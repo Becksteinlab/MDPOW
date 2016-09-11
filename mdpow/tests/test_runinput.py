@@ -1,3 +1,5 @@
+import os.path
+
 import numpy as np
 from numpy.testing import assert_array_almost_equal
 
@@ -81,16 +83,20 @@ class TestAlteredConfig(object):
 
     def setup(self):
     # load default bundled configuration
-        self.cfg = mdpow.config.get_configuration('mdpow/tests/testing_resources/test_configurations/altered_runinput.yml')
+        self.cfg = mdpow.config.get_configuration(
+            os.path.join('mdpow', 'tests', 'testing_resources',
+                         'test_configurations', 'altered_runinput.yml'))
 
     def _test_section(self,section):
         section_dict = self.params_altered[section]
         for k in section_dict.keys():
             if k == 'lambdas':
                 parsed = np.array([float(x.strip()) for x in self.cfg.get(section,k).split(",")])
-                assert_array_almost_equal(parsed, section_dict[k],err_msg="mismatch in lambdas")
+                assert_array_almost_equal(parsed, section_dict[k],
+                                          err_msg="mismatch in lambdas")
             else:
-                assert self.cfg.get(section,k) == section_dict[k], "mismatch in {}:{}".format(section,k)
+                assert self.cfg.get(section,k) == section_dict[k], \
+                    "mismatch in {}:{}".format(section,k)
 
     def test_DEFAULT(self):
         return self._test_section("DEFAULT")

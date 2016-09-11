@@ -1,3 +1,5 @@
+import os.path
+
 import pytest
 
 import mdpow.config
@@ -15,26 +17,28 @@ class TestIncludedForcefiels(object):
     @staticmethod
     def test_oplsaa_itp():
         assert "ffoplsaa.itp" in mdpow.config.topfiles
-        assert mdpow.config.topfiles["ffoplsaa.itp"].endswith('mdpow/top/ffoplsaa.itp')
+        assert mdpow.config.topfiles["ffoplsaa.itp"].endswith(
+            os.path.join('mdpow', 'top', 'ffoplsaa.itp'))
 
     @staticmethod
     def test_oplsaa_ff():
         assert "oplsaa.ff" in mdpow.config.topfiles
-        assert mdpow.config.topfiles["oplsaa.ff"].endswith('mdpow/top/oplsaa.ff')
+        assert mdpow.config.topfiles["oplsaa.ff"].endswith(
+            os.path.join('mdpow', 'top', 'oplsaa.ff'))
 
 class TestIncludedSolvents(object):
     solvents = {
         'tip4p': {
-            'tip4p.itp': 'mdpow/top/oplsaa.ff/tip4p.itp',
-            'tip4p.gro': 'mdpow/top/tip4p.gro'
+            'tip4p.itp': os.path.join('mdpow', 'top', 'oplsaa.ff', 'tip4p.itp'),
+            'tip4p.gro': os.path.join('mdpow', 'top', 'tip4p.gro')
         },
         'octanol': {
-            '1oct.gro': 'mdpow/top/1oct.gro',
-            '1oct.itp': 'mdpow/top/oplsaa.ff/1oct.itp',
+            '1oct.gro': os.path.join('mdpow', 'top', '1oct.gro'),
+            '1oct.itp': os.path.join('mdpow', 'top', 'oplsaa.ff', '1oct.itp'),
         },
         'cyclohexane': {
-            '1cyclo.gro': 'mdpow/top/1cyclo.gro',
-            '1cyclo.itp': 'mdpow/top/oplsaa.ff/1cyclo.itp'
+            '1cyclo.gro': os.path.join('mdpow', 'top', '1cyclo.gro'),
+            '1cyclo.itp': os.path.join('mdpow', 'top', 'oplsaa.ff', '1cyclo.itp')
         },
     }
 

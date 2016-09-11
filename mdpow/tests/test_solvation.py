@@ -1,11 +1,12 @@
-import mdpow.equil
-import tempdir as td
 import os
 import shutil
+
 from gromacs.utilities import in_dir
+import tempdir as td
+
+import mdpow.equil
 
 class TestSolvation(object):
-
     sims = {"water" : mdpow.equil.WaterSimulation,
             "octanol" : mdpow.equil.OctanolSimulation,
             "cyclohexane" : mdpow.equil.CyclohexaneSimulation,
@@ -14,9 +15,11 @@ class TestSolvation(object):
     def setup(self):
         self.tmpdir = td.TempDir()
         self.old_path = os.getcwd()
-        self.resources = os.path.join(self.old_path, 'mdpow', 'tests', 'testing_resources')
-        self.solvation_paths = os.path.join(self.resources, 'stages', 'solvation', 'water', 'benzene')
-        
+        self.resources = os.path.join(
+            self.old_path, 'mdpow', 'tests', 'testing_resources')
+        self.solvation_paths = os.path.join(
+            self.resources, 'stages', 'solvation', 'water', 'benzene')
+
         # TODO replace by using manifest
         """
         m = manifest.Manifest('manifest.yml')
@@ -39,7 +42,7 @@ class TestSolvation(object):
                         S = self.sims[sol](molecule='BNZ')
                         S.topology(itp='benzene.itp')
                         S.solvate(struct='benzene.pdb')
-                else:    
+                else:
                     S = self.sims[solvent](molecule='BNZ')
                     S.topology(itp='benzene.itp')
                     S.solvate(struct='benzene.pdb')
