@@ -36,7 +36,7 @@ install:
   - conda install -c becksteinlab gromacs-$GMX_VERSION
 
   # install test tools
-  - pip install git+git://github.com/ianmkenney/manifest_parser.git
+  - pip install git+git://github.com/ianmkenney/PyBOL.git
   - pip install codecov
   - pip install pytest-cov
   - pip install pytest-pep8
