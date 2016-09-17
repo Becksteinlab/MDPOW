@@ -29,8 +29,8 @@ class TestEquilibriumScript(object):
             try:
                 self._run_equil('water','benzene/')
                 self._new_structures()
-            except:
-                raise AssertionError('Equilibration simulations failed.')
+            except Exception as err:
+                raise AssertionError('Equilibration simulations failed with exception:\n{0}'.format(str(err)))
 
     def _new_structures(self):
         assert os.path.exists(
