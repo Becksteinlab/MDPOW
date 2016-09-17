@@ -12,7 +12,7 @@ branches:
 
 env:
     - GMX_VERSION=4.6.7
-#    - GMX_VERSION=5.1.2
+    - GMX_VERSION=5.1.2
 
 # install python dependencies
 install:
@@ -44,13 +44,10 @@ install:
   # install MDPOW
   - pip install -e .
 
-  # source gromacs
-  - if [[ $GMX_VERSION == "4.6.7" ]]; then curl https://raw.githubusercontent.com/Becksteinlab/GromacsWrapper/develop/gromacs/templates/gromacswrapper_465.cfg -o ~/.gromacswrapper.cfg;
-    fi 
-  - source $($HOME/get_gmx $GMX_VERSION)
-  
 # run tests
-script: 
+script:
+  # set up gromacs environment: picked up by GromacsWrapper
+  - source $($HOME/get_gmx $GMX_VERSION)
   - py.test --cov mdpow mdpow/tests
 
 after_success:
