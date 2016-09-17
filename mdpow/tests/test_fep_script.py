@@ -34,5 +34,5 @@ class TestFEPScript(object):
         with in_dir(self.tmpdir.name, create=False):
             try:
                 self._run_fep('water', 'benzene/')
-            except:
-                raise AssertionError('FEP simulations failed.')
+            except Exception as err:
+                raise AssertionError('FEP simulations failed with exception:\n{0}'.format(str(err)))
