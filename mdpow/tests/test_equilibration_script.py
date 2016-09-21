@@ -1,6 +1,6 @@
 import os.path
 import tempdir as td
-import manifest
+import pybol
 
 from gromacs.utilities import in_dir
 
@@ -14,7 +14,7 @@ class TestEquilibriumScript(object):
         self.old_path = os.getcwd()
         self.resources = os.path.join(
             self.old_path, 'mdpow', 'tests', 'testing_resources')
-        m = manifest.Manifest(os.path.join(self.resources, 'manifest.yml'))
+        m = pybol.Manifest(os.path.join(self.resources, 'manifest.yml'))
         m.assemble('base', self.tmpdir.name)
 
     def teardown(self):
