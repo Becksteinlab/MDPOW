@@ -6,14 +6,14 @@
 
 
 DEFAULT:
-    qscripts: local.sh
+    qscripts: 'local.sh'
 
 setup:
     name: None
          # common, descriptive name, e.g. benzene
     molecule: None
          # Gromacs [ molecule ] identifier from the itp file (typically a 3-letter code)
-    watermodel: tip4p
+    watermodel: 'tip4p'
          # water model available in Gromacs (OPLS-AA):
          # tip4p, tip5p, tip3p, spc, spce, m24
     itp: None
@@ -27,43 +27,43 @@ setup:
          # False: only show the MDPOW messages
 
 energy_minimize:
-    mdp: em_opls.mdp
+    mdp: 'em_opls.mdp'
          # run parameter file for Gromacs;
          # (will be searched as (1) absolute path, (2) in current directory (3)
          # in the package templates)
 
 MD_relaxed:
-    qscript: local.sh
+    qscript: 'local.sh'
          # queuing system scripts to produce
     runlocal: True
          # True: launch Gromacs mdrun and wait for it
          # False: produce queuing system scripts and stop
     runtime: 5
          # run time in ps
-    mdp: NPT_opls.mdp
+    mdp: 'NPT_opls.mdp'
          #  run parameter file for Gromacs;
          # (will be searched as (1) absolute path, (2) in current directory (3)
          # in the package templates)
          # special index groups  __main__ __environment__ can be used
 
 MD_NPT:
-    qscript: local.sh
+    qscript: 'local.sh'
          # queuing system scripts to produce
     runtime: 50000
          # simulation run time in ps [50 ns is generous, probably can be shorter]
     runlocal: False
          # True: launch Gromacs mdrun and wait for it
          # False: produce queuing system scripts and stop
-    mdp: NPT_opls.mdp
+    mdp: 'NPT_opls.mdp'
          # run parameter file for Gromacs;
          # (will be searched as (1) absolute path, (2) in current directory (3)
          # in the package templates)
          # special index groups  __main__ __environment__ can be used
 
 FEP:
-    method: BAR
+    method: 'BAR'
          # BAR or TI
-    qscript: local.sh
+    qscript: 'local.sh'
          # queuing system scripts to produce
     runtime: 5000
          # run time in ps for each free energy window
@@ -79,18 +79,18 @@ FEP:
          #  necessarily cancel.  It may be necessary to decrease the reciprocal space
          #  energy, and increase the cutoff radius to get sufficiently close matches
          #  to energies with free energy turned off.
-    mdp: bar_opls.mdp
+    mdp: 'bar_opls.mdp'
          # run parameter file for Gromacs;
          # (will be searched as (1) absolute path, (2) in current directory (3)
          # in the package templates)
          # special index groups  __main__ __environment__ can be used
 
 FEP_schedule_Coulomb:
-    name: Coulomb
-    description: dis-charging vdw+q --> vdw
-    label: Coul
-    couple_lambda0: vdw-q
-    couple_lambda1: vdw
+    name: 'Coulomb'
+    description: 'dis-charging vdw+q --> vdw'
+    label: 'Coul'
+    couple_lambda0: 'vdw-q'
+    couple_lambda1: 'vdw'
          # soft core alpha: linear scaling for coulomb (sc_alpha = 0)
          # ignore the other sc_*
     sc_alpha: 0
@@ -99,11 +99,11 @@ FEP_schedule_Coulomb:
     lambdas: 0, 0.25, 0.5, 0.75, 1.0
 
 FEP_schedule_VDW:
-    name: vdw
-    description: decoupling vdw --> none
-    label: VDW
-    couple_lambda0: vdw
-    couple_lambda1: none
+    name: 'vdw'
+    description: 'decoupling vdw --> none'
+    label: 'VDW'
+    couple_lambda0: 'vdw'
+    couple_lambda1: 'none'
          # recommended values for soft cores (Mobley, Shirts et al)
     sc_alpha: 0.5
     sc_power: 1.0 
