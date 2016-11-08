@@ -193,13 +193,13 @@ class FEPschedule(AttributeDict):
        couple_lambda1 = none
        # recommended values for soft cores (Mobley, Shirts et al)
        sc_alpha = 0.5
-       sc_power = 1.0
+       sc_power = 1
        sc_sigma = 0.3
        lambdas = 0.0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1
 
     """
     mdp_keywords = dict((('sc_alpha', float),
-                         ('sc_power', float),
+                         ('sc_power', int),
                          ('sc_sigma', float),
                          ('couple_lambda0', str),
                          ('couple_lambda1', str),
@@ -299,7 +299,7 @@ class Gsolv(Journalled):
                                      description="decoupling vdw --> none",
                                      label='VDW',
                                      couple_lambda0='vdw', couple_lambda1='none',
-                                     sc_alpha=0.5, sc_power=1.0, sc_sigma=0.3, # recommended values
+                                     sc_alpha=0.5, sc_power=1, sc_sigma=0.3, # recommended values
                                      lambdas=[0.0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6,  # defaults
                                               0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1],
                                  ),
@@ -1050,7 +1050,7 @@ class Goct(Gsolv):
                              description="decoupling vdw --> none",
                              label='VDW',
                              couple_lambda0='vdw', couple_lambda1='none',
-                             sc_alpha=0.5, sc_power=1.0, sc_sigma=0.3, # recommended values
+                             sc_alpha=0.5, sc_power=1, sc_sigma=0.3, # recommended values
                              lambdas=[0.0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6,  # defaults
                                       0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1],
                              ),
