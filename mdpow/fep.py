@@ -222,6 +222,7 @@ class FEPschedule(AttributeDict):
         keys.update(FEPschedule.other_keywords)
 
         cfg_get = {float: cfg.getfloat,
+                   int: cfg.getint,
                    str: cfg.getstr,    # literal strings, no conversion of None (which we need for the MDP!)
                    list: cfg.getarray  # numpy float array from list
                    }
