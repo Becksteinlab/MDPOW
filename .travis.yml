@@ -36,10 +36,12 @@ install:
   - conda install -c becksteinlab gromacs-$GMX_VERSION
 
   # install test tools
-  - pip install git+git://github.com/ianmkenney/PyBOL.git
+  - pip install pybol
   - pip install codecov
   - pip install pytest-cov
   - pip install pytest-pep8
+
+  # install MDPOW
   - pip install -e .
 
   # source gromacs
