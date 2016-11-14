@@ -49,7 +49,7 @@ install:
 script:
   # set up gromacs environment: picked up by GromacsWrapper
   - source $($HOME/get_gmx $GMX_VERSION)
-  - py.test --cov mdpow mdpow/tests
+  - py.test -s --cov mdpow mdpow/tests
 
 after_success:
   - codecov
