@@ -622,6 +622,7 @@ class Gsolv(Journalled):
 
         wdir = self.wdir(component, lmbda)
         kwargs.setdefault('couple-intramol', 'no')
+        kwargs.setdefault('e','')
 
         ### XXX Issue 20: if an entry is None then the dict will not be updated:
         ###     I *must* keep "none" as a legal string value
