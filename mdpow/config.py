@@ -4,8 +4,8 @@
 # See the file COPYING for details.
 
 """
-:mod:`mdpow.config` -- Configuration for POW
-==========================================================
+:mod:`mdpow.config` -- Configuration for MDPOW
+==============================================
 
 The config module provides configurable options for the whole package;
 eventually it might grow into a more sophisticated configuration system but
