@@ -31,7 +31,6 @@ Protocols
 Support
 -------
 
-.. autoclass:: MDrunnerSimple
 .. autofunction:: setupMD
 .. autofunction:: get_mdp_files
 .. autofunction:: runMD_or_exit
@@ -54,18 +53,6 @@ from .restart import checkpoint
 import logging
 logger = logging.getLogger('mdpow.run')
 
-
-class MDrunnerSimple(gromacs.run.MDrunner):
-    """Gromacs mdrun.
-
-    Use Gromacs 4.5.x with threaded mdrun to get max performance and
-    just leave everything as it is. For older version you can change
-    the name and add a mpiexec binary to launch a multiprocessor
-    job. See :mod:`gromacs.run` for details.
-
-    """
-    mdrun = "mdrun"
-    mpiexec = None
 
 def setupMD(S, protocol, cfg):
     """setup MD simulation *protocol* using the runinput file *cfg*"""
@@ -111,7 +98,7 @@ def get_mdp_files(cfg, protocols):
 def runMD_or_exit(S, protocol, params, cfg, **kwargs):
     """run simulation
 
-    Can launch :program:`mdrun` itself (:class:`MDrunnerSimple`) or exit so
+    Can launch :program:`mdrun` itself (:class:`gromacs.run.MDrunner`) or exit so
     that the user can run the simulation independently. Checks if the
     simulation has completed and sets the return value to ``True`` if this is
     the case.
@@ -139,12 +126,13 @@ def runMD_or_exit(S, protocol, params, cfg, **kwargs):
     if cfg.getboolean(protocol, "runlocal"):
         logger.info("Running %s (%s.log) ... stand by.", protocol, params['deffnm'])
         logger.info("Run directory: %(dirname)s", vars())
-        mdrun = MDrunnerSimple(dirname=dirname, deffnm=params['deffnm'],
-                               v=cfg.getboolean('mdrun','verbose'),
-                               stepout=cfg.getint('mdrun','stepout'),
-                               nice=cfg.getint('mdrun','nice'),
-                               nt=cfg.get('mdrun','maxthreads'),
-                               cpi=True, append=True)
+        mdrun = gromacs.run.MDrunner(
+            dirname=dirname, deffnm=params['deffnm'],
+            v=cfg.getboolean('mdrun','verbose'),
+            stepout=cfg.getint('mdrun','stepout'),
+            nice=cfg.getint('mdrun','nice'),
+            nt=cfg.get('mdrun','maxthreads'),
+            cpi=True, append=True)
         simulation_done = mdrun.run_check()
         if not simulation_done:
             # should probably stop
