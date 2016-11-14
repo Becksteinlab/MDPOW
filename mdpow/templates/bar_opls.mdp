@@ -110,6 +110,7 @@ lincs-iter               = 1
 
 ; Free energy control stuff
 free_energy              = yes
+separate-dhdl-file       = no
 ;  init for bar
 init_lambda              = 0.0
 ;  fep lam for bar
