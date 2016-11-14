@@ -5,6 +5,28 @@
 
 from setuptools import setup, find_packages
 
+# manual integration of pytest
+# http://doc.pytest.org/en/latest/goodpractices.html#manual-integration
+import sys
+from setuptools.command.test import test as TestCommand
+
+class PyTest(TestCommand):
+    user_options = [('pytest-args=', 'a', "Arguments to pass to pytest")]
+
+    def initialize_options(self):
+        TestCommand.initialize_options(self)
+        self.pytest_args = []
+
+    def run_tests(self):
+        import shlex
+        #import here, cause outside the eggs aren't loaded
+        import pytest
+        parsed_options = shlex.split(self.pytest_args) if \
+                         self.pytest_args else []
+        errno = pytest.main(parsed_options)
+        sys.exit(errno)
+
+
 # Dynamically calculate the version based on VERSION.
 version = __import__('mdpow.version').get_version()
 
@@ -24,27 +46,27 @@ It uses Gromacs (http://www.gromacs.org) for the molecular dynamics
       url="https://github.com/Becksteinlab/MDPOW",
       keywords="science Gromacs analysis 'molecular dynamics'",
       packages=find_packages(exclude=['examples']),
-      scripts = ['scripts/mdpow-pow',
-                 'scripts/mdpow-pcw',
-                 'scripts/mdpow-ghyd',
-                 'scripts/mdpow-check',
-                 'scripts/mdpow-rebuild-fep',
-                 'scripts/mdpow-rebuild-simulation',
-                 'scripts/mdpow-equilibrium',
-                 'scripts/mdpow-fep',
-                 'scripts/mdpow-cfg2yaml.py',
-                 'scripts/mdpow-solvationenergy'
-                 ],
+      scripts=['scripts/mdpow-pow',
+               'scripts/mdpow-pcw',
+               'scripts/mdpow-ghyd',
+               'scripts/mdpow-check',
+               'scripts/mdpow-rebuild-fep',
+               'scripts/mdpow-rebuild-simulation',
+               'scripts/mdpow-equilibrium',
+               'scripts/mdpow-fep',
+               'scripts/mdpow-cfg2yaml.py',
+               'scripts/mdpow-solvationenergy'
+      ],
       package_data={'mdpow': ['top/*.dat', 'top/*.gro', 'top/*.itp',
                               'top/oplsaa.ff/*',
                               'templates/*'], },
-      install_requires = ['numpy>=1.6', 'scipy',
-                          'pyyaml',
-                          'GromacsWrapper>=0.5.1',
+      install_requires=['numpy>=1.6', 'scipy',
+                        'pyyaml',
+                        'GromacsWrapper>=0.5.1',
       ],
-      tests_require = ['pytest',
-                       'pybol'],
-      zip_safe = True,
+      tests_require=['pytest','pybol'],
+      cmdclass={'test': PyTest},
+      zip_safe=True,
 )
 
 
