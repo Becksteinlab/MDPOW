@@ -5,28 +5,6 @@
 
 from setuptools import setup, find_packages
 
-# manual integration of pytest
-# http://doc.pytest.org/en/latest/goodpractices.html#manual-integration
-import sys
-from setuptools.command.test import test as TestCommand
-
-class PyTest(TestCommand):
-    user_options = [('pytest-args=', 'a', "Arguments to pass to pytest")]
-
-    def initialize_options(self):
-        TestCommand.initialize_options(self)
-        self.pytest_args = []
-
-    def run_tests(self):
-        import shlex
-        #import here, cause outside the eggs aren't loaded
-        import pytest
-        parsed_options = shlex.split(self.pytest_args) if \
-                         self.pytest_args else []
-        errno = pytest.main(parsed_options)
-        sys.exit(errno)
-
-
 # Dynamically calculate the version based on VERSION.
 version = __import__('mdpow.version').get_version()
 
@@ -64,8 +42,8 @@ It uses Gromacs (http://www.gromacs.org) for the molecular dynamics
                         'pyyaml',
                         'GromacsWrapper>=0.5.1',
       ],
+      setup_requires=['pytest-runner',],
       tests_require=['pytest','pybol'],
-      cmdclass={'test': PyTest},
       zip_safe=True,
 )
 
