@@ -16,7 +16,7 @@ class TestFEPschedule(object):
          'name': 'vdw',
          'sc_alpha': 0.5,
          'sc_power': 1,
-        'sc_sigma': 0.3},
+         'sc_sigma': 0.3},
         'Coulomb':
         {'couple_lambda0': 'vdw-q',
          'couple_lambda1': 'vdw',
