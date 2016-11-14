@@ -43,8 +43,8 @@ Equilibrium simulations
 
 The :program:`mdpow-equilibrium` script
 
-* sets up equilibrium MD simulations for the solvents *water* or
-  *octanol*
+* sets up equilibrium MD simulations for the solvents (e.g., *water* or
+  *octanol*)
 * runs **energy minimization**, **MD_relaxed**, and **MD_NPT**
   protocols; the user can choose if she wants to launch
   :program:`mdrun` herself (e.g. on a cluster) or let the script do it
@@ -55,20 +55,29 @@ The script runs essentially the same steps as described in the tutorial
 input file and it allows one to stop and continue and the protocol
 transparently.
 
-It requires as at least Gromacs 4.0.5 ready to run (check that all commands can
+It requires as at least Gromacs 4.6.5 ready to run (check that all commands can
 be found). The required **input** is
 
-  1. a run configuration file;
+  1. a run configuration file (*runinput.yml*);
   2. a structure file (PDB or GRO) for the compound
   3. a Gromacs ITP file for the compound (OPLS/AA force field)
 
-A template *RUNFILE* can be generated with 
-:option:`mdpow-equilibrium --get-template`.
+A template *RUNFILE* can be generated with :option:`mdpow-get-runinput
+runinput.yml`, which will copy the default run input file bundled with
+MDPOW and put it in the current directory under the name
+``runinput.yml``.
 
-For an example of a *RUNFILE* see :download:`benzene_runinput.cfg
-<../../examples/benzene_runinput.cfg>`. It is recommended to use absolute paths
-to file names. The run input file uses :mod:`ConfigParser`, which describes the
-syntax of the file.
+For an example of a *RUNFILE* see :download:`benzene.yml
+<../../examples/benzene.yml>`. It is recommended to use absolute paths
+to file names. The run input file uses `YAML`_ syntax (and is parsed
+by :mod:`yaml`).
+
+.. _YAML: http://yaml.org/
+
+.. Note:: It is recommended to enclose all strings in the input file
+          in quotes, especially if they can be interpreted as
+          numbers. For example, a name "005" would be interpreted as
+          the number 5 unless explicitly quoted.
 
 The script keeps track of the stages of the simulation protocol and allows the
 user to **restart from the last completed stage**. For instance, one can use the
@@ -100,13 +109,9 @@ Usage of the command:
 
       show this help message and exit
 
-   .. cmdoption:: --get-template
-
-      generate a template RUNFILE and exit
-
    .. cmdoption:: -S <NAME>, --solvent=<NAME>
 
-      solvent ``<NAME>`` for compound, can be 'water' or 'octanol' [water]
+      solvent ``<NAME>`` for compound, can be 'water', 'octanol', 'cyclohexane' [water]
 
    .. cmdoption:: -d <DIRECTORY>, --dirname=<DIRECTORY>
 
