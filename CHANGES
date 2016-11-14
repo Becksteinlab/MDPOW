@@ -8,11 +8,15 @@ GitHub issues numbers and PR numbers.
 2016-xx-xx    0.6.1
 orbeckst, iorga, ianmkenney
 
+* works with Gromacs 5.1.x and 4.6.x
 * removed unused analysis.py and analysis/thermodynamics.py
 * supported water models: TIP4P, TIP3P, TIP5P, SPC, SPC/E, and
   new: M24 (modified TIP3P, #46)
-* fixed sc-alpha can only take integer powers (#71)
+* fixed sc-power can only take integer powers (#71)
 * use PyBOL for building the testing environment
+* removed run.MDrunnerSimple (#60)
+* used flexible water model (-DFLEXIBLE) for more robust energy
+  minimization
 
 
 2016-06-29    0.6.0
