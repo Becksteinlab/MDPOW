@@ -622,11 +622,15 @@ class Gsolv(Journalled):
 
         wdir = self.wdir(component, lmbda)
         kwargs.setdefault('couple-intramol', 'no')
-        kwargs.setdefault('e','')
 
         ### XXX Issue 20: if an entry is None then the dict will not be updated:
         ###     I *must* keep "none" as a legal string value
         kwargs.update(self.schedules[component].mdp_dict)  # sets soft core & lambda0/1 state
+        
+        if kwargs.pop('edr', False):
+            kwargs.setdefault('separate-dhdl-file', 'no')
+        else:
+            kwargs.setdefault('separate-dhdl-file', 'yes')
 
         # for BAR
         if foreign_lambdas is not None:
