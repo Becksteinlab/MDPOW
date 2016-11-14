@@ -2,7 +2,7 @@
 ; Template for energy minimization with OPLS-AA (part of POW)
 
 include                  = 
-define                   = 
+define                   = -DFLEXIBLE
 
 integrator               = steep
 
