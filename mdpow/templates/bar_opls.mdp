@@ -114,7 +114,8 @@ separate-dhdl-file       = no
 ;  init for bar
 init_lambda              = 0.0
 ;  fep lam for bar
-fep_lambdas				 = 0
+fep_lambdas		 = 0
+calc-lambda-neighbors    = -1
 sc_alpha                 = 0.5
 sc-power                 = 1
 sc-sigma                 = 0.3
