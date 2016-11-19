@@ -386,8 +386,8 @@ class Gsolv(Journalled):
         required_args = ('molecule', 'top', 'struct')
 
         # should this be below somewhere?
-        if not method in ("TI", "BAR"):
-            raise ValueError("method can only be TI or BAR")
+        if not method in ("TI", "BAR", "MBAR"):
+            raise ValueError("method can only be TI, BAR, or MBAR")
         self.method = method
 
         filename = kwargs.pop('filename', None)
@@ -596,6 +596,12 @@ class Gsolv(Journalled):
                     # set up gromacs job for each FEP window in BAR
                     params = self._setup(component, l,
                                          foreign_lambdas=foreign_lambdas, **kwargs)
+            elif self.method == "MBAR":
+                for l in lambdas:
+                    xlambdas = list(lambdas)
+                    xlambdas.pop(xlambdas.index(l))
+                    params = self._setup(component, l,
+                                         foreign_lambdas=xlambdas, **kwargs)
             else:
                 raise ValueError("Unknown method {}".format(self.method))
 
@@ -652,8 +658,9 @@ class Gsolv(Journalled):
                           qname=self.tasklabel(component,lmbda),
                           free_energy='yes',
                           couple_moltype=self.molecule,
-                          init_lambda=lmbda,
+                          init_lambda_state=feplambdas.index(lmbda),
                           fep_lambdas=feplambdas,
+                          calc_lambda_neighbors=-1,
                           )
 
         # for TI
