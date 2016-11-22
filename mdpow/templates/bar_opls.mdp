@@ -113,7 +113,7 @@ free_energy              = yes
 ;  init for bar
 init_lambda              = 0.0
 ;  fep lam for bar
-fep_lambdas				 = 0
+fep_lambdas	         = 0
 sc_alpha                 = 0.5
 sc-power                 = 1
 sc-sigma                 = 0.3

@@ -22,7 +22,7 @@ setup:
          # coordinate file name (pdb, gro, ... anything that Gromacs can read)
     maxwarn: 0
          # maximum number of warnings tolerated by grompp during setup
-    gromacsoutput: False
+    gromacsoutput: True
          # True: print output from Gromacs command to screen (useful for debugging)
          # False: only show the MDPOW messages
 
@@ -106,7 +106,7 @@ FEP_schedule_VDW:
     couple_lambda1: none
          # recommended values for soft cores (Mobley, Shirts et al)
     sc_alpha: 0.5
-    sc_power: 1.0 
+    sc_power: 1
     sc_sigma: 0.3
     lambdas: 0.0, 0.5, 1
 
