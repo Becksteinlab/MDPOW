@@ -617,8 +617,10 @@ class Gsolv(Journalled):
         kwargs.update(self.schedules[component].mdp_dict)  # sets soft core & lambda0/1 state
         
         if kwargs.pop('edr', True):
+            logger.info('Setting dhdl file to edr format')
             kwargs.setdefault('separate-dhdl-file', 'no')
         else:
+            logger.info('Setting dhdl file to xvg format')
             kwargs.setdefault('separate-dhdl-file', 'yes')
 
         lambda_index = numpy.where(foreign_lambdas == lmbda)[0][0]
