@@ -616,7 +616,7 @@ class Gsolv(Journalled):
         ###     I *must* keep "none" as a legal string value
         kwargs.update(self.schedules[component].mdp_dict)  # sets soft core & lambda0/1 state
         
-        if kwargs.pop('edr', False):
+        if kwargs.pop('edr', True):
             kwargs.setdefault('separate-dhdl-file', 'no')
         else:
             kwargs.setdefault('separate-dhdl-file', 'yes')
