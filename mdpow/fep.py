@@ -584,26 +584,9 @@ class Gsolv(Journalled):
         kwargs.setdefault('qscript', qscripts)
 
         for component, lambdas in self.lambdas.items():
-            if self.method == "TI":
-                for l in lambdas:
-                    # set up gromacs job for each FEP window in TI
-                    params = self._setup(component, l, **kwargs)
-            elif self.method == "BAR":
-                xlambdas = [None] + list(lambdas) + [None]
-                for l in lambdas:
-                    foreign_lambdas = [xlambdas[xlambdas.index(l) - 1],
-                                       xlambdas[xlambdas.index(l) + 1]]
-                    # set up gromacs job for each FEP window in BAR
-                    params = self._setup(component, l,
-                                         foreign_lambdas=foreign_lambdas, **kwargs)
-            elif self.method == "MBAR":
-                for l in lambdas:
-                    xlambdas = list(lambdas)
-                    xlambdas.pop(xlambdas.index(l))
-                    params = self._setup(component, l,
-                                         foreign_lambdas=xlambdas, **kwargs)
-            else:
-                raise ValueError("Unknown method {}".format(self.method))
+            for l in lambdas:
+                params = self._setup(component, l,
+                                         foreign_lambdas=lambdas, **kwargs)
 
             # generate queuing system script for array job
             directories = [self.wdir(component, l) for l in lambdas]
@@ -619,7 +602,7 @@ class Gsolv(Journalled):
         params.pop('struct', None)   # scrub window-specific params
         return params
 
-    def _setup(self, component, lmbda, foreign_lambdas=None, **kwargs):
+    def _setup(self, component, lmbda, foreign_lambdas, **kwargs):
         """Prepare the input files for an individual Gromacs runs."""
 
         # note that all arguments pertinent to the submission scripts should be in kwargs
@@ -638,46 +621,23 @@ class Gsolv(Journalled):
         else:
             kwargs.setdefault('separate-dhdl-file', 'yes')
 
-        # for BAR
-        if foreign_lambdas is not None:
-            # foreign_lambdas is only passed as an argument if BAR is
-            # desired method, defaults to TI otherwise
-            if foreign_lambdas[0] is None:
-                feplambdas = foreign_lambdas[1]
-            elif foreign_lambdas[1] is None:
-                feplambdas = foreign_lambdas[0]
-            else:
-                feplambdas = "{0} {1}".format(foreign_lambdas[0], foreign_lambdas[1])
-            kwargs.update(dirname=wdir, struct=self.struct, top=self.top,
-                          mdp=self.mdp,
-                          ndx=self.ndx,
-                          mainselection=None,
-                          runtime=self.runtime,
-                          ref_t=self.Temperature,    # TODO: maybe not working yet, check _setup()
-                          gen_temp=self.Temperature, # needed until gromacs.setup() is smarter
-                          qname=self.tasklabel(component,lmbda),
-                          free_energy='yes',
-                          couple_moltype=self.molecule,
-                          init_lambda_state=feplambdas.index(lmbda),
-                          fep_lambdas=feplambdas,
-                          calc_lambda_neighbors=-1,
-                          )
+        lambda_index = numpy.where(foreign_lambdas == lmbda)[0][0]
 
-        # for TI
-        else:
-            kwargs.update(dirname=wdir, struct=self.struct, top=self.top,
-                          mdp=self.mdp,
-                          ndx=self.ndx,
-                          mainselection=None,
-                          runtime=self.runtime,
-                          ref_t=self.Temperature,    # TODO: maybe not working yet, check _setup()
-                          gen_temp=self.Temperature, # needed until gromacs.setup() is smarter
-                          qname=self.tasklabel(component,lmbda),
-                          free_energy='yes',
-                          couple_moltype=self.molecule,
-                          init_lambda=lmbda,
-                          delta_lambda=0,
-                          )
+        kwargs.update(dirname=wdir, struct=self.struct, top=self.top,
+                      mdp=self.mdp,
+                      ndx=self.ndx,
+                      mainselection=None,
+                      runtime=self.runtime,
+                      ref_t=self.Temperature,    # TODO: maybe not working yet, check _setup()
+                      gen_temp=self.Temperature, # needed until gromacs.setup() is smarter
+                      qname=self.tasklabel(component,lmbda),
+                      free_energy='yes',
+                      couple_moltype=self.molecule,
+                      init_lambda_state=lambda_index,
+                      fep_lambdas=foreign_lambdas,
+                      calc_lambda_neighbors=-1,
+                      )
+
         return gromacs.setup.MD(**kwargs)
 
     def dgdl_xvg(self, *args):
