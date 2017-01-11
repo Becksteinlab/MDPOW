@@ -15,7 +15,7 @@ class TestFEPschedule(object):
                                0.7 ,  0.75,  0.8 ,  0.85,  0.9 ,  0.95,  1.  ]),
          'name': 'vdw',
          'sc_alpha': 0.5,
-         'sc_power': 1.0,
+         'sc_power': 1,
         'sc_sigma': 0.3},
         'Coulomb':
         {'couple_lambda0': 'vdw-q',

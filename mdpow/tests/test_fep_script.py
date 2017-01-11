@@ -30,9 +30,10 @@ class TestFEPScript(object):
         cfg = get_configuration('runinput.yml')
         self.S = fep_simulation(cfg, solvent, dirname=dirname)
 
-    def test_basic_run(self):
+    def test_default_run(self):
         with in_dir(self.tmpdir.name, create=False):
             try:
                 self._run_fep('water', 'benzene/')
             except:
                 raise AssertionError('FEP simulations failed.')
+            assert os.path.exists(os.path.join(self.tmpdir.name, 'benzene','FEP','water', 'VDW', '0000', 'md.edr'))
