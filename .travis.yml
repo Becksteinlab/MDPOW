@@ -9,10 +9,11 @@ branches:
     only:
         - master
         - develop
+        - testing-gromacs-5-travis
 
 env:
     - GMX_VERSION=4.6.7
-#- GMX_VERSION=5.1.2
+    - GMX_VERSION=5.1.2
     - GMX_VERSION=2016
 
 # install python dependencies
