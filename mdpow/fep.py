@@ -622,8 +622,7 @@ class Gsolv(Journalled):
         else:
             logger.info('Setting dhdl file to xvg format')
             kwargs.setdefault('separate-dhdl-file', 'yes')
-
-        lambda_index = numpy.where(foreign_lambdas == lmbda)[0][0]
+        lambda_index = numpy.where(numpy.array(foreign_lambdas) == lmbda)[0][0]
 
         kwargs.update(dirname=wdir, struct=self.struct, top=self.top,
                       mdp=self.mdp,
