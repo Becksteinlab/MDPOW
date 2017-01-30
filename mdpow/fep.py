@@ -622,7 +622,9 @@ class Gsolv(Journalled):
         else:
             logger.info('Setting dhdl file to xvg format')
             kwargs.setdefault('separate-dhdl-file', 'yes')
-        lambda_index = numpy.where(numpy.array(foreign_lambdas) == lmbda)[0][0]
+
+        foreign_lambdas = numpy.asarray(foreign_lambdas)
+        lambda_index = numpy.where(foreign_lambdas == lmbda)[0][0]
 
         kwargs.update(dirname=wdir, struct=self.struct, top=self.top,
                       mdp=self.mdp,
@@ -646,7 +648,7 @@ class Gsolv(Journalled):
 
         Recognizes uncompressed, gzipped (gz), and bzip2ed (bz2)
         files.
-g
+
         :Arguments:
            *args*
                joins the arguments into a path and adds the default
