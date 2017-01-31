@@ -293,7 +293,7 @@ class Gsolv(Journalled):
                                      label='Coul',
                                      couple_lambda0='vdw-q', couple_lambda1='vdw',
                                      sc_alpha=0,      # linear scaling for coulomb
-                                     lambdas=[0.0, 0.25, 0.5, 0.75, 1.0],  # default values
+                                     lambdas=numpy.array([0.0, 0.25, 0.5, 0.75, 1.0]),  # default values
                                  ),
                          'vdw':
                          FEPschedule(name='vdw',
@@ -301,8 +301,9 @@ class Gsolv(Journalled):
                                      label='VDW',
                                      couple_lambda0='vdw', couple_lambda1='none',
                                      sc_alpha=0.5, sc_power=1, sc_sigma=0.3, # recommended values
-                                     lambdas=[0.0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6,  # defaults
-                                              0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1],
+                                     lambdas=numpy.array([0.0, 0.05, 0.1, 0.2, 0.3, 
+                                              0.4, 0.5, 0.6, 0.65, 0.7, 0.75, 0.8, 
+                                              0.85, 0.9, 0.95, 1]), # defaults
                                  ),
                      }
 
@@ -623,6 +624,7 @@ class Gsolv(Journalled):
             logger.info('Setting dhdl file to xvg format')
             kwargs.setdefault('separate-dhdl-file', 'yes')
 
+        foreign_lambdas = numpy.asarray(foreign_lambdas)
         lambda_index = numpy.where(foreign_lambdas == lmbda)[0][0]
 
         kwargs.update(dirname=wdir, struct=self.struct, top=self.top,
@@ -647,7 +649,7 @@ class Gsolv(Journalled):
 
         Recognizes uncompressed, gzipped (gz), and bzip2ed (bz2)
         files.
-g
+
         :Arguments:
            *args*
                joins the arguments into a path and adds the default
