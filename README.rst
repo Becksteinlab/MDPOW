@@ -39,7 +39,8 @@ Install from the checked out source::
   pip install MDPOW/
 
 This will also install additional dependencies such as GromacsWrapper_. You
-will also need `Gromacs`_ (currently tested with versions 4.6.5 and 4.6.6).
+will also need `Gromacs`_ (currently tested with versions 4.6.7,
+5.1.2, and Gromacs 2016).
 
 
 Source code
