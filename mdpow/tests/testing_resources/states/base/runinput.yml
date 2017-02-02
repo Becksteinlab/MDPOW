@@ -38,7 +38,7 @@ MD_relaxed:
     runlocal: True
          # True: launch Gromacs mdrun and wait for it
          # False: produce queuing system scripts and stop
-    runtime: 2
+    runtime: 1
          # run time in ps
     mdp: NPT_opls.mdp
          #  run parameter file for Gromacs;
@@ -49,7 +49,7 @@ MD_relaxed:
 MD_NPT:
     qscript: local.sh
          # queuing system scripts to produce
-    runtime: 10
+    runtime: 1
          # simulation run time in ps [50 ns is generous, probably can be shorter]
     runlocal: True
          # True: launch Gromacs mdrun and wait for it
@@ -65,7 +65,7 @@ FEP:
          # BAR or TI
     qscript: local.sh
          # queuing system scripts to produce
-    runtime: 5
+    runtime: 1
          # run time in ps for each free energy window
     runlocal: True
          # True: launch Gromacs mdrun and run all windows in a serial fashion
@@ -119,5 +119,8 @@ mdrun:
          # report progress verbosely (True is -v)
     nice: 19
          # nicel level
-    maxthreads: None
-         # maximum number of threads (-nt), 0 or None lets mdrun automatically choose
+    maxthreads: 3
+         # maximum number of threads (-nt), 0 or None lets mdrun
+         # automatically choose
+         # For testing on travis, needs to be either 3 or 1.
+         # See https://github.com/Becksteinlab/MDPOW/pull/77
