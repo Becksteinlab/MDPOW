@@ -1,8 +1,22 @@
 import numpy as np
-from numpy.testing import assert_array_almost_equal
+from numpy.testing import assert_array_almost_equal, assert_almost_equal
 
 import mdpow
 import mdpow.fep
+
+
+def test_molar_to_nm3():
+    assert_almost_equal(mdpow.fep.molar_to_nm3(1.5), 0.9033212684)
+    assert_almost_equal(mdpow.fep.molar_to_nm3(55.5), 33.42288693449999)
+
+def test_bar_to_kJmolnm3():
+    assert_almost_equal(mdpow.fep.bar_to_kJmolnm3(1.0), 0.0602214179)
+
+def test_kcal_to_kJ():
+    assert_almost_equal(mdpow.fep.kcal_to_kJ(10.0), 41.84)
+
+def test_kJ_to_kcal():
+    assert_almost_equal(mdpow.fep.kJ_to_kcal(41.84), 10.0)
 
 class TestFEPschedule(object):
     reference = {
