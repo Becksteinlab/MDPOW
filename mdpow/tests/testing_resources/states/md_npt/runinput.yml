@@ -22,7 +22,7 @@ setup:
          # coordinate file name (pdb, gro, ... anything that Gromacs can read)
     maxwarn: 0
          # maximum number of warnings tolerated by grompp during setup
-    gromacsoutput: True
+    gromacsoutput: False
          # True: print output from Gromacs command to screen (useful for debugging)
          # False: only show the MDPOW messages
 

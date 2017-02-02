@@ -50,7 +50,9 @@ install:
 script:
   # set up gromacs environment: picked up by GromacsWrapper
   - source $($HOME/get_gmx $GMX_VERSION)
-  - py.test -s --cov mdpow mdpow/tests
+  # NOTE: to see ALL Gromacs output for debugging on Travis CI,
+  #       disable py.test capturing with '-s'  
+  - py.test --cov mdpow mdpow/tests
 
 after_success:
   - codecov
