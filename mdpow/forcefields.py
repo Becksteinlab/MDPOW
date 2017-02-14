@@ -47,6 +47,7 @@ tip5p       TIP5P      TIP 5-point
 spc         SPC        simple point charge
 spce        SPC/E      extended simple point charge
 m24         M24        TIP 3-point with modified LJ (M24)
+tip4pd      TIP4P-D    TIP 4-point with modified dispersion (TIP4P-D)
 """
 
 class GromacsSolventModel(object):
@@ -75,6 +76,7 @@ SPECIAL_WATER_COORDINATE_FILES = defaultdict(
     spce='spc216.gro',
     tip3p='spc216.gro',
     m24='spc216.gro',
+    tip4pd='tip4p.gro',
 )
 
 def _create_water_models(watermodelsdat):

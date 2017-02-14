@@ -849,5 +849,23 @@
 
 ; TIP3P-M24 water model from Shirts and Pande. J. Chem. Phys., 122(13), 2005. doi:10.1063/1.1877132
 ; TIP3P geometry, epsilon: 0.24 kcal/mol, sigma: 3.111 Å
- opls_111_m24   OW  8      9.95140    -0.834       A    3.11100e-01  1.00440e-00
+ opls_111_m24   OW  8     15.99940    -0.834       A    3.11100e-01  1.00440e-00
+
+; Gromacs uses internal for any VdW calculations the C6-C12 form.
+; When providing Lennard Jones parameter sigma and epsilon,
+; Gromacs calculates C6 and C12 as follows:
+;
+; C6 = 4 * epsilon * sigma^6
+; C12 = 4 * epsilon * sigma^12 = C6 * sigma^6
+;
+; TIP4P-D water model from Piana et al., J. Phys. Chem. B 2015, 119, 5113−5123. DOI: 10.1021/jp508971m
+; TIP4P geometry, hydrogen charge 0.58, C6 (kcal.mol-1 Å6) 900, C12 (kcal.mol-1 Å12) 904657
+;
+; sigma^6 = C12 / C6 = 1005.174
+; sigma = 3.16499897 Å
+; epsilon = C6 / (4 * sigma^6) = 0.22384174 kcal.mol-1 = 0.9367777 kJ.mol-1
+;
+ opls_113_d   OW  8     15.99940     0.000       A    3.16500e-01  9.36778e-01
+ opls_114_d   HW  1      1.00800     0.580       A    0.00000e+00  0.00000e+00
+ opls_115_d   MW  0      0.00000    -1.160       D    0.00000e+00  0.00000e+00
 
