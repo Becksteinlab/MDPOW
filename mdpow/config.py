@@ -120,6 +120,10 @@ class POWConfigParser(object):
         self.conf = yaml.load(fn)
         return True
 
+    def write(self, filename):
+        with open(filename, 'w') as f:
+            f.write(yaml.dump(self.conf))
+
     def get(self, section, option):
         """Return option, unless its "None" --> ``None``,
 
