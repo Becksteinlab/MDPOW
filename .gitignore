@@ -3,7 +3,8 @@
 *.pyc
 *.log
 *.egg-info
-install_devel_kauha.sh
+.eggs
+.cache
+build
 dist
 doc/examples/benzene/Equilibrium/
-doc/sphinx/MAKE_html
