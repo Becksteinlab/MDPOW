@@ -25,7 +25,7 @@ small molecule (e.g. from LigandBook_ or ParamChem_).
 
 .. _Gromacs: http://www.gromacs.org
 .. _GromacsWrapper: http://gromacswrapper.readthedocs.org/en/latest/
-.. _LigandBook: http://ligandbook.icsn.cnrs-gif.fr/
+.. _LigandBook: http://ligandbook.org/
 .. _ParamChem: https://cgenff.paramchem.org/
 
 
@@ -33,14 +33,32 @@ small molecule (e.g. from LigandBook_ or ParamChem_).
 Installation
 ------------
 
-Install from the checked out source::
+Since release 0.6.2, MDPOW is available on PyPi and can be installed
+with ::
+
+   pip install MDPOW
+
+This will install the *latest release* together with any additional
+dependencies such as GromacsWrapper_.
+
+You will also need `Gromacs`_ (currently tested with versions 4.6.7,
+5.1.2, and Gromacs 2016).
+
+
+Development version
+~~~~~~~~~~~~~~~~~~~
+
+If you want to install the development version, get the sources from
+GitHub (the development branch) ::
 
   git clone https://github.com/Becksteinlab/MDPOW.git  
+
+and Install from the checked out source::
+
   pip install MDPOW/
 
-This will also install additional dependencies such as GromacsWrapper_. You
-will also need `Gromacs`_ (currently tested with versions 4.6.7,
-5.1.2, and Gromacs 2016).
+(Note the trailing slash ``/`` to indicate the directory.)
+
 
 
 Source code
