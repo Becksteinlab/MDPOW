@@ -896,7 +896,15 @@ class Gsolv(Journalled):
         stride = stride or self.stride
 
         if force or not self.has_dVdl():
-            self.collect(stride=stride, autosave=False)
+            try:
+                self.collect(stride=stride, autosave=False)
+            except IOError as err:
+                if err.errno == errno.ENOENT:
+                    self.convert_edr()
+                    self.collect(stride=stride, autosave=False)
+                else:
+                    logger.exception()
+                    raise
         else:
             logger.info("Analyzing stored data.")
 

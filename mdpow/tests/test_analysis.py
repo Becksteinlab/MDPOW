@@ -52,7 +52,7 @@ def fix_manifest(topdir):
 
 # session scope if read-only use
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def fep_benzene_directory(tmpdir_factory):
     topdir = tmpdir_factory.mktemp('analysis')
     m = pybol.Manifest(fix_manifest(topdir).strpath)
@@ -60,24 +60,16 @@ def fep_benzene_directory(tmpdir_factory):
     return topdir.join("benzene")
 
 class TestAnalyze(object):
-    def test_TI(self, fep_benzene_directory):
-        gsolv = fep_benzene_directory.join("FEP", "water", "Gsolv.fep")
+    def get_Gsolv(self, pth):
+        gsolv = pth.join("FEP", "water", "Gsolv.fep")
         G = pickle.load(gsolv.open())
         # patch paths
-        G.basedir = fep_benzene_directory.strpath
+        G.basedir = pth.strpath
         G.filename = gsolv.strpath
+        return G
 
-        # convert EDR to XVG.bz2; if the fixture is session scoped then other
-        # workers will pick up these files. Make sure that only one runs convert because
-        # there is no file locking, if in doubt, make fep_benzene_directory locally scoped
-        G.convert_edr()
-
-        try:
-            G.analyze(force=True, autosave=False)
-        except IOError as err:
-            raise AssertionError("Failed to convert edr to xvg: {0}: {1}".format(
-                err.strerror, err.filename))
-
+    @staticmethod
+    def assert_DeltaA(G):
         DeltaA = G.results.DeltaA
         assert_array_almost_equal(DeltaA.Gibbs.astuple(),
                                   (-3.7217472974883794, 2.3144288928034911),
@@ -88,4 +80,29 @@ class TestAnalyze(object):
         assert_array_almost_equal(DeltaA.vdw.astuple(),
                                   (-4.6128782195215781, 2.1942144688960972),
                                   decimal=6)
+
+
+    def test_convert_edr(self, fep_benzene_directory):
+        G = self.get_Gsolv(fep_benzene_directory)
+        try:
+            G.analyze(force=True, autosave=False)
+        except IOError as err:
+            raise AssertionError("Failed to auto-convert edr to xvg: {0}: {1}".format(
+                err.strerror, err.filename))
+        self.assert_DeltaA(G)
+
+
+    def test_TI(self, fep_benzene_directory):
+        G = self.get_Gsolv(fep_benzene_directory)
+        # ensure conversion EDR to XVG.bz2; if the fixture is session scoped
+        # then other workers will pick up these files. Make sure that only one
+        # runs convert because there is no file locking, if in doubt, make
+        # fep_benzene_directory locally scoped
+        G.convert_edr()
+        try:
+            G.analyze(force=True, autosave=False)
+        except IOError as err:
+            raise AssertionError("Failed to convert edr to xvg: {0}: {1}".format(
+                err.strerror, err.filename))
+        self.assert_DeltaA(G)
 

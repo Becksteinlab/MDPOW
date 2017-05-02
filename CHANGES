@@ -20,6 +20,9 @@ orbeckst, iorga, ianmkenney, rhheilma
 * FEP failed with IndexError when lambdas where presented as a list
   (#78)
 * EDR files are now output by default instead of XVG (#75)
+* fep.Gsolv.analyze() automatically converts EDR to XVG.bz2 if
+  necessary and can process the XVG/MBAR format of Gromacs 5.x
+  for TI (issue #82)
 * deprecated mdpow-ghyd script (issue #14)
 
 
