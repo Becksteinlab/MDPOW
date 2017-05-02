@@ -10,7 +10,7 @@ version = __import__('mdpow.version').get_version()
 
 setup(name="MDPOW",
       version=version,
-      description="A library for computing octanol/water partitioning coefficients",
+      description="A library for computing solvation/water partitioning coefficients using molecular dynamics simulations",
       long_description=open("README.rst").read(),
       author="Oliver Beckstein",
       author_email="orbeckst@gmail.com",
