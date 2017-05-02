@@ -5,7 +5,7 @@ CHANGES for MDPOW
 Add summary of changes for each release. Use ISO dates. Reference
 GitHub issues numbers and PR numbers.
 
-2017-xx-xx    0.6.1
+2017-05-02    0.6.1
 orbeckst, iorga, ianmkenney, rhheilma
 
 * works with Gromacs 2016.x, 5.1.x, and 4.6.x (#36)
