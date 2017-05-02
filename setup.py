@@ -42,9 +42,13 @@ It uses Gromacs (http://www.gromacs.org) for the molecular dynamics
       install_requires=['numpy>=1.6', 'scipy',
                         'pyyaml',
                         'GromacsWrapper>=0.5.1',
+                        'numkit',
+                        'six',
       ],
       setup_requires=['pytest-runner',],
-      tests_require=['pytest','pybol'],
+      # alchemtest does not have a release yet
+      #dependency_links = ["https://github.com/alchemistry/alchemtest/tarball/master#egg=alchemtest"],
+      tests_require=['pytest', 'pybol', 'py'],
       zip_safe=True,
 )
 
