@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 """%prog [options] DIRECTORY [DIRECTORY ...]
 
+
+** DEPRECATED: will be removed in 0.7. Use mdpow-solvationenergy. **
+
+
+
 Run the free energy analysis for water  in <DIRECTORY>/FEP
 and return DeltaGhyd.
 
@@ -48,6 +53,7 @@ directory
 from __future__ import with_statement
 
 import os
+import warnings
 import mdpow.fep
 import mdpow.filelock
 
@@ -201,6 +207,10 @@ if __name__ == "__main__":
                         energyfile="ghyd.txt",
                         force=False, stride=10, permissive=False)
     opts,args = parser.parse_args()
+
+    warnings.warn("The mdpow-ghyd script is DEPRECATED and will be removed in 0.7. "
+                  "Use 'mdpow-solvationenergy --solvent=water' instead.",
+                  DeprecationWarning)
 
     if len(args) == 0:
         logger.fatal("A directory is required. See --help.")

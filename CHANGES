@@ -20,7 +20,8 @@ orbeckst, iorga, ianmkenney, rhheilma
 * FEP failed with IndexError when lambdas where presented as a list
   (#78)
 * EDR files are now output by default instead of XVG (#75)
-  
+* deprecated mdpow-ghyd script (issue #14)
+
 
 2016-06-29    0.6.0
 orbeckst, ianmkenney
