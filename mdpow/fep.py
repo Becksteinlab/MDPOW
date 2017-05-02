@@ -127,9 +127,12 @@ import errno
 import copy
 from subprocess import call
 import warnings
-from pkg_resources import resource_filename
 
 import numpy
+
+import scipy.integrate
+import numkit.integration
+import numkit.timeseries
 
 import gromacs, gromacs.utilities
 try:
@@ -301,8 +304,8 @@ class Gsolv(Journalled):
                                      label='VDW',
                                      couple_lambda0='vdw', couple_lambda1='none',
                                      sc_alpha=0.5, sc_power=1, sc_sigma=0.3, # recommended values
-                                     lambdas=numpy.array([0.0, 0.05, 0.1, 0.2, 0.3, 
-                                              0.4, 0.5, 0.6, 0.65, 0.7, 0.75, 0.8, 
+                                     lambdas=numpy.array([0.0, 0.05, 0.1, 0.2, 0.3,
+                                              0.4, 0.5, 0.6, 0.65, 0.7, 0.75, 0.8,
                                               0.85, 0.9, 0.95, 1]), # defaults
                                  ),
                      }
@@ -616,7 +619,7 @@ class Gsolv(Journalled):
         ### XXX Issue 20: if an entry is None then the dict will not be updated:
         ###     I *must* keep "none" as a legal string value
         kwargs.update(self.schedules[component].mdp_dict)  # sets soft core & lambda0/1 state
-        
+
         if kwargs.pop('edr', True):
             logger.info('Setting dhdl file to edr format')
             kwargs.setdefault('separate-dhdl-file', 'no')
@@ -670,6 +673,61 @@ class Gsolv(Journalled):
                 return fn
         logger.error("Missing dgdl.xvg file %(root)r.", vars())
         raise IOError(errno.ENOENT, "Missing dgdl.xvg file", root)
+
+    def dgdl_edr(self, *args):
+        """Return filename of the dgdl EDR file.
+
+        :Arguments:
+           *args*
+               joins the arguments into a path and adds the default
+               filename for the dvdl file
+
+        :Returns: path to EDR
+
+        :Raises: :exc:`IOError` with error code ENOENT if no file
+                 could be found
+
+         """
+        fn = os.path.join(*args + (self.deffnm + '.edr',))
+        if not os.path.exists(fn):
+            logger.error("Missing dgdl.edr file %(fn)r.", vars())
+            raise IOError(errno.ENOENT, "Missing dgdl.edr file", fn)
+        return fn
+
+    def dgdl_tpr(self, *args):
+        """Return filename of the dgdl TPR file.
+
+        :Arguments:
+           *args*
+               joins the arguments into a path and adds the default
+               filename for the dvdl file
+
+        :Returns: path to TPR
+
+        :Raises: :exc:`IOError` with error code ENOENT if no file
+                 could be found
+
+         """
+        fn = os.path.join(*args + (self.deffnm + '.tpr',))
+        if not os.path.exists(fn):
+            logger.error("Missing TPR file %(fn)r.", vars())
+            raise IOError(errno.ENOENT, "Missing TPR file", fn)
+        return fn
+
+
+    def convert_edr(self):
+        """Convert EDR files to compressed XVG files."""
+
+        logger.info("[%(dirname)s] Converting EDR -> XVG.bz2" % vars(self))
+
+        for component, lambdas in self.lambdas.items():
+            edr_files = [self.dgdl_edr(self.wdir(component, l)) for l in lambdas]
+            tpr_files = [self.dgdl_tpr(self.wdir(component, l)) for l in lambdas]
+            for tpr, edr in zip(tpr_files, edr_files):
+                deffnm = os.path.splitext(edr)[0]
+                xvgfile = deffnm + ".xvg"  # hack
+                logger.info("  {0} --> {1}".format(edr, xvgfile))
+                gromacs.g_energy(s=tpr, f=edr, odh=xvgfile)
 
     def collect(self, stride=None, autosave=True, autocompress=True):
         """Collect dV/dl from output.
@@ -756,7 +814,7 @@ class Gsolv(Journalled):
             self._corrupted[component] = dict(((l, _lencorrupted(xvg)) for l,xvg in izip(lambdas, xvgs)))
         return numpy.any([x for x in corrupted.values()])
 
-    def analyze(self, force=False, stride=None, autosave=True):
+    def analyze(self, force=False, stride=None, autosave=True, ncorrel=25000):
         """Extract dV/dl from output and calculate dG by TI.
 
         Thermodynamic integration (TI) is performed on the individual
@@ -786,8 +844,9 @@ class Gsolv(Journalled):
         Errors are estimated from the errors of the individual <dV/dlambda>:
 
          1. The error of the mean <dV/dlambda> is calculated via the decay time
-            of the fluctuation around the mean (see
-            :attr:`gromacs.formats.XVG.error`).
+            of the fluctuation around the mean. ``ncorrel`` is the max number of
+            samples that is going to be used to calculate the autocorrelation
+            time via a FFT. See :func:`numkit.timeseries.tcorrel`.
 
          2. The error on the integral is calculated analytically via
             propagation of errors through Simpson's rule (with the
@@ -813,11 +872,27 @@ class Gsolv(Journalled):
               read data every *stride* lines, ``None`` uses the class default
           *autosave*
               save to the pickle file when results have been computed
+          *ncorrel*
+              aim for <= 25,000 samples for t_correl
+
+        ..rubric:: Notes
+
+        Error on the mean of the data, taking the correlation time into account.
+
+        See [FrenkelSmit2002]_ `p526`_:
+
+           error = sqrt(2*tc*acf[0]/T)
+
+        where acf() is the autocorrelation function of the fluctuations around
+        the mean, y-<y>, tc is the correlation time, and T the total length of
+        the simulation.
+
+        .. [FrenkelSmit2002] D. Frenkel and B. Smit, Understanding
+                             Molecular Simulation. Academic Press, San
+                             Diego 2002
+
+        .. _p526: http://books.google.co.uk/books?id=XmyO2oRUg0cC&pg=PA526
         """
-
-        import scipy.integrate
-        import numkit.integration
-
         stride = stride or self.stride
 
         if force or not self.has_dVdl():
@@ -836,8 +911,17 @@ class Gsolv(Journalled):
             # Use XVG class properties: first data in column 0!
             Y = numpy.array([x.mean[0] for x in xvgs])
             stdY = numpy.array([x.std[0]  for x in xvgs])
-            DY = numpy.array([x.error[0]  for x in xvgs])   # takes a while: computes correl.time
-            tc = numpy.array([x.tc[0]  for x in xvgs])
+
+            # compute auto correlation time and error estimate for independent samples
+            # (this can take a while). x.array[0] == time, x.array[1] == dHdl
+            # nstep is calculated to give ncorrel samples (or all samples if less than ncorrel are
+            # available)
+            tc_data = [numkit.timeseries.tcorrel(x.array[0], x.array[1],
+                                                 nstep=int(numpy.ceil(len(x.array[0])/float(ncorrel))))
+                                                 for x in xvgs]
+            DY = numpy.array([tc['sigma'] for tc in tc_data])
+            tc = numpy.array([tc['tc'] for tc in tc_data])
+
             self.results.dvdl[component] = {'lambdas':lambdas, 'mean':Y, 'error':DY,
                                             'stddev':stdY, 'tcorrel':tc}
             # Combined Simpson rule integration:
