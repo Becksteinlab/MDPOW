@@ -2,7 +2,7 @@
  README for MDPOW
 =================== 
 
-|build| |cov|
+|build| |cov| |docs|
 
 .. |P_ow| replace:: *P*\ :sub:`OW`
 .. |P_cw| replace:: *P*\ :sub:`CW`
@@ -29,6 +29,16 @@ small molecule (e.g. from LigandBook_ or ParamChem_).
 .. _ParamChem: https://cgenff.paramchem.org/
 
 
+Documentation
+-------------
+
+* https://mdpow.readthedocs.io
+* `Tutorial`_ : computing the octanol-water partition coefficient of
+  benzene (uses the `example files`_)
+  
+
+.. _Tutorial: http://mdpow.readthedocs.io/en/latest/init.html#tutorial-using-the-mdpow-scripts-to-compute-logpow-of-benzene
+.. _example files: https://github.com/Becksteinlab/MDPOW/tree/develop/doc/examples
 
 Installation
 ------------
@@ -84,4 +94,7 @@ Footnotes
    :alt: Coverage Status
    :target: https://codecov.io/github/Becksteinlab/MDPOW?branch=develop
 
+.. |docs| image:: https://readthedocs.org/projects/mdpow/badge/?version=latest
+   :target: http://mdpow.readthedocs.org/en/latest/?badge=latest
+   :alt: Documentation
    
