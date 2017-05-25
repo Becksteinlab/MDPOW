@@ -13,12 +13,39 @@ force field by supplying alternative template files). However, in the
 future we want to support a simple configuration based switch.
 
 .. autodata:: DEFAULT_FORCEFIELD
-
-Different **water models** are already supported.
-
 .. autodata:: DEFAULT_WATER_MODEL
+
+
+Solvent models
+--------------
+
+Different **water models** are already supported
+
 .. autodata:: GROMACS_WATER_MODELS
 
+as well as different general **solvent models**
+
+.. autodata:: GROMACS_SOLVENT_MODELS
+
+
+Internal data
+-------------
+
+.. autodata:: SPECIAL_WATER_COORDINATE_FILES
+.. autodata:: GROMACS_WATER_MODELS
+.. autodata:: GROMACS_SOLVENT_MODELS
+
+Internal classes and functions
+------------------------------
+
+.. autoclass:: GromacsSolventModel
+   :members:
+
+.. autofunction:: get_water_model
+
+.. autofunction:: get_solvent_identifier
+
+.. autofunction:: get_solvent_model
 """
 
 from __future__ import absolute_import
@@ -62,6 +89,7 @@ class GromacsSolventModel(object):
         self.forcefield = forcefield
 
     def guess_filename(self, extension):
+        """Guess the filename for the model and add *extension*"""
         return self.identifier.lower() + os.extsep + str(extension)
 
     def __repr__(self):

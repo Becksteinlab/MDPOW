@@ -26,8 +26,6 @@ model.
 .. autoclass:: WaterSimulation
 .. autoclass:: OctanolSimulation
 
-.. autodata:: ITP
-.. autodata:: BOX
 .. autodata:: DIST
 """
 
@@ -234,7 +232,7 @@ class Simulation(Journalled):
         """Hack to be able to copy directories around: prune basedir from paths.
 
         .. Warning:: This is not guaranteed to work for all paths. In particular,
-                     check :attrib:`mdpow.equil.Simulation.dirs.includes` and adjust
+                     check :attr:`mdpow.equil.Simulation.dirs.includes` and adjust
                      manually if necessary.
         """
         def assinglet(m):

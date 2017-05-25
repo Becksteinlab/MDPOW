@@ -9,6 +9,7 @@
 .. |P_ow| replace:: *P*\ :sub:`OW`
 .. |P_cw| replace:: *P*\ :sub:`CW`
 
+
 MDPOW documentation
 ===================
 
@@ -20,7 +21,7 @@ particular, it facilitates the computation of partition coeffcients. Currently i
 - *water-cyclohexane* partition coefficient (|P_cw|)
 
 Calculations are performed with the Gromacs_ MD software
-package [#GromacsWrapper]_. Currently, *OPLS-AA force field* parameters are supported.
+package [#GromacsWrapperFramework]_. Currently, *OPLS-AA force field* parameters are supported.
 
 As *input*, the user only needs to provide a structure file (PDB or
 GRO) and a Gromacs ITP file containing the parametrization of the
@@ -31,30 +32,41 @@ small molecule (e.g. from LigandBook_ or ParamChem_).
 .. _LigandBook: http://ligandbook.icsn.cnrs-gif.fr/
 .. _ParamChem: https://cgenff.paramchem.org/
 
-.. rubric:: Contents:
+
+.. warning:: Development is still very much in flux and the
+             documentation is at least partially out of date. If
+             something appears unclear or just wrong, then please ask
+             questions on the `MDPOW Issue Tracker`_.
+
+.. _`MDPOW Issue Tracker`: https://github.com/Becksteinlab/mdpow/issues
+
+.. Hide to use with alabaster
+.. Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
+   :numbered:
+   :hidden:
 
    INSTALL
    init
    scripts
    equil
    fep
-   analysis
-   utilities      
+   utilities
+   forcefields
    tables
 
-.. rubric:: Footnotes
 
-.. [#GromacsWrapper] The package is built on top of the `GromacsWrapper`_
-                     framework (which is automatically installed).
-
-
-Indices and tables
-==================
+.. rubric:: Indices and tables
 
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+.. rubric:: Footnotes
+
+.. [#GromacsWrapperFramework] The package is built on top of the `GromacsWrapper`_
+                     framework (which is automatically installed).
+
 
