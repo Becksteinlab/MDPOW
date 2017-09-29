@@ -271,8 +271,11 @@ class Simulation(Journalled):
                included in topology
             *dirname*
                name of the topology directory ["top"]
-            *kwargs*
-               see source for *top_template*, *topol*
+            *top_template*
+               alternative template for the "system.top" topology
+               file
+            *topol*
+               name of the output topology file (default is "system.top")
         """
         self.journal.start('topology')
 
@@ -280,7 +283,7 @@ class Simulation(Journalled):
         self.dirs.topology = realpath(dirname)
 
         top_template = config.get_template(kwargs.pop('top_template', 'system.top'))
-        topol = kwargs.pop('topol', os.path.basename(top_template))
+        topol = kwargs.pop('topol', 'system.top')
         itp = os.path.realpath(itp)
         _itp = os.path.basename(itp)
 
@@ -288,7 +291,7 @@ class Simulation(Journalled):
             shutil.copy(itp, _itp)
             gromacs.cbook.edit_txt(top_template,
                                    [('#include +"compound\.itp"', 'compound\.itp', _itp),
-                                    ('#include +"oplsaa\.ff/tip4p\.itp"', 'tip4p\.itp', self.solvent.itp),
+                                    ('#include +"[^ ]*\.ff/tip4p\.itp"', 'tip4p\.itp', self.solvent.itp),
                                     ('Compound', 'solvent', self.solvent_type),
                                     ('Compound', 'DRUG', self.molecule),
                                     ('DRUG\s*1', 'DRUG', self.molecule),
