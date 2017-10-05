@@ -282,8 +282,8 @@ class Simulation(Journalled):
         dirname = kwargs.pop('dirname', self.BASEDIR('top'))
         self.dirs.topology = realpath(dirname)
 
-        top_template = config.get_template(kwargs.pop('top_template', 'system.top'))
-        topol = kwargs.pop('topol', 'system.top')
+        top_template = config.get_template(kwargs.pop('top_template', 'system_charmm.top'))
+        topol = kwargs.pop('topol', 'system_charmm.top')
         itp = os.path.realpath(itp)
         _itp = os.path.basename(itp)
 
@@ -291,7 +291,7 @@ class Simulation(Journalled):
             shutil.copy(itp, _itp)
             gromacs.cbook.edit_txt(top_template,
                                    [('#include +"compound\.itp"', 'compound\.itp', _itp),
-                                    ('#include +"[^ ]*\.ff/tip4p\.itp"', 'tip4p\.itp', self.solvent.itp),
+                                    ('#include +"[^ ]*\.ff/tip3p\.itp"', 'tip3p\.itp', self.solvent.itp),
                                     ('Compound', 'solvent', self.solvent_type),
                                     ('Compound', 'DRUG', self.molecule),
                                     ('DRUG\s*1', 'DRUG', self.molecule),
