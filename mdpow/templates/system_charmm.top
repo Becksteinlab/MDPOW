@@ -7,7 +7,7 @@
 ;       to change it as needed. See the source mdpow/equil.py for details.
 
 ; Include forcefield parameters
-#include "charmm36-july2017.ff/forcefield.itp"
+#include "charmm36-jul2017.ff/forcefield.itp"
 
 ; Include compound topology
 #include "compound.itp"
