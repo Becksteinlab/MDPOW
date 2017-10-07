@@ -16,7 +16,7 @@ setup:
     watermodel: "tip3p"
          # water model available in Gromacs (OPLS-AA):
          # tip4p, tip5p, tip3p, spc, spce     
-    distacne: 1.2
+    distance: 1.2
          # 1.2 for charmm
     itp: "benzene_charmm/benzene.itp"
          # Gromacs itp file name 
