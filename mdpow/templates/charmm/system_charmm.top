@@ -13,7 +13,7 @@
 #include "compound.itp"
 
 ; Include solvent topology
-#include "charmm36-jul2017.ff/tip4p.itp"
+#include "charmm36-jul2017.ff/tip3p.itp"
 
 ; Include topology for CHARMM36 ions 
 #include "charmm36-jul2017.ff/ions.itp"
