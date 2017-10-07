@@ -476,6 +476,10 @@ MCH3S	0	0.000000	0.00	A	0.0 0.0
 MW		0	0.000000	0.00	A	0.0 0.0
 ; Updated Mg2+ parameters by Allner et al. (DOI: 10.1021/ct3000734)
 MGA 12	  24.305000    0.000  A   0.277000	0.01234280	
+; Zinc Dummy Model parameters by  Duarte et al. (DOI:  10.1021/jp501737x)
+; Dummy parameters by  Jiang Yang et al. (DOI:  10.1021/acs.jcim.5b00286 )
+ ZND    0   47.390000  -1.00    A   0.1214064532912  35.88448
+ DM     0    3.000000   0.50    A   0.1388200000000  0.000000048
 
 [ pairtypes ]
   CP1     C  1  0.347450500075  0.138767581228
