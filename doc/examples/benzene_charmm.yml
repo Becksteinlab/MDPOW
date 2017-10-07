@@ -13,9 +13,11 @@ setup:
          # common, descriptive name, e.g. benzene
     molecule: "BNZ"
          # Gromacs [ molecule ] identifier from the itp file (typically a 3-letter code)
-    watermodel: "tip4p"
+    watermodel: "tip3p"
          # water model available in Gromacs (OPLS-AA):
          # tip4p, tip5p, tip3p, spc, spce     
+    distacne: 1.2
+         # 1.2 for charmm
     itp: "benzene_charmm/benzene.itp"
          # Gromacs itp file name 
     structure: "benzene_charmm/benzene.pdb"
@@ -29,7 +31,7 @@ setup:
 # energy minimization
 
 energy_minimize:
-    mdp: "em_opls.mdp"
+    mdp: "charmm/em_charmm.mdp"
          # run parameter file for Gromacs;
          # (will be searched as (1) absolute path, (2) in current directory (3)
          # in the package templates)
@@ -45,7 +47,7 @@ MD_relaxed:
          # False: produce queuing system scripts and stop
     runtime: 1
          # run time in ps
-    mdp: "NPT_opls.mdp"
+    mdp: "charmm/NPT_charmm.mdp"
          #  run parameter file for Gromacs;
          # (will be searched as (1) absolute path, (2) in current directory (3)
          # in the package templates)
@@ -89,7 +91,7 @@ FEP:
          #  necessarily cancel.  It may be necessary to decrease the reciprocal space
          #  energy, and increase the cutoff radius to get sufficiently close matches
          #  to energies with free energy turned off.
-    mdp: "bar_opls.mdp"
+    mdp: "charmm/bar_charmm.mdp"
          # run parameter file for Gromacs;
          # (will be searched as (1) absolute path, (2) in current directory (3)
          # in the package templates)
