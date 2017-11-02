@@ -329,6 +329,7 @@ class Simulation(Journalled):
         kwargs['water'] = self.solvent.box
         kwargs.setdefault('mainselection', '"%s"' % self.molecule)  # quotes are needed for make_ndx
         kwargs.setdefault('distance', self.solvent.distance)
+	kwargs.setdefault('boxtype', 'dodecahedron')
         kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.dirs.includes
 
         params = gromacs.setup.solvate(**kwargs)
