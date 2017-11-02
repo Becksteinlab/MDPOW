@@ -194,7 +194,11 @@ def equilibrium_simulation(cfg, solvent, **kwargs):
             distance = cfg.get('setup', 'distance')
         except KeyError:
             distance = None # if no distance is specified, None = default
-
+        try:
+            boxtype = cfg.get('setup', 'boxtype')
+        except KeyError:
+            boxtype = 'dodecahedron'
+	
         solventmodel = None
         if solvent == "water":
             try:
@@ -209,7 +213,7 @@ def equilibrium_simulation(cfg, solvent, **kwargs):
 
         S = Simulation(molecule=cfg.get("setup", "molecule"),
                        dirname=dirname, deffnm=deffnm, mdp=mdpfiles,
-                       distance=distance,
+                       distance=distance, boxtype=boxtype,
                        solventmodel=solventmodel)
 
     if S.journal.has_not_completed("energy_minimize"):
