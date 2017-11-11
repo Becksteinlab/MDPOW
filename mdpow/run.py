@@ -194,6 +194,11 @@ def equilibrium_simulation(cfg, solvent, **kwargs):
             distance = cfg.get('setup', 'distance')
         except KeyError:
             distance = None # if no distance is specified, None = default
+        try:
+            boxtype = cfg.get('setup', 'boxtype')
+        except KeyError:
+            boxtype = None # if no distance is specified, None = default
+
 
         solventmodel = None
         if solvent == "water":
@@ -215,7 +220,9 @@ def equilibrium_simulation(cfg, solvent, **kwargs):
     if S.journal.has_not_completed("energy_minimize"):
         maxwarn = cfg.getint("setup", "maxwarn") or None
         S.topology(itp=cfg.getpath("setup", "itp"))
-        S.solvate(struct=cfg.getpath("setup", "structure"), maxwarn=maxwarn)
+        S.solvate(struct=cfg.getpath("setup", "structure"),
+                  bt=cfg.get("setup", "boxtype"),
+                  maxwarn=maxwarn)
         S.energy_minimize(maxwarn=maxwarn)
         checkpoint('energy_minize', S, savefilename)
     else:

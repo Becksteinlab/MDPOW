@@ -1,9 +1,5 @@
-# default run input file for the the equilibrium simulation
+# default run input file for the the equilibrium and FEP simulations;
 # values can be overriden from your own configuration file
-
-# XXX maybe define which queuing system to submit to, so that this can be
-# XXX done automatically through GromacsWrapper.
-
 
 DEFAULT:
     qscripts: 'local.sh'
@@ -22,6 +18,13 @@ setup:
          # coordinate file name (pdb, gro, ... anything that Gromacs can read)
     maxwarn: 0
          # maximum number of warnings tolerated by grompp during setup
+    distance:  None
+         # minimum distance between solute and box face (by default
+         # (None) this is set to a 1.0 nm for water and 1.5 nm for
+         # other solvents)    
+    boxtype: dodecahedron
+         # box type understood by Gromacs 'gmx editconf' (cubic,
+         # triclinic, octahedron, dodecahedron
     gromacsoutput: False
          # True: print output from Gromacs command to screen (useful for debugging)
          # False: only show the MDPOW messages
