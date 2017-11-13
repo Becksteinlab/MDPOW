@@ -40,8 +40,7 @@ install:
   # install test tools
   - pip install pybol
   - pip install codecov
-  - pip install pytest-cov
-  - pip install pytest-pep8
+  - pip install pytest-cov pytest-pep8 pytest-xdist
 
   # install MDPOW
   - pip install -e .
@@ -52,7 +51,7 @@ script:
   - source $($HOME/get_gmx $GMX_VERSION)
   # NOTE: to see ALL Gromacs output for debugging on Travis CI,
   #       disable py.test capturing with '-s'  
-  - py.test --cov mdpow mdpow/tests
+  - py.test -n 2 --cov mdpow mdpow/tests
 
 after_success:
   - codecov
