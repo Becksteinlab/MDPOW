@@ -10,6 +10,8 @@ orbeckst
 
 * renamed package to MDPOW
 * removed all generated docs from package
+* config parser MERGES user runinput.yml with the package defaults
+  (#8)
 
 
 2017-05-02    0.6.1

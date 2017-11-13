@@ -110,6 +110,20 @@ defaults = {
     "runinput": resource_filename(__name__, "templates/runinput.yml"),
     }
 
+def merge_dicts(user, default):
+    """Merge two dictionaries recursively.
+
+    Based on https://stackoverflow.com/a/823240/334357
+    """
+    if isinstance(user, dict) and isinstance(default, dict):
+        for k, v in default.iteritems():
+            if k not in user:
+                user[k] = v
+            else:
+                user[k] = merge_dicts(user[k], v)
+    return user
+
+
 class POWConfigParser(object):
     """Parse YAML config file."""
 
@@ -117,8 +131,24 @@ class POWConfigParser(object):
         self.conf = None
 
     def readfp(self, fn):
-        self.conf = yaml.load(fn)
+        """Read YAML from open stream ``fn``.
+
+        Overwrites everything.
+        """
+        self.conf = yaml.safe_load(fn)
         return True
+
+    def merge(self, fn):
+        """Load YAML from open stream ``fn`` and merge into :attr:`conf`.
+
+        Data from this file will overwrite data from the existing
+        configuration; anything not set in this file will be taken
+        from the loaded configuration. Arrays are overwritten and not
+        appended/merged.
+        """
+        user = yaml.safe_load(fn)
+        self.conf = merge_dicts(user, self.conf)
+        return self.conf
 
     def write(self, filename):
         with open(filename, 'w') as f:
@@ -194,8 +224,8 @@ def get_configuration(filename=None):
     cfg.readfp(open(defaults["runinput"]))
     logger.debug("Loaded runinput defaults from %r", defaults["runinput"])
     if filename is not None:
-        cfg.readfp(open(filename))   # override package defaults
-        logger.debug("Loaded user runinput from %r", filename)
+        cfg.merge(open(filename))   # override package defaults
+        logger.debug("Loaded user runinput from %r (replacing defaults)", filename)
     else:
         logger.warning("Running with package defaults for the run; you should supply a runinput file!")
     return cfg
