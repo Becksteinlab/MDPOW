@@ -12,7 +12,8 @@ orbeckst
 * removed all generated docs from package
 * config parser MERGES user runinput.yml with the package defaults
   (#8)
-
+* boxtype and minimum distance (#30) can be set in runinput.yml and are
+  documented (#91, #88)
 
 2017-05-02    0.6.1
 orbeckst, iorga, ianmkenney, rhheilma
