@@ -132,6 +132,8 @@ class Simulation(Journalled):
               ``MD_restrained``, ``MD_relaxed``,
               ``MD_NPT`` and values *mdp* file names (if no entry then the
               package defaults are used)
+          *distance*
+               minimum distance between solute and closest box face
           *kwargs*
               advanced keywords for short-circuiting; see
               :data:`mdpow.equil.Simulation.filekeys`.
@@ -314,6 +316,18 @@ class Simulation(Journalled):
           *struct*
               pdb or gro coordinate file (if not supplied, the value is used
               that was supplied to the constructor of :class:`~mdpow.equil.Simulation`)
+          *distance*
+               minimum distance between solute and the closes box face; the default depends
+               on the solvent but can be set explicitly here, too.
+          *bt*
+               any box type understood by :func:`gromacs.editconf` (``-bt``):
+
+               * "triclinic" is a triclinic box,
+               * "cubic" is a rectangular box with all sides equal;
+               * "dodecahedron" represents a rhombic dodecahedron;
+               * "octahedron" is a truncated octahedron.
+
+               The default is "dodecahedron".
           *kwargs*
               All other arguments are passed on to :func:`gromacs.setup.solvate`, but
               set to sensible default values. *top* and *water* are always fixed.
@@ -326,6 +340,15 @@ class Simulation(Journalled):
         kwargs['water'] = self.solvent.box
         kwargs.setdefault('mainselection', '"%s"' % self.molecule)  # quotes are needed for make_ndx
         kwargs.setdefault('distance', self.solvent.distance)
+
+        boxtype = kwargs.pop('bt', None)
+        boxtype = boxtype if boxtype is not None else "dodecahedron"
+        if boxtype not in ("dodecahedron", "triclinic", "cubic", "octahedron"):
+            msg = "Invalid boxtype '{0}', not suitable for 'gmx editconf'.".format(boxtype)
+            logger.error(msg)
+            raise ValueError(msg)
+        kwargs['bt'] = boxtype
+
         kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.dirs.includes
 
         params = gromacs.setup.solvate(**kwargs)

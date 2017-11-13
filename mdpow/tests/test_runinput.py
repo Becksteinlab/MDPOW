@@ -3,7 +3,7 @@ import os.path
 import numpy as np
 from numpy.testing import assert_array_almost_equal
 
-import mdpow
+import mdpow.config
 
 class TestAlteredConfig(object):
     params_altered = {
@@ -19,6 +19,8 @@ class TestAlteredConfig(object):
             'structure': 'some_molecules_structure',
             'watermodel': 'spce',
             'maxwarn': 2,
+            'distance': None,          # default (not in this input file)
+            'boxtype': 'dodecahedron', # default (not in this input file)
             'gromacsoutput': True,
             },
         'energy_minimize':
