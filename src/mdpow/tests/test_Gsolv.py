@@ -7,13 +7,16 @@ from gromacs.utilities import in_dir
 import mdpow.fep
 import mdpow.equil
 
+import pkg_resources
+
+TEST_RESOURCES = pkg_resources.resource_filename(
+    __name__, 'testing_resources')
+
 class Test_Gsolv_manual(object):
 
     def setup(self):
         self.tmpdir = td.TempDir()
-        self.old_path = os.getcwd()
-        self.resources = os.path.join(
-            self.old_path, 'mdpow', 'tests', 'testing_resources')
+        self.resources = TEST_RESOURCES
         self.m = pybol.Manifest(os.path.join(self.resources,'manifest.yml'))
         self.m.assemble('md_npt',self.tmpdir.name)
         simulation_filename = os.path.join(self.tmpdir.name,'benzene',
@@ -41,7 +44,7 @@ class Test_Gsolv_manual(object):
         lambda_coulomb = [0,0.5,1.0]
         lambda_vdw = [0,0.2,1.0]
         self._setup(lambda_coulomb=lambda_coulomb, lambda_vdw=lambda_vdw)
-    
+
     def test_array_foreign_lambdas(self):
         lambda_coulomb = np.array([0,0.5,1.0])
         lambda_vdw = np.array([0,0.2,1.0])

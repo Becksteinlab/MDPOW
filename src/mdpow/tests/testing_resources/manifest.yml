@@ -1,4 +1,4 @@
-path: mdpow/tests/testing_resources/states
+path: src/mdpow/tests/testing_resources/states
 
 base:
     options:

@@ -6,6 +6,12 @@ import tempdir as td
 
 import mdpow.equil
 
+import pkg_resources
+
+TEST_RESOURCES = pkg_resources.resource_filename(
+    __name__, 'testing_resources')
+
+
 class TestSolvation(object):
     sims = {"water" : mdpow.equil.WaterSimulation,
             "octanol" : mdpow.equil.OctanolSimulation,
@@ -14,9 +20,7 @@ class TestSolvation(object):
 
     def setup(self):
         self.tmpdir = td.TempDir()
-        self.old_path = os.getcwd()
-        self.resources = os.path.join(
-            self.old_path, 'mdpow', 'tests', 'testing_resources')
+        self.resources = TEST_RESOURCES
         self.solvation_paths = os.path.join(
             self.resources, 'stages', 'solvation', 'water', 'benzene')
 
@@ -46,8 +50,8 @@ class TestSolvation(object):
                     S = self.sims[solvent](molecule='BNZ')
                     S.topology(itp='benzene.itp')
                     S.solvate(struct='benzene.pdb')
-            except Exception:
-                raise AssertionError('Solvation failed.')
+            except Exception as err:
+                raise AssertionError('Solvation failed: {}'.format(err))
 
     def test_solvation_water(self):
         return self._test_solvation('water')

@@ -1,5 +1,5 @@
 include   setup.py setup.cfg COPYING INSTALL README.rst AUTHORS CHANGES
 recursive-include   doc *.html *.css *.js *.txt *.inv *.png
-graft     mdpow/templates/
-graft     mdpow/top/
-graft     mdpow/top/oplsaa.ff/
+graft     src/mdpow/templates/
+graft     src/mdpow/top/
+graft     src/mdpow/top/oplsaa.ff/

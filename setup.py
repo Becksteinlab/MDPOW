@@ -6,7 +6,13 @@
 from setuptools import setup, find_packages
 
 # Dynamically calculate the version based on VERSION.
-version = __import__('mdpow.version').get_version()
+from importlib import import_module
+import sys
+sys.path.insert(0, "./src")
+try:
+    version = import_module('mdpow.version').get_version()
+finally:
+    sys.path.pop()
 
 setup(name="MDPOW",
       version=version,
@@ -27,18 +33,19 @@ setup(name="MDPOW",
           "Topic :: Scientific/Engineering :: Chemistry",
           "Topic :: Scientific/Engineering :: Physics",
       ],
-      packages=find_packages(exclude=['examples']),
-      scripts=['scripts/mdpow-pow',
-               'scripts/mdpow-pcw',
-               'scripts/mdpow-ghyd',
-               'scripts/mdpow-check',
-               'scripts/mdpow-rebuild-fep',
-               'scripts/mdpow-rebuild-simulation',
-               'scripts/mdpow-equilibrium',
-               'scripts/mdpow-fep',
-               'scripts/mdpow-cfg2yaml.py',
-               'scripts/mdpow-solvationenergy',
-               'scripts/mdpow-get-runinput'
+      packages=find_packages('src', exclude=['examples']),
+      package_dir={'': 'src'},
+      scripts=['src/scripts/mdpow-pow',
+               'src/scripts/mdpow-pcw',
+               'src/scripts/mdpow-ghyd',
+               'src/scripts/mdpow-check',
+               'src/scripts/mdpow-rebuild-fep',
+               'src/scripts/mdpow-rebuild-simulation',
+               'src/scripts/mdpow-equilibrium',
+               'src/scripts/mdpow-fep',
+               'src/scripts/mdpow-cfg2yaml.py',
+               'src/scripts/mdpow-solvationenergy',
+               'src/scripts/mdpow-get-runinput'
       ],
       package_data={'mdpow': ['top/*.dat', 'top/*.gro', 'top/*.itp',
                               'top/oplsaa.ff/*',

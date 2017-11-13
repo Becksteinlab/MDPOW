@@ -3,7 +3,14 @@ import os.path
 import numpy as np
 from numpy.testing import assert_array_almost_equal
 
+import pkg_resources
+
 import mdpow.config
+
+
+TEST_CONFIGURATIONS = pkg_resources.resource_filename(
+    __name__,
+    os.path.join('testing_resources', 'test_configurations'))
 
 class TestAlteredConfig(object):
     params_altered = {
@@ -86,8 +93,7 @@ class TestAlteredConfig(object):
     def setup(self):
     # load default bundled configuration
         self.cfg = mdpow.config.get_configuration(
-            os.path.join('mdpow', 'tests', 'testing_resources',
-                         'test_configurations', 'altered_runinput.yml'))
+            os.path.join(TEST_CONFIGURATIONS, 'altered_runinput.yml'))
 
     def _test_section(self,section):
         section_dict = self.params_altered[section]

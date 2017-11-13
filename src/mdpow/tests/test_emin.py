@@ -2,12 +2,16 @@ import mdpow.equil
 import tempdir as td
 import os
 
+import pkg_resources
+
+TEST_RESOURCES = pkg_resources.resource_filename(
+    __name__, 'testing_resources')
+
 class TestEnergyMinimization(object):
-    
+
     def setup(self):
         self.tmpdir = td.TempDir()
-        self.old_path = os.getcwd()
-        self.resources = os.path.join(self.old_path, 'mdpow', 'tests', 'testing_resources')
+        self.resources = TEST_RESOURCES
         # TODO Instantiate Simulation object from existing files in resources
 
     def _run_emin(self):
