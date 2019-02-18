@@ -1015,7 +1015,8 @@ class Gsolv(Journalled):
 
         All *kwargs* are passed on to :func:`pylab.errorbar`.
         """
-        from pylab import subplot, errorbar, xlabel, ylabel, legend, xlim, title
+        import matplotlib
+        import matplotlib.pyplot as plt
 
         kwargs.setdefault('color', 'black')
         kwargs.setdefault('capsize', 0)
@@ -1030,24 +1031,23 @@ class Gsolv(Journalled):
 
         dvdl = self.results.dvdl
         nplots = len(dvdl)
+        fig, axs = plt.subplots(nrows=1, ncols=nplots)
         for i, component in enumerate(numpy.sort(dvdl.keys())):  # stable plot order
             x,y,dy = [dvdl[component][k] for k in ('lambdas', 'mean', 'error')]
-            iplot = i+1
-            subplot(1, nplots, iplot)
+            iplot = i
+            ax = axs[i]
             energy = self.results.DeltaA[component]
             label = r"$\Delta A^{\rm{%s}}_{\rm{%s}} = %.2f\pm%.2f$ kJ/mol" \
                     % (component, self.solvent_type, energy.value, energy.error)
-            errorbar(x, y, yerr=dy, label=label, **kwargs)
-            xlabel(r'$\lambda$')
-            legend(loc='best')
-            xlim(-0.05, 1.05)
-        subplot(1, nplots, 1)
-        ylabel(r'$dV/d\lambda$ in kJ/mol')
-        title(r"Free energy difference $\Delta A^{0}_{\rm{%s}}$" % self.solvent_type)
-        subplot(1, nplots, 2)
-        title(r"for %s: $%.2f\pm%.2f$ kJ/mol" %
-              ((self.molecule,) + self.results.DeltaA.Gibbs.astuple()))
-
+            ax.errorbar(x, y, yerr=dy, label=label, **kwargs)
+            ax.set_xlabel(r'$\lambda$')
+            ax.legend(loc='best')
+            ax.set_xlim(-0.05, 1.05)
+        ax[0].set_ylabel(r'$dV/d\lambda$ in kJ/mol')
+        fig.suptitle(r"Free energy difference $\Delta A^{0}_{\rm{%s}}$ for %s: $%.2f\pm%.2f$ kJ/mol" %
+              ((self.solvent_type, self.molecule,) + self.results.DeltaA.Gibbs.astuple()))
+        fig.savefig('DeltaA.png')
+        plt.close()
 
     def qsub(self, script=None):
         """Submit a batch script locally.
