@@ -1043,7 +1043,7 @@ class Gsolv(Journalled):
             ax.set_xlabel(r'$\lambda$')
             ax.legend(loc='best')
             ax.set_xlim(-0.05, 1.05)
-        ax[0].set_ylabel(r'$dV/d\lambda$ in kJ/mol')
+        axs[0].set_ylabel(r'$dV/d\lambda$ in kJ/mol')
         fig.suptitle(r"Free energy difference $\Delta A^{0}_{\rm{%s}}$ for %s: $%.2f\pm%.2f$ kJ/mol" %
               ((self.solvent_type, self.molecule,) + self.results.DeltaA.Gibbs.astuple()))
         fig.savefig('DeltaA.png')
