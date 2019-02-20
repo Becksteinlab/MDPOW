@@ -264,13 +264,16 @@ class Simulation(Journalled):
         logger.warn("make_paths_relative(): check/manually adjust %s.dirs.includes = %r !",
                     self.__class__.__name__, self.dirs.includes)
 
-    def topology(self, itp='drug.itp', **kwargs):
+    def topology(self, itp='drug.itp', prm=None, **kwargs):
         """Generate a topology for compound *molecule*.
 
         :Keywords:
             *itp*
                Gromacs itp file; will be copied to topology dir and
                included in topology
+            *prm*
+               Gromacs prm file; if given, will be copied to topology
+               dir and included in topology
             *dirname*
                name of the topology directory ["top"]
             *kwargs*
@@ -285,11 +288,19 @@ class Simulation(Journalled):
         topol = kwargs.pop('topol', os.path.basename(top_template))
         itp = os.path.realpath(itp)
         _itp = os.path.basename(itp)
+        if prm==None:
+            _prm = ''
+        else:
+            prm = os.path.realpath(prm)
+            _prm = os.path.basename(prm)
 
         with in_dir(dirname):
             shutil.copy(itp, _itp)
+            if prm is not None:
+                shutil.copy(prm, _prm)
             gromacs.cbook.edit_txt(top_template,
                                    [('#include +"compound\.itp"', 'compound\.itp', _itp),
+                                    ('#include +"compound\.prm"', 'compound\.prm', _prm),
                                     ('#include +"oplsaa\.ff/tip4p\.itp"', 'tip4p\.itp', self.solvent.itp),
                                     ('Compound', 'solvent', self.solvent_type),
                                     ('Compound', 'DRUG', self.molecule),
