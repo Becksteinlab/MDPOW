@@ -10,6 +10,8 @@
 #include "oplsaa.ff/forcefield.itp"
 
 ; Include compound topology
+#include "compound.prm"
+
 #include "compound.itp"
 
 ; Include solvent topology

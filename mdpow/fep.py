@@ -635,6 +635,7 @@ class Gsolv(Journalled):
                       ndx=self.ndx,
                       mainselection=None,
                       runtime=self.runtime,
+                      maxwarn=1,
                       ref_t=self.Temperature,    # TODO: maybe not working yet, check _setup()
                       gen_temp=self.Temperature, # needed until gromacs.setup() is smarter
                       qname=self.tasklabel(component,lmbda),
