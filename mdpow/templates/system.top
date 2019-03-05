@@ -16,6 +16,7 @@
 
 ; Include solvent topology
 #include "oplsaa.ff/tip4p.itp"
+#include "water.itp"
 
 ; Include topology for OPLS/AA ions 
 #include "oplsaa.ff/ions_opls.itp"
