@@ -120,8 +120,10 @@ class Simulation(Journalled):
               :meth:`~mdpow.equil.Simulation.save`.
           *dirname*
               base directory; all other directories are created under it
+          *forcefield*
+              'OPLS-AA' or 'CHARMM' or 'AMBER'
           *solvent*
-              'water' or 'octanol' or 'cyclohexane'
+              'water' or 'octanol' or 'cyclohexane' or 'wetoctanol'
           *solventmodel*
               ``None`` chooses the default (e.g, :data:`mdpow.forcefields.DEFAULT_WATER_MODEL`
               for ``solvent == "water"``. Other options are the models defined in
@@ -143,6 +145,7 @@ class Simulation(Journalled):
         filename = kwargs.pop('filename', None)
         dirname = kwargs.pop('dirname', self.dirname_default)
 
+        forcefield = kwargs.pop('forcefield', 'OPLS-AA')
         solvent = kwargs.pop('solvent', self.solvent_default)
         # mdp files --- should get values from default runinput.cfg
         # None values in the kwarg mdp dict are ignored
@@ -177,15 +180,23 @@ class Simulation(Journalled):
                 # that includes the necessary itp file(s)
                 self.dirs.topology = realpath(os.path.dirname(self.files.topology))
                 self.dirs.includes.append(self.dirs.topology)
-
+            
+            self.forcefield = forcefield
             self.solvent_type = solvent
-            self.solventmodel_identifier = forcefields.get_solvent_identifier(solvent, solventmodel)
+            self.solventmodel_identifier = forcefields.get_solvent_identifier(
+                 solvent, 
+                 model=solventmodel,
+                 forcefield=forcefield,
+                 )
             if self.solventmodel_identifier is None:
                 msg = "No parameters for solvent {0} and solventmodel {1} available.".format(
                     solvent, solventmodel)
                 logger.error(msg)
                 raise ValueError(msg)
-            self.solventmodel = forcefields.get_solvent_model(self.solventmodel_identifier)
+            self.solventmodel = forcefields.get_solvent_model(
+                self.solventmodel_identifier, 
+                forcefield=forcefield,
+                )
 
             distance = kwargs.pop('distance', None)
             distance = distance if distance is not None else DIST[solvent]
@@ -284,24 +295,50 @@ class Simulation(Journalled):
         dirname = kwargs.pop('dirname', self.BASEDIR('top'))
         self.dirs.topology = realpath(dirname)
 
+        settings = {
+                    'OPLS-AA': ['oplsaa.ff/', 'oplsaa.ff/ions_opls.itp', 
+                                'oplsaa.ff/tip4p.itp'],
+                    'CHARMM': ['amber99sb.ff/', 'amber99sb.ff/ions.itp', 
+                               'amber99sb.ff/tip3p.itp'],
+                    'AMBER': ['charmm36-jul2017.ff/', 'charmm36-jul2017.ff/ions.itp', 
+                              'charmm36-jul2017.ff/tip3p.itp'],
+                    }
+        setting = settings[self.forcefield]
+        
+
         top_template = config.get_template(kwargs.pop('top_template', 'system.top'))
         topol = kwargs.pop('topol', os.path.basename(top_template))
         itp = os.path.realpath(itp)
         _itp = os.path.basename(itp)
+
         if prm==None:
-            _prm = ''
+            prm_kw = ''
         else:
             prm = os.path.realpath(prm)
             _prm = os.path.basename(prm)
+            prm_kw = '#include +"{}"'.format(_prm)
+
+        if self.solvent_type=='wetoctanol':
+            water_kw = '#include +"{}"'.format(setting[2]) 
+        else: 
+            water_kw = ''
 
         with in_dir(dirname):
             shutil.copy(itp, _itp)
             if prm is not None:
                 shutil.copy(prm, _prm)
             gromacs.cbook.edit_txt(top_template,
-                                   [('#include +"compound\.itp"', 'compound\.itp', _itp),
-                                    ('#include +"compound\.prm"', 'compound\.prm', _prm),
-                                    ('#include +"oplsaa\.ff/tip4p\.itp"', 'tip4p\.itp', self.solvent.itp),
+                                   [('#include +"oplsaa\.ff/forcefield\.itp"', 
+                                    'oplsaa\.ff/', setting[0]),
+                                    ('#include +"compound\.itp"', 'compound\.itp', _itp),
+                                    ('#include +"oplsaa\.ff/tip4p\.itp"', 
+                                     'oplsaa\.ff/tip4p\.itp', setting[0]+self.solvent.itp),
+                                    ('#include +"oplsaa\.ff/ions_opls\.itp"',
+                                     'oplsaa\.ff/ions_opls\.itp', setting[1]),
+                                    ('#include +"compound\.prm"',
+                                     '#include +"compound\.prm"', prm_kw),
+                                    ('#include +"water\.itp"',
+                                     '#include +"water\.itp"', water_kw),
                                     ('Compound', 'solvent', self.solvent_type),
                                     ('Compound', 'DRUG', self.molecule),
                                     ('DRUG\s*1', 'DRUG', self.molecule),

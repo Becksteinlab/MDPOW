@@ -79,8 +79,7 @@ m24         M24        TIP 3-point with modified LJ (M24)
 class GromacsSolventModel(object):
     """Data for a solvent model in Gromacs."""
     def __init__(self, identifier, name=None, itp=None, coordinates=None,
-                 description=None,
-                 forcefield="OPLS-AA"):
+                 description=None, forcefield="OPLS-AA"):
         self.identifier = identifier
         self.name = name if name is not None else str(identifier).upper()
         self.itp = itp if itp is not None else self.guess_filename('itp')
@@ -142,14 +141,36 @@ def get_water_model(watermodel=DEFAULT_WATER_MODEL):
         raise ValueError(msg)
 
 #: Other solvents (not water, see :data:`GROMACS_WATER_MODELS` for those).
-GROMACS_SOLVENT_MODELS = {
+OPLS_SOLVENT_MODELS = {
     'octanol': GromacsSolventModel(
         identifier="octanol", itp="1oct.itp", coordinates="1oct.gro"),
     'cyclohexane': GromacsSolventModel(
         identifier="cyclohexane", itp="1cyclo.itp", coordinates="1cyclo.gro"),
+    'wetoctanol': GromacsSolventModel(
+        identifier="wetoctanol", itp="1oct.itp", coordinates="1octwet"),
     }
 
-def get_solvent_identifier(solvent_type, model=None):
+CHARMM_SOLVENT_MODELS = {
+    'octanol': GromacsSolventModel(
+        identifier="octanol", itp="1oct.itp", coordinates="1oct.gro"),
+    'wetoctanol': GromacsSolventModel(
+        identifier="wetoctanol", itp="1oct.itp", coordinates="1octwet"),
+    }
+
+AMBER_SOLVENT_MODELS = {
+    'octanol': GromacsSolventModel(
+        identifier="octanol", itp="1oct.itp", coordinates="1oct.gro"),
+    'wetoctanol': GromacsSolventModel(
+        identifier="wetoctanol", itp="1oct.itp", coordinates="1octwet"),
+    }
+
+GROMACS_SOLVENT_MODELS = {
+    'OPLS-AA': OPLS_SOLVENT_MODELS,
+    'CHARMM': CHARMM_SOLVENT_MODELS,
+    'AMBER': AMBER_SOLVENT_MODELS,
+    }
+
+def get_solvent_identifier(solvent_type, model=None, forcefield='OPLS-AA'):
     """Get the identifier for a solvent model.
 
     The identifier is needed to access a water model (i.e., a
@@ -176,10 +197,10 @@ def get_solvent_identifier(solvent_type, model=None):
     if solvent_type is "water":
         identifier = model if not model in (None, 'water') else DEFAULT_WATER_MODEL
         return identifier if identifier in GROMACS_WATER_MODELS else None
-    return solvent_type if solvent_type in GROMACS_SOLVENT_MODELS else None
+    return solvent_type if solvent_type in GROMACS_SOLVENT_MODELS[forcefield] else None
 
 
-def get_solvent_model(identifier):
+def get_solvent_model(identifier, forcefield='OPLS-AA'):
     """Return a :class:`GromacsSolventModel` corresponding to identifier *identifier*.
 
     If identifier is "water" then the :data:`DEFAULT_WATER_MODEL` is assumed.
@@ -191,7 +212,7 @@ def get_solvent_model(identifier):
         return GROMACS_WATER_MODELS[identifier]
     except KeyError:
         try:
-            return GROMACS_SOLVENT_MODELS[identifier]
+            return GROMACS_SOLVENT_MODELS[forcefield][identifier]
         except KeyError:
             msg = "No solvent model with name {0} is available.".format(identifier)
             logger.critical(msg)
