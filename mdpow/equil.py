@@ -56,7 +56,7 @@ logger = logging.getLogger('mdpow.equil')
 # TODO: change to water distance 1.2 in the future (1.0 for
 #       compatibility with our SAMPL5 runs)
 #: minimum distance between solute and box surface (in nm)
-DIST = {'water': 1.0, 'octanol': 1.5, 'cyclohexane': 1.5}
+DIST = {'water': 1.0, 'octanol': 1.5, 'cyclohexane': 1.5, 'wetoctanol': 1.5}
 
 class Simulation(Journalled):
     """Simple MD simulation of a single compound molecule in water.
@@ -298,14 +298,13 @@ class Simulation(Journalled):
         settings = {
                     'OPLS-AA': ['oplsaa.ff/', 'oplsaa.ff/ions_opls.itp', 
                                 'oplsaa.ff/tip4p.itp'],
-                    'CHARMM': ['amber99sb.ff/', 'amber99sb.ff/ions.itp', 
+                    'AMBER': ['amber99sb.ff/', 'amber99sb.ff/ions.itp', 
                                'amber99sb.ff/tip3p.itp'],
-                    'AMBER': ['charmm36-jul2017.ff/', 'charmm36-jul2017.ff/ions.itp', 
+                    'CHARMM': ['charmm36-jul2017.ff/', 'charmm36-jul2017.ff/ions.itp', 
                               'charmm36-jul2017.ff/tip3p.itp'],
                     }
         setting = settings[self.forcefield]
         
-
         top_template = config.get_template(kwargs.pop('top_template', 'system.top'))
         topol = kwargs.pop('topol', os.path.basename(top_template))
         itp = os.path.realpath(itp)
@@ -316,10 +315,10 @@ class Simulation(Journalled):
         else:
             prm = os.path.realpath(prm)
             _prm = os.path.basename(prm)
-            prm_kw = '#include +"{}"'.format(_prm)
+            prm_kw = '#include "{}"'.format(_prm)
 
         if self.solvent_type=='wetoctanol':
-            water_kw = '#include +"{}"'.format(setting[2]) 
+            water_kw = '#include "{}"'.format(setting[2]) 
         else: 
             water_kw = ''
 
@@ -634,5 +633,10 @@ class CyclohexaneSimulation(Simulation):
 class OctanolSimulation(Simulation):
     """Equilibrium MD of a solute in a box of octanol."""
     solvent_default = 'octanol'
+    dirname_default = os.path.join(Simulation.topdir_default, solvent_default)
+
+class WetOctanolSimulation(Simulation):
+    """Equilibrium MD of a solute in a box of wet octanol."""
+    solvent_default = 'wetoctanol'
     dirname_default = os.path.join(Simulation.topdir_default, solvent_default)
 
