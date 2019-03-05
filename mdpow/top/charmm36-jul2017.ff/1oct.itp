@@ -2,7 +2,7 @@
 
 [ moleculetype ]
 ; Name			   nrexcl
-OcOH				 3
+SOL 				 3
 
 [ atoms ]
 ;	 nr		  type	resnr residue  atom   cgnr	   charge		mass  typeB    chargeB		massB

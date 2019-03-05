@@ -10,7 +10,7 @@
 
 [ moleculetype ]
 ;name            nrexcl
-OcOH              3
+SOL               3
 
 [ atoms ]
 ;   nr  type  resi  res  atom  cgnr     charge      mass       ; qtot   bond_type
