@@ -1127,6 +1127,37 @@ class Goct(Gsolv):
                  }
 
 
+class Gwoct(Gsolv):
+    """Sets up and analyses MD to obtain the solvation free energy of a solute in wet octanol.
+
+    The *coulomb* lambda schedule is enhanced compared to water as the initial
+    part of the dV/dl curve is quite sensitive. By adding two additional points
+    we hope to reduce the overall error on the dis-charging free energy.
+    """
+    solvent_default = "wetoctanol"
+    dirname_default = os.path.join(Gsolv.topdir_default, solvent_default)
+
+    schedules = {'coulomb':
+                 FEPschedule(name='coulomb',
+                             description="dis-charging vdw+q --> vdw",
+                             label='Coul',
+                             couple_lambda0='vdw-q', couple_lambda1='vdw',
+                             sc_alpha=0,      # linear scaling for coulomb
+                             #lambdas=[0, 0.25, 0.5, 0.75, 1.0],  # default
+                             lambdas=[0, 0.125, 0.25, 0.375, 0.5, 0.75, 1.0],  # +0.125, 0.375 enhanced
+                             ),
+                 'vdw':
+                 FEPschedule(name='vdw',
+                             description="decoupling vdw --> none",
+                             label='VDW',
+                             couple_lambda0='vdw', couple_lambda1='none',
+                             sc_alpha=0.5, sc_power=1, sc_sigma=0.3, # recommended values
+                             lambdas=[0.0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6,  # defaults
+                                      0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1],
+                             ),
+                 }
+
+
 
 def p_transfer(G1, G2, **kwargs):
     """Compute partition coefficient from two :class:`Gsolv` objects.
