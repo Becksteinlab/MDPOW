@@ -16,6 +16,7 @@
 
 ; Include solvent topology
 #include "oplsaa.ff/tip4p.itp"
+#include "water.itp"
 
 ; Include topology for OPLS/AA ions 
 #include "oplsaa.ff/ions_opls.itp"
@@ -27,3 +28,4 @@ Compound DRUG in solvent (OPLS-AA parameters)
 [ molecules ]
 ; Compound        #mols
 DRUG               1
+OcOH               1

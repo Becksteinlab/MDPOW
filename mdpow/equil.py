@@ -303,10 +303,14 @@ class Simulation(Journalled):
                     'CHARMM': ['charmm36-jul2017.ff/', 'charmm36-jul2017.ff/ions.itp', 
                               'charmm36-jul2017.ff/tip3p.itp'],
                     }
+        templates = {'water': 'system.top', 'octanol': 'system.top', 
+                     'wetctanol': 'system_octwet.top'}
         setting = settings[self.forcefield]
-        
-        top_template = config.get_template(kwargs.pop('top_template', 'system.top'))
+        template = templates[self.solvent_type]
+
+        top_template = config.get_template(kwargs.pop('top_template', template))
         topol = kwargs.pop('topol', os.path.basename(top_template))
+        self.top_template = top_template
         itp = os.path.realpath(itp)
         _itp = os.path.basename(itp)
 
@@ -316,11 +320,6 @@ class Simulation(Journalled):
             prm = os.path.realpath(prm)
             _prm = os.path.basename(prm)
             prm_kw = '#include "{}"'.format(_prm)
-
-        if self.solvent_type=='wetoctanol':
-            water_kw = '#include "{}"'.format(setting[2]) 
-        else: 
-            water_kw = ''
 
         with in_dir(dirname):
             shutil.copy(itp, _itp)
@@ -336,8 +335,7 @@ class Simulation(Journalled):
                                      'oplsaa\.ff/ions_opls\.itp', setting[1]),
                                     ('#include +"compound\.prm"',
                                      '#include +"compound\.prm"', prm_kw),
-                                    ('#include +"water\.itp"',
-                                     '#include +"water\.itp"', water_kw),
+                                    ('#include +"water\.itp"', 'water\.itp', setting[2]),
                                     ('Compound', 'solvent', self.solvent_type),
                                     ('Compound', 'DRUG', self.molecule),
                                     ('DRUG\s*1', 'DRUG', self.molecule),
@@ -399,6 +397,14 @@ class Simulation(Journalled):
         kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.dirs.includes
 
         params = gromacs.setup.solvate(**kwargs)
+        
+        if self.solvent_type == 'wetoctanol':
+            with in_dir(self.dirs.solvation, create=False):
+                with open('ionized.gro', 'r') as fin:
+                    n = sum([1 for line in fin if 'OcOH' in line])
+            with in_dir(self.dirs.topology, create=False):
+                gromacs.cbook.edit_txt(self.top_template,
+                                       [('OcOH               1', '1', n)])
 
         self.files.structure = kwargs['struct']
         self.files.solvated = params['struct']

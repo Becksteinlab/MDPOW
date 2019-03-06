@@ -147,21 +147,21 @@ OPLS_SOLVENT_MODELS = {
     'cyclohexane': GromacsSolventModel(
         identifier="cyclohexane", itp="1cyclo.itp", coordinates="1cyclo.gro"),
     'wetoctanol': GromacsSolventModel(
-        identifier="wetoctanol", itp="1oct.itp", coordinates="1octwet.gro"),
+        identifier="wetoctanol", itp="1octwet.itp", coordinates="1octwet.gro"),
     }
 
 CHARMM_SOLVENT_MODELS = {
     'octanol': GromacsSolventModel(
         identifier="octanol", itp="1oct.itp", coordinates="1oct_charmm.gro"),
     'wetoctanol': GromacsSolventModel(
-        identifier="wetoctanol", itp="1oct.itp", coordinates="1octwet_charmm.gro"),
+        identifier="wetoctanol", itp="1octwet.itp", coordinates="1octwet_charmm.gro"),
     }
 
 AMBER_SOLVENT_MODELS = {
     'octanol': GromacsSolventModel(
         identifier="octanol", itp="1oct.itp", coordinates="1oct_charmm.gro"),
     'wetoctanol': GromacsSolventModel(
-        identifier="wetoctanol", itp="1oct.itp", coordinates="1octwet_amber.gro"),
+        identifier="wetoctanol", itp="1octwet.itp", coordinates="1octwet_amber.gro"),
     }
 
 GROMACS_SOLVENT_MODELS = {
