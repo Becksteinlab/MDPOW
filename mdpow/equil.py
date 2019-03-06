@@ -304,7 +304,7 @@ class Simulation(Journalled):
                               'charmm36-jul2017.ff/tip3p.itp'],
                     }
         templates = {'water': 'system.top', 'octanol': 'system.top', 
-                     'wetctanol': 'system_octwet.top'}
+                     'wetoctanol': 'system_octwet.top'}
         setting = settings[self.forcefield]
         template = templates[self.solvent_type]
 
