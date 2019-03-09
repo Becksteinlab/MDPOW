@@ -34,6 +34,7 @@ from __future__ import absolute_import, with_statement
 import os, errno
 import shutil
 import cPickle
+import MDAnalysis as mda
 
 try:
     import gromacs.setup, gromacs.cbook
@@ -304,7 +305,7 @@ class Simulation(Journalled):
                               'charmm36-jul2017.ff/tip3p.itp'],
                     }
         templates = {'water': 'system.top', 'octanol': 'system.top', 
-                     'wetoctanol': 'system_octwet.top'}
+                     'cyclohexane': 'system.top', 'wetoctanol': 'system_octwet.top'}
         setting = settings[self.forcefield]
         template = templates[self.solvent_type]
 
@@ -395,21 +396,27 @@ class Simulation(Journalled):
         kwargs['bt'] = boxtype
 
         kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.dirs.includes
-
-        params = gromacs.setup.solvate(**kwargs)
         
         if self.solvent_type == 'wetoctanol':
+            sol = gromacs.setup.solvate_sol(**kwargs)
             with in_dir(self.dirs.solvation, create=False):
-                with open('ionized.gro', 'r') as fin:
-                    n = sum([1 for line in fin if 'OcOH' in line])
+                u = mda.Universe('solvated.gro')
+                octanol = u.select_atoms('resname OcOH')
+                n = octanol.n_residues
             with in_dir(self.dirs.topology, create=False):
                 gromacs.cbook.edit_txt(self.top_template,
                                        [('OcOH               1', '1', n)])
+            
+            struct = sol['struct']
+            params = gromacs.setup.solvate_ion(**kwargs)
+
+        else:
+            params = gromacs.setup.solvate(**kwargs)
+        
 
         self.files.structure = kwargs['struct']
         self.files.solvated = params['struct']
         self.files.ndx = params['ndx']
-
         # we can also make a processed topology right now
         self.processed_topology(**kwargs)
 
