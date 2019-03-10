@@ -406,10 +406,9 @@ class Simulation(Journalled):
             with in_dir(self.dirs.topology, create=False):
                 gromacs.cbook.edit_txt(self.top_template,
                                        [('OcOH               1', '1', n)])
-            
-            struct = sol['struct']
-            params = gromacs.setup.solvate_ion(**kwargs)
-
+            ionkwargs = kwargs
+            ionkwargs['struct'] = sol['struct']
+            params = gromacs.setup.solvate_ion(**ionkwargs)
         else:
             params = gromacs.setup.solvate(**kwargs)
         
