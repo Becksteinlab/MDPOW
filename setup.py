@@ -44,7 +44,8 @@ setup(name="MDPOW",
                               'top/oplsaa.ff/*',
                               'top/charmm36-jul2017.ff/*',
                               'top/amber99sb.ff/*',
-                              'templates/*'], },
+                              'templates/*.mdp', 'templates/*.top'
+                              'templates/*.yml', 'templates/*'], },
       install_requires=['numpy>=1.6', 'scipy',
                         'pyyaml',
                         'GromacsWrapper>=0.5.1',
@@ -56,5 +57,3 @@ setup(name="MDPOW",
       tests_require=['pytest', 'pybol', 'py'],
       zip_safe=True,
 )
-
-
