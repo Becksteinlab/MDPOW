@@ -32,7 +32,7 @@ install:
   - conda update -q conda
   # Useful for debugging any issues with conda
   - conda info -a
-
+  - conda config --add channels conda-forge
   - conda create --yes -q -n mdpow_test python=$TRAVIS_PYTHON_VERSION numpy scipy mdanalysis
   - source activate mdpow_test
   - conda install -c becksteinlab gromacs-$GMX_VERSION
