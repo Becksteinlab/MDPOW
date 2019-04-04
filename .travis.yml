@@ -33,7 +33,7 @@ install:
   # Useful for debugging any issues with conda
   - conda info -a
 
-  - conda create --yes -q -n mdpow_test python=$TRAVIS_PYTHON_VERSION numpy scipy
+  - conda create --yes -q -n mdpow_test python=$TRAVIS_PYTHON_VERSION numpy scipy mdanalysis
   - source activate mdpow_test
   - conda install -c becksteinlab gromacs-$GMX_VERSION
 
@@ -43,14 +43,14 @@ install:
   - pip install pytest-cov pytest-pep8 pytest-xdist
 
   # install MDPOW
-  - pip install -e .
+  - pip install .
 
 # run tests
 script:
   # set up gromacs environment: picked up by GromacsWrapper
   - source $($HOME/get_gmx $GMX_VERSION)
   # NOTE: to see ALL Gromacs output for debugging on Travis CI,
-  #       disable py.test capturing with '-s'  
+  #       disable py.test capturing with '-s'
   - py.test -n 2 --cov mdpow mdpow/tests
 
 after_success:
