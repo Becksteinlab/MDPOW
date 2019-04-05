@@ -40,7 +40,6 @@ install:
   # install test tools
   - pip install pybol
   - pip install codecov
-  - pip install 'pytest<4.0.0'
   - pip install pytest-cov pytest-pep8 pytest-xdist
 
   # install MDPOW
