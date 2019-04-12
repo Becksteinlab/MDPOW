@@ -181,11 +181,11 @@ class Simulation(Journalled):
                 # that includes the necessary itp file(s)
                 self.dirs.topology = realpath(os.path.dirname(self.files.topology))
                 self.dirs.includes.append(self.dirs.topology)
-            
+
             self.forcefield = forcefield
             self.solvent_type = solvent
             self.solventmodel_identifier = forcefields.get_solvent_identifier(
-                 solvent, 
+                 solvent,
                  model=solventmodel,
                  forcefield=forcefield,
                  )
@@ -195,7 +195,7 @@ class Simulation(Journalled):
                 logger.error(msg)
                 raise ValueError(msg)
             self.solventmodel = forcefields.get_solvent_model(
-                self.solventmodel_identifier, 
+                self.solventmodel_identifier,
                 forcefield=forcefield,
                 )
 
@@ -297,14 +297,14 @@ class Simulation(Journalled):
         self.dirs.topology = realpath(dirname)
 
         settings = {
-                    'OPLS-AA': ['oplsaa.ff/', 'oplsaa.ff/ions_opls.itp', 
+                    'OPLS-AA': ['oplsaa.ff/', 'oplsaa.ff/ions_opls.itp',
                                 'oplsaa.ff/tip4p.itp'],
-                    'AMBER': ['amber99sb.ff/', 'amber99sb.ff/ions.itp', 
+                    'AMBER': ['amber99sb.ff/', 'amber99sb.ff/ions.itp',
                                'amber99sb.ff/tip3p.itp'],
-                    'CHARMM': ['charmm36-jul2017.ff/', 'charmm36-jul2017.ff/ions.itp', 
+                    'CHARMM': ['charmm36-jul2017.ff/', 'charmm36-jul2017.ff/ions.itp',
                               'charmm36-jul2017.ff/tip3p.itp'],
                     }
-        templates = {'water': 'system.top', 'octanol': 'system.top', 
+        templates = {'water': 'system.top', 'octanol': 'system.top',
                      'cyclohexane': 'system.top', 'wetoctanol': 'system_octwet.top'}
         setting = settings[self.forcefield]
         template = templates[self.solvent_type]
@@ -327,10 +327,10 @@ class Simulation(Journalled):
             if prm is not None:
                 shutil.copy(prm, _prm)
             gromacs.cbook.edit_txt(top_template,
-                                   [('#include +"oplsaa\.ff/forcefield\.itp"', 
+                                   [('#include +"oplsaa\.ff/forcefield\.itp"',
                                     'oplsaa\.ff/', setting[0]),
                                     ('#include +"compound\.itp"', 'compound\.itp', _itp),
-                                    ('#include +"oplsaa\.ff/tip4p\.itp"', 
+                                    ('#include +"oplsaa\.ff/tip4p\.itp"',
                                      'oplsaa\.ff/tip4p\.itp', setting[0]+self.solvent.itp),
                                     ('#include +"oplsaa\.ff/ions_opls\.itp"',
                                      'oplsaa\.ff/ions_opls\.itp', setting[1]),
@@ -352,6 +352,9 @@ class Simulation(Journalled):
         self.journal.completed('topology')
         return {'dirname': dirname, 'topol': topol}
 
+    @staticmethod
+    def _setup_solvate(**kwargs):
+        return gromacs.setup.solvate(**kwargs)
 
     def solvate(self, struct=None, **kwargs):
         """Solvate structure *struct* in a box of solvent.
@@ -396,22 +399,8 @@ class Simulation(Journalled):
         kwargs['bt'] = boxtype
 
         kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.dirs.includes
-        
-        if self.solvent_type == 'wetoctanol':
-            sol = gromacs.setup.solvate_sol(**kwargs)
-            with in_dir(self.dirs.solvation, create=False):
-                u = mda.Universe('solvated.gro')
-                octanol = u.select_atoms('resname OcOH')
-                n = octanol.n_residues
-            with in_dir(self.dirs.topology, create=False):
-                gromacs.cbook.edit_txt(self.top_template,
-                                       [('OcOH               1', '1', n)])
-            ionkwargs = kwargs
-            ionkwargs['struct'] = sol['struct']
-            params = gromacs.setup.solvate_ion(**ionkwargs)
-        else:
-            params = gromacs.setup.solvate(**kwargs)
-        
+
+        params = self._setup_solvate(**kwargs)
 
         self.files.structure = kwargs['struct']
         self.files.solvated = params['struct']
@@ -651,4 +640,17 @@ class WetOctanolSimulation(Simulation):
     """Equilibrium MD of a solute in a box of wet octanol."""
     solvent_default = 'wetoctanol'
     dirname_default = os.path.join(Simulation.topdir_default, solvent_default)
-
+    @staticmethod
+    def  _setup_solvate(**kwargs):
+        sol = gromacs.setup.solvate_sol(**kwargs)
+        with in_dir(self.dirs.solvation, create=False):
+            u = mda.Universe('solvated.gro')
+            octanol = u.select_atoms('resname OcOH')
+            n = octanol.n_residues
+        with in_dir(self.dirs.topology, create=False):
+            gromacs.cbook.edit_txt(self.top_template,
+                                   [('OcOH               1', '1', n)])
+        ionkwargs = kwargs
+        ionkwargs['struct'] = sol['struct']
+        params = gromacs.setup.solvate_ion(**ionkwargs)
+        return params
