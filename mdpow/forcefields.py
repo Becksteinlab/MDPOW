@@ -218,3 +218,33 @@ def get_solvent_model(identifier, forcefield='OPLS-AA'):
             logger.critical(msg)
             raise ValueError(msg)
 
+
+def get_ff_paths(forcefield='OPLS-AA'):
+    """Return a :list: containing the forcefield directory, paths of ions
+    and default watermodel itp files.
+    """
+    settings = {
+                'OPLS-AA': ['oplsaa.ff/', 'oplsaa.ff/ions_opls.itp',
+                            'oplsaa.ff/tip4p.itp'],
+                'AMBER': ['amber99sb.ff/', 'amber99sb.ff/ions.itp',
+                           'amber99sb.ff/tip3p.itp'],
+                'CHARMM': ['charmm36-jul2017.ff/', 'charmm36-jul2017.ff/ions.itp',
+                          'charmm36-jul2017.ff/tip3p.itp'],
+                }
+    try:
+        return settings[forcefield]
+    except KeyError:
+        msg = "No forcefield with name {0} is available".format(forcefield)
+        logger.critical(msg)
+        raise ValueError(msg)
+
+
+def get_top_template(identifier):
+    templates = {'water': 'system.top', 'octanol': 'system.top',
+                 'cyclohexane': 'system.top', 'wetoctanol': 'system_octwet.top'}
+    try:
+        return templates[identifier]
+    except KeyError:
+        msg = "No template for solvent {0} is available".format(identifier)
+        logger.critical(msg)
+        raise ValueError(msg)

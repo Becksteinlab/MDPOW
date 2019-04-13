@@ -296,18 +296,8 @@ class Simulation(Journalled):
         dirname = kwargs.pop('dirname', self.BASEDIR('top'))
         self.dirs.topology = realpath(dirname)
 
-        settings = {
-                    'OPLS-AA': ['oplsaa.ff/', 'oplsaa.ff/ions_opls.itp',
-                                'oplsaa.ff/tip4p.itp'],
-                    'AMBER': ['amber99sb.ff/', 'amber99sb.ff/ions.itp',
-                               'amber99sb.ff/tip3p.itp'],
-                    'CHARMM': ['charmm36-jul2017.ff/', 'charmm36-jul2017.ff/ions.itp',
-                              'charmm36-jul2017.ff/tip3p.itp'],
-                    }
-        templates = {'water': 'system.top', 'octanol': 'system.top',
-                     'cyclohexane': 'system.top', 'wetoctanol': 'system_octwet.top'}
-        setting = settings[self.forcefield]
-        template = templates[self.solvent_type]
+        setting = forcefields.get_ff_paths(self.forcefield)
+        template = forcefields.get_top_template(self.solvent_type)
 
         top_template = config.get_template(kwargs.pop('top_template', template))
         topol = kwargs.pop('topol', os.path.basename(top_template))
@@ -354,6 +344,7 @@ class Simulation(Journalled):
 
     @staticmethod
     def _setup_solvate(**kwargs):
+        """Solvate structure in a single solvent box."""
         return gromacs.setup.solvate(**kwargs)
 
     def solvate(self, struct=None, **kwargs):
