@@ -779,8 +779,10 @@ class Gsolv(Journalled):
                     fnbz2 = xvg + os.path.extsep + "bz2"
                     logger.info("[%s] Compressing dgdl file %r with bzip2", self.dirname, xvg)
                     # speed is similar to 'bzip2 -9 FILE' (using a 1 Mio buffer)
+                    # (Since GW 0.8, openany() does not take kwargs anymore so the write buffer cannot be
+                    # set anymore (buffering=1048576) so the performance might be lower in MDPOW >= 0.7.0)
                     with open(xvg, 'r', buffering=1048576) as source:
-                        with openany(fnbz2, 'w', buffering=1048576) as target:
+                        with openany(fnbz2, 'w') as target:
                             target.writelines(source)
                     if os.path.exists(fnbz2) and os.path.exists(xvg):
                         os.unlink(xvg)
