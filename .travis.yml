@@ -22,7 +22,7 @@ env:
     # dependency, see https://bioconda.github.io/#set-up-channels
     - CONDA_CHANNELS="defaults conda-forge bioconda"
     - CONDA_CHANNEL_PRIORITY=True
-    - PIP_DEPENDENCIES="numkit codecov"
+    - PIP_DEPENDENCIES="numkit codecov pybol"
     - NUMPY_VERSION=stable
     - MPLBACKEND=agg
 
