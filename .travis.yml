@@ -13,7 +13,7 @@ env:
     - PYTHON_VERSION=2.7
     - CODECOV=true
     - PYTEST_FLAGS="-v --cov=mdpow"
-    - PYTEST_LIST="tests"
+    - PYTEST_LIST="mdpow/tests"
     - MAIN_CMD="pytest ${PYTEST_LIST}"
     - SETUP_CMD="${PYTEST_FLAGS}"
     - BUILD_CMD="pip install -v ."
