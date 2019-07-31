@@ -30,7 +30,6 @@ env:
     # use ci-helper's PACKAGENAME_VERSION magic to pin the 'gromacs' package
     - GROMACS_VERSION=4.6.5   PYTHON_VERSION=2.7
     - GROMACS_VERSION=2019.1  PYTHON_VERSION=2.7
-    - GROMACS_VERSION=2019.2  PYTHON_VERSION=2.7
       SETUP_CMD="${SETUP_CMD}"
 
 

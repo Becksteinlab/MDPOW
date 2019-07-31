@@ -631,8 +631,8 @@ class WetOctanolSimulation(Simulation):
     """Equilibrium MD of a solute in a box of wet octanol."""
     solvent_default = 'wetoctanol'
     dirname_default = os.path.join(Simulation.topdir_default, solvent_default)
-    @staticmethod
-    def  _setup_solvate(**kwargs):
+    
+    def  _setup_solvate(self, **kwargs):
         sol = gromacs.setup.solvate_sol(**kwargs)
         with in_dir(self.dirs.solvation, create=False):
             u = mda.Universe('solvated.gro')
