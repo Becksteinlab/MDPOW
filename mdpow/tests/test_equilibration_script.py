@@ -21,7 +21,7 @@ class TestEquilibriumScript(object):
         self.tmpdir.dissolve()
 
     def _run_equil(self, solvent, dirname):
-        cfg = get_configuration(os.path.join(self.old_path, 'templates', 'runinput.yml'))
+        cfg = get_configuration('runinput.yml')
         self.S = equilibrium_simulation(cfg, solvent, dirname=dirname)
 
     def test_basic_run(self):
