@@ -21,7 +21,7 @@ def setup(tmpdir):
     sims = {"water" : mdpow.equil.WaterSimulation,
             "octanol" : mdpow.equil.OctanolSimulation,
             "cyclohexane" : mdpow.equil.CyclohexaneSimulation,
-            #"wetoctanol" : mdpow.equil.WetOctanolSimulation,
+            "wetoctanol" : mdpow.equil.WetOctanolSimulation,
     }
 
 
