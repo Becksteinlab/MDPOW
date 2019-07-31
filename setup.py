@@ -52,7 +52,7 @@ setup(name="MDPOW",
                         'six',
                         'mdanalysis',
       ],
-      setup_requires=['pytest-runner',],
+      #setup_requires=['pytest-runner',],
       tests_require=['pytest', 'pybol', 'py'],
       zip_safe=True,
 )

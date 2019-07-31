@@ -5,7 +5,7 @@ CHANGES for MDPOW
 Add summary of changes for each release. Use ISO dates. Reference
 GitHub issues numbers and PR numbers.
 
-2017-xx-xx    0.7.0
+2019-xx-xx    0.7.0
 orbeckst
 
 * renamed package to MDPOW
@@ -14,6 +14,9 @@ orbeckst
   (#8)
 * boxtype and minimum distance (#30) can be set in runinput.yml and are
   documented (#91, #88)
+* fixed: buffering kwarg was removed from openany() so code is
+  compatible with GromacsWrapper >= 0.8.0 (#107)
+
 
 2017-05-02    0.6.1
 orbeckst, iorga, ianmkenney, rhheilma
