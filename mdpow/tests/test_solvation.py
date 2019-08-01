@@ -15,7 +15,7 @@ sims = {"water" : mdpow.equil.WaterSimulation,
 
 test_file = {"OPLS-AA": 'benzene.itp',
              "CHARMM": 'benzene_charmm.itp',
-             #"AMBER": ()
+             "AMBER": 'benzene_amber.itp',
              }
 
 @pytest.fixture
@@ -24,7 +24,8 @@ def setup(tmpdir):
     old_path = os.getcwd()
     resources = os.path.join(
         old_path, 'mdpow', 'tests', 'testing_resources')
-    files = ['benzene.pdb','benzene.itp','benzene_charmm.itp']
+    files = ['benzene.pdb', 'benzene.itp',
+             'benzene_charmm.itp', 'benzene_amber.itp']
     for f in files:
         orig = os.path.join(resources, 'molecules', 'benzene', f)
         shutil.copy(orig, newdir.dirname)
@@ -40,11 +41,11 @@ def solvation(setup, solvent, ff='OPLS-AA'):
         except Exception:
             raise AssertionError('Solvation failed.')
 
-@pytest.mark.parametrize("ff", ['OPLS-AA', 'CHARMM'])
+@pytest.mark.parametrize("ff", ['OPLS-AA', 'CHARMM', 'AMBER'])
 def test_solvation_water(setup, ff):
     solvation(setup, "water", ff)
 
-@pytest.mark.parametrize("ff", ['OPLS-AA', 'CHARMM'])
+@pytest.mark.parametrize("ff", ['OPLS-AA', 'CHARMM', 'AMBER'])
 def test_solvation_octanol(setup, ff):
     solvation(setup, "octanol", ff)
 
@@ -52,6 +53,6 @@ def test_solvation_cyclohexane(setup):
     solvation(setup, "cyclohexane")
 
 @pytest.mark.xfail("gromacs.release().startswith('2019')")
-@pytest.mark.parametrize("ff", ['OPLS-AA', 'CHARMM'])
+@pytest.mark.parametrize("ff", ['OPLS-AA', 'CHARMM', 'AMBER'])
 def test_solvation_wetoctanol(setup, ff):
     solvation(setup, "wetoctanol", ff)
