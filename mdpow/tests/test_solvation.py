@@ -1,62 +1,57 @@
 import os
 import shutil
 
-from gromacs.utilities import in_dir
-import tempdir as td
-
 import mdpow.equil
+from gromacs.utilities import in_dir
+import gromacs
 
-class TestSolvation(object):
-    sims = {"water" : mdpow.equil.WaterSimulation,
-            "octanol" : mdpow.equil.OctanolSimulation,
-            "cyclohexane" : mdpow.equil.CyclohexaneSimulation,
-    }
+import pytest
 
-    def setup(self):
-        self.tmpdir = td.TempDir()
-        self.old_path = os.getcwd()
-        self.resources = os.path.join(
-            self.old_path, 'mdpow', 'tests', 'testing_resources')
-        self.solvation_paths = os.path.join(
-            self.resources, 'stages', 'solvation', 'water', 'benzene')
+sims = {"water" : mdpow.equil.WaterSimulation,
+        "octanol" : mdpow.equil.OctanolSimulation,
+        "cyclohexane" : mdpow.equil.CyclohexaneSimulation,
+        "wetoctanol" : mdpow.equil.WetOctanolSimulation,
+        }
 
-        # TODO replace by using manifest
-        """
-        m = manifest.Manifest('manifest.yml')
-        m.assemble('base')
-        """
+test_file = {"OPLS-AA": 'benzene.itp',
+             "CHARMM": 'benzene_charmm.itp',
+             #"AMBER": ()
+             }
 
-        files = ['benzene.pdb','benzene.itp']
-        for f in files:
-            orig = os.path.join(self.resources, 'molecules', 'benzene', f)
-            shutil.copy(orig, self.tmpdir.name)
+@pytest.fixture
+def setup(tmpdir):
+    newdir = tmpdir.mkdir('resources')
+    old_path = os.getcwd()
+    resources = os.path.join(
+        old_path, 'mdpow', 'tests', 'testing_resources')
+    files = ['benzene.pdb','benzene.itp','benzene_charmm.itp']
+    for f in files:
+        orig = os.path.join(resources, 'molecules', 'benzene', f)
+        shutil.copy(orig, newdir.dirname)
+    return newdir.dirname
 
-    def teardown(self):
-        self.tmpdir.dissolve()
+def solvation(setup, solvent, ff='OPLS-AA'):
+    itp = test_file[ff]
+    with in_dir(setup, create=False):
+        try:
+            S = sims[solvent](molecule='BNZ', forcefield=ff)
+            S.topology(itp=itp)
+            S.solvate(struct='benzene.pdb')
+        except Exception:
+            raise AssertionError('Solvation failed.')
 
-    def _test_solvation(self, solvent):
-        with in_dir(self.tmpdir.name, create=False):
-            try:
-                if isinstance(solvent, list):
-                    for sol in solvent:
-                        S = self.sims[sol](molecule='BNZ')
-                        S.topology(itp='benzene.itp')
-                        S.solvate(struct='benzene.pdb')
-                else:
-                    S = self.sims[solvent](molecule='BNZ')
-                    S.topology(itp='benzene.itp')
-                    S.solvate(struct='benzene.pdb')
-            except Exception:
-                raise AssertionError('Solvation failed.')
+@pytest.mark.parametrize("ff", ['OPLS-AA', 'CHARMM'])
+def test_solvation_water(setup, ff):
+    solvation(setup, "water", ff)
 
-    def test_solvation_water(self):
-        return self._test_solvation('water')
+@pytest.mark.parametrize("ff", ['OPLS-AA', 'CHARMM'])
+def test_solvation_octanol(setup, ff):
+    solvation(setup, "octanol", ff)
 
-    def test_solvation_octanol(self):
-        return self._test_solvation('octanol')
+def test_solvation_cyclohexane(setup):
+    solvation(setup, "cyclohexane")
 
-    def test_solvation_cyclohexane(self):
-        return self._test_solvation('cyclohexane')
-
-    def test_all_solvents(self):
-        return self._test_solvation([k for k in self.sims])
+@pytest.mark.xfail("gromacs.release().startswith('2019')")
+@pytest.mark.parametrize("ff", ['OPLS-AA', 'CHARMM'])
+def test_solvation_wetoctanol(setup, ff):
+    solvation(setup, "wetoctanol", ff)
