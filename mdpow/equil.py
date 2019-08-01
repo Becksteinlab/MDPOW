@@ -639,7 +639,7 @@ class WetOctanolSimulation(Simulation):
             octanol = u.select_atoms('resname OcOH')
             n = octanol.n_residues
         with in_dir(self.dirs.topology, create=False):
-            gromacs.cbook.edit_txt(self.top_template,
+            gromacs.cbook.edit_txt(self.files.topology,
                                    [('OcOH               1', '1', n)])
         ionkwargs = kwargs
         ionkwargs['struct'] = sol['struct']
