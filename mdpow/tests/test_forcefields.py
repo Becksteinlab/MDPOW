@@ -134,14 +134,23 @@ class TestSolventModels(object):
     @staticmethod
     def test_get_solvent_cyclohexane():
         model = 'cyclohexane'
+        forcefield = 'OPLS-AA'
         assert (mdpow.forcefields.get_solvent_model(model) is
-                mdpow.forcefields.GROMACS_SOLVENT_MODELS[model])
+                mdpow.forcefields.GROMACS_SOLVENT_MODELS[forcefield][model])
 
+    @pytest.mark.parametrize("forcefield", ['OPLS-AA', 'CHARMM', 'AMBER'])
     @staticmethod
-    def test_get_solvent_octanol():
+    def test_get_solvent_octanol(forcefield):
         model = 'octanol'
-        assert (mdpow.forcefields.get_solvent_model(model) is
-                mdpow.forcefields.GROMACS_SOLVENT_MODELS[model])
+        assert (mdpow.forcefields.get_solvent_model(model, forcefield=forcefield) is
+                mdpow.forcefields.GROMACS_SOLVENT_MODELS[forcefield][model])
+
+    @pytest.mark.parametrize("forcefield", ['OPLS-AA', 'CHARMM', 'AMBER'])
+    @staticmethod
+    def test_get_solvent_wetoctanol(forcefield):
+        model = 'wetoctanol'
+        assert (mdpow.forcefields.get_solvent_model(model, forcefield=forcefield) is
+                mdpow.forcefields.GROMACS_SOLVENT_MODELS[forcefield][model])
 
     @staticmethod
     def test_get_solvent():

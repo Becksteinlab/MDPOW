@@ -6,16 +6,19 @@ Add summary of changes for each release. Use ISO dates. Reference
 GitHub issues numbers and PR numbers.
 
 2019-xx-xx    0.7.0
-orbeckst
+orbeckst, VOD555
 
-* renamed package to MDPOW
-* removed all generated docs from package
-* config parser MERGES user runinput.yml with the package defaults
-  (#8)
-* boxtype and minimum distance (#30) can be set in runinput.yml and are
-  documented (#91, #88)
-* fixed: buffering kwarg was removed from openany() so code is
-  compatible with GromacsWrapper >= 0.8.0 (#107)
+ * renamed package to MDPOW
+ * removed all generated docs from package
+ * config parser MERGES user runinput.yml with the package defaults
+   (#8)
+ * boxtype and minimum distance (#30) can be set in runinput.yml and are
+   documented (#91, #88)
+ * fixed: buffering kwarg was removed from openany() so code is
+   compatible with GromacsWrapper >= 0.8.0 (#107)
+ * supported CHARMM and AMBER forcefield (#104)
+ * supported wet-octanol solvent boxtype (#98)
+ * fixed: using new travis CI settings so CI tests stop failing (#101)
 
 
 2017-05-02    0.6.1
