@@ -579,6 +579,7 @@ class Gsolv(Journalled):
         kwargs['mdrun_opts'] = " ".join([kwargs.pop('mdrun_opts',''), '-dhdl'])
         kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.includes
         kwargs['deffnm'] = self.deffnm
+        kwargs['maxwarn'] = kwargs.pop('maxwarn', 1)
         qsubargs = kwargs.copy()
         qsubargs['dirname'] = self.frombase(self.dirname)
         # handle templates separately (necessary for array jobs)
@@ -635,7 +636,6 @@ class Gsolv(Journalled):
                       ndx=self.ndx,
                       mainselection=None,
                       runtime=self.runtime,
-                      maxwarn=1,
                       ref_t=self.Temperature,    # TODO: maybe not working yet, check _setup()
                       gen_temp=self.Temperature, # needed until gromacs.setup() is smarter
                       qname=self.tasklabel(component,lmbda),
