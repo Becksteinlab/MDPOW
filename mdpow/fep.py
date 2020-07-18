@@ -579,7 +579,7 @@ class Gsolv(Journalled):
         kwargs['mdrun_opts'] = " ".join([kwargs.pop('mdrun_opts',''), '-dhdl'])
         kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.includes
         kwargs['deffnm'] = self.deffnm
-        kwargs['maxwarn'] = kwargs.pop('maxwarn', 1)
+        kwargs.setdefault('maxwarn', 1)
         qsubargs = kwargs.copy()
         qsubargs['dirname'] = self.frombase(self.dirname)
         # handle templates separately (necessary for array jobs)
