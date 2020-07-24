@@ -228,8 +228,8 @@ def get_ff_paths(forcefield='OPLS-AA'):
                             'oplsaa.ff/tip4p.itp'],
                 'AMBER': ['amber99sb.ff/', 'amber99sb.ff/ions.itp',
                            'amber99sb.ff/tip3p.itp'],
-                'CHARMM': ['charmm36-jul2017.ff/', 'charmm36-jul2017.ff/ions.itp',
-                          'charmm36-jul2017.ff/tip3p.itp'],
+                'CHARMM': ['charmm36-mar2019.ff/', 'charmm36-mar2019.ff/ions.itp',
+                          'charmm36-mar2019.ff/tip3p.itp'],
                 }
     try:
         return settings[forcefield]
