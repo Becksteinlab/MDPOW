@@ -1,0 +1,275 @@
+; topology for 1-octanol using the mixed OPLS parameters for alcohols from Zangi R (2018)
+; Refinement of the OPLSAA force-field for liquid alcohols.
+; ACS Omega 3(12):18089–18099. doi: 10.1021/acsomega.8b03132
+; 
+; The molecule is named SOL so that genbox automatically adds the
+; numbers to the topology file. Otherwise it should be 1OCT...
+; (Copy and rename if it is to be used as a solute compound in POW.)
+
+; the new atom type was inserted in the ffnonbonded.itp file, as opls_140_mixed
+; mixed OPLS parameters for alcohols from Zangi R (2018) Refinement of the OPLSAA force-field for liquid alcohols.
+; ACS Omega 3(12):18089–18099. doi: 10.1021/acsomega.8b03132
+; sigma (unchanged): 0.250 nm ; epsilon (new): 0.11000 kj/mol (instead of 0.12552 kJ/mol)
+;[ atomtypes ]
+; name  bond_type    mass    charge   ptype          sigma      epsilon
+; opls_140_mixed   HC  1      1.00800     0.060       A    2.50000e-01  1.10000e-01
+
+
+#ifdef _FF_OPLS
+; optimized OPLS/AA parameters (density, hydration free energy, logP_OW)
+
+[ moleculetype ]
+; Name            nrexcl
+OcOH                3
+
+[ atoms ]
+;   nr       type  resnr residue  atom   cgnr     charge       mass  typeB    chargeB      massB
+     1   opls_155      1   1OCT     HO      1      0.418      1.008   ; qtot 0.418
+     2   opls_154      1   1OCT     OH      1     -0.683    15.9994   ; qtot -0.265
+     3   opls_140      1   1OCT    HA1      1       0.06      1.008   ; qtot -0.205
+     4   opls_140      1   1OCT    HA2      1       0.06      1.008   ; qtot -0.145
+     5   opls_157      1   1OCT     CA      1      0.145     12.011   ; qtot 0
+     6   opls_140_mixed      1   1OCT    HB1      2       0.074     1.008   ; qtot 0.074
+     7   opls_140_mixed      1   1OCT    HB2      2       0.074     1.008   ; qtot 0.148
+     8   opls_136      1   1OCT     CB      2      -0.148    12.011   ; qtot 0
+     9   opls_140_mixed      1   1OCT    HC1      3       0.074     1.008   ; qtot 0.074
+    10   opls_140_mixed      1   1OCT    HC2      3       0.074     1.008   ; qtot 0.148
+    11   opls_136      1   1OCT     CC      3      -0.148    12.011   ; qtot 0
+    12   opls_140_mixed      1   1OCT    HD1      4       0.074     1.008   ; qtot 0.074
+    13   opls_140_mixed      1   1OCT    HD2      4       0.074     1.008   ; qtot 0.148
+    14   opls_136      1   1OCT     CD      4      -0.148    12.011   ; qtot 0
+    15   opls_140_mixed      1   1OCT    HE1      5       0.074     1.008   ; qtot 0.074
+    16   opls_140_mixed      1   1OCT    HE2      5       0.074     1.008   ; qtot 0.148
+    17   opls_136      1   1OCT     CE      5      -0.148    12.011   ; qtot 0
+    18   opls_140_mixed      1   1OCT    HF1      6       0.074     1.008   ; qtot 0.074
+    19   opls_140_mixed      1   1OCT    HF2      6       0.074     1.008   ; qtot 0.148
+    20   opls_136      1   1OCT     CF      6      -0.148    12.011   ; qtot 0
+    21   opls_140_mixed      1   1OCT    HG1      7       0.074     1.008   ; qtot 0.074
+    22   opls_140_mixed      1   1OCT    HG2      7       0.074     1.008   ; qtot 0.148
+    23   opls_136      1   1OCT     CG      7      -0.148    12.011   ; qtot 0
+    24   opls_140      1   1OCT    HH1      8       0.074     1.008   ; qtot 0.06
+    25   opls_140      1   1OCT    HH2      8       0.074     1.008   ; qtot 0.12
+    26   opls_140      1   1OCT    HH3      8       0.074     1.008   ; qtot 0.18
+    27   opls_135      1   1OCT     CH      8      -0.222    12.011   ; qtot 0
+
+[ bonds ]
+;  ai    aj funct            c0            c1            c2            c3
+    1     2     1 
+    2     5     1 
+    3     5     1 
+    4     5     1 
+    5     8     1 
+    6     8     1 
+    7     8     1 
+    8    11     1 
+    9    11     1 
+   10    11     1 
+   11    14     1 
+   12    14     1 
+   13    14     1 
+   14    17     1 
+   15    17     1 
+   16    17     1 
+   17    20     1 
+   18    20     1 
+   19    20     1 
+   20    23     1 
+   21    23     1 
+   22    23     1 
+   23    27     1 
+   24    27     1 
+   25    27     1 
+   26    27     1 
+
+[ pairs ]
+;  ai    aj funct            c0            c1            c2            c3
+    1     3     1 
+    1     4     1 
+    1     8     1 
+    2     6     1 
+    2     7     1 
+    2    11     1 
+    3     6     1 
+    3     7     1 
+    3    11     1 
+    4     6     1 
+    4     7     1 
+    4    11     1 
+    5     9     1 
+    5    10     1 
+    5    14     1 
+    6     9     1 
+    6    10     1 
+    6    14     1 
+    7     9     1 
+    7    10     1 
+    7    14     1 
+    8    12     1 
+    8    13     1 
+    8    17     1 
+    9    12     1 
+    9    13     1 
+    9    17     1 
+   10    12     1 
+   10    13     1 
+   10    17     1 
+   11    15     1 
+   11    16     1 
+   11    20     1 
+   12    15     1 
+   12    16     1 
+   12    20     1 
+   13    15     1 
+   13    16     1 
+   13    20     1 
+   14    18     1 
+   14    19     1 
+   14    23     1 
+   15    18     1 
+   15    19     1 
+   15    23     1 
+   16    18     1 
+   16    19     1 
+   16    23     1 
+   17    21     1 
+   17    22     1 
+   17    27     1 
+   18    21     1 
+   18    22     1 
+   18    27     1 
+   19    21     1 
+   19    22     1 
+   19    27     1 
+   20    24     1 
+   20    25     1 
+   20    26     1 
+   21    24     1 
+   21    25     1 
+   21    26     1 
+   22    24     1 
+   22    25     1 
+   22    26     1 
+
+[ angles ]
+;  ai    aj    ak funct            c0            c1            c2            c3
+    1     2     5     1 
+    2     5     3     1 
+    2     5     4     1 
+    2     5     8     1 
+    3     5     4     1 
+    3     5     8     1 
+    4     5     8     1 
+    5     8     6     1 
+    5     8     7     1 
+    5     8    11     1 
+    6     8     7     1 
+    6     8    11     1 
+    7     8    11     1 
+    8    11     9     1 
+    8    11    10     1 
+    8    11    14     1 
+    9    11    10     1 
+    9    11    14     1 
+   10    11    14     1 
+   11    14    12     1 
+   11    14    13     1 
+   11    14    17     1 
+   12    14    13     1 
+   12    14    17     1 
+   13    14    17     1 
+   14    17    15     1 
+   14    17    16     1 
+   14    17    20     1 
+   15    17    16     1 
+   15    17    20     1 
+   16    17    20     1 
+   17    20    18     1 
+   17    20    19     1 
+   17    20    23     1 
+   18    20    19     1 
+   18    20    23     1 
+   19    20    23     1 
+   20    23    21     1 
+   20    23    22     1 
+   20    23    27     1 
+   21    23    22     1 
+   21    23    27     1 
+   22    23    27     1 
+   23    27    24     1 
+   23    27    25     1 
+   23    27    26     1 
+   24    27    25     1 
+   24    27    26     1 
+   25    27    26     1 
+
+[ dihedrals ]
+;  ai    aj    ak    al funct            c0            c1            c2            c3            c4            c5
+    1     2     5     3     3 
+    1     2     5     4     3 
+    1     2     5     8     3 
+    2     5     8     6     3 
+    2     5     8     7     3 
+    2     5     8    11     3 
+    3     5     8     6     3 
+    3     5     8     7     3 
+    3     5     8    11     3 
+    4     5     8     6     3 
+    4     5     8     7     3 
+    4     5     8    11     3 
+    5     8    11     9     3 
+    5     8    11    10     3 
+    5     8    11    14     3   0.518787  -0.230192   0.896807  -1.49134   0.00000   0.00000 ; CT-CT-CT-CT
+    6     8    11     9     3 
+    6     8    11    10     3 
+    6     8    11    14     3 
+    7     8    11     9     3 
+    7     8    11    10     3 
+    7     8    11    14     3 
+    8    11    14    12     3 
+    8    11    14    13     3 
+    8    11    14    17     3   0.518787  -0.230192   0.896807  -1.49134   0.00000   0.00000 ; CT-CT-CT-CT
+    9    11    14    12     3 
+    9    11    14    13     3 
+    9    11    14    17     3 
+   10    11    14    12     3 
+   10    11    14    13     3 
+   10    11    14    17     3 
+   11    14    17    15     3 
+   11    14    17    16     3 
+   11    14    17    20     3   0.518787  -0.230192   0.896807  -1.49134   0.00000   0.00000 ; CT-CT-CT-CT
+   12    14    17    15     3 
+   12    14    17    16     3 
+   12    14    17    20     3 
+   13    14    17    15     3 
+   13    14    17    16     3 
+   13    14    17    20     3 
+   14    17    20    18     3 
+   14    17    20    19     3 
+   14    17    20    23     3   0.518787  -0.230192   0.896807  -1.49134   0.00000   0.00000 ; CT-CT-CT-CT
+   15    17    20    18     3 
+   15    17    20    19     3 
+   15    17    20    23     3 
+   16    17    20    18     3 
+   16    17    20    19     3 
+   16    17    20    23     3 
+   17    20    23    21     3 
+   17    20    23    22     3 
+   17    20    23    27     3   0.518787  -0.230192   0.896807  -1.49134   0.00000   0.00000 ; CT-CT-CT-CT
+   18    20    23    21     3 
+   18    20    23    22     3 
+   18    20    23    27     3 
+   19    20    23    21     3 
+   19    20    23    22     3 
+   19    20    23    27     3 
+   20    23    27    24     3 
+   20    23    27    25     3 
+   20    23    27    26     3 
+   21    23    27    24     3 
+   21    23    27    25     3 
+   21    23    27    26     3 
+   22    23    27    24     3 
+   22    23    27    25     3 
+   22    23    27    26     3
+
+#endif
+
