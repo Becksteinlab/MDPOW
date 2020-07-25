@@ -142,12 +142,24 @@ def get_water_model(watermodel=DEFAULT_WATER_MODEL):
 
 #: Other solvents (not water, see :data:`GROMACS_WATER_MODELS` for those).
 OPLS_SOLVENT_MODELS = {
-    'octanol': GromacsSolventModel(
-        identifier="octanol", itp="1oct.itp", coordinates="1oct.gro"),
+    'octanol': OPLS_OCTANOL_MODELS,
     'cyclohexane': GromacsSolventModel(
         identifier="cyclohexane", itp="1cyclo.itp", coordinates="1cyclo.gro"),
+    'wetoctanol': OPLS_WETOCTANOL_MODELS,
+    }
+
+OPLS_OCTANOL_MODELS = {
+    'octanol': GromacsSolventModel(
+        identifier="octanol", itp="1oct.itp", coordinates="1oct.gro"),
+    'octanolnew': GromacsSolventModel(
+        identifier="octanol", itp="1octnew.itp", coordinates="1oct.gro")
+    }
+
+OPLS_WETOCTANOL_MODELS = {
     'wetoctanol': GromacsSolventModel(
         identifier="wetoctanol", itp="1octwet.itp", coordinates="1octwet.gro"),
+    'wetoctanolnew': GromacsSolventModel(
+        identifier="wetoctanol", itp="1octwetnew.itp", coordinates="1octwet.gro")
     }
 
 CHARMM_SOLVENT_MODELS = {
@@ -159,7 +171,7 @@ CHARMM_SOLVENT_MODELS = {
 
 AMBER_SOLVENT_MODELS = {
     'octanol': GromacsSolventModel(
-        identifier="octanol", itp="1oct.itp", coordinates="1oct_charmm.gro"),
+        identifier="octanol", itp="1oct.itp", coordinates="1oct_amber.gro"),
     'wetoctanol': GromacsSolventModel(
         identifier="wetoctanol", itp="1octwet.itp", coordinates="1octwet_amber.gro"),
     }
@@ -200,7 +212,7 @@ def get_solvent_identifier(solvent_type, model=None, forcefield='OPLS-AA'):
     return solvent_type if solvent_type in GROMACS_SOLVENT_MODELS[forcefield] else None
 
 
-def get_solvent_model(identifier, forcefield='OPLS-AA'):
+def get_solvent_model(identifier, model=None, forcefield='OPLS-AA'):
     """Return a :class:`GromacsSolventModel` corresponding to identifier *identifier*.
 
     If identifier is "water" then the :data:`DEFAULT_WATER_MODEL` is assumed.
@@ -212,7 +224,12 @@ def get_solvent_model(identifier, forcefield='OPLS-AA'):
         return GROMACS_WATER_MODELS[identifier]
     except KeyError:
         try:
-            return GROMACS_SOLVENT_MODELS[forcefield][identifier]
+            if (forcefield is "OPLS-AA") & identifier is ("octanol" or "wetoctanol"):
+                if model is None:
+                    model = identifier
+                return GROMACS_SOLVENT_MODELS[forcefield][identifier][model]
+            else:
+                return GROMACS_SOLVENT_MODELS[forcefield][identifier]
         except KeyError:
             msg = "No solvent model with name {0} is available.".format(identifier)
             logger.critical(msg)
