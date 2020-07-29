@@ -197,7 +197,6 @@ class Simulation(Journalled):
             self.solventmodel = forcefields.get_solvent_model(
                 self.solventmodel_identifier,
                 forcefield=forcefield,
-                model=solventmodel
                 )
 
             distance = kwargs.pop('distance', None)
