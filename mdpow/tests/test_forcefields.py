@@ -153,22 +153,6 @@ class TestSolventModels(object):
                 mdpow.forcefields.GROMACS_SOLVENT_MODELS[forcefield][model])
 
     @staticmethod
-    def test_get_solvent():
-        def _assert_water_model(model):
-            assert (mdpow.forcefields.get_solvent_model(model) is
-                    mdpow.forcefields.GROMACS_WATER_MODELS[model])
-
-        def _assert_solvent_model(model):
-            assert (mdpow.forcefields.get_solvent_model(model) is
-                    mdpow.forcefields.GROMACS_SOLVENT_MODELS[model])
-
-        for model in mdpow.forcefields.GROMACS_WATER_MODELS:
-            yield _assert_water_model, model
-
-        for model in mdpow.forcefields.GROMACS_SOLVENT_MODELS:
-            yield _assert_solvent_model, model
-
-    @staticmethod
     def test_get_solvent_identifier_default_is_water():
         assert (mdpow.forcefields.get_solvent_identifier('water') is
                 mdpow.forcefields.DEFAULT_WATER_MODEL)
