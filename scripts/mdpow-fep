@@ -59,6 +59,3 @@ if __name__ == "__main__":
 
     cfg = get_configuration(runfile)
     S = fep_simulation(cfg, opts.solvent, dirname=opts.dirname)
-
-
-

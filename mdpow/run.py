@@ -166,6 +166,7 @@ def equilibrium_simulation(cfg, solvent, **kwargs):
     Simulations = {
         'water': equil.WaterSimulation,
         'octanol': equil.OctanolSimulation,
+        'wetoctanol': equil.WetOctanolSimulation,
         'cyclohexane':equil.CyclohexaneSimulation,
         }
     try:
@@ -180,7 +181,6 @@ def equilibrium_simulation(cfg, solvent, **kwargs):
         topdir = cfg.get("setup", "name")
     dirname = os.path.join(topdir, Simulation.dirname_default)
     savefilename = os.path.join(topdir, "%(solvent)s.simulation" % vars())
-
     # output to screen or hidden?
     set_gromacsoutput(cfg)
 
@@ -201,18 +201,18 @@ def equilibrium_simulation(cfg, solvent, **kwargs):
 
 
         solventmodel = None
-        if solvent == "water":
-            try:
-                solventmodel = cfg.get('setup', 'watermodel')
-                logger.info("Selected water model: {0}".format(solventmodel))
-            except KeyError:
-                solventmodel = None
-                logger.info("Using default water model")
+        try:
+            solventmodel = cfg.get('setup', 'solventmodel')
+            logger.info("Selected solvent model: {0}".format(solventmodel))
+        except KeyError:
+            solventmodel = None
+            logger.info("Using default water model")
         # for other solvents we currently only have a single OPLS-AA
         # parameterization included and hence there is no mechanism to
         # choose between different models.
 
         S = Simulation(molecule=cfg.get("setup", "molecule"),
+                       forcefield=cfg.get("setup", "forcefield"),
                        dirname=dirname, deffnm=deffnm, mdp=mdpfiles,
                        distance=distance,
                        solventmodel=solventmodel)
@@ -276,18 +276,20 @@ def fep_simulation(cfg, solvent, **kwargs):
     EquilSimulations = {
         'water': equil.WaterSimulation,
         'octanol': equil.OctanolSimulation,
+        'wetoctanol': equil.WetOctanolSimulation,
         'cyclohexane':equil.CyclohexaneSimulation
         }
     Simulations = {
         'water': fep.Ghyd,
         'octanol': fep.Goct,
+        'wetoctanol': fep.Gwoct,
         'cyclohexane':fep.Gcyclo
         }
     try:
         EquilSimulation = EquilSimulations[solvent]
         Simulation = Simulations[solvent]
     except KeyError:
-        raise ValueError("solvent must be 'water', 'octanol', or 'cyclohexane'")
+        raise ValueError("solvent must be 'water', 'octanol', 'wetoctanol' or 'cyclohexane'")
     # generate a canonical path under dirname
     topdir = kwargs.get("dirname", None)
     if topdir is None:
@@ -354,5 +356,3 @@ def fep_simulation(cfg, solvent, **kwargs):
     logger.info("FEP simulation phase complete, use %(savefilename)r to continue.",
                 vars())
     return savefilename
-
-
