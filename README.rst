@@ -43,16 +43,11 @@ Documentation
 Installation
 ------------
 
-Since release 0.6.2, MDPOW is available on PyPi and can be installed
-with ::
-
-   pip install MDPOW
-
-This will install the *latest release* together with any additional
-dependencies such as GromacsWrapper_.
+See `INSTALL`_ for detailed instructions. Note that
+**only Python 2.7** is supported.
 
 You will also need `Gromacs`_ (currently tested with versions 4.6.7,
-5.1.2, and Gromacs 2016).
+5.1.2, and Gromacs 2016, 2018).
 
 
 Development version
@@ -98,3 +93,4 @@ Footnotes
    :target: http://mdpow.readthedocs.org/en/latest/?badge=latest
    :alt: Documentation
    
+.. _INSTALL: INSTALL.rst
