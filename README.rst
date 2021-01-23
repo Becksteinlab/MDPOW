@@ -16,8 +16,8 @@ coeffcients. Currently implemented:
 - *water-cyclohexane* partition coefficient (|P_cw|)
 
 Calculations are performed with the Gromacs_ MD software package
-[#GromacsWrapperNote]_. Currently, *OPLS-AA force field* parameters are
-supported.
+[#GromacsWrapperNote]_. Currently, *OPLS-AA*, *CHARMM/CGENFF*, and
+*AMBER/GAFF* parameters are supported.
 
 As *input*, the user only needs to provide a structure file (PDB or
 GRO) and a Gromacs ITP file containing the parametrization of the
