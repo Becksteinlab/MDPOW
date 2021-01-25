@@ -16,8 +16,8 @@ coeffcients. Currently implemented:
 - *water-cyclohexane* partition coefficient (|P_cw|)
 
 Calculations are performed with the Gromacs_ MD software package
-[#GromacsWrapperNote]_. Currently, *OPLS-AA force field* parameters are
-supported.
+[#GromacsWrapperNote]_. Currently, *OPLS-AA*, *CHARMM/CGENFF*, and
+*AMBER/GAFF* parameters are supported.
 
 As *input*, the user only needs to provide a structure file (PDB or
 GRO) and a Gromacs ITP file containing the parametrization of the
@@ -43,16 +43,11 @@ Documentation
 Installation
 ------------
 
-Since release 0.6.2, MDPOW is available on PyPi and can be installed
-with ::
-
-   pip install MDPOW
-
-This will install the *latest release* together with any additional
-dependencies such as GromacsWrapper_.
+See `INSTALL`_ for detailed instructions. Note that
+**only Python 2.7** is supported.
 
 You will also need `Gromacs`_ (currently tested with versions 4.6.7,
-5.1.2, and Gromacs 2016).
+5.1.2, and Gromacs 2016, 2018).
 
 
 Development version
@@ -98,3 +93,4 @@ Footnotes
    :target: http://mdpow.readthedocs.org/en/latest/?badge=latest
    :alt: Documentation
    
+.. _INSTALL: INSTALL.rst

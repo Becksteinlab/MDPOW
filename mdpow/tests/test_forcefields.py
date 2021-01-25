@@ -134,30 +134,23 @@ class TestSolventModels(object):
     @staticmethod
     def test_get_solvent_cyclohexane():
         model = 'cyclohexane'
+        forcefield = 'OPLS-AA'
         assert (mdpow.forcefields.get_solvent_model(model) is
-                mdpow.forcefields.GROMACS_SOLVENT_MODELS[model])
+                mdpow.forcefields.GROMACS_SOLVENT_MODELS[forcefield][model])
 
+    @pytest.mark.parametrize("forcefield", ['OPLS-AA', 'CHARMM', 'AMBER'])
     @staticmethod
-    def test_get_solvent_octanol():
+    def test_get_solvent_octanol(forcefield):
         model = 'octanol'
-        assert (mdpow.forcefields.get_solvent_model(model) is
-                mdpow.forcefields.GROMACS_SOLVENT_MODELS[model])
+        assert (mdpow.forcefields.get_solvent_model(model, forcefield=forcefield) is
+                mdpow.forcefields.GROMACS_SOLVENT_MODELS[forcefield][model])
 
+    @pytest.mark.parametrize("forcefield", ['OPLS-AA', 'CHARMM', 'AMBER'])
     @staticmethod
-    def test_get_solvent():
-        def _assert_water_model(model):
-            assert (mdpow.forcefields.get_solvent_model(model) is
-                    mdpow.forcefields.GROMACS_WATER_MODELS[model])
-
-        def _assert_solvent_model(model):
-            assert (mdpow.forcefields.get_solvent_model(model) is
-                    mdpow.forcefields.GROMACS_SOLVENT_MODELS[model])
-
-        for model in mdpow.forcefields.GROMACS_WATER_MODELS:
-            yield _assert_water_model, model
-
-        for model in mdpow.forcefields.GROMACS_SOLVENT_MODELS:
-            yield _assert_solvent_model, model
+    def test_get_solvent_wetoctanol(forcefield):
+        model = 'wetoctanol'
+        assert (mdpow.forcefields.get_solvent_model(model, forcefield=forcefield) is
+                mdpow.forcefields.GROMACS_SOLVENT_MODELS[forcefield][model])
 
     @staticmethod
     def test_get_solvent_identifier_default_is_water():

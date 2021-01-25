@@ -9,11 +9,16 @@ setup:
          # common, descriptive name, e.g. benzene
     molecule: None
          # Gromacs [ molecule ] identifier from the itp file (typically a 3-letter code)
-    watermodel: 'tip4p'
+    solventmodel: 'tip4p'
          # water model available in Gromacs (OPLS-AA):
          # tip4p, tip5p, tip3p, spc, spce, m24
+    forcefield: 'OPLS-AA'
+         # Forcefield name
+         # OPLS-AA, AMBER, CHARMM
     itp: None
-         # Gromacs itp file name 
+         # Gromacs itp file name
+    prm: None
+         # Gromacs prm file name
     structure: None
          # coordinate file name (pdb, gro, ... anything that Gromacs can read)
     maxwarn: 0
@@ -21,7 +26,7 @@ setup:
     distance:  None
          # minimum distance between solute and box face (by default
          # (None) this is set to a 1.0 nm for water and 1.5 nm for
-         # other solvents)    
+         # other solvents)
     boxtype: dodecahedron
          # box type understood by Gromacs 'gmx editconf' (cubic,
          # triclinic, octahedron, dodecahedron

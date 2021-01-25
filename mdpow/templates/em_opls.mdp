@@ -1,8 +1,7 @@
 ; Gromacs mdp file
-; Template for energy minimization with OPLS-AA (part of POW)
+; Template for energy minimization with OPLS-AA (part of MDPOW)
 
 include                  = 
-define                   = -DFLEXIBLE
 
 integrator               = steep
 

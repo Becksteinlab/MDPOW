@@ -579,6 +579,7 @@ class Gsolv(Journalled):
         kwargs['mdrun_opts'] = " ".join([kwargs.pop('mdrun_opts',''), '-dhdl'])
         kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.includes
         kwargs['deffnm'] = self.deffnm
+        kwargs.setdefault('maxwarn', 1)
         qsubargs = kwargs.copy()
         qsubargs['dirname'] = self.frombase(self.dirname)
         # handle templates separately (necessary for array jobs)
@@ -635,7 +636,6 @@ class Gsolv(Journalled):
                       ndx=self.ndx,
                       mainselection=None,
                       runtime=self.runtime,
-                      maxwarn=1,
                       ref_t=self.Temperature,    # TODO: maybe not working yet, check _setup()
                       gen_temp=self.Temperature, # needed until gromacs.setup() is smarter
                       qname=self.tasklabel(component,lmbda),
@@ -1129,6 +1129,16 @@ class Goct(Gsolv):
                  }
 
 
+class Gwoct(Goct):
+    """Sets up and analyses MD to obtain the solvation free energy of a solute in wet octanol.
+
+    The *coulomb* lambda schedule is enhanced compared to water as the initial
+    part of the dV/dl curve is quite sensitive. By adding two additional points
+    we hope to reduce the overall error on the dis-charging free energy.
+    """
+    solvent_default = "wetoctanol"
+    dirname_default = os.path.join(Gsolv.topdir_default, solvent_default)
+    
 
 def p_transfer(G1, G2, **kwargs):
     """Compute partition coefficient from two :class:`Gsolv` objects.

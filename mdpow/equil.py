@@ -34,6 +34,7 @@ from __future__ import absolute_import, with_statement
 import os, errno
 import shutil
 import cPickle
+import MDAnalysis as mda
 
 try:
     import gromacs.setup, gromacs.cbook
@@ -56,7 +57,7 @@ logger = logging.getLogger('mdpow.equil')
 # TODO: change to water distance 1.2 in the future (1.0 for
 #       compatibility with our SAMPL5 runs)
 #: minimum distance between solute and box surface (in nm)
-DIST = {'water': 1.0, 'octanol': 1.5, 'cyclohexane': 1.5}
+DIST = {'water': 1.0, 'octanol': 1.5, 'cyclohexane': 1.5, 'wetoctanol': 1.5}
 
 class Simulation(Journalled):
     """Simple MD simulation of a single compound molecule in water.
@@ -120,8 +121,10 @@ class Simulation(Journalled):
               :meth:`~mdpow.equil.Simulation.save`.
           *dirname*
               base directory; all other directories are created under it
+          *forcefield*
+              'OPLS-AA' or 'CHARMM' or 'AMBER'
           *solvent*
-              'water' or 'octanol' or 'cyclohexane'
+              'water' or 'octanol' or 'cyclohexane' or 'wetoctanol'
           *solventmodel*
               ``None`` chooses the default (e.g, :data:`mdpow.forcefields.DEFAULT_WATER_MODEL`
               for ``solvent == "water"``. Other options are the models defined in
@@ -143,6 +146,7 @@ class Simulation(Journalled):
         filename = kwargs.pop('filename', None)
         dirname = kwargs.pop('dirname', self.dirname_default)
 
+        forcefield = kwargs.pop('forcefield', 'OPLS-AA')
         solvent = kwargs.pop('solvent', self.solvent_default)
         # mdp files --- should get values from default runinput.cfg
         # None values in the kwarg mdp dict are ignored
@@ -178,14 +182,22 @@ class Simulation(Journalled):
                 self.dirs.topology = realpath(os.path.dirname(self.files.topology))
                 self.dirs.includes.append(self.dirs.topology)
 
+            self.forcefield = forcefield
             self.solvent_type = solvent
-            self.solventmodel_identifier = forcefields.get_solvent_identifier(solvent, solventmodel)
+            self.solventmodel_identifier = forcefields.get_solvent_identifier(
+                 solvent,
+                 model=solventmodel,
+                 forcefield=forcefield,
+                 )
             if self.solventmodel_identifier is None:
                 msg = "No parameters for solvent {0} and solventmodel {1} available.".format(
                     solvent, solventmodel)
                 logger.error(msg)
                 raise ValueError(msg)
-            self.solventmodel = forcefields.get_solvent_model(self.solventmodel_identifier)
+            self.solventmodel = forcefields.get_solvent_model(
+                self.solventmodel_identifier,
+                forcefield=forcefield,
+                )
 
             distance = kwargs.pop('distance', None)
             distance = distance if distance is not None else DIST[solvent]
@@ -284,24 +296,37 @@ class Simulation(Journalled):
         dirname = kwargs.pop('dirname', self.BASEDIR('top'))
         self.dirs.topology = realpath(dirname)
 
-        top_template = config.get_template(kwargs.pop('top_template', 'system.top'))
+        setting = forcefields.get_ff_paths(self.forcefield)
+        template = forcefields.get_top_template(self.solvent_type)
+
+        top_template = config.get_template(kwargs.pop('top_template', template))
         topol = kwargs.pop('topol', os.path.basename(top_template))
+        self.top_template = top_template
         itp = os.path.realpath(itp)
         _itp = os.path.basename(itp)
+
         if prm==None:
-            _prm = ''
+            prm_kw = ''
         else:
             prm = os.path.realpath(prm)
             _prm = os.path.basename(prm)
+            prm_kw = '#include "{}"'.format(_prm)
 
         with in_dir(dirname):
             shutil.copy(itp, _itp)
             if prm is not None:
                 shutil.copy(prm, _prm)
             gromacs.cbook.edit_txt(top_template,
-                                   [('#include +"compound\.itp"', 'compound\.itp', _itp),
-                                    ('#include +"compound\.prm"', 'compound\.prm', _prm),
-                                    ('#include +"oplsaa\.ff/tip4p\.itp"', 'tip4p\.itp', self.solvent.itp),
+                                   [('#include +"oplsaa\.ff/forcefield\.itp"',
+                                    'oplsaa\.ff/', setting[0]),
+                                    ('#include +"compound\.itp"', 'compound\.itp', _itp),
+                                    ('#include +"oplsaa\.ff/tip4p\.itp"',
+                                     'oplsaa\.ff/tip4p\.itp', setting[0]+self.solvent.itp),
+                                    ('#include +"oplsaa\.ff/ions_opls\.itp"',
+                                     'oplsaa\.ff/ions_opls\.itp', setting[1]),
+                                    ('#include +"compound\.prm"',
+                                     '#include +"compound\.prm"', prm_kw),
+                                    ('#include +"water\.itp"', 'water\.itp', setting[2]),
                                     ('Compound', 'solvent', self.solvent_type),
                                     ('Compound', 'DRUG', self.molecule),
                                     ('DRUG\s*1', 'DRUG', self.molecule),
@@ -317,6 +342,10 @@ class Simulation(Journalled):
         self.journal.completed('topology')
         return {'dirname': dirname, 'topol': topol}
 
+    @staticmethod
+    def _setup_solvate(**kwargs):
+        """Solvate structure in a single solvent box."""
+        return gromacs.setup.solvate(**kwargs)
 
     def solvate(self, struct=None, **kwargs):
         """Solvate structure *struct* in a box of solvent.
@@ -362,12 +391,11 @@ class Simulation(Journalled):
 
         kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.dirs.includes
 
-        params = gromacs.setup.solvate(**kwargs)
+        params = self._setup_solvate(**kwargs)
 
         self.files.structure = kwargs['struct']
         self.files.solvated = params['struct']
         self.files.ndx = params['ndx']
-
         # we can also make a processed topology right now
         self.processed_topology(**kwargs)
 
@@ -599,3 +627,21 @@ class OctanolSimulation(Simulation):
     solvent_default = 'octanol'
     dirname_default = os.path.join(Simulation.topdir_default, solvent_default)
 
+class WetOctanolSimulation(Simulation):
+    """Equilibrium MD of a solute in a box of wet octanol."""
+    solvent_default = 'wetoctanol'
+    dirname_default = os.path.join(Simulation.topdir_default, solvent_default)
+
+    def  _setup_solvate(self, **kwargs):
+        sol = gromacs.setup.solvate_sol(**kwargs)
+        with in_dir(self.dirs.solvation, create=False):
+            u = mda.Universe('solvated.gro')
+            octanol = u.select_atoms('resname OcOH')
+            n = octanol.n_residues
+        with in_dir(self.dirs.topology, create=False):
+            gromacs.cbook.edit_txt(self.files.topology,
+                                   [('OcOH               1', '1', n)])
+        ionkwargs = kwargs
+        ionkwargs['struct'] = sol['struct']
+        params = gromacs.setup.solvate_ion(**ionkwargs)
+        return params

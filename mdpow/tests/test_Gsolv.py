@@ -31,7 +31,7 @@ class Test_Gsolv_manual(object):
     def _setup(self, **kwargs):
         with in_dir(self.tmpdir.name, create=False):
             self.Gsolv = mdpow.fep.Gsolv(simulation=self.S, molecule='BNZ',
-                    **kwargs)
+                    mdp=os.path.join(self.old_path, 'mdpow', 'templates', 'bar_opls.mdp') ,**kwargs)
             self.Gsolv.setup(maxwarn=1)
 
     def test_default_setup(self):
@@ -41,7 +41,7 @@ class Test_Gsolv_manual(object):
         lambda_coulomb = [0,0.5,1.0]
         lambda_vdw = [0,0.2,1.0]
         self._setup(lambda_coulomb=lambda_coulomb, lambda_vdw=lambda_vdw)
-    
+
     def test_array_foreign_lambdas(self):
         lambda_coulomb = np.array([0,0.5,1.0])
         lambda_vdw = np.array([0,0.2,1.0])
