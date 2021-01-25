@@ -220,7 +220,7 @@ def equilibrium_simulation(cfg, solvent, **kwargs):
     if S.journal.has_not_completed("energy_minimize"):
         maxwarn = cfg.getint("setup", "maxwarn") or None
         prm = cfg.get("setup", "prm") or None
-        maxthreads = cfg.get('mdrun', 'maxthreads') or None,
+        maxthreads = cfg.get('mdrun', 'maxthreads') or None
         S.topology(itp=cfg.getpath("setup", "itp"), prm=prm)
         S.solvate(struct=cfg.getpath("setup", "structure"),
                   bt=cfg.get("setup", "boxtype"),
