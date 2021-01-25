@@ -132,7 +132,7 @@ def runMD_or_exit(S, protocol, params, cfg, **kwargs):
             stepout=cfg.getint('mdrun','stepout'),
             nice=cfg.getint('mdrun','nice'),
             nt=cfg.get('mdrun','maxthreads'),
-            cpi=True, append=True)
+            cpi=True)
         simulation_done = mdrun.run_check()
         if not simulation_done:
             # should probably stop

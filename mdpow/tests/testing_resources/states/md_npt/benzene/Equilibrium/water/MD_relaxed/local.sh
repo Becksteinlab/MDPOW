@@ -16,6 +16,6 @@ PDB=${DEFFNM}.pdb
 
 MDRUN_OPTS=""
 
-mpiexec -n $NCORES mdrun_mpi -nice 19 -v -deffnm ${DEFFNM} -c ${PDB} -cpi -append \
+mpiexec -n $NCORES mdrun_mpi -nice 19 -v -deffnm ${DEFFNM} -c ${PDB} -cpi \
     $MDRUN_OPTS >$OUTPUT 2>&1
 
