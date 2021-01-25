@@ -24,6 +24,8 @@ orbeckst, VOD555
   found. Either supply the name of the right checkpoint file or do not use
   -append": mdpow.run.runMD_or_exit() does not anymore add -append to GROMACS
   invocation (#128)
+* Configuration setting mdrun.maxthreads now also applies to energy
+  minimization with mdpow-equilibrium.py/mdpow.run() (#119)
 
 
 2017-05-02    0.6.1
