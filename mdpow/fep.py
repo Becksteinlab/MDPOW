@@ -690,13 +690,12 @@ class Gsolv(Journalled):
                  could be found
 
          """
-        fn = os.path.join(*args + (self.deffnm + '.edr',))
-        if not os.path.exists(fn):
-            logger.error("Missing dgdl.edr file %(fn)r.", vars())
-            raise IOError(errno.ENOENT, "Missing dgdl.edr file", fn)
-        edrs = glob(*args + (self.deffnm + '*.edr',))
-        edrs = [os.path.abspath(i) for i in edrs]
-        return edrs
+        pattern = os.path.join(*args + (self.deffnm + '*.edr',))
+        edrs = glob(pattern)
+        if not edrs:
+                    logger.error("Missing dgdl.edr file %(pattern)r.", vars())
+                    raise IOError(errno.ENOENT, "Missing dgdl.edr file", pattern)
+        return [os.path.abspath(i) for i in edrs]
 
     def dgdl_tpr(self, *args):
         """Return filename of the dgdl TPR file.
@@ -718,6 +717,20 @@ class Gsolv(Journalled):
             raise IOError(errno.ENOENT, "Missing TPR file", fn)
         return fn
 
+    def dgdl_total_edr(self, *args, **kwargs):
+        """Return filename of the combined dgdl EDR file.
+
+        :Arguments:
+           *args*
+               joins the arguments into a path and adds the default
+               filename for the dvdl file
+
+        :Returns: path to total EDR
+
+        """
+        total_edr_name = kwargs.get("total_edr_name", "total.edr")
+        fn = os.path.join(*args + (total_edr_name,))
+        return fn
 
     def convert_edr(self):
         """Convert EDR files to compressed XVG files."""
@@ -728,10 +741,10 @@ class Gsolv(Journalled):
             edr_files = [self.dgdl_edr(self.wdir(component, l)) for l in lambdas]
             tpr_files = [self.dgdl_tpr(self.wdir(component, l)) for l in lambdas]
             for tpr, edr in zip(tpr_files, edr_files):
-                dirct = os.path.abspath(os.path.dirname(edr[0]))
-                total_edr = os.path.join(dirct, 'total.edr')
+                dirct = os.path.abspath(os.path.dirname(tpr))
+                total_edr = self.dgdl_total_edr(dirct)
                 logger.info("  {0} --> {1}".format('edrs', total_edr))
-                total_edr = gromacs.eneconv(f=edr, o=total_edr)
+                gromacs.eneconv(f=edr, o=total_edr)
                 xvgfile = os.path.join(dirct, self.deffnm + ".xvg")  # hack
                 logger.info("  {0} --> {1}".format(total_edr, xvgfile))
                 gromacs.g_energy(s=tpr, f=total_edr, odh=xvgfile)
