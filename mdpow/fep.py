@@ -694,7 +694,7 @@ class Gsolv(Journalled):
         if not os.path.exists(fn):
             logger.error("Missing dgdl.edr file %(fn)r.", vars())
             raise IOError(errno.ENOENT, "Missing dgdl.edr file", fn)
-        edrs = glob.glob(*args + (self.deffnm + '*.edr',))
+        edrs = glob(*args + (self.deffnm + '*.edr',))
         edrs = [os.path.abspath(i) for i in edrs]
         return edrs
 
