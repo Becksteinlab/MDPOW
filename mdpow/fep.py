@@ -141,6 +141,7 @@ except (ImportError, OSError):
     raise ImportError("Gromacs installation not found, source GMXRC?")
 from gromacs.utilities import asiterable, AttributeDict, in_dir, openany
 from numkit.observables import QuantityWithError
+from glob import glob
 
 import logging
 logger = logging.getLogger('mdpow.fep')
@@ -693,7 +694,9 @@ class Gsolv(Journalled):
         if not os.path.exists(fn):
             logger.error("Missing dgdl.edr file %(fn)r.", vars())
             raise IOError(errno.ENOENT, "Missing dgdl.edr file", fn)
-        return fn
+        edrs = glob.glob(*args + (self.deffnm + '*.edr',))
+        edrs = [os.path.abspath(i) for i in edrs]
+        return edrs
 
     def dgdl_tpr(self, *args):
         """Return filename of the dgdl TPR file.
@@ -725,10 +728,13 @@ class Gsolv(Journalled):
             edr_files = [self.dgdl_edr(self.wdir(component, l)) for l in lambdas]
             tpr_files = [self.dgdl_tpr(self.wdir(component, l)) for l in lambdas]
             for tpr, edr in zip(tpr_files, edr_files):
-                deffnm = os.path.splitext(edr)[0]
-                xvgfile = deffnm + ".xvg"  # hack
-                logger.info("  {0} --> {1}".format(edr, xvgfile))
-                gromacs.g_energy(s=tpr, f=edr, odh=xvgfile)
+                dirct = os.path.abspath(os.path.dirname(edr[0]))
+                total_edr = os.path.join(dirct, 'total.edr')
+                logger.info("  {0} --> {1}".format('edrs', total_edr))
+                total_edr = gromacs.eneconv(f=edr, o=total_edr)
+                xvgfile = os.path.join(dirct, self.deffnm + ".xvg")  # hack
+                logger.info("  {0} --> {1}".format(total_edr, xvgfile))
+                gromacs.g_energy(s=tpr, f=total_edr, odh=xvgfile)
 
     def collect(self, stride=None, autosave=True, autocompress=True):
         """Collect dV/dl from output.
@@ -1138,7 +1144,7 @@ class Gwoct(Goct):
     """
     solvent_default = "wetoctanol"
     dirname_default = os.path.join(Gsolv.topdir_default, solvent_default)
-    
+
 
 def p_transfer(G1, G2, **kwargs):
     """Compute partition coefficient from two :class:`Gsolv` objects.
