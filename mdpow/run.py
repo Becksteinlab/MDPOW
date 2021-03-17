@@ -132,7 +132,7 @@ def runMD_or_exit(S, protocol, params, cfg, **kwargs):
             stepout=cfg.getint('mdrun','stepout'),
             nice=cfg.getint('mdrun','nice'),
             nt=cfg.get('mdrun','maxthreads'),
-            cpi=True, append=True)
+            cpi=True)
         simulation_done = mdrun.run_check()
         if not simulation_done:
             # should probably stop
@@ -220,11 +220,12 @@ def equilibrium_simulation(cfg, solvent, **kwargs):
     if S.journal.has_not_completed("energy_minimize"):
         maxwarn = cfg.getint("setup", "maxwarn") or None
         prm = cfg.get("setup", "prm") or None
+        maxthreads = cfg.get('mdrun', 'maxthreads') or None
         S.topology(itp=cfg.getpath("setup", "itp"), prm=prm)
         S.solvate(struct=cfg.getpath("setup", "structure"),
                   bt=cfg.get("setup", "boxtype"),
                   maxwarn=maxwarn)
-        S.energy_minimize(maxwarn=maxwarn)
+        S.energy_minimize(maxwarn=maxwarn, mdrun_args={'nt': maxthreads})
         checkpoint('energy_minize', S, savefilename)
     else:
         logger.info("Fast-forwarding: setup + energy_minimize done")
