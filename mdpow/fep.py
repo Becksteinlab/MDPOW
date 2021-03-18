@@ -305,7 +305,7 @@ class Gsolv(Journalled):
     #: Estimators in alchemlyb
     estimators = {'TI': {'extract': extract_dHdl, 'estimator': TI},
                   'BAR': {'extract': extract_u_nk, 'estimator': BAR},
-                  'MBAR': {'extract': extract_u_nk, 'estimator': BAR}
+                  'MBAR': {'extract': extract_u_nk, 'estimator': MBAR}
                   }
 
     # TODO: initialize from default cfg
@@ -1012,7 +1012,7 @@ class Gsolv(Journalled):
             val = []
             for l in lambdas:
                 xvg_file = self.dgdl_xvg(self.wdir(component, l))
-                xvg_df = extract(xvg, T=self.Temperature)
+                xvg_df = extract(xvg_file, T=self.Temperature)
                 if self.SI:
                     ts = _extract_dataframe(xvg_file)
                     ts = pd.DataFrame({'time': ts.iloc[:,0], 'dhdl': ts.iloc[:,1]})
@@ -1024,7 +1024,7 @@ class Gsolv(Journalled):
         if autosave:
             self.save()
 
-    def analyze_alchemlyb(self, force=False):
+    def analyze_alchemlyb(self, force=False, autosave=True):
         if force or not self.has_dVdl():
             try:
                 self.collect_alchemlyb(autosave=False)
@@ -1050,14 +1050,21 @@ class Gsolv(Journalled):
 
         for component, (lambdas, xvgs) in self.results.xvg.items():
             result = estimator().fit(xvgs)
-            a = result.delta_f_.loc[0.00, 1.00]
-            da = result.d_delta_f_.loc[0.00, 1.00]
-            self.results.DeltaA[component] = QuantityWithError(a, da)
+            if self.method == 'BAR':
+                DeltaA = QuantityWithError(0,0)
+                a_s= numpy.diagonal(result.delta_f_, offset=1)
+                da_s = numpy.diagonal(result.d_delta_f_, offset=1)
+                for a, da in zip(a_s, da_s):
+                    DeltaA += QuantityWithError(a, da)
+                self.results.DeltaA[component] = kBT_to_kJ(DeltaA, self.Temperature)
+            else:
+                a = result.delta_f_.loc[0.00, 1.00]
+                da = result.d_delta_f_.loc[0.00, 1.00]
+                self.results.DeltaA[component] = kBT_to_kJ(QuantityWithError(a, da), self.Temperature)
             GibbsFreeEnergy += self.results.DeltaA[component]  # error propagation is automagic!
 
         # hydration free energy Delta A = -(Delta A_coul + Delta A_vdw)
         GibbsFreeEnergy *= -1
-        GibbsFreeEnergy = kBT_to_kJ(GibbsFreeEnergy, self.Temperature)
         self.results.DeltaA.Gibbs = GibbsFreeEnergy
 
         if autosave:
@@ -1065,6 +1072,9 @@ class Gsolv(Journalled):
 
         self.logger_DeltaA0()
         return self.results.DeltaA.Gibbs
+
+        if autosave:
+            self.save()
 
     def write_DeltaA0(self, filename, mode='w'):
         """Write free energy components to a file.
