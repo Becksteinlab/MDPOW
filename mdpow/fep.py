@@ -176,6 +176,11 @@ def kJ_to_kcal(x):
     """Convert a energy in kJ to kcal."""
     return x / 4.184
 
+def kBT_to_kJ(x, T):
+    """Convert a energy in kBT to kJ/mol."""
+    x *= constants.N_A*constants.k*T*1e-3
+    return x
+
 
 class FEPschedule(AttributeDict):
     """Describe mdp parameter choices as key - value pairs.
@@ -1052,7 +1057,7 @@ class Gsolv(Journalled):
 
         # hydration free energy Delta A = -(Delta A_coul + Delta A_vdw)
         GibbsFreeEnergy *= -1
-        GibbsFreeEnergy = self.KbT2KJ(GibbsFreeEnergy, self.Temperature)
+        GibbsFreeEnergy = kBT_to_kJ(GibbsFreeEnergy, self.Temperature)
         self.results.DeltaA.Gibbs = GibbsFreeEnergy
 
         if autosave:
@@ -1194,12 +1199,6 @@ class Gsolv(Journalled):
 
     def __repr__(self):
         return "%s(filename=%r)" % (self.__class__.__name__, self.filename)
-
-    @staticmethod
-    def KbT2KJ(GibbsFreeEnergy, Temperature):
-        GibbsFreeEnergy *= constants.N_A*constants.k*Temperature*1e-3
-        return GibbsFreeEnergy
-
 
 
 class Ghyd(Gsolv):
