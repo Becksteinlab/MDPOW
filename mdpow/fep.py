@@ -129,10 +129,17 @@ from subprocess import call
 import warnings
 
 import numpy
+import pandas as pd
 
 import scipy.integrate
+from scipy import constants
 import numkit.integration
 import numkit.timeseries
+
+from alchemlyb.parsing.gmx import extract_dHdl, extract_u_nk
+from alchemlyb.estimators import TI, BAR, MBAR
+from alchemlyb.parsing.gmx import _extract_dataframe
+from alchemlyb.preprocessing.subsampling import statistical_inefficiency
 
 import gromacs, gromacs.utilities
 try:
@@ -289,6 +296,12 @@ class Gsolv(Journalled):
     #: Check list of all methods that can be run as an independent protocol; see also
     #: :meth:`Simulation.get_protocol` and :class:`restart.Journal`
     protocols = ["setup", "fep_run"]
+
+    #: Estimators in alchemlyb
+    estimators = {'TI': {'extract': extract_dHdl, 'estimator': TI},
+                  'BAR': {'extract': extract_u_nk, 'estimator': BAR},
+                  'MBAR': {'extract': extract_u_nk, 'estimator': BAR}
+                  }
 
     # TODO: initialize from default cfg
     schedules_default = {'coulomb':
@@ -462,6 +475,7 @@ class Gsolv(Journalled):
 
             # for analysis
             self.stride = kwargs.pop('stride', 1)
+            self.SI = kwargs.pop('SI', False)
 
             # other variables
             #: Results from the analysis
@@ -725,6 +739,9 @@ class Gsolv(Journalled):
                joins the arguments into a path and adds the default
                filename for the dvdl file
 
+        :Keywords:
+
+
         :Returns: path to total EDR
 
         """
@@ -972,6 +989,78 @@ class Gsolv(Journalled):
         self.logger_DeltaA0()
         return self.results.DeltaA.Gibbs
 
+    def collect_alchemlyb(self, autosave=True, autocompress=True):
+        if self.method in ['TI', 'BAR', 'MBAR']:
+            extract = self.estimators[self.method]['extract']
+        else:
+            errmsg = "The method is not supported."
+            logger.error(errmsg)
+            raise ValueError(errmsg)
+
+        if autocompress:
+            # must be done before adding to results.xvg or we will not find the file later
+            self.compress_dgdl_xvg()
+
+        logger.info("[%(dirname)s] Finding dgdl xvg files, reading with "
+                    "stride=%(stride)d permissive=%(permissive)r." % vars(self))
+        for component, lambdas in self.lambdas.items():
+            val = []
+            for l in lambdas:
+                xvg_file = self.dgdl_xvg(self.wdir(component, l))
+                xvg_df = extract(xvg, T=self.Temperature)
+                if self.SI:
+                    ts = _extract_dataframe(xvg_file)
+                    ts = pd.DataFrame({'time': ts.iloc[:,0], 'dhdl': ts.iloc[:,1]})
+                    ts = ts.set_index('time')
+                    xvg_df = statistical_inefficiency(xvg_df, series=ts, conservative=False)
+                val.append(xvg_df)
+            self.results.xvg[component] = (numpy.array(lambdas), pd.concat(val))
+
+        if autosave:
+            self.save()
+
+    def analyze_alchemlyb(self, force=False):
+        if force or not self.has_dVdl():
+            try:
+                self.collect_alchemlyb(autosave=False)
+            except IOError as err:
+                if err.errno == errno.ENOENT:
+                    self.convert_edr()
+                    self.collect_alchemlyb(autosave=False)
+                else:
+                    logger.exception()
+                    raise
+        else:
+            logger.info("Analyzing stored data.")
+
+        # total free energy difference at const P (all simulations are done in NPT)
+        GibbsFreeEnergy = QuantityWithError(0,0)
+
+        if self.method in ['TI', 'BAR', 'MBAR']:
+            estimator = self.estimators[self.method]['estimator']
+        else:
+            errmsg = "The method is not supported."
+            logger.error(errmsg)
+            raise ValueError(errmsg)
+
+        for component, (lambdas, xvgs) in self.results.xvg.items():
+            result = estimator().fit(xvgs)
+            a = result.delta_f_.loc[0.00, 1.00]
+            da = result.d_delta_f_.loc[0.00, 1.00]
+            self.results.DeltaA[component] = QuantityWithError(a, da)
+            GibbsFreeEnergy += self.results.DeltaA[component]  # error propagation is automagic!
+
+        # hydration free energy Delta A = -(Delta A_coul + Delta A_vdw)
+        GibbsFreeEnergy *= -1
+        GibbsFreeEnergy = self.KbT2KJ(GibbsFreeEnergy, self.Temperature)
+        self.results.DeltaA.Gibbs = GibbsFreeEnergy
+
+        if autosave:
+            self.save()
+
+        self.logger_DeltaA0()
+        return self.results.DeltaA.Gibbs
+
     def write_DeltaA0(self, filename, mode='w'):
         """Write free energy components to a file.
 
@@ -1105,6 +1194,13 @@ class Gsolv(Journalled):
 
     def __repr__(self):
         return "%s(filename=%r)" % (self.__class__.__name__, self.filename)
+
+    @staticmethod
+    def KbT2KJ(GibbsFreeEnergy, Temperature):
+        GibbsFreeEnergy *= constants.N_A*constants.k*Temperature*1e-3
+        return GibbsFreeEnergy
+
+
 
 class Ghyd(Gsolv):
     """Sets up and analyses MD to obtain the hydration free energy of a solute."""
