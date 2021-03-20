@@ -87,6 +87,8 @@ class TestAnalyze(object):
         G = self.get_Gsolv(fep_benzene_directory)
         G.SI = False
         G.method = method
+        G.start = 0
+        G.stop = None
         # ensure conversion EDR to XVG.bz2; if the fixture is session scoped
         # then other workers will pick up these files. Make sure that only one
         # runs convert because there is no file locking, if in doubt, make
@@ -109,6 +111,8 @@ class TestAnalyze(object):
         G = self.get_Gsolv(fep_benzene_directory)
         G.SI = True
         G.method = 'TI'
+        G.start = 0
+        G.stop = None
         G.convert_edr()
         try:
             G.analyze_alchemlyb(force=True, autosave=False)
@@ -121,4 +125,25 @@ class TestAnalyze(object):
         assert_array_almost_equal(DeltaA.coulomb.astuple(), (7.755779, 0.531481),
                                   decimal=6)
         assert_array_almost_equal(DeltaA.vdw.astuple(), (-4.846894,  2.110071),
+                                  decimal=6)
+
+    def test_start_stop_stride(self, fep_benzene_directory):
+        G = self.get_Gsolv(fep_benzene_directory)
+        G.SI = False
+        G.method = 'TI'
+        G.start = 10
+        G.stride = 2
+        G.stop = 200
+        G.convert_edr()
+        try:
+            G.analyze_alchemlyb(force=True, autosave=False)
+        except IOError as err:
+            raise AssertionError("Failed to convert edr to xvg: {0}: {1}".format(
+                err.strerror, err.filename))
+        DeltaA = G.results.DeltaA
+        assert_array_almost_equal(DeltaA.Gibbs.astuple(), (-3.318109,  0.905128),
+                                  decimal=6)
+        assert_array_almost_equal(DeltaA.coulomb.astuple(), (8.146806, 0.348866),
+                                  decimal=6)
+        assert_array_almost_equal(DeltaA.vdw.astuple(), (-4.828696,  0.835195),
                                   decimal=6)
