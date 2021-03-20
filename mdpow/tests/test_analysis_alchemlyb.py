@@ -116,9 +116,9 @@ class TestAnalyze(object):
             raise AssertionError("Failed to convert edr to xvg: {0}: {1}".format(
                 err.strerror, err.filename))
         DeltaA = G.results.DeltaA
-        assert_array_almost_equal(DeltaA.Gibbs.astuple(), (-5.402752,  2.105333),
+        assert_array_almost_equal(DeltaA.Gibbs.astuple(), (-2.908885,  2.175976),
                                   decimal=6)
-        assert_array_almost_equal(DeltaA.coulomb.astuple(), ([8.555778, 0.627644]),
+        assert_array_almost_equal(DeltaA.coulomb.astuple(), (7.755779, 0.531481),
                                   decimal=6)
-        assert_array_almost_equal(DeltaA.vdw.astuple(), (-3.153026, 2.009599),
+        assert_array_almost_equal(DeltaA.vdw.astuple(), (-4.846894,  2.110071),
                                   decimal=6)
