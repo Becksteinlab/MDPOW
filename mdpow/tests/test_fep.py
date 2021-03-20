@@ -1,5 +1,6 @@
 import numpy as np
 from numpy.testing import assert_array_almost_equal, assert_almost_equal
+from scipy import constants
 
 import mdpow
 import mdpow.fep
@@ -17,6 +18,10 @@ def test_kcal_to_kJ():
 
 def test_kJ_to_kcal():
     assert_almost_equal(mdpow.fep.kJ_to_kcal(41.84), 10.0)
+
+def test_kBT_to_kJ():
+    ref = constants.N_A*constants.k*1e-3
+    assert_almost_equal(mdpow.fep.kBT_to_kJ(1, 1), ref)
 
 class TestFEPschedule(object):
     reference = {

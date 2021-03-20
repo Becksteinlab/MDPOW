@@ -51,6 +51,8 @@ setup(name="MDPOW",
                         'numkit',
                         'six',
                         'mdanalysis',
+                        'alchemlyb',
+                        'pandas'
       ],
       #setup_requires=['pytest-runner',],
       tests_require=['pytest', 'pybol', 'py'],

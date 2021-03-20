@@ -129,10 +129,17 @@ from subprocess import call
 import warnings
 
 import numpy
+import pandas as pd
 
 import scipy.integrate
+from scipy import constants
 import numkit.integration
 import numkit.timeseries
+
+from alchemlyb.parsing.gmx import extract_dHdl, extract_u_nk
+from alchemlyb.estimators import TI, BAR, MBAR
+from alchemlyb.parsing.gmx import _extract_dataframe
+from alchemlyb.preprocessing.subsampling import statistical_inefficiency
 
 import gromacs, gromacs.utilities
 try:
@@ -141,6 +148,7 @@ except (ImportError, OSError):
     raise ImportError("Gromacs installation not found, source GMXRC?")
 from gromacs.utilities import asiterable, AttributeDict, in_dir, openany
 from numkit.observables import QuantityWithError
+from glob import glob
 
 import logging
 logger = logging.getLogger('mdpow.fep')
@@ -167,6 +175,10 @@ def kcal_to_kJ(x):
 def kJ_to_kcal(x):
     """Convert a energy in kJ to kcal."""
     return x / 4.184
+
+def kBT_to_kJ(x, T):
+    """Convert a energy in kBT to kJ/mol."""
+    return x * constants.N_A*constants.k*T*1e-3
 
 
 class FEPschedule(AttributeDict):
@@ -289,6 +301,12 @@ class Gsolv(Journalled):
     #: :meth:`Simulation.get_protocol` and :class:`restart.Journal`
     protocols = ["setup", "fep_run"]
 
+    #: Estimators in alchemlyb
+    estimators = {'TI': {'extract': extract_dHdl, 'estimator': TI},
+                  'BAR': {'extract': extract_u_nk, 'estimator': BAR},
+                  'MBAR': {'extract': extract_u_nk, 'estimator': MBAR}
+                  }
+
     # TODO: initialize from default cfg
     schedules_default = {'coulomb':
                          FEPschedule(name='coulomb',
@@ -373,6 +391,13 @@ class Gsolv(Journalled):
                the value set in a loaded pickle file. [``False``]
            *stride*
                collect every *stride* data line, see :meth:`Gsolv.collect` [1]
+           *start*
+               Start frame of data analyzed in every fep window.
+           *stop*
+               Stop frame of data analyzed in every fep window.
+           *SI*
+               Set to ``True`` if you want to perform statistical inefficiency
+               to preprocess the data.
            *kwargs*
                other undocumented arguments (see source for the moment)
 
@@ -461,6 +486,9 @@ class Gsolv(Journalled):
 
             # for analysis
             self.stride = kwargs.pop('stride', 1)
+            self.start = kwargs.pop('start', 0)
+            self.stop = kwargs.pop('stop', None)
+            self.SI = kwargs.pop('SI', False)
 
             # other variables
             #: Results from the analysis
@@ -689,11 +717,12 @@ class Gsolv(Journalled):
                  could be found
 
          """
-        fn = os.path.join(*args + (self.deffnm + '.edr',))
-        if not os.path.exists(fn):
-            logger.error("Missing dgdl.edr file %(fn)r.", vars())
-            raise IOError(errno.ENOENT, "Missing dgdl.edr file", fn)
-        return fn
+        pattern = os.path.join(*args + (self.deffnm + '*.edr',))
+        edrs = glob(pattern)
+        if not edrs:
+                    logger.error("Missing dgdl.edr file %(pattern)r.", vars())
+                    raise IOError(errno.ENOENT, "Missing dgdl.edr file", pattern)
+        return [os.path.abspath(i) for i in edrs]
 
     def dgdl_tpr(self, *args):
         """Return filename of the dgdl TPR file.
@@ -715,6 +744,24 @@ class Gsolv(Journalled):
             raise IOError(errno.ENOENT, "Missing TPR file", fn)
         return fn
 
+    def dgdl_total_edr(self, *args, **kwargs):
+        """Return filename of the combined dgdl EDR file.
+
+        :Arguments:
+           *args*
+               joins the arguments into a path and adds the default
+               filename for the dvdl file
+
+        :Keywords:
+           *total_edr_name*
+               Name of the user defined total edr file.
+
+        :Returns: path to total EDR
+
+        """
+        total_edr_name = kwargs.get("total_edr_name", "total.edr")
+        fn = os.path.join(*args + (total_edr_name,))
+        return fn
 
     def convert_edr(self):
         """Convert EDR files to compressed XVG files."""
@@ -725,10 +772,13 @@ class Gsolv(Journalled):
             edr_files = [self.dgdl_edr(self.wdir(component, l)) for l in lambdas]
             tpr_files = [self.dgdl_tpr(self.wdir(component, l)) for l in lambdas]
             for tpr, edr in zip(tpr_files, edr_files):
-                deffnm = os.path.splitext(edr)[0]
-                xvgfile = deffnm + ".xvg"  # hack
-                logger.info("  {0} --> {1}".format(edr, xvgfile))
-                gromacs.g_energy(s=tpr, f=edr, odh=xvgfile)
+                dirct = os.path.abspath(os.path.dirname(tpr))
+                total_edr = self.dgdl_total_edr(dirct)
+                logger.info("  {0} --> {1}".format('edrs', total_edr))
+                gromacs.eneconv(f=edr, o=total_edr)
+                xvgfile = os.path.join(dirct, self.deffnm + ".xvg")  # hack
+                logger.info("  {0} --> {1}".format(total_edr, xvgfile))
+                gromacs.g_energy(s=tpr, f=total_edr, odh=xvgfile)
 
     def collect(self, stride=None, autosave=True, autocompress=True):
         """Collect dV/dl from output.
@@ -953,6 +1003,87 @@ class Gsolv(Journalled):
         self.logger_DeltaA0()
         return self.results.DeltaA.Gibbs
 
+    def collect_alchemlyb(self, start=0, stop=None, stride=None, autosave=True, autocompress=True):
+        extract = self.estimators[self.method]['extract']
+
+        if autocompress:
+            # must be done before adding to results.xvg or we will not find the file later
+            self.compress_dgdl_xvg()
+
+        logger.info("[%(dirname)s] Finding dgdl xvg files, reading with "
+                    "stride=%(stride)d permissive=%(permissive)r." % vars(self))
+        for component, lambdas in self.lambdas.items():
+            val = []
+            for l in lambdas:
+                xvg_file = self.dgdl_xvg(self.wdir(component, l))
+                xvg_df = extract(xvg_file, T=self.Temperature).iloc[start:stop:stride]
+                if self.SI:
+                    ts = _extract_dataframe(xvg_file).iloc[start:stop:stride]
+                    ts = pd.DataFrame({'time': ts.iloc[:,0], 'dhdl': ts.iloc[:,1]})
+                    ts = ts.set_index('time')
+                    xvg_df = statistical_inefficiency(xvg_df, series=ts, conservative=True)
+                val.append(xvg_df)
+            self.results.xvg[component] = (numpy.array(lambdas), pd.concat(val))
+
+        if autosave:
+            self.save()
+
+    def analyze_alchemlyb(self, start=0, stop=None, stride=None, force=False, autosave=True):
+        stride = stride or self.stride
+        start = start or self.start
+        stop = stop or self.stop
+
+        if self.method in ['TI', 'BAR', 'MBAR']:
+            estimator = self.estimators[self.method]['estimator']
+        else:
+            errmsg = "The method is not supported."
+            logger.error(errmsg)
+            raise ValueError(errmsg)
+
+        if force or not self.has_dVdl():
+            try:
+                self.collect_alchemlyb(start, stop, stride, autosave=False)
+            except IOError as err:
+                if err.errno == errno.ENOENT:
+                    self.convert_edr()
+                    self.collect_alchemlyb(start, stop, stride, autosave=False)
+                else:
+                    logger.exception()
+                    raise
+        else:
+            logger.info("Analyzing stored data.")
+
+        # total free energy difference at const P (all simulations are done in NPT)
+        GibbsFreeEnergy = QuantityWithError(0,0)
+
+        for component, (lambdas, xvgs) in self.results.xvg.items():
+            result = estimator().fit(xvgs)
+            if self.method == 'BAR':
+                DeltaA = QuantityWithError(0,0)
+                a_s= numpy.diagonal(result.delta_f_, offset=1)
+                da_s = numpy.diagonal(result.d_delta_f_, offset=1)
+                for a, da in zip(a_s, da_s):
+                    DeltaA += QuantityWithError(a, da)
+                self.results.DeltaA[component] = kBT_to_kJ(DeltaA, self.Temperature)
+            else:
+                a = result.delta_f_.loc[0.00, 1.00]
+                da = result.d_delta_f_.loc[0.00, 1.00]
+                self.results.DeltaA[component] = kBT_to_kJ(QuantityWithError(a, da), self.Temperature)
+            GibbsFreeEnergy += self.results.DeltaA[component]  # error propagation is automagic!
+
+        # hydration free energy Delta A = -(Delta A_coul + Delta A_vdw)
+        GibbsFreeEnergy *= -1
+        self.results.DeltaA.Gibbs = GibbsFreeEnergy
+
+        if autosave:
+            self.save()
+
+        self.logger_DeltaA0()
+        return self.results.DeltaA.Gibbs
+
+        if autosave:
+            self.save()
+
     def write_DeltaA0(self, filename, mode='w'):
         """Write free energy components to a file.
 
@@ -1087,6 +1218,7 @@ class Gsolv(Journalled):
     def __repr__(self):
         return "%s(filename=%r)" % (self.__class__.__name__, self.filename)
 
+
 class Ghyd(Gsolv):
     """Sets up and analyses MD to obtain the hydration free energy of a solute."""
     solvent_default = "water"
@@ -1138,7 +1270,7 @@ class Gwoct(Goct):
     """
     solvent_default = "wetoctanol"
     dirname_default = os.path.join(Gsolv.topdir_default, solvent_default)
-    
+
 
 def p_transfer(G1, G2, **kwargs):
     """Compute partition coefficient from two :class:`Gsolv` objects.
