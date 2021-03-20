@@ -392,6 +392,9 @@ class Gsolv(Journalled):
                the value set in a loaded pickle file. [``False``]
            *stride*
                collect every *stride* data line, see :meth:`Gsolv.collect` [1]
+           *SI*
+               Set to ``True`` if you want to perform statistical inefficiency
+               to preprocess the data.
            *kwargs*
                other undocumented arguments (see source for the moment)
 
@@ -995,12 +998,7 @@ class Gsolv(Journalled):
         return self.results.DeltaA.Gibbs
 
     def collect_alchemlyb(self, autosave=True, autocompress=True):
-        if self.method in ['TI', 'BAR', 'MBAR']:
-            extract = self.estimators[self.method]['extract']
-        else:
-            errmsg = "The method is not supported."
-            logger.error(errmsg)
-            raise ValueError(errmsg)
+        extract = self.estimators[self.method]['extract']
 
         if autocompress:
             # must be done before adding to results.xvg or we will not find the file later
@@ -1017,7 +1015,7 @@ class Gsolv(Journalled):
                     ts = _extract_dataframe(xvg_file)
                     ts = pd.DataFrame({'time': ts.iloc[:,0], 'dhdl': ts.iloc[:,1]})
                     ts = ts.set_index('time')
-                    xvg_df = statistical_inefficiency(xvg_df, series=ts, conservative=False)
+                    xvg_df = statistical_inefficiency(xvg_df, series=ts, conservative=True)
                 val.append(xvg_df)
             self.results.xvg[component] = (numpy.array(lambdas), pd.concat(val))
 
@@ -1025,6 +1023,13 @@ class Gsolv(Journalled):
             self.save()
 
     def analyze_alchemlyb(self, force=False, autosave=True):
+        if self.method in ['TI', 'BAR', 'MBAR']:
+            estimator = self.estimators[self.method]['estimator']
+        else:
+            errmsg = "The method is not supported."
+            logger.error(errmsg)
+            raise ValueError(errmsg)
+
         if force or not self.has_dVdl():
             try:
                 self.collect_alchemlyb(autosave=False)
@@ -1040,13 +1045,6 @@ class Gsolv(Journalled):
 
         # total free energy difference at const P (all simulations are done in NPT)
         GibbsFreeEnergy = QuantityWithError(0,0)
-
-        if self.method in ['TI', 'BAR', 'MBAR']:
-            estimator = self.estimators[self.method]['estimator']
-        else:
-            errmsg = "The method is not supported."
-            logger.error(errmsg)
-            raise ValueError(errmsg)
 
         for component, (lambdas, xvgs) in self.results.xvg.items():
             result = estimator().fit(xvgs)
