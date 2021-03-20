@@ -178,7 +178,7 @@ def kJ_to_kcal(x):
 
 def kBT_to_kJ(x, T):
     """Convert a energy in kBT to kJ/mol."""
-    return x*constants.N_A*constants.k*T*1e-3
+    return x * constants.N_A*constants.k*T*1e-3
 
 
 class FEPschedule(AttributeDict):
@@ -391,6 +391,10 @@ class Gsolv(Journalled):
                the value set in a loaded pickle file. [``False``]
            *stride*
                collect every *stride* data line, see :meth:`Gsolv.collect` [1]
+           *start*
+               Start frame of data analyzed in every fep window.
+           *stop*
+               Stop frame of data analyzed in every fep window.
            *SI*
                Set to ``True`` if you want to perform statistical inefficiency
                to preprocess the data.
@@ -482,6 +486,8 @@ class Gsolv(Journalled):
 
             # for analysis
             self.stride = kwargs.pop('stride', 1)
+            self.start = kwargs.pop('start', 0)
+            self.stop = kwargs.pop('stop', None)
             self.SI = kwargs.pop('SI', False)
 
             # other variables
@@ -747,7 +753,8 @@ class Gsolv(Journalled):
                filename for the dvdl file
 
         :Keywords:
-
+           *total_edr_name*
+               Name of the user defined total edr file.
 
         :Returns: path to total EDR
 
@@ -996,7 +1003,7 @@ class Gsolv(Journalled):
         self.logger_DeltaA0()
         return self.results.DeltaA.Gibbs
 
-    def collect_alchemlyb(self, autosave=True, autocompress=True):
+    def collect_alchemlyb(self, start=0, stop=None, stride=None, autosave=True, autocompress=True):
         extract = self.estimators[self.method]['extract']
 
         if autocompress:
@@ -1009,7 +1016,7 @@ class Gsolv(Journalled):
             val = []
             for l in lambdas:
                 xvg_file = self.dgdl_xvg(self.wdir(component, l))
-                xvg_df = extract(xvg_file, T=self.Temperature)
+                xvg_df = extract(xvg_file, T=self.Temperature).iloc[start:stop:stride]
                 if self.SI:
                     ts = _extract_dataframe(xvg_file)
                     ts = pd.DataFrame({'time': ts.iloc[:,0], 'dhdl': ts.iloc[:,1]})
@@ -1021,7 +1028,11 @@ class Gsolv(Journalled):
         if autosave:
             self.save()
 
-    def analyze_alchemlyb(self, force=False, autosave=True):
+    def analyze_alchemlyb(self, start=0, stop=None, stride=None, force=False, autosave=True):
+        stride = stride or self.stride
+        start = start or self.start
+        stop = stop or self.stop
+
         if self.method in ['TI', 'BAR', 'MBAR']:
             estimator = self.estimators[self.method]['estimator']
         else:
@@ -1031,11 +1042,11 @@ class Gsolv(Journalled):
 
         if force or not self.has_dVdl():
             try:
-                self.collect_alchemlyb(autosave=False)
+                self.collect_alchemlyb(start, stop, stride, autosave=False)
             except IOError as err:
                 if err.errno == errno.ENOENT:
                     self.convert_edr()
-                    self.collect_alchemlyb(autosave=False)
+                    self.collect_alchemlyb(start, stop, stride, autosave=False)
                 else:
                     logger.exception()
                     raise
