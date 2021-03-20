@@ -178,8 +178,7 @@ def kJ_to_kcal(x):
 
 def kBT_to_kJ(x, T):
     """Convert a energy in kBT to kJ/mol."""
-    x *= constants.N_A*constants.k*T*1e-3
-    return x
+    return x * constants.N_A*constants.k*T*1e-3
 
 
 class FEPschedule(AttributeDict):
