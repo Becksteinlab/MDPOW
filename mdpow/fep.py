@@ -1321,6 +1321,7 @@ def p_transfer(G1, G2, **kwargs):
            or ``mdpow`` if you want the default TI method.
        *method*
            Use `TI`, `BAR` or `MBAR` method in `alchemlyb`, or `TI` in `mdpow`.
+
     :Returns: (transfer free energy, log10 of the water-octanol partition coefficient = log Pow)
 
     """
@@ -1336,6 +1337,13 @@ def p_transfer(G1, G2, **kwargs):
     logger.info("[%s] transfer free energy %s --> %s calculation",
                 G1.molecule, G1.solvent_type, G2.solvent_type)
     for G in (G1, G2):
+        # for fep files generated with old code which doesn't have these attributes
+        if not hasattr(G, 'start'):
+            G.start = 0
+        if not hasattr(G, 'stop'):
+            G.start = None
+        if not hasattr(G, 'SI'):
+            G.SI = False
         if kwargs['force']:
             if estimator == 'mdpow':
                 G.analyze(**kwargs)
@@ -1393,6 +1401,18 @@ def pOW(G1, G2, **kwargs):
            force rereading of data files even if some data were already stored [False]
        *stride*
            analyze every *stride*-th datapoint in the dV/dlambda files
+       *start*
+           Start frame of data analyzed in every fep window.
+       *stop*
+           Stop frame of data analyzed in every fep window.
+       *SI*
+           Set to ``True`` if you want to perform statistical inefficiency
+           to preprocess the data.
+       *estimator*
+           Set to ``alchemlyb`` if you want to use alchemlyb estimators,
+           or ``mdpow`` if you want the default TI method.
+       *method*
+           Use `TI`, `BAR` or `MBAR` method in `alchemlyb`, or `TI` in `mdpow`.
 
     :Returns: (transfer free energy, log10 of the octanol/water partition coefficient = log Pow)
     """
@@ -1426,6 +1446,18 @@ def pCW(G1, G2, **kwargs):
            force rereading of data files even if some data were already stored [False]
        *stride*
            analyze every *stride*-th datapoint in the dV/dlambda files
+       *start*
+           Start frame of data analyzed in every fep window.
+       *stop*
+           Stop frame of data analyzed in every fep window.
+       *SI*
+           Set to ``True`` if you want to perform statistical inefficiency
+           to preprocess the data.
+       *estimator*
+           Set to ``alchemlyb`` if you want to use alchemlyb estimators,
+           or ``mdpow`` if you want the default TI method.
+       *method*
+           Use `TI`, `BAR` or `MBAR` method in `alchemlyb`, or `TI` in `mdpow`.
 
     :Returns: (transfer free energy, log10 of the cyclohexane/water partition coefficient = log Pcw)
     """
