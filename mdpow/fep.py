@@ -1309,11 +1309,24 @@ def p_transfer(G1, G2, **kwargs):
            force rereading of data files even if some data were already stored [False]
        *stride*
            analyze every *stride*-th datapoint in the dV/dlambda files
+       *start*
+           Start frame of data analyzed in every fep window.
+       *stop*
+           Stop frame of data analyzed in every fep window.
+       *SI*
+           Set to ``True`` if you want to perform statistical inefficiency
+           to preprocess the data.
+       *estimator*
+           Set to ``alchemlyb`` if you want to use alchemlyb estimators,
+           or ``mdpow`` if you want the default TI method.
+       *method*
+           Use `TI`, `BAR` or `MBAR` method in `alchemlyb`, or `TI` in `mdpow`.
     :Returns: (transfer free energy, log10 of the water-octanol partition coefficient = log Pow)
 
     """
 
     kwargs.setdefault('force', False)
+    estimator = kwargs.pop('estimator', 'mdpow')
 
     if G1.molecule != G2.molecule:
         raise ValueError("The two simulations were done for different molecules.")
@@ -1324,14 +1337,19 @@ def p_transfer(G1, G2, **kwargs):
                 G1.molecule, G1.solvent_type, G2.solvent_type)
     for G in (G1, G2):
         if kwargs['force']:
-            G.analyze(**kwargs)
+            if estimator == 'mdpow':
+                G.analyze(**kwargs)
+            elif estimator == 'alchemlyb':
+                G.analyze_alchemlyb(**kwargs)
         try:
             G.results.DeltaA.Gibbs
             G.logger_DeltaA0()
         except (KeyError, AttributeError):   # KeyError because results is a AttributeDict
             logger.warn("Must analyze simulation because no hydration free energy data available...")
-            G.analyze(**kwargs)
-
+            if estimator == 'mdpow':
+                G.analyze(**kwargs)
+            elif estimator == 'alchemlyb':
+                G.analyze_alchemlyb(**kwargs)
     # x.Gibbs are QuantityWithError so they do error propagation
     transferFE = G2.results.DeltaA.Gibbs - G1.results.DeltaA.Gibbs
     # note minus sign, with our convention of the free energy difference to be
