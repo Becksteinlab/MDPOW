@@ -199,7 +199,7 @@ if __name__ == "__main__":
                       metavar="FILE")
     parser.add_option('--estimator', dest="estimator", default='mdpow',
                       help="choose the estimator to be used, alchemlyb or mdpow estimators")
-    parser.add_option('--method', dest="method", default='TI'
+    parser.add_option('--method', dest="method", default='TI',
                       help="choose the method to calculate free energy",)
     parser.add_option('--force', dest='force',
                       action="store_true",

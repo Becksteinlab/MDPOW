@@ -1339,11 +1339,11 @@ def p_transfer(G1, G2, **kwargs):
     for G in (G1, G2):
         # for fep files generated with old code which doesn't have these attributes
         if not hasattr(G, 'start'):
-            G.start = 0
+            G.start = kwargs.pop('start', 0)
         if not hasattr(G, 'stop'):
-            G.start = None
+            G.start = kwargs.pop('stop', None)
         if not hasattr(G, 'SI'):
-            G.SI = False
+            G.SI = kwargs.pop('SI', False)
         if kwargs['force']:
             if estimator == 'mdpow':
                 G.analyze(**kwargs)
