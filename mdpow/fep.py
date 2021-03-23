@@ -1003,7 +1003,7 @@ class Gsolv(Journalled):
         self.logger_DeltaA0()
         return self.results.DeltaA.Gibbs
 
-    def collect_alchemlyb(self, start=0, stop=None, stride=None, autosave=True, autocompress=True):
+    def collect_alchemlyb(self, SI=False, start=0, stop=None, stride=None, autosave=True, autocompress=True):
         extract = self.estimators[self.method]['extract']
 
         if autocompress:
@@ -1017,7 +1017,7 @@ class Gsolv(Journalled):
             for l in lambdas:
                 xvg_file = self.dgdl_xvg(self.wdir(component, l))
                 xvg_df = extract(xvg_file, T=self.Temperature).iloc[start:stop:stride]
-                if self.SI:
+                if (self.SI or SI):
                     ts = _extract_dataframe(xvg_file).iloc[start:stop:stride]
                     ts = pd.DataFrame({'time': ts.iloc[:,0], 'dhdl': ts.iloc[:,1]})
                     ts = ts.set_index('time')
@@ -1028,7 +1028,7 @@ class Gsolv(Journalled):
         if autosave:
             self.save()
 
-    def analyze_alchemlyb(self, start=0, stop=None, stride=None, force=False, autosave=True):
+    def analyze_alchemlyb(self, SI=False, start=0, stop=None, stride=None, force=False, autosave=True):
         stride = stride or self.stride
         start = start or self.start
         stop = stop or self.stop
@@ -1042,11 +1042,11 @@ class Gsolv(Journalled):
 
         if force or not self.has_dVdl():
             try:
-                self.collect_alchemlyb(start, stop, stride, autosave=False)
+                self.collect_alchemlyb(SI, start, stop, stride, autosave=False)
             except IOError as err:
                 if err.errno == errno.ENOENT:
                     self.convert_edr()
-                    self.collect_alchemlyb(start, stop, stride, autosave=False)
+                    self.collect_alchemlyb(SI, start, stop, stride, autosave=False)
                 else:
                     logger.exception()
                     raise
