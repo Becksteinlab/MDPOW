@@ -197,7 +197,7 @@ if __name__ == "__main__":
     parser.add_option('-e', '--energies', dest="energyfile",
                       help="append solvation free energies to FILE [%default]",
                       metavar="FILE")
-    parser.add_option('--estimator', dest="estimator", default='mdpow'
+    parser.add_option('--estimator', dest="estimator", default='mdpow',
                       help="choose the estimator to be used, alchemlyb or mdpow estimators")
     parser.add_option('--method', dest="method", default='TI'
                       help="choose the method to calculate free energy",)
