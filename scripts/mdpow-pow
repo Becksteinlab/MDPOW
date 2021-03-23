@@ -127,7 +127,7 @@ def run_pow(directory, **kwargs):
             logger.info("Wrote solvation energy terms to %(energyfile)r", kwargs)
 
     plotfile = kwargs.get('plotfile', None)
-    if estimator = 'alchemlyb':
+    if estimator == 'alchemlyb':
         plotfile = False
     if plotfile:
         if plotfile == 'auto':
