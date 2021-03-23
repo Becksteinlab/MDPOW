@@ -1328,7 +1328,10 @@ def p_transfer(G1, G2, **kwargs):
 
     kwargs.setdefault('force', False)
     estimator = kwargs.pop('estimator', 'mdpow')
-
+    if not estimator in ('mdpow', 'alchemlyb'):
+        errmsg = "estimator = %r is not supported, must be 'mdpow' or 'alchemlyb'" % estimator
+        logger.error(errmsg)
+        raise ValueError(errmsg)
     if G1.molecule != G2.molecule:
         raise ValueError("The two simulations were done for different molecules.")
     if G1.Temperature != G2.Temperature:
@@ -1341,14 +1344,22 @@ def p_transfer(G1, G2, **kwargs):
         if not hasattr(G, 'start'):
             G.start = kwargs.pop('start', 0)
         if not hasattr(G, 'stop'):
-            G.start = kwargs.pop('stop', None)
+            G.stop = kwargs.pop('stop', None)
         if not hasattr(G, 'SI'):
             G.SI = kwargs.pop('SI', False)
+
+        # for this version. use the method given instead of the one in the input cfg file
+        G.method = kwargs.pop('method', 'TI')
         if kwargs['force']:
             if estimator == 'mdpow':
                 G.analyze(**kwargs)
+                if G.method != "TI":
+                    errmsg = "Method %s is not implemented in MDPOW, use estimator='alchemlyb'" % G.method
+                    logger.error(errmsg)
+                    raise ValueError(errmsg)
             elif estimator == 'alchemlyb':
                 G.analyze_alchemlyb(**kwargs)
+
         try:
             G.results.DeltaA.Gibbs
             G.logger_DeltaA0()
