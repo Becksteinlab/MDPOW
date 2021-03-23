@@ -96,11 +96,12 @@ def run_pow(directory, **kwargs):
     def datstat(g):
         return _datastatus[g.contains_corrupted_xvgs()]
 
+    estimator=kwargs.pop('estimator', 'mdpow')
     gwat, goct = load_gsolv(directory, permissive=kwargs.pop('permissive',False),)
     transferFE, logPow = mdpow.fep.pOW(goct, gwat, stride=kwargs.pop('stride', None),
                                        start=kwargs.pop('start', 0), stop=kwargs.pop('stop', None),
                                        force=kwargs.pop('force', False), SI=kwargs.pop('SI', False),
-                                       estimator=kwargs.get('estimator', 'mdpow'),
+                                       estimator=estimator,
                                        method=kwargs.pop('method', 'TI'))
 
     if datstat(gwat) == 'BAD' or datstat(goct) == 'BAD':

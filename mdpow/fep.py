@@ -773,9 +773,12 @@ class Gsolv(Journalled):
             tpr_files = [self.dgdl_tpr(self.wdir(component, l)) for l in lambdas]
             for tpr, edr in zip(tpr_files, edr_files):
                 dirct = os.path.abspath(os.path.dirname(tpr))
-                total_edr = self.dgdl_total_edr(dirct)
-                logger.info("  {0} --> {1}".format('edrs', total_edr))
-                gromacs.eneconv(f=edr, o=total_edr)
+                if len(edr) == 1:
+                    total_edr = edr[0]
+                else:
+                    total_edr = self.dgdl_total_edr(dirct)
+                    logger.info("  {0} --> {1}".format('edrs', total_edr))
+                    gromacs.eneconv(f=edr, o=total_edr)
                 xvgfile = os.path.join(dirct, self.deffnm + ".xvg")  # hack
                 logger.info("  {0} --> {1}".format(total_edr, xvgfile))
                 gromacs.g_energy(s=tpr, f=total_edr, odh=xvgfile)
