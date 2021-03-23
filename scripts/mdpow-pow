@@ -204,6 +204,9 @@ if __name__ == "__main__":
     parser.add_option('--force', dest='force',
                       action="store_true",
                       help="force rereading all data [%default]")
+    parser.add_option('--SI', dest='SI',
+                      action="store_true",
+                      help="Apply statistical inefficiency analysis")
     parser.add_option('-s', '--stride', dest="stride", type='int',
                       help="Use every N-th datapoint from the original dV/dlambda data. "
                       "Using a number larger than 1 can significantly reduce memory usage "
@@ -245,7 +248,7 @@ if __name__ == "__main__":
                     energyfile=realpath_or_none(opts.energyfile),
                     force=opts.force, stride=opts.stride, start=opts.start,
                     stop=opts.stop, estimator=opts.estimator,
-                    method=opts.method, permissive=opts.permissive)
+                    method=opts.method, permissive=opts.permissive, SI=opts.SI)
         except (OSError, IOError), err:
             logger.error("Running analysis in directory %r failed: %s", directory, str(err))
         except Exception, err:
