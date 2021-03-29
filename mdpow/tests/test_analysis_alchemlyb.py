@@ -109,13 +109,12 @@ class TestAnalyze(object):
 
     def test_SI(self, fep_benzene_directory):
         G = self.get_Gsolv(fep_benzene_directory)
-        G.SI = True
         G.method = 'TI'
         G.start = 0
         G.stop = None
         G.convert_edr()
         try:
-            G.analyze_alchemlyb(force=True, autosave=False)
+            G.analyze_alchemlyb(force=True, SI=True, autosave=False)
         except IOError as err:
             raise AssertionError("Failed to convert edr to xvg: {0}: {1}".format(
                 err.strerror, err.filename))
@@ -129,7 +128,6 @@ class TestAnalyze(object):
 
     def test_start_stop_stride(self, fep_benzene_directory):
         G = self.get_Gsolv(fep_benzene_directory)
-        G.SI = False
         G.method = 'TI'
         G.start = 10
         G.stride = 2

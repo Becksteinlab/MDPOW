@@ -1020,7 +1020,8 @@ class Gsolv(Journalled):
             for l in lambdas:
                 xvg_file = self.dgdl_xvg(self.wdir(component, l))
                 xvg_df = extract(xvg_file, T=self.Temperature).iloc[start:stop:stride]
-                if (self.SI or SI):
+                if (SI):
+                    logger.info("Perform statistical inefficiency analysis.")
                     ts = _extract_dataframe(xvg_file).iloc[start:stop:stride]
                     ts = pd.DataFrame({'time': ts.iloc[:,0], 'dhdl': ts.iloc[:,1]})
                     ts = ts.set_index('time')
@@ -1349,7 +1350,9 @@ def p_transfer(G1, G2, **kwargs):
         if not hasattr(G, 'stop'):
             G.stop = kwargs.pop('stop', None)
         if not hasattr(G, 'SI'):
-            G.SI = kwargs.pop('SI', False)
+            kwargs['SI'] = kwargs.pop('SI', False)
+        else:
+            kwargs['SI'] = kwargs.pop('SI', G.SI)
 
         # for this version. use the method given instead of the one in the input cfg file
         G.method = kwargs.pop('method', 'TI')
