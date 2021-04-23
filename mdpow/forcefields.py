@@ -13,12 +13,39 @@ force field by supplying alternative template files). However, in the
 future we want to support a simple configuration based switch.
 
 .. autodata:: DEFAULT_FORCEFIELD
-
-Different **water models** are already supported.
-
 .. autodata:: DEFAULT_WATER_MODEL
+
+
+Solvent models
+--------------
+
+Different **water models** are already supported
+
 .. autodata:: GROMACS_WATER_MODELS
 
+as well as different general **solvent models**
+
+.. autodata:: GROMACS_SOLVENT_MODELS
+
+
+Internal data
+-------------
+
+.. autodata:: SPECIAL_WATER_COORDINATE_FILES
+.. autodata:: GROMACS_WATER_MODELS
+.. autodata:: GROMACS_SOLVENT_MODELS
+
+Internal classes and functions
+------------------------------
+
+.. autoclass:: GromacsSolventModel
+   :members:
+
+.. autofunction:: get_water_model
+
+.. autofunction:: get_solvent_identifier
+
+.. autofunction:: get_solvent_model
 """
 
 from __future__ import absolute_import
@@ -53,8 +80,7 @@ tip4pd      TIP4P-D    TIP 4-point with modified dispersion (TIP4P-D)
 class GromacsSolventModel(object):
     """Data for a solvent model in Gromacs."""
     def __init__(self, identifier, name=None, itp=None, coordinates=None,
-                 description=None,
-                 forcefield="OPLS-AA"):
+                 description=None, forcefield="OPLS-AA"):
         self.identifier = identifier
         self.name = name if name is not None else str(identifier).upper()
         self.itp = itp if itp is not None else self.guess_filename('itp')
@@ -63,6 +89,7 @@ class GromacsSolventModel(object):
         self.forcefield = forcefield
 
     def guess_filename(self, extension):
+        """Guess the filename for the model and add *extension*"""
         return self.identifier.lower() + os.extsep + str(extension)
 
     def __repr__(self):
@@ -116,14 +143,50 @@ def get_water_model(watermodel=DEFAULT_WATER_MODEL):
         raise ValueError(msg)
 
 #: Other solvents (not water, see :data:`GROMACS_WATER_MODELS` for those).
-GROMACS_SOLVENT_MODELS = {
+new_octanol = '''Zangi R (2018) Refinement of the OPLSAA force-field
+                for liquid alcohols.; ACS Omega 3(12):18089–18099.
+                doi: 10.1021/acsomega.8b03132'''
+
+OPLS_SOLVENT_MODELS = {
     'octanol': GromacsSolventModel(
         identifier="octanol", itp="1oct.itp", coordinates="1oct.gro"),
+    'octanolnew': GromacsSolventModel(
+        identifier="octanol", itp="1octnew.itp", coordinates="1oct.gro",
+        description=new_octanol),
     'cyclohexane': GromacsSolventModel(
         identifier="cyclohexane", itp="1cyclo.itp", coordinates="1cyclo.gro"),
+    'wetoctanol': GromacsSolventModel(
+        identifier="wetoctanol", itp="1octwet.itp", coordinates="1octwet.gro"),
+    'wetoctanolnew': GromacsSolventModel(
+        identifier="wetoctanol", itp="1octwetnew.itp", coordinates="1octwet.gro",
+        description=new_octanol)
     }
 
-def get_solvent_identifier(solvent_type, model=None):
+CHARMM_SOLVENT_MODELS = {
+    'octanol': GromacsSolventModel(
+        identifier="octanol", itp="1oct.itp", coordinates="1oct_charmm.gro"),
+    'wetoctanol': GromacsSolventModel(
+        identifier="wetoctanol", itp="1octwet.itp", coordinates="1octwet_charmm.gro"),
+    'cyclohexane': GromacsSolventModel(
+        identifier="cyclohexane", itp="1cyclo.itp", coordinates="1cyclo_charmm.gro"),
+    }
+
+AMBER_SOLVENT_MODELS = {
+    'octanol': GromacsSolventModel(
+        identifier="octanol", itp="1oct.itp", coordinates="1oct_amber.gro"),
+    'wetoctanol': GromacsSolventModel(
+        identifier="wetoctanol", itp="1octwet.itp", coordinates="1octwet_amber.gro"),
+    'cyclohexane': GromacsSolventModel(
+        identifier="cyclohexane", itp="1cyclo.itp", coordinates="1cyclo_amber.gro"),
+    }
+
+GROMACS_SOLVENT_MODELS = {
+    'OPLS-AA': OPLS_SOLVENT_MODELS,
+    'CHARMM': CHARMM_SOLVENT_MODELS,
+    'AMBER': AMBER_SOLVENT_MODELS,
+    }
+
+def get_solvent_identifier(solvent_type, model=None, forcefield='OPLS-AA'):
     """Get the identifier for a solvent model.
 
     The identifier is needed to access a water model (i.e., a
@@ -141,8 +204,9 @@ def get_solvent_identifier(solvent_type, model=None):
     for the specific ``model`` (and the default
     :data:`DEFAULT_WATER_MODEL` will be selected, or a specific water
     model such as "tip3p" or "spce" (see
-    :data:`GROMACS_WATER_MODELS`). For other solvent types, the
-    ``model`` is ignored.
+    :data:`GROMACS_WATER_MODELS`). For other "octanol" or "wetoctanol"
+    of OPLS-AA forcefield, the ``model`` is used to select a specific
+    model. For other solvents and forcefields, "model" is not required.
 
     :Returns: Either an identifier or ``None``
 
@@ -150,10 +214,15 @@ def get_solvent_identifier(solvent_type, model=None):
     if solvent_type is "water":
         identifier = model if not model in (None, 'water') else DEFAULT_WATER_MODEL
         return identifier if identifier in GROMACS_WATER_MODELS else None
-    return solvent_type if solvent_type in GROMACS_SOLVENT_MODELS else None
+    if not model in GROMACS_SOLVENT_MODELS[forcefield]:
+        if solvent_type in GROMACS_SOLVENT_MODELS[forcefield]:
+            model = solvent_type
+        else:
+            model = None
+    return model
 
 
-def get_solvent_model(identifier):
+def get_solvent_model(identifier, forcefield='OPLS-AA'):
     """Return a :class:`GromacsSolventModel` corresponding to identifier *identifier*.
 
     If identifier is "water" then the :data:`DEFAULT_WATER_MODEL` is assumed.
@@ -165,9 +234,39 @@ def get_solvent_model(identifier):
         return GROMACS_WATER_MODELS[identifier]
     except KeyError:
         try:
-            return GROMACS_SOLVENT_MODELS[identifier]
+            return GROMACS_SOLVENT_MODELS[forcefield][identifier]
         except KeyError:
             msg = "No solvent model with name {0} is available.".format(identifier)
             logger.critical(msg)
             raise ValueError(msg)
 
+
+def get_ff_paths(forcefield='OPLS-AA'):
+    """Return a :list: containing the forcefield directory, paths of ions
+    and default watermodel itp files.
+    """
+    settings = {
+                'OPLS-AA': ['oplsaa.ff/', 'oplsaa.ff/ions_opls.itp',
+                            'oplsaa.ff/tip4p.itp'],
+                'AMBER': ['amber99sb.ff/', 'amber99sb.ff/ions.itp',
+                           'amber99sb.ff/tip3p.itp'],
+                'CHARMM': ['charmm36-mar2019.ff/', 'charmm36-mar2019.ff/ions.itp',
+                          'charmm36-mar2019.ff/tip3p.itp'],
+                }
+    try:
+        return settings[forcefield]
+    except KeyError:
+        msg = "No forcefield with name {0} is available".format(forcefield)
+        logger.critical(msg)
+        raise ValueError(msg)
+
+
+def get_top_template(identifier):
+    templates = {'water': 'system.top', 'octanol': 'system.top',
+                 'cyclohexane': 'system.top', 'wetoctanol': 'system_octwet.top'}
+    try:
+        return templates[identifier]
+    except KeyError:
+        msg = "No template for solvent {0} is available".format(identifier)
+        logger.critical(msg)
+        raise ValueError(msg)

@@ -1,8 +1,5 @@
-language: python
+language: generic
 sudo: false
-
-python:
-  - "2.7"
 
 # whitelist
 branches:
@@ -12,47 +9,52 @@ branches:
         - testing-gromacs-5-travis
 
 env:
-    - GMX_VERSION=4.6.7
-    - GMX_VERSION=5.1.2
-    - GMX_VERSION=2016
+  global:
+    - PYTHON_VERSION=2.7
+    - CODECOV=true
+    - PYTEST_FLAGS="-v --cov=mdpow"
+    - PYTEST_LIST="mdpow/tests"
+    - MAIN_CMD="pytest ${PYTEST_LIST}"
+    - SETUP_CMD="${PYTEST_FLAGS}"
+    - BUILD_CMD="pip install -v ."
+    - CONDA_DEPENDENCIES="six matplotlib pandas gromacs"
+    # Gromacs 2018 packages from bioconda require conda-forge for
+    # dependency, see https://bioconda.github.io/#set-up-channels
+    - CONDA_CHANNELS="defaults conda-forge bioconda"
+    - CONDA_CHANNEL_PRIORITY=True
+    - PIP_DEPENDENCIES="numkit codecov pybol"
+    - NUMPY_VERSION=stable
+    - MPLBACKEND=agg
 
-# install python dependencies
+  matrix:
+    # use ci-helper's PACKAGENAME_VERSION magic to pin the 'gromacs' package
+    - GROMACS_VERSION=4.6.5   PYTHON_VERSION=2.7
+    - GROMACS_VERSION=2019.1  PYTHON_VERSION=2.7
+      SETUP_CMD="${SETUP_CMD}"
+
+
+matrix:
+  fast_finish: true
+
+  include:
+    # see Gromacs packages on bioconda https://anaconda.org/bioconda/gromacs/files
+    - os: osx
+      env: GROMACS_VERSION=2019.1 PYTHON_VERSION=2.7
+
+
 install:
-  # We do this conditionally because it saves us some downloading if the
-  # version is the same.
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
-    else
-      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-    fi
-  - bash miniconda.sh -b -p $HOME/miniconda
-  - export PATH="$HOME/miniconda/bin:$PATH"
-  - hash -r
-  - conda config --set always_yes yes --set changeps1 no
-  - conda update -q conda
-  # Useful for debugging any issues with conda
-  - conda info -a
+  - git clone --depth 1 git://github.com/astropy/ci-helpers.git
+  - source ci-helpers/travis/setup_conda.sh
+  - eval $BUILD_CMD
 
-  - conda create --yes -q -n mdpow_test python=$TRAVIS_PYTHON_VERSION numpy scipy
-  - source activate mdpow_test
-  - conda install -c becksteinlab gromacs-$GMX_VERSION
-
-  # install test tools
-  - pip install pybol
-  - pip install codecov
-  - pip install pytest-cov
-  - pip install pytest-pep8
-
-  # install MDPOW
-  - pip install -e .
-
-# run tests
 script:
-  # set up gromacs environment: picked up by GromacsWrapper
-  - source $($HOME/get_gmx $GMX_VERSION)
-  # NOTE: to see ALL Gromacs output for debugging on Travis CI,
-  #       disable py.test capturing with '-s'  
-  - py.test --cov mdpow mdpow/tests
+  - cd ${TRAVIS_BUILD_DIR}
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then ulimit -S -n 2048; fi
+  - echo $MAIN_CMD $SETUP_CMD
+  - eval $MAIN_CMD $SETUP_CMD
 
 after_success:
-  - codecov
+  - |
+    if [[ $CODECOV == 'true' ]]; then \
+      codecov; \
+    fi

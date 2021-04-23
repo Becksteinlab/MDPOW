@@ -1,0 +1,22 @@
+#!/usr/bin/env python
+"""%(prog)s [RUNINPUTFILE]
+
+Generate a template RUNINPUTFILE.
+"""
+
+from mdpow.config import get_configuration
+
+import logging
+logger = logging.getLogger('mdpow')
+
+if __name__ == "__main__":
+    from argparse import ArgumentParser
+
+    parser = ArgumentParser(usage=__doc__)
+    parser.add_argument('filename', metavar='F', type=str, nargs='?', default="runinput.yml", help="Filename of generated runinput file [runinput.yml]")
+
+    filename = vars(parser.parse_args())['filename']
+    cfg = get_configuration()
+    cfg.write(filename)
+    logger.info("Generated template runfile %r. Edit it!", filename)
+

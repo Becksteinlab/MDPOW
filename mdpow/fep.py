@@ -127,9 +127,19 @@ import errno
 import copy
 from subprocess import call
 import warnings
-from pkg_resources import resource_filename
 
 import numpy
+import pandas as pd
+
+import scipy.integrate
+from scipy import constants
+import numkit.integration
+import numkit.timeseries
+
+from alchemlyb.parsing.gmx import extract_dHdl, extract_u_nk
+from alchemlyb.estimators import TI, BAR, MBAR
+from alchemlyb.parsing.gmx import _extract_dataframe
+from alchemlyb.preprocessing.subsampling import statistical_inefficiency
 
 import gromacs, gromacs.utilities
 try:
@@ -138,6 +148,7 @@ except (ImportError, OSError):
     raise ImportError("Gromacs installation not found, source GMXRC?")
 from gromacs.utilities import asiterable, AttributeDict, in_dir, openany
 from numkit.observables import QuantityWithError
+from glob import glob
 
 import logging
 logger = logging.getLogger('mdpow.fep')
@@ -164,6 +175,10 @@ def kcal_to_kJ(x):
 def kJ_to_kcal(x):
     """Convert a energy in kJ to kcal."""
     return x / 4.184
+
+def kBT_to_kJ(x, T):
+    """Convert a energy in kBT to kJ/mol."""
+    return x * constants.N_A*constants.k*T*1e-3
 
 
 class FEPschedule(AttributeDict):
@@ -286,6 +301,12 @@ class Gsolv(Journalled):
     #: :meth:`Simulation.get_protocol` and :class:`restart.Journal`
     protocols = ["setup", "fep_run"]
 
+    #: Estimators in alchemlyb
+    estimators = {'TI': {'extract': extract_dHdl, 'estimator': TI},
+                  'BAR': {'extract': extract_u_nk, 'estimator': BAR},
+                  'MBAR': {'extract': extract_u_nk, 'estimator': MBAR}
+                  }
+
     # TODO: initialize from default cfg
     schedules_default = {'coulomb':
                          FEPschedule(name='coulomb',
@@ -301,8 +322,8 @@ class Gsolv(Journalled):
                                      label='VDW',
                                      couple_lambda0='vdw', couple_lambda1='none',
                                      sc_alpha=0.5, sc_power=1, sc_sigma=0.3, # recommended values
-                                     lambdas=numpy.array([0.0, 0.05, 0.1, 0.2, 0.3, 
-                                              0.4, 0.5, 0.6, 0.65, 0.7, 0.75, 0.8, 
+                                     lambdas=numpy.array([0.0, 0.05, 0.1, 0.2, 0.3,
+                                              0.4, 0.5, 0.6, 0.65, 0.7, 0.75, 0.8,
                                               0.85, 0.9, 0.95, 1]), # defaults
                                  ),
                      }
@@ -370,6 +391,13 @@ class Gsolv(Journalled):
                the value set in a loaded pickle file. [``False``]
            *stride*
                collect every *stride* data line, see :meth:`Gsolv.collect` [1]
+           *start*
+               Start frame of data analyzed in every fep window.
+           *stop*
+               Stop frame of data analyzed in every fep window.
+           *SI*
+               Set to ``True`` if you want to perform statistical inefficiency
+               to preprocess the data.
            *kwargs*
                other undocumented arguments (see source for the moment)
 
@@ -458,6 +486,9 @@ class Gsolv(Journalled):
 
             # for analysis
             self.stride = kwargs.pop('stride', 1)
+            self.start = kwargs.pop('start', 0)
+            self.stop = kwargs.pop('stop', None)
+            self.SI = kwargs.pop('SI', False)
 
             # other variables
             #: Results from the analysis
@@ -576,6 +607,7 @@ class Gsolv(Journalled):
         kwargs['mdrun_opts'] = " ".join([kwargs.pop('mdrun_opts',''), '-dhdl'])
         kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.includes
         kwargs['deffnm'] = self.deffnm
+        kwargs.setdefault('maxwarn', 1)
         qsubargs = kwargs.copy()
         qsubargs['dirname'] = self.frombase(self.dirname)
         # handle templates separately (necessary for array jobs)
@@ -616,7 +648,7 @@ class Gsolv(Journalled):
         ### XXX Issue 20: if an entry is None then the dict will not be updated:
         ###     I *must* keep "none" as a legal string value
         kwargs.update(self.schedules[component].mdp_dict)  # sets soft core & lambda0/1 state
-        
+
         if kwargs.pop('edr', True):
             logger.info('Setting dhdl file to edr format')
             kwargs.setdefault('separate-dhdl-file', 'no')
@@ -671,6 +703,86 @@ class Gsolv(Journalled):
         logger.error("Missing dgdl.xvg file %(root)r.", vars())
         raise IOError(errno.ENOENT, "Missing dgdl.xvg file", root)
 
+    def dgdl_edr(self, *args):
+        """Return filename of the dgdl EDR file.
+
+        :Arguments:
+           *args*
+               joins the arguments into a path and adds the default
+               filename for the dvdl file
+
+        :Returns: path to EDR
+
+        :Raises: :exc:`IOError` with error code ENOENT if no file
+                 could be found
+
+         """
+        pattern = os.path.join(*args + (self.deffnm + '*.edr',))
+        edrs = glob(pattern)
+        if not edrs:
+                    logger.error("Missing dgdl.edr file %(pattern)r.", vars())
+                    raise IOError(errno.ENOENT, "Missing dgdl.edr file", pattern)
+        return [os.path.abspath(i) for i in edrs]
+
+    def dgdl_tpr(self, *args):
+        """Return filename of the dgdl TPR file.
+
+        :Arguments:
+           *args*
+               joins the arguments into a path and adds the default
+               filename for the dvdl file
+
+        :Returns: path to TPR
+
+        :Raises: :exc:`IOError` with error code ENOENT if no file
+                 could be found
+
+         """
+        fn = os.path.join(*args + (self.deffnm + '.tpr',))
+        if not os.path.exists(fn):
+            logger.error("Missing TPR file %(fn)r.", vars())
+            raise IOError(errno.ENOENT, "Missing TPR file", fn)
+        return fn
+
+    def dgdl_total_edr(self, *args, **kwargs):
+        """Return filename of the combined dgdl EDR file.
+
+        :Arguments:
+           *args*
+               joins the arguments into a path and adds the default
+               filename for the dvdl file
+
+        :Keywords:
+           *total_edr_name*
+               Name of the user defined total edr file.
+
+        :Returns: path to total EDR
+
+        """
+        total_edr_name = kwargs.get("total_edr_name", "total.edr")
+        fn = os.path.join(*args + (total_edr_name,))
+        return fn
+
+    def convert_edr(self):
+        """Convert EDR files to compressed XVG files."""
+
+        logger.info("[%(dirname)s] Converting EDR -> XVG.bz2" % vars(self))
+
+        for component, lambdas in self.lambdas.items():
+            edr_files = [self.dgdl_edr(self.wdir(component, l)) for l in lambdas]
+            tpr_files = [self.dgdl_tpr(self.wdir(component, l)) for l in lambdas]
+            for tpr, edr in zip(tpr_files, edr_files):
+                dirct = os.path.abspath(os.path.dirname(tpr))
+                if len(edr) == 1:
+                    total_edr = edr[0]
+                else:
+                    total_edr = self.dgdl_total_edr(dirct)
+                    logger.info("  {0} --> {1}".format('edrs', total_edr))
+                    gromacs.eneconv(f=edr, o=total_edr)
+                xvgfile = os.path.join(dirct, self.deffnm + ".xvg")  # hack
+                logger.info("  {0} --> {1}".format(total_edr, xvgfile))
+                gromacs.g_energy(s=tpr, f=total_edr, odh=xvgfile)
+
     def collect(self, stride=None, autosave=True, autocompress=True):
         """Collect dV/dl from output.
 
@@ -720,8 +832,10 @@ class Gsolv(Journalled):
                     fnbz2 = xvg + os.path.extsep + "bz2"
                     logger.info("[%s] Compressing dgdl file %r with bzip2", self.dirname, xvg)
                     # speed is similar to 'bzip2 -9 FILE' (using a 1 Mio buffer)
+                    # (Since GW 0.8, openany() does not take kwargs anymore so the write buffer cannot be
+                    # set anymore (buffering=1048576) so the performance might be lower in MDPOW >= 0.7.0)
                     with open(xvg, 'r', buffering=1048576) as source:
-                        with openany(fnbz2, 'w', buffering=1048576) as target:
+                        with openany(fnbz2, 'w') as target:
                             target.writelines(source)
                     if os.path.exists(fnbz2) and os.path.exists(xvg):
                         os.unlink(xvg)
@@ -756,7 +870,7 @@ class Gsolv(Journalled):
             self._corrupted[component] = dict(((l, _lencorrupted(xvg)) for l,xvg in izip(lambdas, xvgs)))
         return numpy.any([x for x in corrupted.values()])
 
-    def analyze(self, force=False, stride=None, autosave=True):
+    def analyze(self, force=False, stride=None, autosave=True, ncorrel=25000):
         """Extract dV/dl from output and calculate dG by TI.
 
         Thermodynamic integration (TI) is performed on the individual
@@ -786,8 +900,9 @@ class Gsolv(Journalled):
         Errors are estimated from the errors of the individual <dV/dlambda>:
 
          1. The error of the mean <dV/dlambda> is calculated via the decay time
-            of the fluctuation around the mean (see
-            :attr:`gromacs.formats.XVG.error`).
+            of the fluctuation around the mean. ``ncorrel`` is the max number of
+            samples that is going to be used to calculate the autocorrelation
+            time via a FFT. See :func:`numkit.timeseries.tcorrel`.
 
          2. The error on the integral is calculated analytically via
             propagation of errors through Simpson's rule (with the
@@ -813,15 +928,39 @@ class Gsolv(Journalled):
               read data every *stride* lines, ``None`` uses the class default
           *autosave*
               save to the pickle file when results have been computed
+          *ncorrel*
+              aim for <= 25,000 samples for t_correl
+
+        ..rubric:: Notes
+
+        Error on the mean of the data, taking the correlation time into account.
+
+        See [FrenkelSmit2002]_ `p526`_:
+
+           error = sqrt(2*tc*acf[0]/T)
+
+        where acf() is the autocorrelation function of the fluctuations around
+        the mean, y-<y>, tc is the correlation time, and T the total length of
+        the simulation.
+
+        .. [FrenkelSmit2002] D. Frenkel and B. Smit, Understanding
+                             Molecular Simulation. Academic Press, San
+                             Diego 2002
+
+        .. _p526: http://books.google.co.uk/books?id=XmyO2oRUg0cC&pg=PA526
         """
-
-        import scipy.integrate
-        import numkit.integration
-
         stride = stride or self.stride
 
         if force or not self.has_dVdl():
-            self.collect(stride=stride, autosave=False)
+            try:
+                self.collect(stride=stride, autosave=False)
+            except IOError as err:
+                if err.errno == errno.ENOENT:
+                    self.convert_edr()
+                    self.collect(stride=stride, autosave=False)
+                else:
+                    logger.exception()
+                    raise
         else:
             logger.info("Analyzing stored data.")
 
@@ -836,8 +975,17 @@ class Gsolv(Journalled):
             # Use XVG class properties: first data in column 0!
             Y = numpy.array([x.mean[0] for x in xvgs])
             stdY = numpy.array([x.std[0]  for x in xvgs])
-            DY = numpy.array([x.error[0]  for x in xvgs])   # takes a while: computes correl.time
-            tc = numpy.array([x.tc[0]  for x in xvgs])
+
+            # compute auto correlation time and error estimate for independent samples
+            # (this can take a while). x.array[0] == time, x.array[1] == dHdl
+            # nstep is calculated to give ncorrel samples (or all samples if less than ncorrel are
+            # available)
+            tc_data = [numkit.timeseries.tcorrel(x.array[0], x.array[1],
+                                                 nstep=int(numpy.ceil(len(x.array[0])/float(ncorrel))))
+                                                 for x in xvgs]
+            DY = numpy.array([tc['sigma'] for tc in tc_data])
+            tc = numpy.array([tc['tc'] for tc in tc_data])
+
             self.results.dvdl[component] = {'lambdas':lambdas, 'mean':Y, 'error':DY,
                                             'stddev':stdY, 'tcorrel':tc}
             # Combined Simpson rule integration:
@@ -857,6 +1005,88 @@ class Gsolv(Journalled):
 
         self.logger_DeltaA0()
         return self.results.DeltaA.Gibbs
+
+    def collect_alchemlyb(self, SI=False, start=0, stop=None, stride=None, autosave=True, autocompress=True):
+        extract = self.estimators[self.method]['extract']
+
+        if autocompress:
+            # must be done before adding to results.xvg or we will not find the file later
+            self.compress_dgdl_xvg()
+
+        logger.info("[%(dirname)s] Finding dgdl xvg files, reading with "
+                    "stride=%(stride)d permissive=%(permissive)r." % vars(self))
+        for component, lambdas in self.lambdas.items():
+            val = []
+            for l in lambdas:
+                xvg_file = self.dgdl_xvg(self.wdir(component, l))
+                xvg_df = extract(xvg_file, T=self.Temperature).iloc[start:stop:stride]
+                if SI:
+                    logger.info("Perform statistical inefficiency analysis.")
+                    ts = _extract_dataframe(xvg_file).iloc[start:stop:stride]
+                    ts = pd.DataFrame({'time': ts.iloc[:,0], 'dhdl': ts.iloc[:,1]})
+                    ts = ts.set_index('time')
+                    xvg_df = statistical_inefficiency(xvg_df, series=ts, conservative=True)
+                val.append(xvg_df)
+            self.results.xvg[component] = (numpy.array(lambdas), pd.concat(val))
+
+        if autosave:
+            self.save()
+
+    def analyze_alchemlyb(self, SI=False, start=0, stop=None, stride=None, force=False, autosave=True):
+        stride = stride or self.stride
+        start = start or self.start
+        stop = stop or self.stop
+
+        if self.method in ['TI', 'BAR', 'MBAR']:
+            estimator = self.estimators[self.method]['estimator']
+        else:
+            errmsg = "The method is not supported."
+            logger.error(errmsg)
+            raise ValueError(errmsg)
+
+        if force or not self.has_dVdl():
+            try:
+                self.collect_alchemlyb(SI, start, stop, stride, autosave=False)
+            except IOError as err:
+                if err.errno == errno.ENOENT:
+                    self.convert_edr()
+                    self.collect_alchemlyb(SI, start, stop, stride, autosave=False)
+                else:
+                    logger.exception()
+                    raise
+        else:
+            logger.info("Analyzing stored data.")
+
+        # total free energy difference at const P (all simulations are done in NPT)
+        GibbsFreeEnergy = QuantityWithError(0,0)
+
+        for component, (lambdas, xvgs) in self.results.xvg.items():
+            result = estimator().fit(xvgs)
+            if self.method == 'BAR':
+                DeltaA = QuantityWithError(0,0)
+                a_s= numpy.diagonal(result.delta_f_, offset=1)
+                da_s = numpy.diagonal(result.d_delta_f_, offset=1)
+                for a, da in zip(a_s, da_s):
+                    DeltaA += QuantityWithError(a, da)
+                self.results.DeltaA[component] = kBT_to_kJ(DeltaA, self.Temperature)
+            else:
+                a = result.delta_f_.loc[0.00, 1.00]
+                da = result.d_delta_f_.loc[0.00, 1.00]
+                self.results.DeltaA[component] = kBT_to_kJ(QuantityWithError(a, da), self.Temperature)
+            GibbsFreeEnergy += self.results.DeltaA[component]  # error propagation is automagic!
+
+        # hydration free energy Delta A = -(Delta A_coul + Delta A_vdw)
+        GibbsFreeEnergy *= -1
+        self.results.DeltaA.Gibbs = GibbsFreeEnergy
+
+        if autosave:
+            self.save()
+
+        self.logger_DeltaA0()
+        return self.results.DeltaA.Gibbs
+
+        if autosave:
+            self.save()
 
     def write_DeltaA0(self, filename, mode='w'):
         """Write free energy components to a file.
@@ -923,7 +1153,8 @@ class Gsolv(Journalled):
 
         All *kwargs* are passed on to :func:`pylab.errorbar`.
         """
-        from pylab import subplot, errorbar, xlabel, ylabel, legend, xlim, title
+        import matplotlib
+        import matplotlib.pyplot as plt
 
         kwargs.setdefault('color', 'black')
         kwargs.setdefault('capsize', 0)
@@ -938,24 +1169,23 @@ class Gsolv(Journalled):
 
         dvdl = self.results.dvdl
         nplots = len(dvdl)
+        fig, axs = plt.subplots(nrows=1, ncols=nplots)
         for i, component in enumerate(numpy.sort(dvdl.keys())):  # stable plot order
             x,y,dy = [dvdl[component][k] for k in ('lambdas', 'mean', 'error')]
-            iplot = i+1
-            subplot(1, nplots, iplot)
+            iplot = i
+            ax = axs[i]
             energy = self.results.DeltaA[component]
             label = r"$\Delta A^{\rm{%s}}_{\rm{%s}} = %.2f\pm%.2f$ kJ/mol" \
                     % (component, self.solvent_type, energy.value, energy.error)
-            errorbar(x, y, yerr=dy, label=label, **kwargs)
-            xlabel(r'$\lambda$')
-            legend(loc='best')
-            xlim(-0.05, 1.05)
-        subplot(1, nplots, 1)
-        ylabel(r'$dV/d\lambda$ in kJ/mol')
-        title(r"Free energy difference $\Delta A^{0}_{\rm{%s}}$" % self.solvent_type)
-        subplot(1, nplots, 2)
-        title(r"for %s: $%.2f\pm%.2f$ kJ/mol" %
-              ((self.molecule,) + self.results.DeltaA.Gibbs.astuple()))
-
+            ax.errorbar(x, y, yerr=dy, label=label, **kwargs)
+            ax.set_xlabel(r'$\lambda$')
+            ax.legend(loc='best')
+            ax.set_xlim(-0.05, 1.05)
+        axs[0].set_ylabel(r'$dV/d\lambda$ in kJ/mol')
+        fig.suptitle(r"Free energy difference $\Delta A^{0}_{\rm{%s}}$ for %s: $%.2f\pm%.2f$ kJ/mol" %
+              ((self.solvent_type, self.molecule,) + self.results.DeltaA.Gibbs.astuple()))
+        fig.savefig('DeltaA.png')
+        plt.close()
 
     def qsub(self, script=None):
         """Submit a batch script locally.
@@ -991,6 +1221,7 @@ class Gsolv(Journalled):
 
     def __repr__(self):
         return "%s(filename=%r)" % (self.__class__.__name__, self.filename)
+
 
 class Ghyd(Gsolv):
     """Sets up and analyses MD to obtain the hydration free energy of a solute."""
@@ -1034,6 +1265,16 @@ class Goct(Gsolv):
                  }
 
 
+class Gwoct(Goct):
+    """Sets up and analyses MD to obtain the solvation free energy of a solute in wet octanol.
+
+    The *coulomb* lambda schedule is enhanced compared to water as the initial
+    part of the dV/dl curve is quite sensitive. By adding two additional points
+    we hope to reduce the overall error on the dis-charging free energy.
+    """
+    solvent_default = "wetoctanol"
+    dirname_default = os.path.join(Gsolv.topdir_default, solvent_default)
+
 
 def p_transfer(G1, G2, **kwargs):
     """Compute partition coefficient from two :class:`Gsolv` objects.
@@ -1072,12 +1313,29 @@ def p_transfer(G1, G2, **kwargs):
            force rereading of data files even if some data were already stored [False]
        *stride*
            analyze every *stride*-th datapoint in the dV/dlambda files
+       *start*
+           Start frame of data analyzed in every fep window.
+       *stop*
+           Stop frame of data analyzed in every fep window.
+       *SI*
+           Set to ``True`` if you want to perform statistical inefficiency
+           to preprocess the data.
+       *estimator*
+           Set to ``alchemlyb`` if you want to use alchemlyb estimators,
+           or ``mdpow`` if you want the default TI method.
+       *method*
+           Use `TI`, `BAR` or `MBAR` method in `alchemlyb`, or `TI` in `mdpow`.
+
     :Returns: (transfer free energy, log10 of the water-octanol partition coefficient = log Pow)
 
     """
 
     kwargs.setdefault('force', False)
-
+    estimator = kwargs.pop('estimator', 'mdpow')
+    if not estimator in ('mdpow', 'alchemlyb'):
+        errmsg = "estimator = %r is not supported, must be 'mdpow' or 'alchemlyb'" % estimator
+        logger.error(errmsg)
+        raise ValueError(errmsg)
     if G1.molecule != G2.molecule:
         raise ValueError("The two simulations were done for different molecules.")
     if G1.Temperature != G2.Temperature:
@@ -1086,15 +1344,37 @@ def p_transfer(G1, G2, **kwargs):
     logger.info("[%s] transfer free energy %s --> %s calculation",
                 G1.molecule, G1.solvent_type, G2.solvent_type)
     for G in (G1, G2):
+        # for fep files generated with old code which doesn't have these attributes
+        if not hasattr(G, 'start'):
+            G.start = kwargs.pop('start', 0)
+        if not hasattr(G, 'stop'):
+            G.stop = kwargs.pop('stop', None)
+        if not hasattr(G, 'SI'):
+            kwargs.setdefault('SI', False)
+        else:
+            kwargs.setdefault('SI', G.SI)
+
+        # for this version. use the method given instead of the one in the input cfg file
+        G.method = kwargs.pop('method', 'TI')
         if kwargs['force']:
-            G.analyze(**kwargs)
+            if estimator == 'mdpow':
+                G.analyze(**kwargs)
+                if G.method != "TI":
+                    errmsg = "Method %s is not implemented in MDPOW, use estimator='alchemlyb'" % G.method
+                    logger.error(errmsg)
+                    raise ValueError(errmsg)
+            elif estimator == 'alchemlyb':
+                G.analyze_alchemlyb(**kwargs)
+
         try:
             G.results.DeltaA.Gibbs
             G.logger_DeltaA0()
         except (KeyError, AttributeError):   # KeyError because results is a AttributeDict
             logger.warn("Must analyze simulation because no hydration free energy data available...")
-            G.analyze(**kwargs)
-
+            if estimator == 'mdpow':
+                G.analyze(**kwargs)
+            elif estimator == 'alchemlyb':
+                G.analyze_alchemlyb(**kwargs)
     # x.Gibbs are QuantityWithError so they do error propagation
     transferFE = G2.results.DeltaA.Gibbs - G1.results.DeltaA.Gibbs
     # note minus sign, with our convention of the free energy difference to be
@@ -1138,6 +1418,18 @@ def pOW(G1, G2, **kwargs):
            force rereading of data files even if some data were already stored [False]
        *stride*
            analyze every *stride*-th datapoint in the dV/dlambda files
+       *start*
+           Start frame of data analyzed in every fep window.
+       *stop*
+           Stop frame of data analyzed in every fep window.
+       *SI*
+           Set to ``True`` if you want to perform statistical inefficiency
+           to preprocess the data.
+       *estimator*
+           Set to ``alchemlyb`` if you want to use alchemlyb estimators,
+           or ``mdpow`` if you want the default TI method.
+       *method*
+           Use `TI`, `BAR` or `MBAR` method in `alchemlyb`, or `TI` in `mdpow`.
 
     :Returns: (transfer free energy, log10 of the octanol/water partition coefficient = log Pow)
     """
@@ -1171,6 +1463,18 @@ def pCW(G1, G2, **kwargs):
            force rereading of data files even if some data were already stored [False]
        *stride*
            analyze every *stride*-th datapoint in the dV/dlambda files
+       *start*
+           Start frame of data analyzed in every fep window.
+       *stop*
+           Stop frame of data analyzed in every fep window.
+       *SI*
+           Set to ``True`` if you want to perform statistical inefficiency
+           to preprocess the data.
+       *estimator*
+           Set to ``alchemlyb`` if you want to use alchemlyb estimators,
+           or ``mdpow`` if you want the default TI method.
+       *method*
+           Use `TI`, `BAR` or `MBAR` method in `alchemlyb`, or `TI` in `mdpow`.
 
     :Returns: (transfer free energy, log10 of the cyclohexane/water partition coefficient = log Pcw)
     """

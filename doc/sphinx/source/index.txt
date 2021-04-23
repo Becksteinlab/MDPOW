@@ -2,25 +2,69 @@
    sphinx-quickstart on Wed Mar 24 13:28:55 2010.
 
 .. Common replacements for MDPOW docs
-..
 .. |Pow| replace:: *P*\ :sub:`OW`
 .. |P_OW| replace:: *P*\ :sub:`OW`
 .. |POW|  replace:: *P*\ :sub:`OW`
 .. |P_ow| replace:: *P*\ :sub:`OW`
 .. |P_cw| replace:: *P*\ :sub:`CW`
 
+
+
 MDPOW documentation
 ===================
 
-*MDPOW* is a python package that automates the calculation of
+:Release: |release|
+:Date: |today|
+
+
+**MDPOW** is a python package that automates the calculation of
 solvation free energies via molecular dynamics (MD) simulations. In
 particular, it facilitates the computation of partition coeffcients. Currently implemented:
 
 - *water-octanol* partition coefficient (|P_ow|)
 - *water-cyclohexane* partition coefficient (|P_cw|)
 
-Calculations are performed with the Gromacs_ MD software
-package [#GromacsWrapper]_. Currently, *OPLS-AA force field* parameters are supported.
+.. warning:: Development is still very much in flux and the
+             documentation is at least partially out of date. If
+             something appears unclear or just wrong, then please ask
+             questions on the `MDPOW Issue Tracker`_.
+
+.. _`MDPOW Issue Tracker`: https://github.com/Becksteinlab/mdpow/issues
+
+
+.. _supported-versions:
+
+MD engine
+---------
+
+Calculations are performed with the Gromacs_ molecular dynamics (MD)
+software package [#GromacsWrapperFramework]_. MDPOW is tested with
+
+* Gromacs 4.6.x
+* Gromacs 5.1.x
+* Gromacs 2016.x
+
+It should be possible to use any of these Gromacs versions without
+further adjustments, thanks to the underlying GromacsWrapper library
+[#GromacsWrapperFramework]_.
+
+
+Force fields
+------------
+
+Currently, the *OPLS-AA force field* parameters are supported out of
+the box. In principle it is possible to add force fields sets by
+changing the :envvar:`GMXLIB` environment variable and providing
+appropriate template files but this is currently untested.
+
+A number of different *water models* are supporte (see
+:data:`mdpow.forcefields.GROMACS_WATER_MODELS`).
+
+.. seealso:: :mod:`mdpow.forcefields`
+
+
+Required input
+--------------
 
 As *input*, the user only needs to provide a structure file (PDB or
 GRO) and a Gromacs ITP file containing the parametrization of the
@@ -31,30 +75,35 @@ small molecule (e.g. from LigandBook_ or ParamChem_).
 .. _LigandBook: http://ligandbook.icsn.cnrs-gif.fr/
 .. _ParamChem: https://cgenff.paramchem.org/
 
-.. rubric:: Contents:
+
+
+.. Hide to use with alabaster
+.. Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
+   :numbered:
+   :hidden:
 
    INSTALL
    init
    scripts
    equil
    fep
-   analysis
-   utilities      
+   utilities
+   forcefields
    tables
 
-.. rubric:: Footnotes
 
-.. [#GromacsWrapper] The package is built on top of the `GromacsWrapper`_
-                     framework (which is automatically installed).
-
-
-Indices and tables
-==================
+.. rubric:: Indices and tables
 
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+.. rubric:: Footnotes
+
+.. [#GromacsWrapperFramework] The package is built on top of the `GromacsWrapper`_
+                     framework (which is automatically installed).
+
 

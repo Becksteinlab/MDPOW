@@ -33,9 +33,6 @@ if __name__ == "__main__":
     from optparse import OptionParser
 
     parser = OptionParser(usage=__doc__)
-    parser.add_option('--get-template', dest='gettemplate',
-                      action='store_true',
-                      help="generate a template RUNFILE and exit")
     parser.add_option('--solvent', '-S', dest='solvent',
                       metavar="NAME",
                       help="solvent NAME for compound, 'water' or 'octanol' [%default]")
@@ -56,18 +53,9 @@ if __name__ == "__main__":
 
     runfile = args[0]
 
-    if opts.gettemplate:
-        cfg = get_configuration()
-        cfg.write(open(runfile, "w"))
-        logger.info("Generated template runfile %r. Edit it!", runfile)
-        sys.exit(0)
-
     if not os.path.exists(runfile):
         logger.fatal("Run input file %r not found...", runfile)
         sys.exit(1)
 
     cfg = get_configuration(runfile)
     S = fep_simulation(cfg, opts.solvent, dirname=opts.dirname)
-
-
-

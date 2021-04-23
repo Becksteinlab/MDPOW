@@ -869,3 +869,8 @@
  opls_114_d   HW  1      1.00800     0.580       A    0.00000e+00  0.00000e+00
  opls_115_d   MW  0      0.00000    -1.160       D    0.00000e+00  0.00000e+00
 
+; mixed OPLS parameters for alcohols from Zangi R (2018) Refinement of the OPLSAA force-field for liquid alcohols. 
+; ACS Omega 3(12):18089–18099. doi: 10.1021/acsomega.8b03132
+; sigma (unchanged): 0.250 nm ; epsilon (new): 0.11000 kj/mol (instead of 0.12552 kJ/mol)
+ opls_140_mixed   HC  1      1.00800     0.060       A    2.50000e-01  1.10000e-01
+

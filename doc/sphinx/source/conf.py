@@ -23,7 +23,8 @@ import sys, os
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 # 'sphinx.ext.pngmath', 'sphinx.ext.jsmath'
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.intersphinx', 'sphinx.ext.coverage', 'sphinx.ext.mathjax']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.intersphinx',
+              'sphinx.ext.coverage', 'sphinx.ext.mathjax']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -39,7 +40,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'MDPOW'
-copyright = u'2010–2016, Ian Kenney, Bogdan Iorga, and Oliver Beckstein'
+copyright = u'2010–2017, Ian Kenney, Bogdan Iorga, and Oliver Beckstein'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -95,12 +96,20 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  Major themes that come with
 # Sphinx are currently 'default' and 'sphinxdoc'.
-html_theme = 'default'
+html_theme = 'alabaster'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-#html_theme_options = {}
+html_theme_options = {
+    'github_user': 'Becksteinlab',
+    'github_repo': 'mdpow',
+    'description': "Solvation free energy calculations made easy.",
+    'travis_button': False,
+    'sidebar_includehidden': True,
+    'sidebar_collapse': True,
+    'show_related': True,
+}
 
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []
@@ -135,7 +144,15 @@ html_static_path = ['_static']
 #html_use_smartypants = True
 
 # Custom sidebar templates, maps document names to template names.
-#html_sidebars = {}
+html_sidebars = {
+    '**': [
+        'about.html',
+        'navigation.html',
+        'relations.html',
+        'searchbox.html',
+        'donate.html',
+    ]
+}
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
@@ -203,10 +220,10 @@ latex_documents = [
 # ---------------------------
 # intersphinx: reference standard lib and GromacsWrapper
 # http://sphinx.pocoo.org/latest/ext/intersphinx.html
-intersphinx_mapping = {'http://docs.python.org/': None,
-                       'http://docs.scipy.org/doc/numpy/': None,
-                       'http://docs.scipy.org/doc/scipy/reference/': None,
-                       'http://gromacswrapper.readthedocs.org/en/latest/': None,
+intersphinx_mapping = {'https://docs.python.org/': None,
+                       'https://docs.scipy.org/doc/numpy/': None,
+                       'https://docs.scipy.org/doc/scipy/reference/': None,
+                       'https://gromacswrapper.readthedocs.org/en/latest/': None,
                    }
 
 
