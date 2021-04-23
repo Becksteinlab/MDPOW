@@ -75,6 +75,7 @@ spc         SPC        simple point charge
 spce        SPC/E      extended simple point charge
 m24         M24        TIP 3-point with modified LJ (M24)
 tip4pd      TIP4P-D    TIP 4-point with modified dispersion (TIP4P-D)
+tip4pew     TIP4PEW    TIP 4-point modified for use with Ewald techniques (TIP4PEW)
 """
 
 class GromacsSolventModel(object):
@@ -104,6 +105,7 @@ SPECIAL_WATER_COORDINATE_FILES = defaultdict(
     tip3p='spc216.gro',
     m24='spc216.gro',
     tip4pd='tip4p.gro',
+    tip4pew='tip4p.gro',
 )
 
 def _create_water_models(watermodelsdat):
