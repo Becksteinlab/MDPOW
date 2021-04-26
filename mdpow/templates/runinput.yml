@@ -11,7 +11,7 @@ setup:
          # Gromacs [ molecule ] identifier from the itp file (typically a 3-letter code)
     solventmodel: 'tip4p'
          # water model available in Gromacs (OPLS-AA):
-         # tip4p, tip5p, tip3p, spc, spce, m24
+         # tip4p, tip5p, tip3p, spc, spce, m24, tip4pd
     forcefield: 'OPLS-AA'
          # Forcefield name
          # OPLS-AA, AMBER, CHARMM
