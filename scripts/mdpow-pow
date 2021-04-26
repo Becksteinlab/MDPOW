@@ -223,7 +223,7 @@ if __name__ == "__main__":
                       "WARNING: Other lines in the file might have been corrupted in "
                       "such a way that they appear correct but are in fact wrong. "
                       "WRONG RESULTS CAN OCCUR! USE AT YOUR OWN RISK [%default]")
-    parser.set_defaults(plotfile="auto",
+    parser.set_defaults(plotfile="none",
                         outfile="pow.txt", energyfile="energies.txt",
                         force=False, stride=10, permissive=False)
     opts,args = parser.parse_args()
