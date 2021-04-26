@@ -1358,6 +1358,9 @@ def p_transfer(G1, G2, **kwargs):
         G.method = kwargs.pop('method', 'TI')
         if kwargs['force']:
             if estimator == 'mdpow':
+                G.start = kwargs.pop('start', 0)
+                G.stop = kwargs.pop('stop', None)
+                G.SI = kwargs.pop('stop', False)
                 G.analyze(**kwargs)
                 if G.method != "TI":
                     errmsg = "Method %s is not implemented in MDPOW, use estimator='alchemlyb'" % G.method
