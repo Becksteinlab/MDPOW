@@ -96,13 +96,13 @@ def run_pcw(directory, **kwargs):
     def datstat(g):
         return _datastatus[g.contains_corrupted_xvgs()]
 
-    estimator=kwargs.pop('estimator', 'mdpow')
+    estimator=kwargs.pop('estimator', 'alchemlyb')
     gwat, gcyc = load_gsolv(directory, permissive=kwargs.pop('permissive',False),)
     transferFE, logPcw = mdpow.fep.pCW(gcyc, gwat, stride=kwargs.pop('stride', None),
                                        start=kwargs.pop('start', 0), stop=kwargs.pop('stop', None),
                                        force=kwargs.pop('force', False), SI=kwargs.pop('SI', False),
                                        estimator=estimator,
-                                       method=kwargs.pop('method', 'TI'))
+                                       method=kwargs.pop('method', 'MBAR'))
 
     if datstat(gwat) == 'BAD' or datstat(gcyc) == 'BAD':
             logger.warning("Possible file corruption: water:%s, cyclohexane:%s",
@@ -190,7 +190,7 @@ if __name__ == "__main__":
     parser.add_option('-p', '--plotfile', dest="plotfile",
                       help="plot dV/dlambda to FILE; use png or pdf suffix to "
                       "determine the file type. 'auto' generates a pdf file "
-                      "DIRECTORY/dVdl_MOLID_pow.pdf and 'None' disables it [%default]",
+                      "DIRECTORY/dVdl_MOLID_pcw.pdf and 'None' disables it [%default]",
                       metavar="FILE")
     parser.add_option('-o', '--outfile', dest="outfile",
                       help="append one-line results summary to FILE [%default]",
@@ -198,9 +198,9 @@ if __name__ == "__main__":
     parser.add_option('-e', '--energies', dest="energyfile",
                       help="append solvation free energies to FILE [%default]",
                       metavar="FILE")
-    parser.add_option('--estimator', dest="estimator", default='mdpow',
+    parser.add_option('--estimator', dest="estimator", default='alchemlyb',
                       help="choose the estimator to be used, alchemlyb or mdpow estimators")
-    parser.add_option('--method', dest="method", default='TI',
+    parser.add_option('--method', dest="method", default='MBAR',
                       help="choose the method to calculate free energy",)
     parser.add_option('--force', dest='force',
                       action="store_true",

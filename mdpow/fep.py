@@ -1331,7 +1331,7 @@ def p_transfer(G1, G2, **kwargs):
     """
 
     kwargs.setdefault('force', False)
-    estimator = kwargs.pop('estimator', 'mdpow')
+    estimator = kwargs.pop('estimator', 'alchemlyb')
     if not estimator in ('mdpow', 'alchemlyb'):
         errmsg = "estimator = %r is not supported, must be 'mdpow' or 'alchemlyb'" % estimator
         logger.error(errmsg)
@@ -1355,7 +1355,7 @@ def p_transfer(G1, G2, **kwargs):
             kwargs.setdefault('SI', G.SI)
 
         # for this version. use the method given instead of the one in the input cfg file
-        G.method = kwargs.pop('method', 'TI')
+        G.method = kwargs.pop('method', 'MBAR')
         if kwargs['force']:
             if estimator == 'mdpow':
                 G.start = kwargs.pop('start', 0)
