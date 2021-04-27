@@ -205,8 +205,8 @@ if __name__ == "__main__":
     parser.add_option('--force', dest='force',
                       action="store_true",
                       help="force rereading all data [%default]")
-    parser.add_option('--SI', dest='SI',
-                      action="store_true",
+    parser.add_option('--noSI', dest='SI',
+                      action="store_false",
                       help="Apply statistical inefficiency analysis")
     parser.add_option('-s', '--stride', dest="stride", type='int',
                       help="Use every N-th datapoint from the original dV/dlambda data. "

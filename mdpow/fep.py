@@ -488,7 +488,7 @@ class Gsolv(Journalled):
             self.stride = kwargs.pop('stride', 1)
             self.start = kwargs.pop('start', 0)
             self.stop = kwargs.pop('stop', None)
-            self.SI = kwargs.pop('SI', False)
+            self.SI = kwargs.pop('SI', True)
 
             # other variables
             #: Results from the analysis
@@ -1006,7 +1006,7 @@ class Gsolv(Journalled):
         self.logger_DeltaA0()
         return self.results.DeltaA.Gibbs
 
-    def collect_alchemlyb(self, SI=False, start=0, stop=None, stride=None, autosave=True, autocompress=True):
+    def collect_alchemlyb(self, SI=True, start=0, stop=None, stride=None, autosave=True, autocompress=True):
         extract = self.estimators[self.method]['extract']
 
         if autocompress:
@@ -1032,7 +1032,7 @@ class Gsolv(Journalled):
         if autosave:
             self.save()
 
-    def analyze_alchemlyb(self, SI=False, start=0, stop=None, stride=None, force=False, autosave=True):
+    def analyze_alchemlyb(self, SI=True, start=0, stop=None, stride=None, force=False, autosave=True):
         stride = stride or self.stride
         start = start or self.start
         stop = stop or self.stop
@@ -1350,7 +1350,7 @@ def p_transfer(G1, G2, **kwargs):
         if not hasattr(G, 'stop'):
             G.stop = kwargs.pop('stop', None)
         if not hasattr(G, 'SI'):
-            kwargs.setdefault('SI', False)
+            kwargs.setdefault('SI', True)
         else:
             kwargs.setdefault('SI', G.SI)
 
