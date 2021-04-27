@@ -74,6 +74,8 @@ tip5p       TIP5P      TIP 5-point
 spc         SPC        simple point charge
 spce        SPC/E      extended simple point charge
 m24         M24        TIP 3-point with modified LJ (M24)
+tip4pd      TIP4P-D    TIP 4-point with modified dispersion (TIP4P-D)
+tip4pew     TIP4PEW    TIP 4-point modified for use with Ewald techniques (TIP4PEW)
 """
 
 class GromacsSolventModel(object):
@@ -102,6 +104,8 @@ SPECIAL_WATER_COORDINATE_FILES = defaultdict(
     spce='spc216.gro',
     tip3p='spc216.gro',
     m24='spc216.gro',
+    tip4pd='tip4p.gro',
+    tip4pew='tip4p.gro',
 )
 
 def _create_water_models(watermodelsdat):
@@ -165,6 +169,8 @@ CHARMM_SOLVENT_MODELS = {
         identifier="octanol", itp="1oct.itp", coordinates="1oct_charmm.gro"),
     'wetoctanol': GromacsSolventModel(
         identifier="wetoctanol", itp="1octwet.itp", coordinates="1octwet_charmm.gro"),
+    'cyclohexane': GromacsSolventModel(
+        identifier="cyclohexane", itp="1cyclo.itp", coordinates="1cyclo_charmm.gro"),
     }
 
 AMBER_SOLVENT_MODELS = {
@@ -172,6 +178,8 @@ AMBER_SOLVENT_MODELS = {
         identifier="octanol", itp="1oct.itp", coordinates="1oct_amber.gro"),
     'wetoctanol': GromacsSolventModel(
         identifier="wetoctanol", itp="1octwet.itp", coordinates="1octwet_amber.gro"),
+    'cyclohexane': GromacsSolventModel(
+        identifier="cyclohexane", itp="1cyclo.itp", coordinates="1cyclo_amber.gro"),
     }
 
 GROMACS_SOLVENT_MODELS = {
