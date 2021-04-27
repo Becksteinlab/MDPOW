@@ -210,8 +210,7 @@ if __name__ == "__main__":
                       help="Apply statistical inefficiency analysis")
     parser.add_option('-s', '--stride', dest="stride", type='int',
                       help="Use every N-th datapoint from the original dV/dlambda data. "
-                      "Using a number larger than 1 can significantly reduce memory usage "
-                      "with little impact on the precision of the final output. [%default]",
+                      "[%default]",
                       metavar="N")
     parser.add_option('--start', dest="start", type='int',
                       help="Start point for the data used from the original dV/dlambda data. ")
@@ -225,7 +224,7 @@ if __name__ == "__main__":
                       "WRONG RESULTS CAN OCCUR! USE AT YOUR OWN RISK [%default]")
     parser.set_defaults(plotfile="none",
                         outfile="pcw.txt", energyfile="energies.txt",
-                        force=False, stride=10, permissive=False)
+                        force=False, stride=1, permissive=False)
     opts,args = parser.parse_args()
 
     if len(args) == 0:
