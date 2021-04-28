@@ -94,7 +94,7 @@ class TestAnalyze(object):
         # fep_benzene_directory locally scoped
         G.convert_edr()
         try:
-            G.analyze_alchemlyb(force=True, autosave=False, SI = False)
+            G.analyze_alchemlyb(force=True, autosave=False, SI=False)
         except IOError as err:
             raise AssertionError("Failed to convert edr to xvg: {0}: {1}".format(
                 err.strerror, err.filename))
