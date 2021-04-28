@@ -139,8 +139,8 @@ import numkit.timeseries
 from alchemlyb.parsing.gmx import extract_dHdl, extract_u_nk
 from alchemlyb.estimators import TI, BAR, MBAR
 from alchemlyb.parsing.gmx import _extract_dataframe
-from alchemlyb.preprocessing.subsampling import statistical_inefficiency
-
+from pymbar.timeseries import (statisticalInefficiency,
+                               subsampleCorrelatedData, )
 import gromacs, gromacs.utilities
 try:
     import gromacs.setup
@@ -488,7 +488,7 @@ class Gsolv(Journalled):
             self.stride = kwargs.pop('stride', 1)
             self.start = kwargs.pop('start', 0)
             self.stop = kwargs.pop('stop', None)
-            self.SI = kwargs.pop('SI', False)
+            self.SI = kwargs.pop('SI', True)
 
             # other variables
             #: Results from the analysis
@@ -1006,7 +1006,7 @@ class Gsolv(Journalled):
         self.logger_DeltaA0()
         return self.results.DeltaA.Gibbs
 
-    def collect_alchemlyb(self, SI=False, start=0, stop=None, stride=None, autosave=True, autocompress=True):
+    def collect_alchemlyb(self, SI=True, start=0, stop=None, stride=None, autosave=True, autocompress=True):
         extract = self.estimators[self.method]['extract']
 
         if autocompress:
@@ -1025,14 +1025,21 @@ class Gsolv(Journalled):
                     ts = _extract_dataframe(xvg_file).iloc[start:stop:stride]
                     ts = pd.DataFrame({'time': ts.iloc[:,0], 'dhdl': ts.iloc[:,1]})
                     ts = ts.set_index('time')
-                    xvg_df = statistical_inefficiency(xvg_df, series=ts, conservative=True)
+                    # calculate statistical inefficiency of series
+                    statinef  = statisticalInefficiency(ts, fast=False)
+                    logger.info("The statistical inefficiency value is {:.4f}.".format(statinef))
+                    logger.info("The data are subsampled every {:d} frames.".format(int(numpy.ceil(statinef))))
+                    # use the subsampleCorrelatedData function to get the subsample index
+                    indices = subsampleCorrelatedData(ts, g=statinef,
+                                                      conservative=True)
+                    xvg_df = xvg_df.iloc[indices]
                 val.append(xvg_df)
             self.results.xvg[component] = (numpy.array(lambdas), pd.concat(val))
 
         if autosave:
             self.save()
 
-    def analyze_alchemlyb(self, SI=False, start=0, stop=None, stride=None, force=False, autosave=True):
+    def analyze_alchemlyb(self, SI=True, start=0, stop=None, stride=None, force=False, autosave=True):
         stride = stride or self.stride
         start = start or self.start
         stop = stop or self.stop
@@ -1331,7 +1338,7 @@ def p_transfer(G1, G2, **kwargs):
     """
 
     kwargs.setdefault('force', False)
-    estimator = kwargs.pop('estimator', 'mdpow')
+    estimator = kwargs.pop('estimator', 'alchemlyb')
     if not estimator in ('mdpow', 'alchemlyb'):
         errmsg = "estimator = %r is not supported, must be 'mdpow' or 'alchemlyb'" % estimator
         logger.error(errmsg)
@@ -1350,14 +1357,17 @@ def p_transfer(G1, G2, **kwargs):
         if not hasattr(G, 'stop'):
             G.stop = kwargs.pop('stop', None)
         if not hasattr(G, 'SI'):
-            kwargs.setdefault('SI', False)
+            kwargs.setdefault('SI', True)
         else:
             kwargs.setdefault('SI', G.SI)
 
         # for this version. use the method given instead of the one in the input cfg file
-        G.method = kwargs.pop('method', 'TI')
+        G.method = kwargs.pop('method', 'MBAR')
         if kwargs['force']:
             if estimator == 'mdpow':
+                G.start = kwargs.pop('start', 0)
+                G.stop = kwargs.pop('stop', None)
+                G.SI = kwargs.pop('stop', False)
                 G.analyze(**kwargs)
                 if G.method != "TI":
                     errmsg = "Method %s is not implemented in MDPOW, use estimator='alchemlyb'" % G.method

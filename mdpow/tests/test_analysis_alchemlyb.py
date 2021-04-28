@@ -85,7 +85,6 @@ class TestAnalyze(object):
     def test_estimator_alchemlyb(self, fep_benzene_directory, method,
                                  Gibbs, coulomb, vdw):
         G = self.get_Gsolv(fep_benzene_directory)
-        G.SI = False
         G.method = method
         G.start = 0
         G.stop = None
@@ -95,7 +94,7 @@ class TestAnalyze(object):
         # fep_benzene_directory locally scoped
         G.convert_edr()
         try:
-            G.analyze_alchemlyb(force=True, autosave=False)
+            G.analyze_alchemlyb(force=True, autosave=False, SI=False)
         except IOError as err:
             raise AssertionError("Failed to convert edr to xvg: {0}: {1}".format(
                 err.strerror, err.filename))
@@ -134,7 +133,7 @@ class TestAnalyze(object):
         G.stop = 200
         G.convert_edr()
         try:
-            G.analyze_alchemlyb(force=True, autosave=False)
+            G.analyze_alchemlyb(force=True, autosave=False, SI=False)
         except IOError as err:
             raise AssertionError("Failed to convert edr to xvg: {0}: {1}".format(
                 err.strerror, err.filename))

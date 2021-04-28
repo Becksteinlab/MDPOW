@@ -96,13 +96,13 @@ def run_pow(directory, **kwargs):
     def datstat(g):
         return _datastatus[g.contains_corrupted_xvgs()]
 
-    estimator=kwargs.pop('estimator', 'mdpow')
+    estimator=kwargs.pop('estimator', 'alchemlyb')
     gwat, goct = load_gsolv(directory, permissive=kwargs.pop('permissive',False),)
     transferFE, logPow = mdpow.fep.pOW(goct, gwat, stride=kwargs.pop('stride', None),
                                        start=kwargs.pop('start', 0), stop=kwargs.pop('stop', None),
                                        force=kwargs.pop('force', False), SI=kwargs.pop('SI', False),
                                        estimator=estimator,
-                                       method=kwargs.pop('method', 'TI'))
+                                       method=kwargs.pop('method', 'MBAR'))
 
     if datstat(gwat) == 'BAD' or datstat(goct) == 'BAD':
             logger.warning("Possible file corruption: water:%s, octanol:%s",
@@ -198,20 +198,19 @@ if __name__ == "__main__":
     parser.add_option('-e', '--energies', dest="energyfile",
                       help="append solvation free energies to FILE [%default]",
                       metavar="FILE")
-    parser.add_option('--estimator', dest="estimator", default='mdpow',
+    parser.add_option('--estimator', dest="estimator", default='alchemlyb',
                       help="choose the estimator to be used, alchemlyb or mdpow estimators")
-    parser.add_option('--method', dest="method", default='TI',
+    parser.add_option('--method', dest="method", default='MBAR',
                       help="choose the method to calculate free energy",)
     parser.add_option('--force', dest='force',
                       action="store_true",
                       help="force rereading all data [%default]")
-    parser.add_option('--SI', dest='SI',
-                      action="store_true",
+    parser.add_option('--noSI', dest='SI',
+                      action="store_false",
                       help="Apply statistical inefficiency analysis")
     parser.add_option('-s', '--stride', dest="stride", type='int',
                       help="Use every N-th datapoint from the original dV/dlambda data. "
-                      "Using a number larger than 1 can significantly reduce memory usage "
-                      "with little impact on the precision of the final output. [%default]",
+                      "[%default]",
                       metavar="N")
     parser.add_option('--start', dest="start", type='int',
                       help="Start point for the data used from the original dV/dlambda data. ")
@@ -223,9 +222,9 @@ if __name__ == "__main__":
                       "WARNING: Other lines in the file might have been corrupted in "
                       "such a way that they appear correct but are in fact wrong. "
                       "WRONG RESULTS CAN OCCUR! USE AT YOUR OWN RISK [%default]")
-    parser.set_defaults(plotfile="auto",
+    parser.set_defaults(plotfile="none",
                         outfile="pow.txt", energyfile="energies.txt",
-                        force=False, stride=10, permissive=False)
+                        force=False, stride=1, permissive=False)
     opts,args = parser.parse_args()
 
     if len(args) == 0:
