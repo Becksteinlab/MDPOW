@@ -139,8 +139,8 @@ import numkit.timeseries
 from alchemlyb.parsing.gmx import extract_dHdl, extract_u_nk
 from alchemlyb.estimators import TI, BAR, MBAR
 from alchemlyb.parsing.gmx import _extract_dataframe
-from alchemlyb.preprocessing.subsampling import statistical_inefficiency
-
+from pymbar.timeseries import (statisticalInefficiency,
+                               subsampleCorrelatedData, )
 import gromacs, gromacs.utilities
 try:
     import gromacs.setup
@@ -1025,7 +1025,13 @@ class Gsolv(Journalled):
                     ts = _extract_dataframe(xvg_file).iloc[start:stop:stride]
                     ts = pd.DataFrame({'time': ts.iloc[:,0], 'dhdl': ts.iloc[:,1]})
                     ts = ts.set_index('time')
-                    xvg_df = statistical_inefficiency(xvg_df, series=ts, conservative=True)
+                    # calculate statistical inefficiency of series
+                    statinef  = statisticalInefficiency(ts, fast=False)
+                    logger.info("The statistical inefficiency value is {:.4f}.".format(statinef))
+                    # use the subsampleCorrelatedData function to get the subsample index
+                    indices = subsampleCorrelatedData(ts, g=statinef,
+                                                      conservative=True)
+                    xvg_df = xvg_df.iloc[indices]
                 val.append(xvg_df)
             self.results.xvg[component] = (numpy.array(lambdas), pd.concat(val))
 
