@@ -1028,6 +1028,7 @@ class Gsolv(Journalled):
                     # calculate statistical inefficiency of series
                     statinef  = statisticalInefficiency(ts, fast=False)
                     logger.info("The statistical inefficiency value is {:.4f}.".format(statinef))
+                    logger.info("The data are subsampled every {:d} frames.".format(int(np.ceil(statinef))))
                     # use the subsampleCorrelatedData function to get the subsample index
                     indices = subsampleCorrelatedData(ts, g=statinef,
                                                       conservative=True)
