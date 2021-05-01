@@ -1185,7 +1185,6 @@ class Gsolv(Journalled):
         fig.suptitle(r"Free energy difference $\Delta A^{0}_{\rm{%s}}$ for %s: $%.2f\pm%.2f$ kJ/mol" %
               ((self.solvent_type, self.molecule,) + self.results.DeltaA.Gibbs.astuple()))
         fig.savefig('DeltaA.png')
-        plt.close()
 
     def qsub(self, script=None):
         """Submit a batch script locally.
