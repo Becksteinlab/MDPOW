@@ -36,6 +36,8 @@ directory
 from __future__ import with_statement
 
 import os
+import matplotlib
+matplotlib.use('agg')  # quick non-interactive plotting
 import mdpow.fep
 import mdpow.filelock
 
@@ -133,8 +135,6 @@ def run_pow(directory, **kwargs):
     if plotfile:
         if plotfile == 'auto':
             plotfile = auto_plotfile(directory, gwat)
-        import matplotlib
-        matplotlib.use('agg')  # quick non-interactive plotting
         from pylab import clf, title, savefig
         clf()
         gwat.plot(color='k', ls='--')
