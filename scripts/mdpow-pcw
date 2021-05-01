@@ -224,7 +224,7 @@ if __name__ == "__main__":
                       "WRONG RESULTS CAN OCCUR! USE AT YOUR OWN RISK [%default]")
     parser.set_defaults(plotfile="none",
                         outfile="pcw.txt", energyfile="energies.txt",
-                        force=False, stride=1, permissive=False)
+                        force=False, stride=1, permissive=False, SI=True)
     opts,args = parser.parse_args()
 
     if len(args) == 0:
