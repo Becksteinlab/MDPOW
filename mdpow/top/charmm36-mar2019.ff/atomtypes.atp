@@ -440,6 +440,9 @@ SG2R50     32.06000 ; THIP, thiophene
   OWT4	   15.99940 ; TIP4P
   HWT4		1.00800 ; TIP4P
   MWT4		0.00000 ; TIP4P
+  OWT5    15.9994 ; TIP5P
+  HWT5    1.0080 ; TIP5P
+  MWT5    0.0000 ; TIP5P
   MNH3		0.00000 ; vsite (rigid tetrahedrical NH3 group)
   MNH2		0.00000 ; vsite
   MCH3		0.00000 ; vsite (rigid CH3 group)
