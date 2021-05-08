@@ -31,13 +31,16 @@ model.
 
 from __future__ import absolute_import, with_statement
 
-import os, errno
+import os
+import errno
 import shutil
-import cPickle
+import _pickle
 import MDAnalysis as mda
+from typing import Optional, Any
 
 try:
-    import gromacs.setup, gromacs.cbook
+    import gromacs.setup
+    import gromacs.cbook
 except (ImportError, OSError):
     raise ImportError("Gromacs installation not found, source GMXRC?")
 from gromacs.utilities import in_dir, realpath, asiterable, AttributeDict
@@ -48,6 +51,7 @@ from . import forcefields
 from .restart import Journalled
 
 import logging
+
 logger = logging.getLogger('mdpow.equil')
 
 # ITP <-- forcefields.get_solvent_model(id).itp
@@ -58,6 +62,7 @@ logger = logging.getLogger('mdpow.equil')
 #       compatibility with our SAMPL5 runs)
 #: minimum distance between solute and box surface (in nm)
 DIST = {'water': 1.0, 'octanol': 1.5, 'cyclohexane': 1.5, 'wetoctanol': 1.5}
+
 
 class Simulation(Journalled):
     """Simple MD simulation of a single compound molecule in water.
@@ -87,13 +92,12 @@ class Simulation(Journalled):
     #: the protocol; the later the better. The values are keys into :attr:`Simulation.files`.
     coordinate_structures = ('solvated', 'energy_minimized', 'MD_relaxed',
                              'MD_restrained', 'MD_NPT')
-    checkpoints = ('solvated','energy_minimized','MD_relaxed','MD_restrained','MD_NPT')
-
+    checkpoints = ('solvated', 'energy_minimized', 'MD_relaxed', 'MD_restrained', 'MD_NPT')
 
     #: Check list of all methods that can be run as an independent protocol; see also
     #: :meth:`Simulation.get_protocol` and :class:`restart.Journal`
-    protocols = ("MD_NPT", "MD_NPT_run",                 # *_run as dummies for the ...
-                 "MD_relaxed", "MD_relaxed_run",         # ...checkpointing logic
+    protocols = ("MD_NPT", "MD_NPT_run",  # *_run as dummies for the ...
+                 "MD_relaxed", "MD_relaxed_run",  # ...checkpointing logic
                  "MD_restrained", "MD_restrained_run",
                  "energy_minimize", "solvate", "topology")
 
@@ -158,20 +162,20 @@ class Simulation(Journalled):
         solventmodel = kwargs.pop('solventmodel', None)
 
         mdp_kw = kwargs.pop('mdp', {})
-        self.mdp = dict((stage, config.get_template(fn)) for stage,fn in self.mdp_defaults.items())
-        self.mdp.update(dict((stage, config.get_template(fn)) for stage,fn in mdp_kw.items() if fn is not None))
+        self.mdp = dict((stage, config.get_template(fn)) for stage, fn in self.mdp_defaults.items())
+        self.mdp.update(dict((stage, config.get_template(fn)) for stage, fn in mdp_kw.items() if fn is not None))
 
         if molecule is None and filename is not None:
             # load from pickle file
             self.load(filename)
             self.filename = filename
-            kwargs = {}    # for super
+            kwargs = {}  # for super
         else:
             self.molecule = molecule or 'DRUG'
             self.dirs = AttributeDict(
-                basedir=realpath(dirname),    # .../Equilibrium/<solvent>
-                includes=list(asiterable(kwargs.pop('includes',[]))) + [config.includedir],
-                )
+                basedir=realpath(dirname),  # .../Equilibrium/<solvent>
+                includes=list(asiterable(kwargs.pop('includes', []))) + [config.includedir],
+            )
             # pre-set filenames: keyword == variable name
             self.files = AttributeDict([(k, kwargs.pop(k, None)) for k in self.filekeys])
             self.deffnm = kwargs.pop("deffnm", "md")
@@ -185,10 +189,10 @@ class Simulation(Journalled):
             self.forcefield = forcefield
             self.solvent_type = solvent
             self.solventmodel_identifier = forcefields.get_solvent_identifier(
-                 solvent,
-                 model=solventmodel,
-                 forcefield=forcefield,
-                 )
+                solvent,
+                model=solventmodel,
+                forcefield=forcefield,
+            )
             if self.solventmodel_identifier is None:
                 msg = "No parameters for solvent {0} and solventmodel {1} available.".format(
                     solvent, solventmodel)
@@ -197,7 +201,7 @@ class Simulation(Journalled):
             self.solventmodel = forcefields.get_solvent_model(
                 self.solventmodel_identifier,
                 forcefield=forcefield,
-                )
+            )
 
             distance = kwargs.pop('distance', None)
             distance = distance if distance is not None else DIST[solvent]
@@ -206,7 +210,7 @@ class Simulation(Journalled):
                                          box=self.solventmodel.coordinates,
                                          distance=distance)
 
-            self.filename = filename or self.solvent_type+'.simulation'
+            self.filename = filename or self.solvent_type + '.simulation'
 
         super(Simulation, self).__init__(**kwargs)
 
@@ -221,13 +225,13 @@ class Simulation(Journalled):
         """
         if filename is None:
             if self.filename is None:
-                self.filename = filename or self.solvent_type+'.simulation'
+                self.filename = filename or self.solvent_type + '.simulation'
                 logger.warning("No filename known, saving instance under name %r", self.filename)
             filename = self.filename
         else:
             self.filename = filename
         with open(filename, 'wb') as f:
-            cPickle.dump(self, f, protocol=cPickle.HIGHEST_PROTOCOL)
+            _pickle.dump(self, f, protocol=_pickle.HIGHEST_PROTOCOL)
         logger.debug("Instance pickled to %(filename)r" % vars())
 
     def load(self, filename=None):
@@ -238,7 +242,7 @@ class Simulation(Journalled):
                 logger.warning("No filename known, trying name %r", self.filename)
             filename = self.filename
         with open(filename, 'rb') as f:
-            instance = cPickle.load(f)
+            instance = _pickle.load(f)
         self.__dict__.update(instance.__dict__)
         logger.debug("Instance loaded from %(filename)r" % vars())
 
@@ -249,6 +253,7 @@ class Simulation(Journalled):
                      check :attr:`mdpow.equil.Simulation.dirs.includes` and adjust
                      manually if necessary.
         """
+
         def assinglet(m):
             if len(m) == 1:
                 return m[0]
@@ -273,8 +278,8 @@ class Simulation(Journalled):
                 self.mdp[key] = fn.replace(basedir, prefix)
             except AttributeError:
                 pass
-        logger.warn("make_paths_relative(): check/manually adjust %s.dirs.includes = %r !",
-                    self.__class__.__name__, self.dirs.includes)
+        logger.warning("make_paths_relative(): check/manually adjust %s.dirs.includes = %r !",
+                       self.__class__.__name__, self.dirs.includes)
 
     def topology(self, itp='drug.itp', prm=None, **kwargs):
         """Generate a topology for compound *molecule*.
@@ -304,8 +309,9 @@ class Simulation(Journalled):
         self.top_template = top_template
         itp = os.path.realpath(itp)
         _itp = os.path.basename(itp)
+        _prm: Optional[str] = None  # To prevent variable used before assignment warning
 
-        if prm==None:
+        if prm is None:
             prm_kw = ''
         else:
             prm = os.path.realpath(prm)
@@ -318,10 +324,10 @@ class Simulation(Journalled):
                 shutil.copy(prm, _prm)
             gromacs.cbook.edit_txt(top_template,
                                    [('#include +"oplsaa\.ff/forcefield\.itp"',
-                                    'oplsaa\.ff/', setting[0]),
+                                     'oplsaa\.ff/', setting[0]),
                                     ('#include +"compound\.itp"', 'compound\.itp', _itp),
                                     ('#include +"oplsaa\.ff/tip4p\.itp"',
-                                     'oplsaa\.ff/tip4p\.itp', setting[0]+self.solvent.itp),
+                                     'oplsaa\.ff/tip4p\.itp', setting[0] + self.solvent.itp),
                                     ('#include +"oplsaa\.ff/ions_opls\.itp"',
                                      'oplsaa\.ff/ions_opls\.itp', setting[1]),
                                     ('#include +"compound\.prm"',
@@ -389,7 +395,7 @@ class Simulation(Journalled):
             raise ValueError(msg)
         kwargs['bt'] = boxtype
 
-        kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.dirs.includes
+        kwargs['includes'] = asiterable(kwargs.pop('includes', [])) + self.dirs.includes
 
         params = self._setup_solvate(**kwargs)
 
@@ -426,7 +432,7 @@ class Simulation(Journalled):
         kwargs.setdefault('struct', self.files.solvated)
         kwargs.setdefault('mdp', self.mdp['energy_minimize'])
         kwargs['mainselection'] = None
-        kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.dirs.includes
+        kwargs['includes'] = asiterable(kwargs.pop('includes', [])) + self.dirs.includes
 
         params = gromacs.setup.energy_minimize(**kwargs)
 
@@ -445,9 +451,9 @@ class Simulation(Journalled):
         self.dirs[protocol] = realpath(kwargs['dirname'])
         setupMD = kwargs.pop('MDfunc', gromacs.setup.MD)
         kwargs['top'] = self.files.topology
-        kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.dirs.includes
+        kwargs['includes'] = asiterable(kwargs.pop('includes', [])) + self.dirs.includes
         kwargs['ndx'] = self.files.ndx
-        kwargs['mainselection'] = None # important for SD (use custom mdp and ndx!, gromacs.setup._MD)
+        kwargs['mainselection'] = None  # important for SD (use custom mdp and ndx!, gromacs.setup._MD)
         self._checknotempty(kwargs['struct'], 'struct')
         if not os.path.exists(kwargs['struct']):
             # struct is not reliable as it depends on qscript so now we just try everything...
@@ -459,15 +465,15 @@ class Simulation(Journalled):
                 logger.info("Found starting structure %r (instead of %r).", struct, kwargs['struct'])
                 kwargs['struct'] = struct
         # now setup the whole simulation (this is typically gromacs.setup.MD() )
-        params =  setupMD(**kwargs)
+        params = setupMD(**kwargs)
         # params['struct'] is md.gro but could also be md.pdb --- depends entirely on qscript
         self.files[protocol] = params['struct']
         # Gromacs 4.5.x 'mdrun -c PDB'  fails if it cannot find 'residuetypes.dat'
         # so instead of fuffing with GMXLIB we just dump it into the directory
         try:
             shutil.copy(config.topfiles['residuetypes.dat'], self.dirs[protocol])
-        except:
-            logger.warn("Failed to copy 'residuetypes.dat': mdrun will likely fail to write a final structure")
+        except IOError:
+            logger.warning("Failed to copy 'residuetypes.dat': mdrun will likely fail to write a final structure")
 
         self.journal.completed(protocol)
         return params
@@ -583,7 +589,7 @@ class Simulation(Journalled):
         """
         # user structure or relaxed or restrained or solvated
         kwargs.setdefault('struct', self.get_last_structure())
-        kwargs.setdefault('t',self.get_last_checkpoint()) # Pass checkpoint file from md_relaxed
+        kwargs.setdefault('t', self.get_last_checkpoint())  # Pass checkpoint file from md_relaxed
         kwargs.setdefault('mdp', self.mdp['MD_NPT'])
         return self._MD('MD_NPT', **kwargs)
 
@@ -597,7 +603,7 @@ class Simulation(Journalled):
         return value
 
     @staticmethod
-    def _lastnotempty(l):
+    def _lastnotempty(l) -> Optional[Any]:
         """Return the last non-empty value in list *l* (or None :-p)"""
         nonempty = [None] + [x for x in l if not (x is None or x == "" or x == [])]
         return nonempty[-1]
@@ -610,29 +616,35 @@ class Simulation(Journalled):
         """Returns the checkpoint of the most advanced step in the protocol.
         Relies on md.gro being present from previous simulation, assumes that checkpoint is then present.
         """
-        return self._lastnotempty([self.files[name] for name in self.checkpoints]).replace('.gro','.cpt')
+        if self._lastnotempty([self.files[name] for name in self.checkpoints]) is not None:
+            return self._lastnotempty([self.files[name] for name in self.checkpoints]).replace('.gro', '.cpt')
+        return None
+
 
 class WaterSimulation(Simulation):
     """Equilibrium MD of a solute in a box of water."""
     solvent_default = 'water'
     dirname_default = os.path.join(Simulation.topdir_default, solvent_default)
 
+
 class CyclohexaneSimulation(Simulation):
     """Equilibrium MD of a solute in a box of cyclohexane."""
     solvent_default = 'cyclohexane'
     dirname_default = os.path.join(Simulation.topdir_default, solvent_default)
+
 
 class OctanolSimulation(Simulation):
     """Equilibrium MD of a solute in a box of octanol."""
     solvent_default = 'octanol'
     dirname_default = os.path.join(Simulation.topdir_default, solvent_default)
 
+
 class WetOctanolSimulation(Simulation):
     """Equilibrium MD of a solute in a box of wet octanol."""
     solvent_default = 'wetoctanol'
     dirname_default = os.path.join(Simulation.topdir_default, solvent_default)
 
-    def  _setup_solvate(self, **kwargs):
+    def _setup_solvate(self, **kwargs):
         sol = gromacs.setup.solvate_sol(**kwargs)
         with in_dir(self.dirs.solvation, create=False):
             u = mda.Universe('solvated.gro')

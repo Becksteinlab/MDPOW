@@ -71,7 +71,7 @@ def setupMD(S, protocol, cfg):
 
 def get_mdp_files(cfg, protocols):
     """Get file names of MDP files from *cfg* for all *protocols*"""
-    import ConfigParser
+    from .config import POWConfigParser
 
     mdpfiles = {}
     for protocol in protocols:
@@ -306,7 +306,7 @@ def fep_simulation(cfg, solvent, **kwargs):
     equil_savefilename = os.path.join(topdir, "%(solvent)s.simulation" % vars())
     try:
         equil_S = EquilSimulation(filename=equil_savefilename)
-    except IOError, err:
+    except IOError as err:
         if err.errno == errno.ENOENT:
             logger.critical("Missing the equilibrium simulation %(equil_savefilename)r.", vars())
             logger.critical("Run `mdpow-equilibrium -S %s %s'  first!", solvent, "RUNINPUT.cfg")

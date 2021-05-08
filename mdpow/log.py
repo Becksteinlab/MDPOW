@@ -29,6 +29,7 @@ from __future__ import absolute_import
 
 import logging
 
+
 def create(logname, logfile):
     """Create a top level logger.
 
@@ -55,6 +56,7 @@ def create(logname, logfile):
 
     return logger
 
+
 def clear_handlers(logger):
     """clean out handlers in the library top level logger
 
@@ -62,5 +64,3 @@ def clear_handlers(logger):
     """
     for h in logger.handlers:
         logger.removeHandler(h)
-
-
