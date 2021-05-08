@@ -27,7 +27,7 @@ class TestEquilibriumScript(object):
     def test_basic_run(self):
         with in_dir(self.tmpdir.name, create=False):
             try:
-                self._run_equil('water','benzene/')
+                self._run_equil('water', 'benzene/')
                 self._new_structures()
             except Exception as err:
                 raise AssertionError('Equilibration simulations failed with exception:\n{0}'.format(str(err)))
@@ -42,4 +42,3 @@ class TestEquilibriumScript(object):
         assert os.path.exists(
             os.path.join(self.tmpdir.name,
                          'benzene', 'Equilibrium', 'water', 'MD_NPT', 'md.gro'))
-

@@ -52,6 +52,7 @@ from __future__ import absolute_import
 
 import os
 from collections import defaultdict
+from typing import Optional, Dict, List
 
 import logging
 logger = logging.getLogger("mdpow.forecefields")
@@ -78,6 +79,7 @@ tip4pd      TIP4P-D    TIP 4-point with modified dispersion (TIP4P-D)
 tip4pew     TIP4PEW    TIP 4-point modified for use with Ewald techniques (TIP4PEW)
 """
 
+
 class GromacsSolventModel(object):
     """Data for a solvent model in Gromacs."""
     def __init__(self, identifier, name=None, itp=None, coordinates=None,
@@ -96,6 +98,7 @@ class GromacsSolventModel(object):
     def __repr__(self):
         return "<{0[name]} water: identifier={0[identifier]}, ff={0[forcefield]}>".format(vars(self))
 
+
 #: For some water models we cannot derive the filename for the equilibrated box
 #: so we supply them explicitly.
 SPECIAL_WATER_COORDINATE_FILES = defaultdict(
@@ -107,6 +110,7 @@ SPECIAL_WATER_COORDINATE_FILES = defaultdict(
     tip4pd='tip4p.gro',
     tip4pew='tip4p.gro',
 )
+
 
 def _create_water_models(watermodelsdat):
     models = {}
@@ -133,6 +137,7 @@ DEFAULT_WATER_MODEL = "tip4p"
 #: For OPLS-AA the following ones are available.
 GROMACS_WATER_MODELS = _create_water_models(GMX_WATERMODELS_DAT)
 
+
 def get_water_model(watermodel=DEFAULT_WATER_MODEL):
     """Return a :class:`GromacsSolventModel` corresponding to identifier *watermodel*"""
 
@@ -143,6 +148,7 @@ def get_water_model(watermodel=DEFAULT_WATER_MODEL):
             watermodel, ", ".join(GROMACS_WATER_MODELS.keys()))
         logger.error(msg)
         raise ValueError(msg)
+
 
 #: Other solvents (not water, see :data:`GROMACS_WATER_MODELS` for those).
 new_octanol = '''Zangi R (2018) Refinement of the OPLSAA force-field
@@ -188,6 +194,7 @@ GROMACS_SOLVENT_MODELS = {
     'AMBER': AMBER_SOLVENT_MODELS,
     }
 
+
 def get_solvent_identifier(solvent_type, model=None, forcefield='OPLS-AA'):
     """Get the identifier for a solvent model.
 
@@ -213,7 +220,7 @@ def get_solvent_identifier(solvent_type, model=None, forcefield='OPLS-AA'):
     :Returns: Either an identifier or ``None``
 
     """
-    if solvent_type is "water":
+    if solvent_type == "water":
         identifier = model if not model in (None, 'water') else DEFAULT_WATER_MODEL
         return identifier if identifier in GROMACS_WATER_MODELS else None
     if not model in GROMACS_SOLVENT_MODELS[forcefield]:
@@ -230,7 +237,7 @@ def get_solvent_model(identifier, forcefield='OPLS-AA'):
     If identifier is "water" then the :data:`DEFAULT_WATER_MODEL` is assumed.
     """
 
-    if identifier is "water":
+    if identifier == "water":
         identifier = DEFAULT_WATER_MODEL
     try:
         return GROMACS_WATER_MODELS[identifier]
