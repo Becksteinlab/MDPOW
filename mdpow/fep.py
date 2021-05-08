@@ -1159,6 +1159,8 @@ class Gsolv(Journalled):
         Run :meth:`mdpow.fep.Gsolv.analyze` first.
 
         All *kwargs* are passed on to :func:`pylab.errorbar`.
+
+        :Returns: The axes of the subplot.
         """
         import matplotlib
         import matplotlib.pyplot as plt
@@ -1192,6 +1194,8 @@ class Gsolv(Journalled):
         fig.suptitle(r"Free energy difference $\Delta A^{0}_{\rm{%s}}$ for %s: $%.2f\pm%.2f$ kJ/mol" %
               ((self.solvent_type, self.molecule,) + self.results.DeltaA.Gibbs.astuple()))
         fig.savefig('DeltaA.png')
+        plt.close()
+        return fig
 
     def qsub(self, script=None):
         """Submit a batch script locally.
