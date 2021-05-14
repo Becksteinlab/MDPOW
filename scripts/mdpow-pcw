@@ -134,8 +134,7 @@ def run_pcw(directory, **kwargs):
         if plotfile == 'auto':
             plotfile = auto_plotfile(directory, gwat)
         import matplotlib
-        matplotlib.use('agg')  # quick non-interactive plotting
-        from pylab import clf, title, savefig
+        from matplotlib.pyplot import clf, title, savefig
         clf()
         gwat.plot(color='k', ls='--')
         gcyc.plot(color='r', ls='-')
