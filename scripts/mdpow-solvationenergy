@@ -105,11 +105,39 @@ def run_gsolv(solvent, directory, **kwargs):
 
     gsolv = load_gsolv(solvent, directory, permissive=kwargs.pop('permissive',False),)
 
+    if not hasattr(gsolv, 'start'):
+        gsolv.start = kwargs.pop('start', 0)
+    if not hasattr(gsolv, 'stop'):
+        gsolv.stop = kwargs.pop('stop', None)
+    if not hasattr(gsolv, 'SI'):
+        kwargs.setdefault('SI', True)
+    else:
+        kwargs.setdefault('SI', gsolv.SI)
+
+    # for this version. use the method given instead of the one in the input cfg file
+    gsolv.method = kwargs.pop('method', 'MBAR')
+    estimator = kwargs.pop('estimator', 'alchemlyb')
+
     # do the analysis (only use keywords that are needed for FEP.analysis())
     akw = {'stride': kwargs.pop('stride', None), 'force': kwargs.pop('force', False)}
+    if not estimator in ('mdpow', 'alchemlyb'):
+        errmsg = "estimator = %r is not supported, must be 'mdpow' or 'alchemlyb'" % estimator
+        logger.error(errmsg)
+        raise ValueError(errmsg)
     if akw['force']:
         logger.info("[%(directory)s] Forcing (re)analysis of hydration free energy data", vars())
-        gsolv.analyze(**akw)
+        if estimator == 'mdpow':
+            if G.method != "TI":
+                errmsg = "Method %s is not implemented in MDPOW, use estimator='alchemlyb'" % G.method
+                logger.error(errmsg)
+                raise ValueError(errmsg)
+            gsolv.start = kwargs.pop('start', 0)
+            gsolv.stop = kwargs.pop('stop', None)
+            gsolv.SI = kwargs.pop('stop', False)
+            gsolv.analyze(**akw)
+
+        elif estimator == 'alchemlyb':
+            gsolv.analyze_alchemlyb(**akw)
     # make sure that we have data
     try:
         gsolv.results.DeltaA.Gibbs
@@ -117,8 +145,19 @@ def run_gsolv(solvent, directory, **kwargs):
         gsolv.logger_DeltaA0()
     except (KeyError, AttributeError):   # KeyError because results is a AttributeDict
         logger.info("[%(directory)s] Analyzing %(solvent)s solvation free energy data for the first time", vars())
-        gsolv.analyze(**akw)
+        if estimator == 'mdpow':
+            if G.method != "TI":
+                errmsg = "Method %s is not implemented in MDPOW, use estimator='alchemlyb'" % G.method
+                logger.error(errmsg)
+                raise ValueError(errmsg)
+            gsolv.start = kwargs.pop('start', 0)
+            gsolv.stop = kwargs.pop('stop', None)
+            gsolv.SI = kwargs.pop('stop', False)
+            gsolv.analyze(**akw)
 
+        elif estimator == 'alchemlyb':
+            gsolv.analyze_alchemlyb(**akw)
+            
     if datstat(gsolv) == 'BAD':
         logger.warning("[%s] Possible file corruption: %s:%s", directory, solvent, datstat(gsolv))
 
@@ -129,6 +168,8 @@ def run_gsolv(solvent, directory, **kwargs):
             logger.info("[%s] Wrote solvation energy terms to %r", directory, kwargs['energyfile'])
 
     plotfile = kwargs.get('plotfile', None)
+    if estimator == 'alchemlyb':
+        plotfile = False
     if plotfile:
         if plotfile == 'auto':
             plotfile = auto_plotfile(directory, gsolv)
@@ -185,31 +226,48 @@ if __name__ == "__main__":
     parser.add_option('-p', '--plotfile', dest="plotfile",
                       help="plot dV/dlambda to FILE; use png or pdf suffix to "
                       "determine the file type. 'auto' generates a pdf file "
-                      "DIRECTORY/dVdl_<molname>_<solvent>.pdf and 'None' disables it [%default]",
+                      "DIRECTORY/dVdl_MOLID_pow.pdf and 'None' disables it [%default]"
+                      "The plot function is only available for mdpow estimator,"
+                      "and is disabled when using alchemlyb estimators.",
+                      metavar="FILE")
+    parser.add_option('--solvent', '-S', dest='solvent',
+                      metavar="NAME",
+                      help="solvent NAME for compound, 'water', 'octanol', or 'cyclohexane' [%default]")
+    parser.add_option('-o', '--outfile', dest="outfile",
+                      help="append one-line results summary to FILE [%default]",
                       metavar="FILE")
     parser.add_option('-e', '--energies', dest="energyfile",
                       help="append solvation free energies to FILE [%default]",
                       metavar="FILE")
+    parser.add_option('--estimator', dest="estimator", default='alchemlyb',
+                      help="choose the estimator to be used, alchemlyb or mdpow estimators")
+    parser.add_option('--method', dest="method", default='MBAR',
+                      help="choose the method to calculate free energy",)
     parser.add_option('--force', dest='force',
                       action="store_true",
                       help="force rereading all data [%default]")
+    parser.add_option('--noSI', dest='SI',
+                      action="store_false",
+                      help="Disable statistical inefficiency analysis"
+                      "Statitical inefficiency analysis is performed by default when using"
+                      "alchemlyb estimators and is disabled when using mdpow estimator.")
     parser.add_option('-s', '--stride', dest="stride", type='int',
                       help="Use every N-th datapoint from the original dV/dlambda data. "
-                      "Using a number larger than 1 can significantly reduce memory usage "
-                      "with little impact on the precision of the final output. [%default]",
+                      "[%default]",
                       metavar="N")
-    parser.add_option('--solvent', '-S', dest='solvent',
-                      metavar="NAME",
-                      help="solvent NAME for compound, 'water', 'octanol', or 'cyclohexane' [%default]")
+    parser.add_option('--start', dest="start", type='int',
+                      help="Start point for the data used from the original dV/dlambda data. ")
+    parser.add_option('--stop', dest="stop", type='int',
+                      help="Stop point for the data used from the original dV/dlambda data.",)
     parser.add_option('--ignore-corrupted', dest="permissive",
                       action="store_true",
                       help="skip lines in the md.xvg files that cannot be parsed. "
                       "WARNING: Other lines in the file might have been corrupted in "
                       "such a way that they appear correct but are in fact wrong. "
                       "WRONG RESULTS CAN OCCUR! USE AT YOUR OWN RISK [%default]")
-    parser.set_defaults(plotfile="auto",
-                        energyfile="gsolv.txt",
-                        force=False, stride=10, permissive=False, solvent='water')
+    parser.set_defaults(plotfile="none",
+                        outfile="pow.txt", energyfile="energies.txt",
+                        force=False, stride=1, permissive=False, SI=True)
     opts,args = parser.parse_args()
 
     if len(args) == 0:
@@ -230,7 +288,9 @@ if __name__ == "__main__":
         try:
             run_gsolv(opts.solvent, directory, plotfile=opts.plotfile,
                      energyfile=realpath_or_none(opts.energyfile),
-                     force=opts.force, stride=opts.stride, permissive=opts.permissive)
+                     force=opts.force, stride=opts.stride, start=opts.start,
+                     stop=opts.stop, estimator=opts.estimator,
+                     method=opts.method, permissive=opts.permissive, SI=opts.SI)
         except (OSError, IOError), err:
             logger.error("Running analysis in directory %r failed: %s", directory, str(err))
         except Exception, err:
