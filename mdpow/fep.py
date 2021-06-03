@@ -1372,9 +1372,6 @@ def p_transfer(G1, G2, **kwargs):
                     errmsg = "Method %s is not implemented in MDPOW, use estimator='alchemlyb'" % G.method
                     logger.error(errmsg)
                     raise ValueError(errmsg)
-                G.start = kwargs.pop('start', 0)
-                G.stop = kwargs.pop('stop', None)
-                G.SI = kwargs.pop('stop', False)
                 G.analyze(**kwargs)
             elif estimator == 'alchemlyb':
                 G.analyze_alchemlyb(**kwargs)
