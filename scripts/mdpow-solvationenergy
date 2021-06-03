@@ -268,10 +268,10 @@ if __name__ == "__main__":
             continue
         logger.info("Analyzing directory %r... (can take a while)", directory)
 
-        opts.plotfile = parse_filename_option(opts.plotfile)
+        plotfile = parse_filename_option(opts.plotfile)
 
         try:
-            run_gsolv(opts.solvent, directory, plotfile=opts.plotfile,
+            run_gsolv(opts.solvent, directory, plotfile=plotfile,
                      energyfile=realpath_or_none(opts.energyfile),
                      force=opts.force, stride=opts.stride, start=opts.start,
                      stop=opts.stop, estimator=opts.estimator,
