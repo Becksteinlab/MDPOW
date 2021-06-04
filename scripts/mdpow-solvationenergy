@@ -104,17 +104,19 @@ def run_gsolv(solvent, directory, **kwargs):
         return _datastatus[g.contains_corrupted_xvgs()]
 
     gsolv = load_gsolv(solvent, directory, permissive=kwargs.pop('permissive',False),)
+    logger.info("The solvent is %s .", solvent)
 
     # for this version. use the method given instead of the one in the input cfg file
-    gsolv.method = kwargs.pop('method', 'MBAR')
     estimator = kwargs.pop('estimator', 'alchemlyb')
     if not estimator in ('mdpow', 'alchemlyb'):
         errmsg = "estimator = %r is not supported, must be 'mdpow' or 'alchemlyb'" % estimator
         logger.error(errmsg)
         raise ValueError(errmsg)
+
+    gsolv.method = kwargs.pop('method', 'MBAR')
     if estimator == 'mdpow':
         if gsolv.method != "TI":
-            errmsg = "Method %s is not implemented in MDPOW, use estimator='alchemlyb'" % G.method
+            errmsg = "Method %s is not implemented in MDPOW, use estimator='alchemlyb'" % gsolv.method
             logger.error(errmsg)
             raise ValueError(errmsg)
 
@@ -133,11 +135,22 @@ def run_gsolv(solvent, directory, **kwargs):
     # make sure that we have data
     if akw['force'] or (not hasattr(gsolv.results.DeltaA, 'Gibbs')):
         logger.info("[%(directory)s] Forcing (re)analysis of hydration free energy data", vars())
-        logger.info("[%(directory)s] Reading existing data from pickle file.", vars())
+        # write out the settings when the analysis is performed
+        logger.info("Estimator is %s .", estimator)
+        logger.info("Free energy calculation method is %s .", gsolv.method)
+        logger.info("Analysis starts from frame %s .", gsolv.start)
+        logger.info("Analysis stops at frame %s .", gsolv.stop)
+        logger.info("Analysis stride is %s .", akw['stride'])
+        if kwargs['SI']:
+            logger.info("Statistial inefficiency analysis will be performed.")
+        else:
+            logger.info("Statistial inefficiency analysis won't be performed.")
         if estimator == 'mdpow':
             gsolv.analyze(**akw)
         elif estimator == 'alchemlyb':
             gsolv.analyze_alchemlyb(**akw)
+    else:
+        logger.info("[%(directory)s] Reading existing data from pickle file.", vars())
 
     gsolv.logger_DeltaA0()
 
@@ -243,9 +256,9 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--stride', dest="stride", type=int, default=1,
                         help="Use every N-th datapoint from the original dV/dlambda data. ",
                         metavar="N")
-    parser.add_argument('--start', dest="start", type=int,
+    parser.add_argument('--start', dest="start", type=int, default=0,
                         help="Start point for the data used from the original dV/dlambda data. ")
-    parser.add_argument('--stop', dest="stop", type=int,
+    parser.add_argument('--stop', dest="stop", type=int, default=None,
                         help="Stop point for the data used from the original dV/dlambda data. ",)
     parser.add_argument('--ignore-corrupted', dest="permissive",
                         action="store_true", default=False,
