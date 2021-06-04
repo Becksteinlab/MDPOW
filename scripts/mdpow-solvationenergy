@@ -138,16 +138,17 @@ def run_gsolv(solvent, directory, **kwargs):
         # write out the settings when the analysis is performed
         logger.info("Estimator is %s.", estimator)
         logger.info("Free energy calculation method is %s.", gsolv.method)
-        logger.info("Analysis starts from frame %s.", gsolv.start)
-        logger.info("Analysis stops at frame %s.", gsolv.stop)
         logger.info("Analysis stride is %s.", akw['stride'])
-        if kwargs['SI']:
-            logger.info("Statistial inefficiency analysis will be performed.")
-        else:
-            logger.info("Statistial inefficiency analysis won't be performed.")
         if estimator == 'mdpow':
             gsolv.analyze(**akw)
         elif estimator == 'alchemlyb':
+            # the options only available for alchemlyb
+            logger.info("Analysis starts from frame %s.", gsolv.start)
+            logger.info("Analysis stops at frame %s.", gsolv.stop)
+            if kwargs['SI']:
+                logger.info("Statistial inefficiency analysis will be performed.")
+            else:
+                logger.info("Statistial inefficiency analysis won't be performed.")
             gsolv.analyze_alchemlyb(**akw)
     else:
         logger.info("[%(directory)s] Reading existing data from pickle file.", vars())
