@@ -1346,6 +1346,7 @@ def p_transfer(G1, G2, **kwargs):
         errmsg = "estimator = %r is not supported, must be 'mdpow' or 'alchemlyb'" % estimator
         logger.error(errmsg)
         raise ValueError(errmsg)
+
     if G1.molecule != G2.molecule:
         raise ValueError("The two simulations were done for different molecules.")
     if G1.Temperature != G2.Temperature:
@@ -1366,14 +1367,26 @@ def p_transfer(G1, G2, **kwargs):
 
         # for this version. use the method given instead of the one in the input cfg file
         G.method = kwargs.pop('method', 'MBAR')
-        if kwargs['force']:
+        if estimator == 'mdpow':
+            if G.method != "TI":
+                errmsg = "Method %s is not implemented in MDPOW, use estimator='alchemlyb'" % G.method
+                logger.error(errmsg)
+                raise ValueError(errmsg)
+
+        if kwargs['force'] or (not hasattr(G.results.DeltaA, 'Gibbs')):
+            # write out the settings when the analysis is performed
+            logger.info("Estimator is %s.", estimator)
+            logger.info("Free energy calculation method is %s.", G.method)
+            logger.info("Analysis stride is %s.", akw['stride'])
             if estimator == 'mdpow':
-                if G.method != "TI":
-                    errmsg = "Method %s is not implemented in MDPOW, use estimator='alchemlyb'" % G.method
-                    logger.error(errmsg)
-                    raise ValueError(errmsg)
                 G.analyze(**kwargs)
             elif estimator == 'alchemlyb':
+                logger.info("Analysis starts from frame %s.", G.start)
+                logger.info("Analysis stops at frame %s.", G.stop)
+                if kwargs['SI']:
+                    logger.info("Statistial inefficiency analysis will be performed.")
+                else:
+                    logger.info("Statistial inefficiency analysis won't be performed.")
                 G.analyze_alchemlyb(**kwargs)
 
         try:
