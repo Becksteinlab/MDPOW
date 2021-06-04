@@ -950,6 +950,7 @@ class Gsolv(Journalled):
         .. _p526: http://books.google.co.uk/books?id=XmyO2oRUg0cC&pg=PA526
         """
         stride = stride or self.stride
+        logger.info("Analysis stride is %s.",stride)
 
         if force or not self.has_dVdl():
             try:
@@ -1021,7 +1022,7 @@ class Gsolv(Journalled):
                 xvg_file = self.dgdl_xvg(self.wdir(component, l))
                 xvg_df = extract(xvg_file, T=self.Temperature).iloc[start:stop:stride]
                 if SI:
-                    logger.info("Performing statistical inefficiency analysis for window %s %s.", component, l)
+                    logger.info("Performing statistical inefficiency analysis for window %s %04d" % (component, 1000 * l))
                     ts = _extract_dataframe(xvg_file).iloc[start:stop:stride]
                     ts = pd.DataFrame({'time': ts.iloc[:,0], 'dhdl': ts.iloc[:,1]})
                     ts = ts.set_index('time')
@@ -1043,6 +1044,10 @@ class Gsolv(Journalled):
         stride = stride or self.stride
         start = start or self.start
         stop = stop or self.stop
+
+        logger.info("Analysis stride is %s.",stride)
+        logger.info("Analysis starts from frame %s.",start)
+        logger.info("Analysis stops at frame %s.", stop)
 
         if self.method in ['TI', 'BAR', 'MBAR']:
             estimator = self.estimators[self.method]['estimator']
@@ -1375,14 +1380,12 @@ def p_transfer(G1, G2, **kwargs):
 
         if kwargs['force'] or (not hasattr(G.results.DeltaA, 'Gibbs')):
             # write out the settings when the analysis is performed
+            logger.info("The solvent is %s .", G.solvent_type)
             logger.info("Estimator is %s.", estimator)
             logger.info("Free energy calculation method is %s.", G.method)
-            logger.info("Analysis stride is %s.", akw['stride'])
             if estimator == 'mdpow':
                 G.analyze(**kwargs)
             elif estimator == 'alchemlyb':
-                logger.info("Analysis starts from frame %s.", G.start)
-                logger.info("Analysis stops at frame %s.", G.stop)
                 if kwargs['SI']:
                     logger.info("Statistial inefficiency analysis will be performed.")
                 else:

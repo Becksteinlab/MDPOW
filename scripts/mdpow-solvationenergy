@@ -120,6 +120,9 @@ def run_gsolv(solvent, directory, **kwargs):
             logger.error(errmsg)
             raise ValueError(errmsg)
 
+    energyfile = kwargs.pop('energyfile', None)
+    plotfile = kwargs.pop('plotfile', None)
+
     if not hasattr(gsolv, 'start'):
         gsolv.start = kwargs.pop('start', 0)
     if not hasattr(gsolv, 'stop'):
@@ -129,27 +132,22 @@ def run_gsolv(solvent, directory, **kwargs):
     else:
         kwargs.setdefault('SI', gsolv.SI)
 
-    # do the analysis (only use keywords that are needed for FEP.analysis())
-    akw = {'stride': kwargs.pop('stride', None), 'force': kwargs.pop('force', False)}
-
     # make sure that we have data
-    if akw['force'] or (not hasattr(gsolv.results.DeltaA, 'Gibbs')):
+    if kwargs['force'] or (not hasattr(gsolv.results.DeltaA, 'Gibbs')):
         logger.info("[%(directory)s] Forcing (re)analysis of hydration free energy data", vars())
         # write out the settings when the analysis is performed
         logger.info("Estimator is %s.", estimator)
         logger.info("Free energy calculation method is %s.", gsolv.method)
-        logger.info("Analysis stride is %s.", akw['stride'])
         if estimator == 'mdpow':
+            # do the analysis (only use keywords that are needed for FEP.analysis())
+            akw = {'stride': kwargs.pop('stride', None), 'force': kwargs.pop('force', False)}
             gsolv.analyze(**akw)
         elif estimator == 'alchemlyb':
-            # the options only available for alchemlyb
-            logger.info("Analysis starts from frame %s.", gsolv.start)
-            logger.info("Analysis stops at frame %s.", gsolv.stop)
             if kwargs['SI']:
                 logger.info("Statistial inefficiency analysis will be performed.")
             else:
                 logger.info("Statistial inefficiency analysis won't be performed.")
-            gsolv.analyze_alchemlyb(**akw)
+            gsolv.analyze_alchemlyb(**kwargs)
     else:
         logger.info("[%(directory)s] Reading existing data from pickle file.", vars())
 
@@ -158,13 +156,12 @@ def run_gsolv(solvent, directory, **kwargs):
     if datstat(gsolv) == 'BAD':
         logger.warning("[%s] Possible file corruption: %s:%s", directory, solvent, datstat(gsolv))
 
-    if kwargs.get('energyfile', None):
+    if energyfile:
         with mdpow.filelock.FileLock(kwargs['energyfile'], timeout=2):
-            with open(kwargs['energyfile'], mode='a') as out:
+            with open(energyfile, mode='a') as out:
                 out.write(fmt_energy % (gsolv.summary(), directory))
             logger.info("[%s] Wrote solvation energy terms to %r", directory, kwargs['energyfile'])
 
-    plotfile = kwargs.get('plotfile', None)
     if estimator == 'alchemlyb':
         plotfile = False
     if plotfile:
@@ -286,10 +283,10 @@ if __name__ == "__main__":
 
         try:
             run_gsolv(opts.solvent, directory, plotfile=plotfile,
-                     energyfile=realpath_or_none(opts.energyfile),
-                     force=opts.force, stride=opts.stride, start=opts.start,
-                     stop=opts.stop, estimator=opts.estimator,
-                     method=opts.method, permissive=opts.permissive, SI=opts.SI)
+                      energyfile=realpath_or_none(opts.energyfile),
+                      force=opts.force, stride=opts.stride, start=opts.start,
+                      stop=opts.stop, estimator=opts.estimator,
+                      method=opts.method, permissive=opts.permissive, SI=opts.SI)
         except (OSError, IOError), err:
             logger.error("Running analysis in directory %r failed: %s", directory, str(err))
         except Exception, err:
