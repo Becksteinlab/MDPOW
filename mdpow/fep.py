@@ -1021,7 +1021,7 @@ class Gsolv(Journalled):
                 xvg_file = self.dgdl_xvg(self.wdir(component, l))
                 xvg_df = extract(xvg_file, T=self.Temperature).iloc[start:stop:stride]
                 if SI:
-                    logger.info("Perform statistical inefficiency analysis.")
+                    logger.info("Performing statistical inefficiency analysis for window %s %s.", component, l)
                     ts = _extract_dataframe(xvg_file).iloc[start:stop:stride]
                     ts = pd.DataFrame({'time': ts.iloc[:,0], 'dhdl': ts.iloc[:,1]})
                     ts = ts.set_index('time')
