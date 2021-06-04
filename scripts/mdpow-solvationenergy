@@ -136,11 +136,11 @@ def run_gsolv(solvent, directory, **kwargs):
     if akw['force'] or (not hasattr(gsolv.results.DeltaA, 'Gibbs')):
         logger.info("[%(directory)s] Forcing (re)analysis of hydration free energy data", vars())
         # write out the settings when the analysis is performed
-        logger.info("Estimator is %s .", estimator)
-        logger.info("Free energy calculation method is %s .", gsolv.method)
-        logger.info("Analysis starts from frame %s .", gsolv.start)
-        logger.info("Analysis stops at frame %s .", gsolv.stop)
-        logger.info("Analysis stride is %s .", akw['stride'])
+        logger.info("Estimator is %s.", estimator)
+        logger.info("Free energy calculation method is %s.", gsolv.method)
+        logger.info("Analysis starts from frame %s.", gsolv.start)
+        logger.info("Analysis stops at frame %s.", gsolv.stop)
+        logger.info("Analysis stride is %s.", akw['stride'])
         if kwargs['SI']:
             logger.info("Statistial inefficiency analysis will be performed.")
         else:
@@ -250,16 +250,16 @@ if __name__ == "__main__":
                         help="force rereading all data ")
     parser.add_argument('--noSI', dest='SI',
                         action="store_false", default=True,
-                        help="Disable statistical inefficiency analysis"
+                        help="disable statistical inefficiency analysis. "
                         "Statitical inefficiency analysis is performed by default when using"
                         "alchemlyb estimators and is disabled when using mdpow estimator. ")
     parser.add_argument('-s', '--stride', dest="stride", type=int, default=1,
-                        help="Use every N-th datapoint from the original dV/dlambda data. ",
+                        help="use every N-th datapoint from the original dV/dlambda data. ",
                         metavar="N")
     parser.add_argument('--start', dest="start", type=int, default=0,
-                        help="Start point for the data used from the original dV/dlambda data. ")
+                        help="start point for the data used from the original dV/dlambda data. ")
     parser.add_argument('--stop', dest="stop", type=int, default=None,
-                        help="Stop point for the data used from the original dV/dlambda data. ",)
+                        help="stop point for the data used from the original dV/dlambda data. ",)
     parser.add_argument('--ignore-corrupted', dest="permissive",
                         action="store_true", default=False,
                         help="skip lines in the md.xvg files that cannot be parsed. "
