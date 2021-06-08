@@ -1360,18 +1360,19 @@ def p_transfer(G1, G2, **kwargs):
     logger.info("[%s] transfer free energy %s --> %s calculation",
                 G1.molecule, G1.solvent_type, G2.solvent_type)
     for G in (G1, G2):
+        G_kwargs = kwargs.copy()
         # for fep files generated with old code which doesn't have these attributes
         if not hasattr(G, 'start'):
-            G.start = kwargs.pop('start', 0)
+            G.start = G_kwargs.pop('start', 0)
         if not hasattr(G, 'stop'):
-            G.stop = kwargs.pop('stop', None)
+            G.stop = G_kwargs.pop('stop', None)
         if not hasattr(G, 'SI'):
-            kwargs.setdefault('SI', True)
+            G_kwargs.setdefault('SI', True)
         else:
-            kwargs.setdefault('SI', G.SI)
+            G_kwargs.setdefault('SI', G.SI)
 
         # for this version. use the method given instead of the one in the input cfg file
-        G.method = kwargs.pop('method', 'MBAR')
+        G.method = G_kwargs.pop('method', 'MBAR')
         if estimator == 'mdpow':
             if G.method != "TI":
                 errmsg = "Method %s is not implemented in MDPOW, use estimator='alchemlyb'" % G.method
@@ -1384,23 +1385,14 @@ def p_transfer(G1, G2, **kwargs):
             logger.info("Estimator is %s.", estimator)
             logger.info("Free energy calculation method is %s.", G.method)
             if estimator == 'mdpow':
-                G.analyze(**kwargs)
+                G.analyze(**G_kwargs)
             elif estimator == 'alchemlyb':
-                if kwargs['SI']:
+                if G_kwargs['SI']:
                     logger.info("Statistial inefficiency analysis will be performed.")
                 else:
                     logger.info("Statistial inefficiency analysis won't be performed.")
-                G.analyze_alchemlyb(**kwargs)
+                G.analyze_alchemlyb(**G_kwargs)
 
-        try:
-            G.results.DeltaA.Gibbs
-            G.logger_DeltaA0()
-        except (KeyError, AttributeError):   # KeyError because results is a AttributeDict
-            logger.warn("Must analyze simulation because no hydration free energy data available...")
-            if estimator == 'mdpow':
-                G.analyze(**kwargs)
-            elif estimator == 'alchemlyb':
-                G.analyze_alchemlyb(**kwargs)
     # x.Gibbs are QuantityWithError so they do error propagation
     transferFE = G2.results.DeltaA.Gibbs - G1.results.DeltaA.Gibbs
     # note minus sign, with our convention of the free energy difference to be
