@@ -209,7 +209,7 @@ if __name__ == "__main__":
     parser.add_option('--noSI', dest='SI',
                       action="store_false",
                       help="Disable statistical inefficiency analysis"
-                      "Statitical inefficiency analysis is performed by default when using"
+                      "Statistical inefficiency analysis is performed by default when using"
                       "alchemlyb estimators and is disabled when using mdpow estimator.")
     parser.add_option('-s', '--stride', dest="stride", type='int',
                       help="Use every N-th datapoint from the original dV/dlambda data. "

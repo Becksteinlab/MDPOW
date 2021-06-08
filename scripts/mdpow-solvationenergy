@@ -104,7 +104,7 @@ def run_gsolv(solvent, directory, **kwargs):
         return _datastatus[g.contains_corrupted_xvgs()]
 
     gsolv = load_gsolv(solvent, directory, permissive=kwargs.pop('permissive',False),)
-    logger.info("The solvent is %s .", solvent)
+    logger.info("The solvent is %s.", solvent)
 
     # for this version. use the method given instead of the one in the input cfg file
     estimator = kwargs.pop('estimator', 'alchemlyb')
@@ -246,10 +246,15 @@ if __name__ == "__main__":
     parser.add_argument('--force', dest='force', default=False,
                         action="store_true",
                         help="force rereading all data ")
-    parser.add_argument('--noSI', dest='SI',
+    parser.add_argument('--SI', dest='SI',
+                        action="store_true", default=True,
+                        help="enable statistical inefficiency (SI) analysis. "
+                             "Statistical inefficiency analysis is performed by default when using"
+                             "alchemlyb estimators and is always disabled when using mdpow estimator.")
+    parser.add_argument('--no-SI', dest='SI',
                         action="store_false", default=True,
                         help="disable statistical inefficiency analysis. "
-                        "Statitical inefficiency analysis is performed by default when using"
+                        "Statistical inefficiency analysis is performed by default when using"
                         "alchemlyb estimators and is disabled when using mdpow estimator. ")
     parser.add_argument('-s', '--stride', dest="stride", type=int, default=1,
                         help="use every N-th datapoint from the original dV/dlambda data. ",
