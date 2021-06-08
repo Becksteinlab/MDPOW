@@ -1388,9 +1388,9 @@ def p_transfer(G1, G2, **kwargs):
                 G.analyze(**G_kwargs)
             elif estimator == 'alchemlyb':
                 if G_kwargs['SI']:
-                    logger.info("Statistial inefficiency analysis will be performed.")
+                    logger.info("Statistical inefficiency analysis will be performed.")
                 else:
-                    logger.info("Statistial inefficiency analysis won't be performed.")
+                    logger.info("Statistical inefficiency analysis won't be performed.")
                 G.analyze_alchemlyb(**G_kwargs)
 
     # x.Gibbs are QuantityWithError so they do error propagation

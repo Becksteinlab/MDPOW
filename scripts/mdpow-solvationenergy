@@ -144,9 +144,9 @@ def run_gsolv(solvent, directory, **kwargs):
             gsolv.analyze(**akw)
         elif estimator == 'alchemlyb':
             if kwargs['SI']:
-                logger.info("Statistial inefficiency analysis will be performed.")
+                logger.info("Statistical inefficiency analysis will be performed.")
             else:
-                logger.info("Statistial inefficiency analysis won't be performed.")
+                logger.info("Statistical inefficiency analysis won't be performed.")
             gsolv.analyze_alchemlyb(**kwargs)
     else:
         logger.info("[%(directory)s] Reading existing data from pickle file.", vars())
