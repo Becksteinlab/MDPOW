@@ -157,10 +157,10 @@ def run_gsolv(solvent, directory, **kwargs):
         logger.warning("[%s] Possible file corruption: %s:%s", directory, solvent, datstat(gsolv))
 
     if energyfile:
-        with mdpow.filelock.FileLock(kwargs['energyfile'], timeout=2):
+        with mdpow.filelock.FileLock(energyfile, timeout=2):
             with open(energyfile, mode='a') as out:
                 out.write(fmt_energy % (gsolv.summary(), directory))
-            logger.info("[%s] Wrote solvation energy terms to %r", directory, kwargs['energyfile'])
+            logger.info("[%s] Wrote solvation energy terms to %r", directory, energyfile)
 
     if estimator == 'alchemlyb':
         plotfile = False
