@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""%prog [options] DIRECTORY [DIRECTORY ...]
+"""%(prog)s [options] DIRECTORY [DIRECTORY ...]
 
 Run the free energy analysis for water and octanol in <DIRECTORY>/FEP
 and return the octanol-water partition coefficient log P_ow.

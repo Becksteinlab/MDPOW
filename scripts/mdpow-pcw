@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""%prog [options] DIRECTORY [DIRECTORY ...]
+"""%(prog)s [options] DIRECTORY [DIRECTORY ...]
 
 Run the free energy analysis for water and cyclohexane in <DIRECTORY>/FEP
 and return the cyclohexane-water partition coefficient log P_cw.
