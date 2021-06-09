@@ -271,11 +271,12 @@ if __name__ == "__main__":
                         "WRONG RESULTS CAN OCCUR! USE AT YOUR OWN RISK ")
     opts = parser.parse_args()
 
-    if len(opts.directory) == 0:
-        logger.fatal("A directory is required. See --help.")
-        sys.exit(1)
-    elif len(opts.directory) > 1 and not opts.plotfile.lower() in ('none', 'auto'):
+    if len(opts.directory) > 1 and not opts.plotfile.lower() in ('none', 'auto'):
         logger.fatal("Can only use --plotfile=None or --plotfile=auto with multiple directories.")
+        sys.exit(1)
+
+    if opts.estimator == 'mdpow' and opt.SI:
+        logger.fatal("Statistical inefficiency analysis is only available for estimator 'alchemlyb'.")
         sys.exit(1)
 
     for directory in opts.directory:
