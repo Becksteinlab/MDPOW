@@ -190,7 +190,7 @@ if __name__ == "__main__":
                       help="plot dV/dlambda to FILE; use png or pdf suffix to "
                       "determine the file type. 'auto' generates a pdf file "
                       "DIRECTORY/dVdl_MOLID_pow.pdf and 'None' disables it [%default]"
-                      "The plot function is only available for mdpow estimator,"
+                      "The plot function is only available for mdpow estimator, "
                       "and is disabled when using alchemlyb estimators.",
                       metavar="FILE")
     parser.add_option('-o', '--outfile', dest="outfile",
@@ -208,8 +208,8 @@ if __name__ == "__main__":
                       help="force rereading all data [%default]")
     parser.add_option('--noSI', dest='SI',
                       action="store_false",
-                      help="Disable statistical inefficiency analysis"
-                      "Statistical inefficiency analysis is performed by default when using"
+                      help="Disable statistical inefficiency analysis. "
+                      "Statistical inefficiency analysis is performed by default when using "
                       "alchemlyb estimators and is disabled when using mdpow estimator.")
     parser.add_option('-s', '--stride', dest="stride", type='int',
                       help="Use every N-th datapoint from the original dV/dlambda data. "
