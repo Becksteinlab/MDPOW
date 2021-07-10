@@ -1,3 +1,5 @@
+# MDPOW runinput file
+#
 # default run input file for the the equilibrium and FEP simulations;
 # values can be overriden from your own configuration file
 
