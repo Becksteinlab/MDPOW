@@ -26,7 +26,7 @@ def create_logger(logfile="mdpow.log"):
 def log_banner():
     """Log program name and licence at INFO level."""
     logger.info("MDPOW %s starting.", get_version())
-    logger.info("Copyright (c) 2010-2016 Ian Kenney, Bogdan Iorga, and Oliver Beckstein")
+    logger.info("Copyright (c) 2010-2021 Shujie Fan, Ian Kenney, Bogdan Iorga, and Oliver Beckstein")
     logger.info("Released under the GNU Public Licence, version 3.")
     logger.info("For bug reports and help: https://github.com/Becksteinlab/MDPOW/issues")
 
