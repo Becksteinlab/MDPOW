@@ -74,10 +74,26 @@ Fixes
   found. Either supply the name of the right checkpoint file or do not use
   -append": mdpow.run.runMD_or_exit() does not anymore add -append to GROMACS
   invocation (#128)
-* fixed mdpow-pow and mdpow-pcw scripts (#138)
-* fixed template em_charmm.mdp to use standard CHARMM non-bonded parameters
-  for energy minimization (PR #155)
-
+* Configuration setting mdrun.maxthreads now also applies to energy
+  minimization with mdpow-equilibrium.py/mdpow.run() (#119)
+* supported forcefield options in scripts (#123)
+* supported multiple edr files input in fep.py (#132)
+* supported alchemlyb estimators in analysis functions and scripts
+  (#133 #135)
+* fixed: return fig in fep.py so plot function in scripts can access the
+  object (#129)
+* support opls-aa tip4pd, amber tip4pew and cyclohexane, and charmm TIP5P
+  and cyclohexane solvent type (#141)
+* updated MDP templates:
+  - disable energy group calculation to allow running on GPUs with
+    modern GROMACS versions (such as 2021)
+  - use standard CHARMM non-bonded parameters for em_charmm.mdp
+    (for energy minimization)
+  - added comments regarding GROMACS bug
+    https://gitlab.com/gromacs/gromacs/-/issues/3403 that requires
+    manually increasing rlist >= solute diameter
+  - added comment regarding 'pme_order = 6' prevening PME calculation
+    on GPUs with GROMACS 2021.
 
 2017-05-02    0.6.1
 orbeckst, iorga, ianmkenney, rhheilma

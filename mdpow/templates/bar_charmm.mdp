@@ -1,6 +1,5 @@
 ; Gromacs mdp file
-; Template for MD solvation free energy calculation with CHARMM (part of MDPOW)
-; Will generate TI and BAR/MBAR FEP output.
+; Template for MD Hydration FEP with CHARMM (part of MDPOW)
 ;
 ; grompp -pp -c ../MD_NPT/md.gro -p ../top/system.top -f fep.mdp -o md.tpr
 
