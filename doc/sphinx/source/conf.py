@@ -40,7 +40,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'MDPOW'
-copyright = u'2010–2017, Ian Kenney, Bogdan Iorga, and Oliver Beckstein'
+copyright = u'2010–2021, Shujie Fan, Ian Kenney, Bogdan Iorga, and Oliver Beckstein'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
