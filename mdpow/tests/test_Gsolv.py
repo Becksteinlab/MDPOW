@@ -2,10 +2,11 @@ import tempdir as td
 import os
 import pybol
 import numpy as np
+import gromacs.cbook
 from gromacs.utilities import in_dir
+from mdpow.fep import *
+from mdpow.equil import *
 
-import mdpow.fep
-import mdpow.equil
 
 class Test_Gsolv_manual(object):
 
@@ -18,7 +19,7 @@ class Test_Gsolv_manual(object):
         self.m.assemble('md_npt',self.tmpdir.name)
         simulation_filename = os.path.join(self.tmpdir.name,'benzene',
                                   'water.simulation')
-        self.S = mdpow.equil.Simulation(filename = simulation_filename)
+        self.S = Simulation(filename = simulation_filename)
 
         self.S.make_paths_relative(prefix=os.path.join(
            self.tmpdir.name,'benzene', 'Equilibrium', 'water'))
@@ -30,7 +31,7 @@ class Test_Gsolv_manual(object):
 
     def _setup(self, **kwargs):
         with in_dir(self.tmpdir.name, create=False):
-            self.Gsolv = mdpow.fep.Gsolv(simulation=self.S, molecule='BNZ',
+            self.Gsolv = Gsolv(simulation=self.S, molecule='BNZ',
                     mdp=os.path.join(self.old_path, 'mdpow', 'templates', 'bar_opls.mdp') ,**kwargs)
             self.Gsolv.setup(maxwarn=1)
 

@@ -1,6 +1,8 @@
 import mdpow.equil
+import gromacs.cbook
 import tempdir as td
 import os
+
 
 class TestEnergyMinimization(object):
     

@@ -4,7 +4,7 @@ import shutil
 import mdpow.equil
 from gromacs.utilities import in_dir
 import gromacs
-
+import gromacs.cbook
 import pytest
 
 sims = {"water" : mdpow.equil.WaterSimulation,

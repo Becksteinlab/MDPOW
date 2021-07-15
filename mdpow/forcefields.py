@@ -80,6 +80,10 @@ tip4pew     TIP4PEW    TIP 4-point modified for use with Ewald techniques (TIP4P
 """
 
 
+class NoOptionError(Exception):
+    pass
+
+
 class GromacsSolventModel(object):
     """Data for a solvent model in Gromacs."""
     def __init__(self, identifier, name=None, itp=None, coordinates=None,

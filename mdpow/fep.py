@@ -162,6 +162,10 @@ from .restart import Journalled
 from . import kBOLTZ, N_AVOGADRO
 
 
+class NoOptionError(Exception):
+    pass
+
+
 def molar_to_nm3(c):
     """Convert a concentration in Molar to nm|^-3|."""
     return c * N_AVOGADRO * 1e-24
@@ -254,7 +258,7 @@ class FEPschedule(AttributeDict):
         def getter(type, section, key):
             try:
                 return cfg_get[type](section, key)
-            except ConfigParser.NoOptionError:
+            except NoOptionError:
                 return None
 
         return FEPschedule((key, getter(keytype, section, key)) for key, keytype in keys.items()

@@ -2,6 +2,8 @@ import os.path
 import tempdir as td
 import pybol
 
+import gromacs
+import gromacs.cbook
 from gromacs.utilities import in_dir
 
 from mdpow.run import equilibrium_simulation

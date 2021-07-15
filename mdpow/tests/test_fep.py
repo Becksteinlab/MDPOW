@@ -1,27 +1,27 @@
 import numpy as np
 from numpy.testing import assert_array_almost_equal, assert_almost_equal
 from scipy import constants
-
-import mdpow
-import mdpow.fep
+import gromacs.cbook
+from mdpow.config import *
+from mdpow.fep import *
 
 
 def test_molar_to_nm3():
-    assert_almost_equal(mdpow.fep.molar_to_nm3(1.5), 0.9033212684)
-    assert_almost_equal(mdpow.fep.molar_to_nm3(55.5), 33.42288693449999)
+    assert_almost_equal(molar_to_nm3(1.5), 0.9033212684)
+    assert_almost_equal(molar_to_nm3(55.5), 33.42288693449999)
 
 def test_bar_to_kJmolnm3():
-    assert_almost_equal(mdpow.fep.bar_to_kJmolnm3(1.0), 0.0602214179)
+    assert_almost_equal(bar_to_kJmolnm3(1.0), 0.0602214179)
 
 def test_kcal_to_kJ():
-    assert_almost_equal(mdpow.fep.kcal_to_kJ(10.0), 41.84)
+    assert_almost_equal(kcal_to_kJ(10.0), 41.84)
 
 def test_kJ_to_kcal():
-    assert_almost_equal(mdpow.fep.kJ_to_kcal(41.84), 10.0)
+    assert_almost_equal(kJ_to_kcal(41.84), 10.0)
 
 def test_kBT_to_kJ():
     ref = constants.N_A*constants.k*1e-3
-    assert_almost_equal(mdpow.fep.kBT_to_kJ(1, 1), ref)
+    assert_almost_equal(kBT_to_kJ(1, 1), ref)
 
 class TestFEPschedule(object):
     reference = {
@@ -50,7 +50,7 @@ class TestFEPschedule(object):
 
     def setup(self):
         # load default bundled configuration
-        self.cfg = mdpow.config.get_configuration()
+        self.cfg = get_configuration()
 
     def test_VDW(self):
         return self._test_schedule('VDW')
@@ -60,7 +60,7 @@ class TestFEPschedule(object):
 
     def _test_schedule(self, component):
         section = 'FEP_schedule_{0}'.format(component)
-        schedule = mdpow.fep.FEPschedule.load(self.cfg, section)
+        schedule = FEPschedule.load(self.cfg, section)
         reference = self.reference[component]
 
         for k in schedule:

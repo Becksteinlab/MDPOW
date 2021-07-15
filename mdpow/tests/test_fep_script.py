@@ -3,9 +3,10 @@ import os
 import pybol
 from mdpow.equil import Simulation
 from gromacs.utilities import in_dir
-
+import gromacs.cbook
 from mdpow.run import fep_simulation
 from mdpow.config import get_configuration
+
 
 class TestFEPScript(object):
     def setup(self):
@@ -13,7 +14,7 @@ class TestFEPScript(object):
         self.old_path = os.getcwd()
         self.resources = os.path.join(
             self.old_path, 'mdpow', 'tests', 'testing_resources')
-        self.m = pybol.Manifest(os.path.join(self.resources,'manifest.yml'))
+        self.m = pybol.Manifest(os.path.join(self.resources, 'manifest.yml'))
         self.m.assemble('md_npt',self.tmpdir.name)
 
         S = Simulation(filename=os.path.join(

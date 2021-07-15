@@ -4,12 +4,12 @@ import py.path
 
 import yaml
 import pybol
-
+import gromacs.cbook
 from numpy.testing import assert_array_almost_equal
 
 from six.moves import cPickle as pickle
 
-import mdpow.fep
+from mdpow.fep import *
 
 from pkg_resources import resource_filename
 RESOURCES = py.path.local(resource_filename(__name__, 'testing_resources'))

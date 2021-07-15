@@ -69,9 +69,13 @@ def setupMD(S, protocol, cfg):
                                  )
     return params
 
+
+class NoOptionError(Exception):
+    pass
+
+
 def get_mdp_files(cfg, protocols):
     """Get file names of MDP files from *cfg* for all *protocols*"""
-    from .config import POWConfigParser
 
     mdpfiles = {}
     for protocol in protocols:
@@ -81,7 +85,7 @@ def get_mdp_files(cfg, protocols):
             # skip anything for which we do not define sections, such as
             # the dummy run protocols
             mdp = None
-        except ConfigParser.NoOptionError:
+        except NoOptionError:
             # Should not happen... let's continue and wait for hard-coded defaults
             logger.error("No 'mdp' config file entry for protocol [%s]---check input files!", protocol)
             mdp = None

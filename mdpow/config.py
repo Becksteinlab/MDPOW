@@ -114,17 +114,19 @@ defaults = {
 
 
 # TODO test merge_dicts
-def merge_dicts(user, default):
+def merge_dicts(user: Dict, default: Dict):
     """Merge two dictionaries recursively.
 
     Based on https://stackoverflow.com/a/823240/334357
     """
-    if isinstance(user, dict) and isinstance(default, dict):
-        for k, v in default.keys():
-            if k not in user:
-                user[k] = v
-            else:
-                user[k] = merge_dicts(user[k], v)
+    for key in default:
+        if key in user:
+            if isinstance(user[key], Dict) and isinstance(default[key], Dict):
+                merge_dicts(user[key], default[key])
+            elif user[key] == default[key]:
+                pass
+        else:
+            user[key] = default[key]
     return user
 
 
@@ -139,7 +141,8 @@ class POWConfigParser(object):
 
         Overwrites everything.
         """
-        self.conf = yaml.safe_load(fn)
+        with open(fn, 'r') as yml_file:
+            self.conf = yaml.safe_load(yml_file)
         return True
 
     def merge(self, fn: str) -> Dict:
@@ -150,7 +153,9 @@ class POWConfigParser(object):
         from the loaded configuration. Arrays are overwritten and not
         appended/merged.
         """
-        user: Dict = yaml.safe_load(fn)
+        with open(fn, 'r') as user_yml:
+            user = yaml.safe_load(user_yml)
+
         self.conf = merge_dicts(user, self.conf)
         return self.conf
 
@@ -158,7 +163,7 @@ class POWConfigParser(object):
         with open(filename, 'w') as f:
             f.write(yaml.dump(self.conf))
 
-    def get(self, section: str, option: str) -> Any:
+    def get(self, section, option) -> Any:
         """Return option, unless its "None" --> ``None``,
 
         Conversion to basic python types str, float, int, boolean is
@@ -171,8 +176,13 @@ class POWConfigParser(object):
            Prior versions would convert case-insensitively (e.g. "NONE"
            and "none")
         """
-        value = self.conf[section][option]
-        return value if value != "None" else None
+
+        value = self.conf[section]
+        if isinstance(value, dict):
+            if value[option] is not 'None':
+                return value[option]
+            else:
+                return None
 
     # TODO:
     # The YAML parser does automatic conversion: the following
