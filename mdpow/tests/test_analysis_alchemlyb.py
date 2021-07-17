@@ -4,6 +4,7 @@ import py.path
 
 import yaml
 import pybol
+import gromacs
 
 from numpy.testing import assert_array_almost_equal
 
@@ -42,6 +43,7 @@ def fix_manifest(topdir):
 
     """
     manifest = yaml.load(MANIFEST.open())
+    gromacs.config.set_gmxrc_environment('~/.conda/envs/MDPOW3/bin/GMXRC')
     # simple heuristic: last element of the recorded manifest::path is the name
     # of the states directory, typically 'states' (from .../testing_resources/states)
     manifest['path'] = RESOURCES.join(os.path.basename(manifest['path'])).strpath
@@ -59,13 +61,15 @@ def fep_benzene_directory(tmpdir_factory):
     m.assemble('FEP', topdir.strpath)
     return topdir.join("benzene")
 
+
 class TestAnalyze(object):
     def get_Gsolv(self, pth):
         gsolv = pth.join("FEP", "water", "Gsolv.fep")
-        G = pickle.load(gsolv.open())
-        # patch paths
-        G.basedir = pth.strpath
-        G.filename = gsolv.strpath
+        with open(gsolv, 'rb') as f:
+            G = pickle.load(f, encoding='latin1')
+            # patch paths
+            G.basedir = pth.strpath
+            G.filename = gsolv.strpath
         return G
 
     @pytest.mark.parametrize('method, Gibbs, coulomb, vdw', [

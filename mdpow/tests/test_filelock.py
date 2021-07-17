@@ -1,7 +1,7 @@
 import os.path
 
 import pytest
-import gromacs.cbook
+import gromacs
 from mdpow.filelock import FileLock, FileLockException
 
 def test_FileLock_acquire(tmpdir, filename="test.txt"):

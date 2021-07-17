@@ -179,7 +179,7 @@ class POWConfigParser(object):
 
         value = self.conf[section]
         if isinstance(value, dict):
-            if value[option] is not 'None':
+            if value[option] != 'None':
                 return value[option]
             else:
                 return None

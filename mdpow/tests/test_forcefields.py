@@ -1,7 +1,6 @@
 import os.path
 
 import pytest
-import gromacs.cbook
 from mdpow.config import topfiles
 from mdpow.forcefields import *
 

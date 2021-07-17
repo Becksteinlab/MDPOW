@@ -247,7 +247,7 @@ class Journalled(object):
         else:
             self.filename = os.path.abspath(filename)
         with open(self.filename, 'wb') as f:
-            _pickle.dump(self, f, protocol=_pickle.HIGHEST_PROTOCOL)
+            _pickle.dump(self, f)
         logger.debug("Instance pickled to %(filename)r" % vars(self))
 
     def load(self, filename=None):

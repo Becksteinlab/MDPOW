@@ -4,7 +4,7 @@ import shutil
 import mdpow.equil
 from gromacs.utilities import in_dir
 import gromacs
-import gromacs.cbook
+
 import pytest
 
 sims = {"water" : mdpow.equil.WaterSimulation,
@@ -18,18 +18,21 @@ test_file = {"OPLS-AA": 'benzene.itp',
              "AMBER": 'benzene_amber.itp',
              }
 
+
 @pytest.fixture
 def setup(tmpdir):
+    gromacs.config.set_gmxrc_environment('~/.conda/envs/MDPOW3/bin/GMXRC')
+    os.system('echo')
     newdir = tmpdir.mkdir('resources')
     old_path = os.getcwd()
-    resources = os.path.join(
-        old_path, 'mdpow', 'tests', 'testing_resources')
+    resources = os.path.join(old_path, 'testing_resources')
     files = ['benzene.pdb', 'benzene.itp',
              'benzene_charmm.itp', 'benzene_amber.itp']
     for f in files:
         orig = os.path.join(resources, 'molecules', 'benzene', f)
         shutil.copy(orig, newdir.dirname)
     return newdir.dirname
+
 
 def solvation(setup, solvent, ff='OPLS-AA'):
     itp = test_file[ff]
@@ -41,16 +44,20 @@ def solvation(setup, solvent, ff='OPLS-AA'):
         except Exception:
             raise AssertionError('Solvation failed.')
 
+
 @pytest.mark.parametrize("ff", ['OPLS-AA', 'CHARMM', 'AMBER'])
 def test_solvation_water(setup, ff):
     solvation(setup, "water", ff)
+
 
 @pytest.mark.parametrize("ff", ['OPLS-AA', 'CHARMM', 'AMBER'])
 def test_solvation_octanol(setup, ff):
     solvation(setup, "octanol", ff)
 
+
 def test_solvation_cyclohexane(setup):
     solvation(setup, "cyclohexane")
+
 
 @pytest.mark.xfail("gromacs.release().startswith('2019')")
 @pytest.mark.parametrize("ff", ['OPLS-AA', 'CHARMM', 'AMBER'])

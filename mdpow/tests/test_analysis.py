@@ -4,7 +4,7 @@ import py.path
 
 import yaml
 import pybol
-import gromacs.cbook
+import gromacs
 from numpy.testing import assert_array_almost_equal
 
 from six.moves import cPickle as pickle
@@ -14,6 +14,7 @@ from mdpow.fep import *
 from pkg_resources import resource_filename
 RESOURCES = py.path.local(resource_filename(__name__, 'testing_resources'))
 MANIFEST = RESOURCES.join("manifest.yml")
+
 
 def fix_manifest(topdir):
     """Create a temporary manifest with a custom `path`.
@@ -59,13 +60,15 @@ def fep_benzene_directory(tmpdir_factory):
     m.assemble('FEP', topdir.strpath)
     return topdir.join("benzene")
 
+
 class TestAnalyze(object):
     def get_Gsolv(self, pth):
         gsolv = pth.join("FEP", "water", "Gsolv.fep")
-        G = pickle.load(gsolv.open())
-        # patch paths
-        G.basedir = pth.strpath
-        G.filename = gsolv.strpath
+        with open(gsolv, 'rb') as f:
+            G = pickle.load(f, encoding='latin1')
+            # patch paths
+            G.basedir = pth.strpath
+            G.filename = gsolv.strpath
         return G
 
     @staticmethod

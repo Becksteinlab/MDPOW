@@ -1,4 +1,4 @@
-path: mdpow/tests/testing_resources/states
+path: /nfs/homes3/alescoul/MDPOW_dev/mdpow/tests/testing_resources/states
 
 base:
     options:

@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.testing import assert_array_almost_equal, assert_almost_equal
 from scipy import constants
-import gromacs.cbook
+import gromacs
 from mdpow.config import *
 from mdpow.fep import *
 
@@ -50,6 +50,7 @@ class TestFEPschedule(object):
 
     def setup(self):
         # load default bundled configuration
+        gromacs.config.set_gmxrc_environment('~/.conda/envs/MDPOW3/bin/GMXRC')
         self.cfg = get_configuration()
 
     def test_VDW(self):

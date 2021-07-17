@@ -38,6 +38,7 @@ import _pickle
 import MDAnalysis as mda
 from typing import Optional, Any
 
+
 try:
     import gromacs.setup
     import gromacs.cbook
@@ -231,7 +232,7 @@ class Simulation(Journalled):
         else:
             self.filename = filename
         with open(filename, 'wb') as f:
-            _pickle.dump(self, f, protocol=_pickle.HIGHEST_PROTOCOL)
+            _pickle.dump(self, f)
         logger.debug("Instance pickled to %(filename)r" % vars())
 
     def load(self, filename=None):
@@ -408,7 +409,7 @@ class Simulation(Journalled):
         self.journal.completed('solvate')
         return params
 
-    def processed_topology(self, **kwargs):
+    def processed_topology(self, **kwargs: dict):
         """Create a portable topology file from the topology and the solvated system."""
         if self.files.solvated is None or not os.path.exists(self.files.solvated):
             self.solvate(**kwargs)

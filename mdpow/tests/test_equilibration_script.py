@@ -3,7 +3,6 @@ import tempdir as td
 import pybol
 
 import gromacs
-import gromacs.cbook
 from gromacs.utilities import in_dir
 
 from mdpow.run import equilibrium_simulation
@@ -12,10 +11,11 @@ from mdpow.config import get_configuration
 
 class TestEquilibriumScript(object):
     def setup(self):
+        gromacs.config.set_gmxrc_environment('~/.conda/envs/MDPOW3/bin/GMXRC')
         self.tmpdir = td.TempDir()
         self.old_path = os.getcwd()
         self.resources = os.path.join(
-            self.old_path, 'mdpow', 'tests', 'testing_resources')
+            self.old_path, 'testing_resources')
         m = pybol.Manifest(os.path.join(self.resources, 'manifest.yml'))
         m.assemble('base', self.tmpdir.name)
 

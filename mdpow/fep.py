@@ -127,6 +127,7 @@ import errno
 import copy
 from subprocess import call
 import warnings
+from collections.abc import Iterable
 
 import numpy
 import pandas as pd
@@ -265,9 +266,10 @@ class FEPschedule(AttributeDict):
                            if getter(keytype, section, key) is not None)
 
     def __deepcopy__(self, memo):
-        x = type(self)()
-        for k, v in self.iteritems():
-            x[k] = copy.deepcopy(v, memo)
+        x: FEPschedule = FEPschedule()
+        for k, v in self.items():
+            if isinstance(k, Iterable) and isinstance(v, Iterable):
+                x[k] = copy.deepcopy(v)
         return x
 
 
@@ -519,7 +521,7 @@ class Gsolv(Journalled):
                 wmsg = "Directory %(dirname)r already exists --- will overwrite " \
                        "existing files." % vars(self)
                 warnings.warn(wmsg)
-                logger.warn(wmsg)
+                logger.warning(wmsg)
 
         # overrides pickle file so that we can run from elsewhere
         if not basedir is None:
@@ -619,6 +621,7 @@ class Gsolv(Journalled):
 
         # -dgdl for FEP output (although that seems to have been changed to -dHdl in Gromacs 4.5.3)
         # NOW use -dhdl
+        params = None
         kwargs['mdrun_opts'] = " ".join([kwargs.pop('mdrun_opts', ''), '-dhdl'])
         kwargs['includes'] = asiterable(kwargs.pop('includes', [])) + self.includes
         kwargs['deffnm'] = self.deffnm
@@ -1204,7 +1207,7 @@ class Gsolv(Journalled):
             ax.set_xlim(-0.05, 1.05)
         axs[0].set_ylabel(r'$dV/d\lambda$ in kJ/mol')
         fig.suptitle(r"Free energy difference $\Delta A^{0}_{\rm{%s}}$ for %s: $%.2f\pm%.2f$ kJ/mol" %
-                     ((self.solvent_type, self.molecule,) + self.results.DeltaA.Gibbs.astuple()))
+                     ((self.solvent_type, self.molecule) + self.results.DeltaA.Gibbs.astuple()))
         fig.savefig('DeltaA.png')
         plt.close()
         return fig

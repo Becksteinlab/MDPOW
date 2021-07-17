@@ -2,7 +2,7 @@ import os.path
 
 import numpy as np
 from numpy.testing import assert_array_almost_equal
-import gromacs.cbook
+import gromacs
 
 from mdpow.config import *
 
@@ -87,6 +87,7 @@ class TestAlteredConfig(object):
 
     def setup(self):
     # load default bundled configuration
+        gromacs.config.set_gmxrc_environment('~/.conda/envs/MDPOW3/bin/GMXRC')
         self.cfg = get_configuration(
             os.path.join('testing_resources',
                          'test_configurations', 'altered_runinput.yml'))
