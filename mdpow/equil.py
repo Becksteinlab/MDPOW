@@ -34,7 +34,7 @@ from __future__ import absolute_import, with_statement
 import os
 import errno
 import shutil
-import _pickle
+import six
 import MDAnalysis as mda
 from typing import Optional, Any
 
@@ -232,7 +232,7 @@ class Simulation(Journalled):
         else:
             self.filename = filename
         with open(filename, 'wb') as f:
-            _pickle.dump(self, f)
+            six.dump(self, f)
         logger.debug("Instance pickled to %(filename)r" % vars())
 
     def load(self, filename=None):
@@ -243,7 +243,7 @@ class Simulation(Journalled):
                 logger.warning("No filename known, trying name %r", self.filename)
             filename = self.filename
         with open(filename, 'rb') as f:
-            instance = _pickle.load(f)
+            instance = six.load(f)
         self.__dict__.update(instance.__dict__)
         logger.debug("Instance loaded from %(filename)r" % vars())
 
@@ -310,7 +310,7 @@ class Simulation(Journalled):
         self.top_template = top_template
         itp = os.path.realpath(itp)
         _itp = os.path.basename(itp)
-        _prm: Optional[str] = None  # To prevent variable used before assignment warning
+        _prm = None  # To prevent variable used before assignment warning
 
         if prm is None:
             prm_kw = ''

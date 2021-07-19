@@ -266,7 +266,7 @@ class FEPschedule(AttributeDict):
                            if getter(keytype, section, key) is not None)
 
     def __deepcopy__(self, memo):
-        x: FEPschedule = FEPschedule()
+        x = FEPschedule()
         for k, v in self.items():
             if isinstance(k, Iterable) and isinstance(v, Iterable):
                 x[k] = copy.deepcopy(v)
