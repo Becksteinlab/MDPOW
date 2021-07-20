@@ -26,6 +26,14 @@ orbeckst, VOD555
   invocation (#128)
 * Configuration setting mdrun.maxthreads now also applies to energy
   minimization with mdpow-equilibrium.py/mdpow.run() (#119)
+* supported forcefield options in scripts (#123)
+* supported multiple edr files input in fep.py (#132)
+* supported alchemlyb estimators in analysis functions and scripts
+  (#133 #135)
+* fixed: return fig in fep.py so plot function in scripts can access the
+  object (#129)
+* support opls-aa tip4pd, amber tip4pew and cyclohexane, and charmm TIP5P
+  and cyclohexane solvent type (#141)
 
 
 2017-05-02    0.6.1

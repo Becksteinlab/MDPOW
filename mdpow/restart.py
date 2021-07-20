@@ -23,9 +23,11 @@ restartable simulation protocols (for example :program:`mdpow-equilibrium`).
 """
 from __future__ import absolute_import
 
+import six
 import os
 import errno
-import _pickle
+import sys
+
 
 import logging
 
@@ -185,6 +187,17 @@ class Journalled(object):
             self.journal = Journal(self.protocols)
         super(Journalled, self).__init__(*args, **kwargs)
 
+    @staticmethod
+    def get_pickle():
+        if sys.version_info.major == 3:
+            import _pickle as pickle
+            return pickle
+        elif sys.version_info.major == 2:
+            import cPickle as pickle
+            return pickle
+        else:
+            raise ImportError
+
     def get_protocol(self, protocol):
         """Return method for *protocol*.
 
@@ -234,6 +247,7 @@ class Journalled(object):
         or saved to. Also sets the attribute :attr:`~Journalled.filename` to
         the absolute path of the saved file.
         """
+        pickle = self.get_pickle()
         if filename is None:
             try:
                 if self.filename is not None:
@@ -247,7 +261,7 @@ class Journalled(object):
         else:
             self.filename = os.path.abspath(filename)
         with open(self.filename, 'wb') as f:
-            _pickle.dump(self, f)
+            pickle.dump(self, f)
         logger.debug("Instance pickled to %(filename)r" % vars(self))
 
     def load(self, filename=None):
@@ -256,6 +270,7 @@ class Journalled(object):
         If no *filename* was supplied then the filename is taken from the
         attribute :attr:`~Journalled.filename`.
         """
+        pickle = self.get_pickle()
         if filename is None:
             try:
                 if self.filename is not None:
@@ -267,6 +282,6 @@ class Journalled(object):
                 logger.error(errmsg)
                 raise ValueError(errmsg)
         with open(filename, 'rb') as f:
-            instance = _pickle.load(f)
+            instance = pickle.load(f)
         self.__dict__.update(instance.__dict__)
         logger.debug("Instance loaded from %(filename)r" % vars())
