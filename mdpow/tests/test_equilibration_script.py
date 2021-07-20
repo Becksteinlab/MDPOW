@@ -2,6 +2,7 @@ import os.path
 import tempdir as td
 import pybol
 
+import gromacs
 from gromacs.utilities import in_dir
 
 from mdpow.run import equilibrium_simulation
@@ -10,10 +11,11 @@ from mdpow.config import get_configuration
 
 class TestEquilibriumScript(object):
     def setup(self):
+        gromacs.config.set_gmxrc_environment('~/.conda/envs/MDPOW3/bin/GMXRC')
         self.tmpdir = td.TempDir()
         self.old_path = os.getcwd()
         self.resources = os.path.join(
-            self.old_path, 'mdpow', 'tests', 'testing_resources')
+            self.old_path, 'testing_resources')
         m = pybol.Manifest(os.path.join(self.resources, 'manifest.yml'))
         m.assemble('base', self.tmpdir.name)
 
@@ -27,7 +29,7 @@ class TestEquilibriumScript(object):
     def test_basic_run(self):
         with in_dir(self.tmpdir.name, create=False):
             try:
-                self._run_equil('water','benzene/')
+                self._run_equil('water', 'benzene/')
                 self._new_structures()
             except Exception as err:
                 raise AssertionError('Equilibration simulations failed with exception:\n{0}'.format(str(err)))
@@ -42,4 +44,3 @@ class TestEquilibriumScript(object):
         assert os.path.exists(
             os.path.join(self.tmpdir.name,
                          'benzene', 'Equilibrium', 'water', 'MD_NPT', 'md.gro'))
-

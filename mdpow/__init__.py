@@ -19,16 +19,18 @@ def create_logger(logfile="mdpow.log"):
     :mod:`numkit` into the file *logfile*.
     """
     logger = log.create('mdpow', logfile)
-    log.create('numkit', logfile)   # capture numkit messages to same file
+    log.create('numkit', logfile)  # capture numkit messages to same file
     log.create('gromacs', logfile)  # and the GromacsWrapper messages
     return logger
 
+
 def log_banner():
     """Log program name and licence at INFO level."""
+
     logger.info("MDPOW %s starting.", get_version())
-    logger.info("Copyright (c) 2010-2021 Shujie Fan, Ian Kenney, Bogdan Iorga, and Oliver Beckstein")
-    logger.info("Released under the GNU Public Licence, version 3.")
-    logger.info("For bug reports and help: https://github.com/Becksteinlab/MDPOW/issues")
+    logger.info("Copyright (c) 2010-2021 Shujie Fan, Alia Lesoculie, Ian Kenney, Bogdan Iorga, and Oliver Beckstein")
+
+
 
 logger = create_logger()
 log_banner()
@@ -43,5 +45,4 @@ log_banner()
 #: Avogadro's constant |NA| in mol^-1 (`NA NIST value`_).
 N_AVOGADRO = 6.02214179e23
 #: Boltzmann's constant |kB| in kJ mol^-1 (`kB NIST value`_).
-kBOLTZ = 1.3806504e-23 *1e-3 * N_AVOGADRO
-
+kBOLTZ = 1.3806504e-23 * 1e-3 * N_AVOGADRO

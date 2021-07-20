@@ -2,26 +2,25 @@ import tempdir as td
 import os
 import pybol
 import numpy as np
+import gromacs
 from gromacs.utilities import in_dir
+from mdpow.fep import *
+from mdpow.equil import *
 
-import mdpow.fep
-import mdpow.equil
 
 class Test_Gsolv_manual(object):
 
     def setup(self):
         self.tmpdir = td.TempDir()
         self.old_path = os.getcwd()
-        self.resources = os.path.join(
-            self.old_path, 'mdpow', 'tests', 'testing_resources')
-        self.m = pybol.Manifest(os.path.join(self.resources,'manifest.yml'))
-        self.m.assemble('md_npt',self.tmpdir.name)
-        simulation_filename = os.path.join(self.tmpdir.name,'benzene',
-                                  'water.simulation')
-        self.S = mdpow.equil.Simulation(filename = simulation_filename)
+        self.resources = os.path.join(self.old_path, 'testing_resources')
+        self.m = pybol.Manifest(os.path.join(self.resources, 'manifest.yml'))
+        self.m.assemble('md_npt', self.tmpdir.name)
+        simulation_filename = os.path.join(self.tmpdir.name, 'benzene', 'water.simulation')
+        self.S = Simulation(filename=simulation_filename)
 
         self.S.make_paths_relative(prefix=os.path.join(
-           self.tmpdir.name,'benzene', 'Equilibrium', 'water'))
+           self.tmpdir.name, 'benzene', 'Equilibrium', 'water'))
         self.S.dirs.includes = os.path.join(self.tmpdir.name, 'top')
         self.S.save()
 
@@ -30,8 +29,8 @@ class Test_Gsolv_manual(object):
 
     def _setup(self, **kwargs):
         with in_dir(self.tmpdir.name, create=False):
-            self.Gsolv = mdpow.fep.Gsolv(simulation=self.S, molecule='BNZ',
-                    mdp=os.path.join(self.old_path, 'mdpow', 'templates', 'bar_opls.mdp') ,**kwargs)
+            self.Gsolv = Gsolv(simulation=self.S, molecule='BNZ',
+                               mdp=os.path.join(self.old_path, '../templates', 'bar_opls.mdp'), **kwargs)
             self.Gsolv.setup(maxwarn=1)
 
     def test_default_setup(self):

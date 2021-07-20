@@ -69,9 +69,13 @@ def setupMD(S, protocol, cfg):
                                  )
     return params
 
+
+class NoOptionError(Exception):
+    pass
+
+
 def get_mdp_files(cfg, protocols):
     """Get file names of MDP files from *cfg* for all *protocols*"""
-    import ConfigParser
 
     mdpfiles = {}
     for protocol in protocols:
@@ -81,7 +85,7 @@ def get_mdp_files(cfg, protocols):
             # skip anything for which we do not define sections, such as
             # the dummy run protocols
             mdp = None
-        except ConfigParser.NoOptionError:
+        except NoOptionError:
             # Should not happen... let's continue and wait for hard-coded defaults
             logger.error("No 'mdp' config file entry for protocol [%s]---check input files!", protocol)
             mdp = None
@@ -306,7 +310,7 @@ def fep_simulation(cfg, solvent, **kwargs):
     equil_savefilename = os.path.join(topdir, "%(solvent)s.simulation" % vars())
     try:
         equil_S = EquilSimulation(filename=equil_savefilename)
-    except IOError, err:
+    except IOError as err:
         if err.errno == errno.ENOENT:
             logger.critical("Missing the equilibrium simulation %(equil_savefilename)r.", vars())
             logger.critical("Run `mdpow-equilibrium -S %s %s'  first!", solvent, "RUNINPUT.cfg")

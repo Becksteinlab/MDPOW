@@ -25,18 +25,22 @@ from __future__ import absolute_import
 
 import os
 import errno
-import cPickle
+import _pickle
 
 import logging
+
 logger = logging.getLogger('mdpow.checkpoint')
+
 
 def checkpoint(name, sim, filename):
     """Execute the :meth:`Journalled.save` method and log the event."""
     logger.info("checkpoint: %(name)s", vars())
     sim.save(filename)
 
+
 class JournalSequenceError(Exception):
     """Raised when a stage is started without another one having been completed."""
+
 
 class Journal(object):
     """Class that keeps track of the stage in a protocol.
@@ -71,6 +75,7 @@ class Journal(object):
       # raises JournalSequenceError
 
     """
+
     def __init__(self, stages):
         """Initialise the journal that keeps track of stages.
 
@@ -136,7 +141,7 @@ class Journal(object):
         """Record that *stage* is starting."""
         if self.current is not None:
             errmsg = "Cannot start stage %s because previously started stage %s " \
-                "has not been completed." % (stage, self.current)
+                     "has not been completed." % (stage, self.current)
             logger.error(errmsg)
             raise JournalSequenceError(errmsg)
         self.current = stage
@@ -156,6 +161,7 @@ class Journal(object):
 
     def __repr__(self):
         return "%s(%r)" % (self.__class__.__name__, self.stages)
+
 
 class Journalled(object):
     """A base class providing methods for journalling and restarts.
@@ -218,6 +224,7 @@ class Journalled(object):
             if success:
                 self.journal.completed(protocol)
             return success
+
         return dummy_protocol
 
     def save(self, filename=None):
@@ -240,7 +247,7 @@ class Journalled(object):
         else:
             self.filename = os.path.abspath(filename)
         with open(self.filename, 'wb') as f:
-            cPickle.dump(self, f, protocol=cPickle.HIGHEST_PROTOCOL)
+            _pickle.dump(self, f)
         logger.debug("Instance pickled to %(filename)r" % vars(self))
 
     def load(self, filename=None):
@@ -260,6 +267,6 @@ class Journalled(object):
                 logger.error(errmsg)
                 raise ValueError(errmsg)
         with open(filename, 'rb') as f:
-            instance = cPickle.load(f)
+            instance = _pickle.load(f)
         self.__dict__.update(instance.__dict__)
         logger.debug("Instance loaded from %(filename)r" % vars())
