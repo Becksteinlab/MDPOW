@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""%prog [options] DIRECTORY [DIRECTORY ...]
+"""%(prog)s [options] DIRECTORY [DIRECTORY ...]
 
 Run the free energy analysis for a solvent  in <DIRECTORY>/FEP
 and return DeltaG.
@@ -104,31 +104,66 @@ def run_gsolv(solvent, directory, **kwargs):
         return _datastatus[g.contains_corrupted_xvgs()]
 
     gsolv = load_gsolv(solvent, directory, permissive=kwargs.pop('permissive',False),)
+    logger.info("The solvent is %s.", solvent)
 
-    # do the analysis (only use keywords that are needed for FEP.analysis())
-    akw = {'stride': kwargs.pop('stride', None), 'force': kwargs.pop('force', False)}
-    if akw['force']:
-        logger.info("[%(directory)s] Forcing (re)analysis of hydration free energy data", vars())
-        gsolv.analyze(**akw)
+    # for this version. use the method given instead of the one in the input cfg file
+    estimator = kwargs.pop('estimator', 'alchemlyb')
+    if not estimator in ('mdpow', 'alchemlyb'):
+        errmsg = "estimator = %r is not supported, must be 'mdpow' or 'alchemlyb'" % estimator
+        logger.error(errmsg)
+        raise ValueError(errmsg)
+
+    gsolv.method = kwargs.pop('method', 'MBAR')
+    if estimator == 'mdpow':
+        if gsolv.method != "TI":
+            errmsg = "Method %s is not implemented in MDPOW, use estimator='alchemlyb'" % gsolv.method
+            logger.error(errmsg)
+            raise ValueError(errmsg)
+
+    energyfile = kwargs.pop('energyfile', None)
+    plotfile = kwargs.pop('plotfile', None)
+
+    if not hasattr(gsolv, 'start'):
+        gsolv.start = kwargs.pop('start', 0)
+    if not hasattr(gsolv, 'stop'):
+        gsolv.stop = kwargs.pop('stop', None)
+    if not hasattr(gsolv, 'SI'):
+        kwargs.setdefault('SI', True)
+    else:
+        kwargs.setdefault('SI', gsolv.SI)
+
     # make sure that we have data
-    try:
-        gsolv.results.DeltaA.Gibbs
+    if kwargs['force'] or (not hasattr(gsolv.results.DeltaA, 'Gibbs')):
+        logger.info("[%(directory)s] Forcing (re)analysis of hydration free energy data", vars())
+        # write out the settings when the analysis is performed
+        logger.info("Estimator is %s.", estimator)
+        logger.info("Free energy calculation method is %s.", gsolv.method)
+        if estimator == 'mdpow':
+            # do the analysis (only use keywords that are needed for FEP.analysis())
+            akw = {'stride': kwargs.pop('stride', None), 'force': kwargs.pop('force', False)}
+            gsolv.analyze(**akw)
+        elif estimator == 'alchemlyb':
+            if kwargs['SI']:
+                logger.info("Statistical inefficiency analysis will be performed.")
+            else:
+                logger.info("Statistical inefficiency analysis won't be performed.")
+            gsolv.analyze_alchemlyb(**kwargs)
+    else:
         logger.info("[%(directory)s] Reading existing data from pickle file.", vars())
-        gsolv.logger_DeltaA0()
-    except (KeyError, AttributeError):   # KeyError because results is a AttributeDict
-        logger.info("[%(directory)s] Analyzing %(solvent)s solvation free energy data for the first time", vars())
-        gsolv.analyze(**akw)
+
+    gsolv.logger_DeltaA0()
 
     if datstat(gsolv) == 'BAD':
         logger.warning("[%s] Possible file corruption: %s:%s", directory, solvent, datstat(gsolv))
 
-    if kwargs.get('energyfile', None):
-        with mdpow.filelock.FileLock(kwargs['energyfile'], timeout=2):
-            with open(kwargs['energyfile'], mode='a') as out:
+    if energyfile:
+        with mdpow.filelock.FileLock(energyfile, timeout=2):
+            with open(energyfile, mode='a') as out:
                 out.write(fmt_energy % (gsolv.summary(), directory))
-            logger.info("[%s] Wrote solvation energy terms to %r", directory, kwargs['energyfile'])
+            logger.info("[%s] Wrote solvation energy terms to %r", directory, energyfile)
 
-    plotfile = kwargs.get('plotfile', None)
+    if estimator == 'alchemlyb':
+        plotfile = False
     if plotfile:
         if plotfile == 'auto':
             plotfile = auto_plotfile(directory, gsolv)
@@ -179,58 +214,85 @@ def realpath_or_none(fn):
 if __name__ == "__main__":
     import sys
     import os.path
-    from optparse import OptionParser
+    import argparse
 
-    parser = OptionParser(usage=__doc__)
-    parser.add_option('-p', '--plotfile', dest="plotfile",
-                      help="plot dV/dlambda to FILE; use png or pdf suffix to "
-                      "determine the file type. 'auto' generates a pdf file "
-                      "DIRECTORY/dVdl_<molname>_<solvent>.pdf and 'None' disables it [%default]",
-                      metavar="FILE")
-    parser.add_option('-e', '--energies', dest="energyfile",
-                      help="append solvation free energies to FILE [%default]",
-                      metavar="FILE")
-    parser.add_option('--force', dest='force',
-                      action="store_true",
-                      help="force rereading all data [%default]")
-    parser.add_option('-s', '--stride', dest="stride", type='int',
-                      help="Use every N-th datapoint from the original dV/dlambda data. "
-                      "Using a number larger than 1 can significantly reduce memory usage "
-                      "with little impact on the precision of the final output. [%default]",
-                      metavar="N")
-    parser.add_option('--solvent', '-S', dest='solvent',
-                      metavar="NAME",
-                      help="solvent NAME for compound, 'water', 'octanol', or 'cyclohexane' [%default]")
-    parser.add_option('--ignore-corrupted', dest="permissive",
-                      action="store_true",
-                      help="skip lines in the md.xvg files that cannot be parsed. "
-                      "WARNING: Other lines in the file might have been corrupted in "
-                      "such a way that they appear correct but are in fact wrong. "
-                      "WRONG RESULTS CAN OCCUR! USE AT YOUR OWN RISK [%default]")
-    parser.set_defaults(plotfile="auto",
-                        energyfile="gsolv.txt",
-                        force=False, stride=10, permissive=False, solvent='water')
-    opts,args = parser.parse_args()
+    parser = argparse.ArgumentParser(usage=__doc__, prog='mdpow-solvationenergy',
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument("directory", nargs='+',
+                        help="directory or directories which contain all the files "
+                        "resulting from running mdpow.fep.Ghyd.setup() ",)
+    parser.add_argument('--plotfile', dest="plotfile", default='none',
+                        help="plot dV/dlambda to FILE; use png or pdf suffix to "
+                        "determine the file type. 'auto' generates a pdf file "
+                        "DIRECTORY/dVdl_<molname>_<solvent>.pdf and 'None' disables it "
+                        "The plot function is only available for mdpow estimator,"
+                        "and is disabled when using alchemlyb estimators.",
+                        metavar="FILE")
+    parser.add_argument('--solvent', '-S', dest='solvent', default='water',
+                        choices=['water', 'octanol', 'cyclohexane'], metavar="NAME",
+                        help="solvent NAME for compound, 'water', 'octanol', or 'cyclohexane' ")
+    parser.add_argument('-o', '--outfile', dest="outfile", default="gsolv.txt",
+                        help="append one-line results summary to FILE ",
+                        metavar="FILE")
+    parser.add_argument('-e', '--energies', dest="energyfile", default="energies.txt",
+                        help="append solvation free energies to FILE ",
+                        metavar="FILE")
+    parser.add_argument('--estimator', dest="estimator", default='alchemlyb',
+                        choices=['mdpow', 'alchemlyb'],
+                        help="choose the estimator to be used, alchemlyb or mdpow estimators")
+    parser.add_argument('--method', dest="method", default='MBAR',
+                        choices=['TI', 'MBAR', 'BAR'],
+                        help="choose the method to calculate free energy ",)
+    parser.add_argument('--force', dest='force', default=False,
+                        action="store_true",
+                        help="force rereading all data ")
+    parser.add_argument('--SI', dest='SI',
+                        action="store_true", default=True,
+                        help="enable statistical inefficiency (SI) analysis. "
+                             "Statistical inefficiency analysis is performed by default when using"
+                             "alchemlyb estimators and is always disabled when using mdpow estimator.")
+    parser.add_argument('--no-SI', dest='SI',
+                        action="store_false", default=True,
+                        help="disable statistical inefficiency analysis. "
+                        "Statistical inefficiency analysis is performed by default when using"
+                        "alchemlyb estimators and is disabled when using mdpow estimator. ")
+    parser.add_argument('-s', '--stride', dest="stride", type=int, default=1,
+                        help="use every N-th datapoint from the original dV/dlambda data. ",
+                        metavar="N")
+    parser.add_argument('--start', dest="start", type=int, default=0,
+                        help="start point for the data used from the original dV/dlambda data. ")
+    parser.add_argument('--stop', dest="stop", type=int, default=None,
+                        help="stop point for the data used from the original dV/dlambda data. ",)
+    parser.add_argument('--ignore-corrupted', dest="permissive",
+                        action="store_true", default=False,
+                        help="skip lines in the md.xvg files that cannot be parsed. "
+                        "WARNING: Other lines in the file might have been corrupted in "
+                        "such a way that they appear correct but are in fact wrong. "
+                        "WRONG RESULTS CAN OCCUR! USE AT YOUR OWN RISK ")
+    opts = parser.parse_args()
 
-    if len(args) == 0:
-        logger.fatal("A directory is required. See --help.")
-        sys.exit(1)
-    elif len(args) > 1 and not opts.plotfile.lower() in ('none', 'auto'):
+    if len(opts.directory) > 1 and not opts.plotfile.lower() in ('none', 'auto'):
         logger.fatal("Can only use --plotfile=None or --plotfile=auto with multiple directories.")
         sys.exit(1)
 
-    for directory in args:
+    if opts.estimator == 'mdpow' and opts.SI:
+        logger.fatal("Statistical inefficiency analysis is only available for estimator 'alchemlyb'.")
+        sys.exit(1)
+
+    for directory in opts.directory:
         if not os.path.exists(directory):
             logger.warn("Directory %r not found, skipping...", directory)
             continue
         logger.info("Analyzing directory %r... (can take a while)", directory)
 
-        opts.plotfile = parse_filename_option(opts.plotfile)
+        plotfile = parse_filename_option(opts.plotfile)
 
         try:
-            run_gsolv(opts.solvent, directory, plotfile=opts.plotfile,
-                     energyfile=realpath_or_none(opts.energyfile),
-                     force=opts.force, stride=opts.stride, permissive=opts.permissive)
+            run_gsolv(opts.solvent, directory, plotfile=plotfile,
+                      energyfile=realpath_or_none(opts.energyfile),
+                      force=opts.force, stride=opts.stride, start=opts.start,
+                      stop=opts.stop, estimator=opts.estimator,
+                      method=opts.method, permissive=opts.permissive, SI=opts.SI)
         except (OSError, IOError), err:
             logger.error("Running analysis in directory %r failed: %s", directory, str(err))
         except Exception, err:
