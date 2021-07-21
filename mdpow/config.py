@@ -237,7 +237,7 @@ def get_configuration(filename: Optional[str] = None) -> POWConfigParser:
     """
     cfg = POWConfigParser()
     cfg.readfp(defaults["runinput"])
-    logger.debug(r"Loaded runinput defaults from  %defualtsr", defaults['runinput'])
+    logger.debug("Loaded runinput defaults from  %r" % defaults['runinput'])
     if filename is not None:
         cfg.merge(filename)  # override package defaults
         logger.debug("Loaded user runinput from %r (replacing defaults)", filename)
