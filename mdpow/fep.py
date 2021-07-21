@@ -860,8 +860,8 @@ class Gsolv(Journalled):
                     # speed is similar to 'bzip2 -9 FILE' (using a 1 Mio buffer)
                     # (Since GW 0.8, openany() does not take kwargs anymore so the write buffer cannot be
                     # set anymore (buffering=1048576) so the performance might be lower in MDPOW >= 0.7.0)
-                    with open(xvg, 'r', buffering=1048576) as source:
-                        with openany(fnbz2, 'w') as target:
+                    with open(xvg, 'rb', buffering=1048576) as source:
+                        with openany(fnbz2, 'wb') as target:
                             target.writelines(source)
                     if os.path.exists(fnbz2) and os.path.exists(xvg):
                         os.unlink(xvg)
@@ -986,7 +986,7 @@ class Gsolv(Journalled):
                     self.convert_edr()
                     self.collect(stride=stride, autosave=False)
                 else:
-                    logger.exception()
+                    logger.exception(err)
                     raise
         else:
             logger.info("Analyzing stored data.")
@@ -1090,7 +1090,7 @@ class Gsolv(Journalled):
                     self.convert_edr()
                     self.collect_alchemlyb(SI, start, stop, stride, autosave=False)
                 else:
-                    logger.exception()
+                    logger.exception(err)
                     raise
         else:
             logger.info("Analyzing stored data.")

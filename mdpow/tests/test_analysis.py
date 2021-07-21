@@ -84,7 +84,6 @@ class TestAnalyze(object):
                                   (-4.6128782195215781, 2.1942144688960972),
                                   decimal=6)
 
-
     def test_convert_edr(self, fep_benzene_directory):
         G = self.get_Gsolv(fep_benzene_directory)
         try:
@@ -93,7 +92,6 @@ class TestAnalyze(object):
             raise AssertionError("Failed to auto-convert edr to xvg: {0}: {1}".format(
                 err.strerror, err.filename))
         self.assert_DeltaA(G)
-
 
     def test_TI(self, fep_benzene_directory):
         G = self.get_Gsolv(fep_benzene_directory)
@@ -108,4 +106,3 @@ class TestAnalyze(object):
             raise AssertionError("Failed to convert edr to xvg: {0}: {1}".format(
                 err.strerror, err.filename))
         self.assert_DeltaA(G)
-

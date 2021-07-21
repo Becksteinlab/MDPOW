@@ -117,7 +117,8 @@ defaults = {
 def merge_dicts(user: Dict, default: Dict):
     """Merge two dictionaries recursively.
 
-    Based on https://stackoverflow.com/a/823240/334357
+    Uses recursive method to accurately
+    merge nested dictionaries
     """
     for key in default:
         if key in user:
@@ -237,7 +238,7 @@ def get_configuration(filename: Optional[str] = None) -> POWConfigParser:
     """
     cfg = POWConfigParser()
     cfg.readfp(defaults["runinput"])
-    logger.debug(r"Loaded runinput defaults from  %defualtsr", defaults['runinput'])
+    logger.debug("Loaded runinput defaults from  %r" % defaults['runinput'])
     if filename is not None:
         cfg.merge(filename)  # override package defaults
         logger.debug("Loaded user runinput from %r (replacing defaults)", filename)
