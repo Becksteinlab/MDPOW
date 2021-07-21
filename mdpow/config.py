@@ -134,7 +134,7 @@ class POWConfigParser(object):
     """Parse YAML config file."""
 
     def __init__(self):
-        self.conf: Optional[Dict] = None
+        self.conf = None
 
     def readfp(self, fn: str) -> bool:
         """Read YAML from open stream ``fn``.
@@ -237,7 +237,7 @@ def get_configuration(filename: Optional[str] = None) -> POWConfigParser:
     """
     cfg = POWConfigParser()
     cfg.readfp(defaults["runinput"])
-    logger.debug(f"Loaded runinput defaults from {defaults['runinput']}")
+    logger.debug(r"Loaded runinput defaults from  %defualtsr", defaults['runinput'])
     if filename is not None:
         cfg.merge(filename)  # override package defaults
         logger.debug("Loaded user runinput from %r (replacing defaults)", filename)
@@ -303,7 +303,7 @@ def get_template(t):
     :Raises:    :exc:`ValueError` if no file can be located.
 
     """
-    templates: List = [_get_template(s) for s in asiterable(t)]
+    templates = [_get_template(s) for s in asiterable(t)]
     if len(templates) == 1:
         return templates[0]
     return templates

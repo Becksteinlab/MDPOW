@@ -37,7 +37,6 @@ import shutil
 import sys
 
 import MDAnalysis as mda
-from typing import Optional, Any
 
 
 try:
@@ -619,7 +618,8 @@ class Simulation(Journalled):
             raise ValueError("Parameter %s cannot be empty." % name)
         return value
 
-    def _lastnotempty(l) -> Optional[Any]:
+    @staticmethod
+    def _lastnotempty(l):
         """Return the last non-empty value in list *l* (or None :-p)"""
         nonempty = [None] + [x for x in l if not (x is None or x == "" or x == [])]
         return nonempty[-1]

@@ -151,7 +151,7 @@ def runMD_or_exit(S, protocol, params, cfg, **kwargs):
             logger.info("Now go and run %(protocol)s in directory %(dirname)r.", vars())
             sys.exit(0)
         elif simulation_done is False:
-            logger.warn("Simulation %(protocol)s in directory %(dirname)r is incomplete (log=%)logfile)s).", vars())
+            logger.warning("Simulation %(protocol)s in directory %(dirname)r is incomplete (log=%)logfile)s).", vars())
             sys.exit(1)
         logger.info("Simulation %(protocol)s seems complete (log=%(logfile)s)", vars())
     return simulation_done

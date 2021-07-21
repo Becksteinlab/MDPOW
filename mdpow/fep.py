@@ -127,7 +127,7 @@ import errno
 import copy
 from subprocess import call
 import warnings
-from collections.abc import Iterable
+
 import sys
 
 import numpy
@@ -267,11 +267,18 @@ class FEPschedule(AttributeDict):
                            if getter(keytype, section, key) is not None)
 
     def __deepcopy__(self, memo):
-        x = FEPschedule()
-        for k, v in self.items():
-            if isinstance(k, Iterable) and isinstance(v, Iterable):
+        if sys.version_info.major == 3:
+            from collections.abc import Iterable
+            x = FEPschedule()
+            for k, v in self.items():
+                if isinstance(k, Iterable) and isinstance(v, Iterable):
+                    x[k] = copy.deepcopy(v)
+            return x
+        elif sys.version_info == 2:
+            x = FEPschedule()
+            for k, v in self.iteritems():
                 x[k] = copy.deepcopy(v)
-        return x
+            return x
 
 
 class Gsolv(Journalled):

@@ -52,7 +52,6 @@ from __future__ import absolute_import
 
 import os
 from collections import defaultdict
-from typing import Optional, Dict, List
 
 import logging
 logger = logging.getLogger("mdpow.forecefields")
