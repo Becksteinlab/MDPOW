@@ -81,9 +81,9 @@ Footnotes
 .. [#GromacsWrapperNote] The package is built on top of the GromacsWrapper_
                          framework (which is automatically installed).
 
-.. |build| image:: https://travis-ci.org/Becksteinlab/MDPOW.svg?branch=develop
+.. |build| image:: https://github.com/Becksteinlab/MDPOW/actions/workflows/ci.yaml/badge.svg?branch=develop
    :alt: Build Status
-   :target: https://travis-ci.org/Becksteinlab/MDPOW
+   :target: https://github.com/Becksteinlab/MDPOW/actions/workflows/ci.yaml
 
 .. |cov| image:: https://codecov.io/github/Becksteinlab/MDPOW/coverage.svg?branch=develop
    :alt: Coverage Status
