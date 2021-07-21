@@ -34,7 +34,8 @@ from __future__ import absolute_import, with_statement
 import os
 import errno
 import shutil
-import six
+import sys
+
 import MDAnalysis as mda
 from typing import Optional, Any
 
@@ -215,6 +216,19 @@ class Simulation(Journalled):
 
         super(Simulation, self).__init__(**kwargs)
 
+    @staticmethod
+    def load_pickle():
+        """Loads compatible version of pickle
+
+        For python 2 loads and returns module cPickle as pickle, and
+        for python 3 loads _pickle"""
+        if sys.version_info.major == 2:
+            import cPickle as pickle
+            return pickle
+        elif sys.version_info.major == 3:
+            import _pickle as pickle
+            return pickle
+
     def BASEDIR(self, *args):
         return os.path.join(self.dirs.basedir, *args)
 
@@ -224,6 +238,7 @@ class Simulation(Journalled):
         The default filename is the name of the file that was last loaded from
         or saved to.
         """
+        pickle = self.get_pickle()
         if filename is None:
             if self.filename is None:
                 self.filename = filename or self.solvent_type + '.simulation'
@@ -232,18 +247,19 @@ class Simulation(Journalled):
         else:
             self.filename = filename
         with open(filename, 'wb') as f:
-            six.dump(self, f)
+            pickle.dump(self, f)
         logger.debug("Instance pickled to %(filename)r" % vars())
 
     def load(self, filename=None):
         """Re-instantiate class from pickled file."""
+        pickle = self.get_pickle()
         if filename is None:
             if self.filename is None:
                 self.filename = self.molecule.lower() + '.pickle'
                 logger.warning("No filename known, trying name %r", self.filename)
             filename = self.filename
         with open(filename, 'rb') as f:
-            instance = six.load(f)
+            instance = pickle.load(f)
         self.__dict__.update(instance.__dict__)
         logger.debug("Instance loaded from %(filename)r" % vars())
 
@@ -603,7 +619,6 @@ class Simulation(Journalled):
             raise ValueError("Parameter %s cannot be empty." % name)
         return value
 
-    @staticmethod
     def _lastnotempty(l) -> Optional[Any]:
         """Return the last non-empty value in list *l* (or None :-p)"""
         nonempty = [None] + [x for x in l if not (x is None or x == "" or x == [])]

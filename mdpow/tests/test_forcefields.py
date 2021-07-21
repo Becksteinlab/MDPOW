@@ -9,6 +9,7 @@ WATERMODELS = ('tip4p', 'tip3p', 'tip5p', 'spc', 'spce', 'm24', 'tip4pd')
 SOLVENTMODELS = ('water', 'cyclohexane', 'octanol')
 
 
+
 class TestIncludedForcefiels(object):
     @staticmethod
     def test_default_forcefield():
@@ -73,27 +74,30 @@ class TestWatermodels(object):
     def test_default_water_model():
         assert DEFAULT_WATER_MODEL == "tip4p"
 
+    @pytest.mark.parametrize('expected', WATERMODELS)
+    def test_gromacs_water_models(self, expected):
+        models = GROMACS_WATER_MODELS
+
+        def has_identifier(identifier):
+            assert identifier in models
+
+        def itp_in_top(identifier):
+            model = models[identifier]
+            assert model.itp in topfiles
+
+        def coordinates_in_top(identifier):
+            model = models[identifier]
+            assert model.coordinates in topfiles
+
+        has_identifier(expected)
+        itp_in_top(expected)
+        coordinates_in_top(expected)
+
     def test_watermodelsdat(self):
         included_watermodels = open(topfiles['watermodels.dat']).read()
         for line, ref in zip(self._simple_line_parser(GMX_WATERMODELS_DAT),
                              self._simple_line_parser(included_watermodels)):
             assert line.strip() == ref.strip()
-
-    def test_gromacs_water_models(self):
-        models = GROMACS_WATER_MODELS
-        def has_identifier(identifier):
-            assert identifier in models
-        def itp_in_top(identifier):
-            model = models[identifier]
-            assert model.itp in topfiles
-        def coordinates_in_top(identifier):
-            model = models[identifier]
-            assert model.coordinates in topfiles
-
-        for identifier in self.watermodels:
-            yield has_identifier, identifier
-            yield itp_in_top, identifier
-            yield coordinates_in_top, identifier
 
     @staticmethod
     def _simple_line_parser(string):
@@ -157,23 +161,22 @@ class TestSolventModels(object):
         assert (get_solvent_identifier('water') is
                 DEFAULT_WATER_MODEL)
 
-    def test_get_solvent_identifier_water(self):
+    @pytest.mark.parametrize('test_model', WATERMODELS)
+    def test_get_solvent_identifier_water(self, test_model):
         def _assert_model(model):
             assert get_solvent_identifier('water', model=model) is model
 
-        for model in self.watermodels:
-            yield _assert_model, model
+        _assert_model(test_model)
 
-    def test_get_solvent_identifier_solvents(self):
+    @pytest.mark.parametrize('test_solvent', [model for model in SOLVENTMODELS if model != "water"])
+    def test_get_solvent_identifier_solvents(self, test_solvent):
         def _assert_model(solvent, model):
             assert get_solvent_identifier(solvent, model=model) is solvent
 
-        for solvent in self.solventmodels:
-            yield _assert_model, solvent, None
+        _assert_model(test_solvent, None)
 
         # make sure that model is ignored
-        for solvent in self.solventmodels:
-            yield _assert_model, solvent, "Jabberwock model"
+        _assert_model(test_solvent, "Jabberwock model")
 
     @staticmethod
     def test_get_solvent_identifier_None():
