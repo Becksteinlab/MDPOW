@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # POW package __init__.py
 # Copyright (c) 2012 Oliver Beckstein <orbeckst@gmail.com>
 # Released under the GNU Public License 3 (or higher, your choice)
@@ -146,7 +147,7 @@ def get_water_model(watermodel=DEFAULT_WATER_MODEL):
 
 #: Other solvents (not water, see :data:`GROMACS_WATER_MODELS` for those).
 new_octanol = '''Zangi R (2018) Refinement of the OPLSAA force-field
-                for liquid alcohols.; ACS Omega 3(12):18089–18099.
+                for liquid alcohols.; ACS Omega 3(12):18089-18099.
                 doi: 10.1021/acsomega.8b03132'''
 
 OPLS_SOLVENT_MODELS = {
