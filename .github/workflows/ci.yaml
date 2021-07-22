@@ -16,20 +16,27 @@ concurrency:
   group: "${{ github.ref }}-${{ github.head_ref }}"
   cancel-in-progress: true
 
-# TODO: test different OS (but difficult with GROMACS versions)
-#       for right now: test on Linux only
 jobs:
   test:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
-        #os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macOS-latest]
         python-version: [2.7] 
         #python-version: [2.7, 3.8] 
         #python-version: [2.7, 3.6, 3.7, 3.8, 3.9]
-        gromacs-version: ["4.6.5", "2019.1", "2021.1"]
+        gromacs-version: ["4.6.5", "2018.6", "2019.1", "2021.1"]
+        # only test one GROMACS version on macOS to keep the testing
+        # matrix manageable
+        exclude:
+          - os: macOS-latest
+            gromacs-version: "4.6.5"
+          - os: macOS-latest
+            gromacs-version: "2018.6"
+          - os: macOS-latest
+            gromacs-version: "2019.1"
+
     env:
       MPLBACKEND: agg
         
