@@ -12,7 +12,7 @@ setup:
     molecule: None
          # Gromacs [ molecule ] identifier from the itp file (typically a 3-letter code)
     solventmodel: 'tip4p'
-         # water model available in Gromacs (OPLS-AA):
+         # water model available in Gromacs:
          # tip4p, tip5p, tip3p, spc, spce, m24, tip4pd
     forcefield: 'OPLS-AA'
          # Forcefield name
@@ -32,9 +32,9 @@ setup:
     boxtype: dodecahedron
          # box type understood by Gromacs 'gmx editconf' (cubic,
          # triclinic, octahedron, dodecahedron
-    gromacsoutput: False
+    gromacsoutput: True
          # True: print output from Gromacs command to screen (useful for debugging)
-         # False: only show the MDPOW messages
+         # False: only show the MDPOW messages (for tested production scripts)
 
 energy_minimize:
     mdp: 'em_opls.mdp'
@@ -44,7 +44,7 @@ energy_minimize:
 
 MD_relaxed:
     qscript: 'local.sh'
-         # queuing system scripts to produce
+         # queuing system script to produce
     runlocal: True
          # True: launch Gromacs mdrun and wait for it
          # False: produce queuing system scripts and stop
@@ -58,7 +58,7 @@ MD_relaxed:
 
 MD_NPT:
     qscript: 'local.sh'
-         # queuing system scripts to produce
+         # queuing system script to produce
     runtime: 50000
          # simulation run time in ps [50 ns is generous, probably can be shorter]
     runlocal: False
@@ -72,9 +72,9 @@ MD_NPT:
 
 FEP:
     method: 'BAR'
-         # BAR or TI
+         # BAR (also MBAR) or TI
     qscript: 'local.sh'
-         # queuing system scripts to produce
+         # queuing system script to produce
     runtime: 5000
          # run time in ps for each free energy window
     runlocal: False
