@@ -92,7 +92,7 @@ jobs:
     - name: Run tests
       shell: bash -l {0}
       run: |
-        pytest -v --durations=20 --cov=mdpow --cov-report=xml ./mdpow/tests
+        pytest -v --durations=20 --cov=mdpow --cov-report=xml --color=yes ./mdpow/tests
 
     - name: Codecov
       uses: codecov/codecov-action@v1
