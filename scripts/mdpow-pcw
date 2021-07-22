@@ -189,7 +189,8 @@ if __name__ == "__main__":
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("directory", nargs='+',
                         help="directory or directories which contain all the files "
-                        "resulting from running mdpow.fep.Ghyd.setup() ",)
+                        "resulting from running mdpow.fep.Ghyd.setup() and mdpow.fep.Gcylo.setup()"
+                        "and the results of the MD FEP simulations.",)
     parser.add_argument('--plotfile', dest="plotfile", default='none',
                         help="plot dV/dlambda to FILE; use png or pdf suffix to "
                         "determine the file type. 'auto' generates a pdf file "
