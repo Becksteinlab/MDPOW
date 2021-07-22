@@ -54,9 +54,8 @@ def test_solvation_cyclohexane(setup):
 
 @pytest.mark.xfail(gromacs.release.startswith('4')
                    or gromacs.release.startswith('5')
-                   or gromacs.release.startswith('2016')
-                   or gromacs.release.startswith('2018'),
-                   reason="GROMACS < 2019 cannot easily work with mixed solvents "
+                   or gromacs.release.startswith('2016'),
+                   reason="GROMACS < 2018 cannot easily work with mixed solvents "
                    "(see issue #111)")
 @pytest.mark.parametrize("ff", ['OPLS-AA', 'CHARMM', 'AMBER'])
 def test_solvation_wetoctanol(setup, ff):
