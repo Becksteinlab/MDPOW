@@ -46,8 +46,8 @@ Installation
 See `INSTALL`_ for detailed instructions. Note that
 **only Python 2.7** is supported.
 
-You will also need `Gromacs`_ (currently tested with versions 4.6.7,
-5.1.2, and Gromacs 2016, 2018).
+You will also need `Gromacs`_ (currently tested with versions 4.6.5,
+2018, 2019, 2021 but 2016 and 2020 should also work).
 
 
 Development version
@@ -81,9 +81,9 @@ Footnotes
 .. [#GromacsWrapperNote] The package is built on top of the GromacsWrapper_
                          framework (which is automatically installed).
 
-.. |build| image:: https://travis-ci.org/Becksteinlab/MDPOW.svg?branch=develop
+.. |build| image:: https://github.com/Becksteinlab/MDPOW/actions/workflows/ci.yaml/badge.svg?branch=develop
    :alt: Build Status
-   :target: https://travis-ci.org/Becksteinlab/MDPOW
+   :target: https://github.com/Becksteinlab/MDPOW/actions/workflows/ci.yaml
 
 .. |cov| image:: https://codecov.io/github/Becksteinlab/MDPOW/coverage.svg?branch=develop
    :alt: Coverage Status
