@@ -37,7 +37,7 @@ import shutil
 import sys
 
 import MDAnalysis as mda
-
+from six.moves import cPickle as pickle
 
 try:
     import gromacs.setup
@@ -215,19 +215,6 @@ class Simulation(Journalled):
 
         super(Simulation, self).__init__(**kwargs)
 
-    @staticmethod
-    def load_pickle():
-        """Loads compatible version of pickle
-
-        For python 2 loads and returns module cPickle as pickle, and
-        for python 3 loads _pickle"""
-        if sys.version_info.major == 2:
-            import cPickle as pickle
-            return pickle
-        elif sys.version_info.major == 3:
-            import _pickle as pickle
-            return pickle
-
     def BASEDIR(self, *args):
         return os.path.join(self.dirs.basedir, *args)
 
@@ -251,7 +238,6 @@ class Simulation(Journalled):
 
     def load(self, filename=None):
         """Re-instantiate class from pickled file."""
-        pickle = self.get_pickle()
         if filename is None:
             if self.filename is None:
                 self.filename = self.molecule.lower() + '.pickle'

@@ -97,7 +97,6 @@ import os
 import errno
 from pkg_resources import resource_filename, resource_listdir
 import yaml
-
 import numpy as np
 
 import logging
