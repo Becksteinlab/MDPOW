@@ -40,20 +40,30 @@ MD engine
 Calculations are performed with the Gromacs_ molecular dynamics (MD)
 software package [#GromacsWrapperFramework]_. MDPOW is tested with
 
-* Gromacs 4.6.x
-* Gromacs 5.1.x
-* Gromacs 2016.x
+* Gromacs 4.6.5
+* Gromacs 2018.6
+* Gromacs 2019.1
+* Gromacs 2021.1  
 
+but versions 5.x, 2016.x, and 2020.x should also work. 
 It should be possible to use any of these Gromacs versions without
 further adjustments, thanks to the underlying GromacsWrapper library
 [#GromacsWrapperFramework]_.
+
+Nevertheless, you should _always_ check the topology and runinput
+(mdp) files for the version of Gromacs_ that you are using.
 
 
 Force fields
 ------------
 
-Currently, the *OPLS-AA force field* parameters are supported out of
-the box. In principle it is possible to add force fields sets by
+Currently
+
+* OPLS-AA
+* CHARMM/CGenFF
+* AMBER/GAFF
+
+are supported. In principle it is possible to add force fields sets by
 changing the :envvar:`GMXLIB` environment variable and providing
 appropriate template files but this is currently untested.
 
