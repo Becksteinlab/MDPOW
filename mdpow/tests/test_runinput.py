@@ -79,7 +79,7 @@ class TestAlteredConfig(object):
             'stepout': 12000,
             'verbose': False,
             'nice': 12,
-            'maxthreads': 3
+            'maxthreads': 1
             }
     }
 

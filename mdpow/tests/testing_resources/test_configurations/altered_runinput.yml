@@ -119,5 +119,5 @@ mdrun:
          # report progress verbosely (True is -v)
     nice: 12
          # nicel level
-    maxthreads: 3
+    maxthreads: 1
          # maximum number of threads (-nt), 0 or None lets mdrun automatically choose
