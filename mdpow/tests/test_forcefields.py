@@ -42,29 +42,13 @@ class TestIncludedSolvents(object):
         },
     }
 
-    # using nosetest-style test generators.. .feel free to rewrite for
-    # py.test but I found the docs for parameterizing tests in py.test
-    # too complicated
-
-    def _test_solvent(self, name):
-        solvent = self.solvents[name]
-        def _assert_has_filename(filename):
+    @pytest.mark.parametrize("solvent_name", ["tip4p", "octanol", "cyclohexane"])
+    def test_solvent(self, solvent_name):
+        solvent = self.solvents[solvent_name]
+        for filename, path in solvent.items():
             assert filename in mdpow.config.topfiles
-        def _assert_correct_path(filename, path):
             assert mdpow.config.topfiles[filename].endswith(path)
 
-        for filename, path in solvent:
-            yield _assert_has_filename, filename
-            yield _assert_correct_path, filename, path
-
-    def test_tip4p(self):
-        self._test_solvent('tip4p')
-
-    def test_octanol(self):
-        self._test_solvent('octanol')
-
-    def test_cyclohexane(self):
-        self._test_solvent('cyclohexane')
 
 class TestWatermodels(object):
     @staticmethod
