@@ -247,6 +247,10 @@ if __name__ == "__main__":
         logger.fatal("Can only use --plotfile=None or --plotfile=auto with multiple directories.")
         sys.exit(1)
 
+    if opts.estimator == 'mdpow' and opts.SI:
+        logger.fatal("Statistical inefficiency analysis is only available for estimator 'alchemlyb'.")
+        sys.exit(1)
+
     for directory in opts.directory:
         if not os.path.exists(directory):
             logger.warn("Directory %r not found, skipping...", directory)
