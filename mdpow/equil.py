@@ -224,7 +224,6 @@ class Simulation(Journalled):
         The default filename is the name of the file that was last loaded from
         or saved to.
         """
-        pickle = self.get_pickle()
         if filename is None:
             if self.filename is None:
                 self.filename = filename or self.solvent_type + '.simulation'
