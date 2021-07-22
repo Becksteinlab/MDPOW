@@ -4,8 +4,8 @@ import pybol
 import numpy as np
 import gromacs
 from gromacs.utilities import in_dir
-from mdpow.fep import *
-from mdpow.equil import *
+from mdpow.fep import Gsolv
+from mdpow.equil import Simulation
 
 
 class Test_Gsolv_manual(object):

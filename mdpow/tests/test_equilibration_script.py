@@ -11,7 +11,6 @@ from mdpow.config import get_configuration
 
 class TestEquilibriumScript(object):
     def setup(self):
-        gromacs.config.set_gmxrc_environment('~/.conda/envs/MDPOW3/bin/GMXRC')
         self.tmpdir = td.TempDir()
         self.old_path = os.getcwd()
         self.resources = os.path.join(

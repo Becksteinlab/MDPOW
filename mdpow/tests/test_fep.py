@@ -2,8 +2,8 @@ import numpy as np
 from numpy.testing import assert_array_almost_equal, assert_almost_equal
 from scipy import constants
 import gromacs
-from mdpow.config import *
-from mdpow.fep import *
+from mdpow.config import get_configuration
+from mdpow.fep import molar_to_nm3, bar_to_kJmolnm3, kcal_to_kJ, kBT_to_kJ, kJ_to_kcal, FEPschedule
 
 
 def test_molar_to_nm3():
@@ -50,7 +50,6 @@ class TestFEPschedule(object):
 
     def setup(self):
         # load default bundled configuration
-        gromacs.config.set_gmxrc_environment('~/.conda/envs/MDPOW3/bin/GMXRC')
         self.cfg = get_configuration()
 
     def test_VDW(self):

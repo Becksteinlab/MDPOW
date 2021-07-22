@@ -21,7 +21,6 @@ test_file = {"OPLS-AA": 'benzene.itp',
 
 @pytest.fixture
 def setup(tmpdir):
-    gromacs.config.set_gmxrc_environment('~/.conda/envs/MDPOW3/bin/GMXRC')
     os.system('echo')
     newdir = tmpdir.mkdir('resources')
     old_path = os.getcwd()

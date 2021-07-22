@@ -4,7 +4,7 @@ import numpy as np
 from numpy.testing import assert_array_almost_equal
 import gromacs
 
-from mdpow.config import *
+from mdpow.config import get_configuration
 
 
 class TestAlteredConfig(object):
