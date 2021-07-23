@@ -112,15 +112,17 @@ defaults = {
 
 def merge_dicts(user, default):
     """Merge two dictionaries recursively.
-
-    Based on https://stackoverflow.com/a/823240/334357
+    Uses recursive method to accurately
+    merge nested dictionaries
     """
-    if isinstance(user, dict) and isinstance(default, dict):
-        for k, v in default.iteritems():
-            if k not in user:
-                user[k] = v
-            else:
-                user[k] = merge_dicts(user[k], v)
+    for key in default:
+        if key in user:
+            if isinstance(user[key], dict) and isinstance(default[key], dict):
+                merge_dicts(user[key], default[key])
+            elif user[key] == default[key]:
+                pass
+        else:
+            user[key] = default[key]
     return user
 
 
@@ -167,8 +169,13 @@ class POWConfigParser(object):
            Prior versions would convert case-insensitively (e.g. "NONE"
            and "none")
         """
-        value = self.conf[section][option]
-        return value if value != "None" else None
+
+        value = self.conf[section]
+        if isinstance(value, dict):
+            if value[option] != 'None':
+                return value[option]
+            else:
+                return None
 
     # TODO:
     # The YAML parser does automatic conversion: the following
@@ -233,7 +240,7 @@ def get_configuration(filename=None):
 def modify_gromacs_environment(name, value):
     from gromacs.environment import flags
     if flags[name] != value:
-        logger.warn("Changing GromacsWrapper environment: flags[%(name)r] = %(value)r", vars())
+        logger.warning("Changing GromacsWrapper environment: flags[%(name)r] = %(value)r", vars())
         flags[name] = value
 
 def set_gromacsoutput(cfg):
@@ -308,7 +315,7 @@ def get_templates(t):
     :Raises:    :exc:`ValueError` if no file can be located.
 
     """
-    return [_get_template(s) for s in utilities.asiterable(t)]
+    return [_get_template(s) for s in asiterable(t)]
 
 def _get_template(t):
     """Return a single template *t*."""
@@ -339,8 +346,8 @@ def _get_template(t):
 
 def iterable(obj):
     """Returns ``True`` if *obj* can be iterated over and is *not* a  string."""
-    if isinstance(obj, basestring):
-        return False    # avoid iterating over characters of a string
+    if isinstance(obj, str):
+        return False  # avoid iterating over characters of a string
 
     if hasattr(obj, 'next'):
         return True    # any iterator will do
@@ -416,6 +423,6 @@ if not 'GMXLIB' in os.environ:
     logger.info("Using the bundled force fields from GMXLIB=%(includedir)r.", vars())
     logger.info("If required, override this behaviour by setting the environment variable GMXLIB yourself.")
 else:
-    logger.warn("Using user-supplied environment variable GMXLIB=%r to find force fields", os.environ['GMXLIB'])
+    logger.warning("Using user-supplied environment variable GMXLIB=%r to find force fields", os.environ['GMXLIB'])
     logger.info("(You can use the MDPOW default by executing 'unset GMXLIB' in your shell before running MDPOW.)")
 
