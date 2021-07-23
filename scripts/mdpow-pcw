@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""%prog [options] DIRECTORY [DIRECTORY ...]
+"""%(prog)s [options] DIRECTORY [DIRECTORY ...]
 
 Run the free energy analysis for water and cyclohexane in <DIRECTORY>/FEP
 and return the cyclohexane-water partition coefficient log P_cw.
@@ -182,61 +182,71 @@ def realpath_or_none(fn):
 if __name__ == "__main__":
     import sys
     import os.path
-    from optparse import OptionParser
+    import argparse
 
-    parser = OptionParser(usage=__doc__)
-    parser.add_option('-p', '--plotfile', dest="plotfile",
-                      help="plot dV/dlambda to FILE; use png or pdf suffix to "
-                      "determine the file type. 'auto' generates a pdf file "
-                      "DIRECTORY/dVdl_MOLID_pcw.pdf and 'None' disables it [%default]"
-                      "The plot function is only available for mdpow estimator,"
-                      "and is disabled when using alchemlyb estimators.",
-                      metavar="FILE")
-    parser.add_option('-o', '--outfile', dest="outfile",
-                      help="append one-line results summary to FILE [%default]",
-                      metavar="FILE")
-    parser.add_option('-e', '--energies', dest="energyfile",
-                      help="append solvation free energies to FILE [%default]",
-                      metavar="FILE")
-    parser.add_option('--estimator', dest="estimator", default='alchemlyb',
-                      help="choose the estimator to be used, alchemlyb or mdpow estimators")
-    parser.add_option('--method', dest="method", default='MBAR',
-                      help="choose the method to calculate free energy",)
-    parser.add_option('--force', dest='force',
-                      action="store_true",
-                      help="force rereading all data [%default]")
-    parser.add_option('--noSI', dest='SI',
-                      action="store_false",
-                      help="Disable statistical inefficiency analysis."
-                      "Statitical inefficiency analysis is performed by default when using"
-                      "alchemlyb estimators and is disabled when using mdpow estimator.")
-    parser.add_option('-s', '--stride', dest="stride", type='int',
-                      help="Use every N-th datapoint from the original dV/dlambda data. "
-                      "[%default]",
-                      metavar="N")
-    parser.add_option('--start', dest="start", type='int',
-                      help="Start point for the data used from the original dV/dlambda data. ")
-    parser.add_option('--stop', dest="stop", type='int',
-                      help="Stop point for the data used from the original dV/dlambda data.",)
-    parser.add_option('--ignore-corrupted', dest="permissive",
-                      action="store_true",
-                      help="skip lines in the md.xvg files that cannot be parsed. "
-                      "WARNING: Other lines in the file might have been corrupted in "
-                      "such a way that they appear correct but are in fact wrong. "
-                      "WRONG RESULTS CAN OCCUR! USE AT YOUR OWN RISK [%default]")
-    parser.set_defaults(plotfile="none",
-                        outfile="pcw.txt", energyfile="energies.txt",
-                        force=False, stride=1, permissive=False, SI=True)
-    opts,args = parser.parse_args()
+    parser = argparse.ArgumentParser(usage=__doc__, prog='mdpow-pcw',
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument("directory", nargs='+',
+                        help="directory or directories which contain all the files "
+                        "resulting from running mdpow.fep.Ghyd.setup() and mdpow.fep.Gcylo.setup()"
+                        "and the results of the MD FEP simulations.",)
+    parser.add_argument('--plotfile', dest="plotfile", default='none',
+                        help="plot dV/dlambda to FILE; use png or pdf suffix to "
+                        "determine the file type. 'auto' generates a pdf file "
+                        "DIRECTORY/dVdl_MOLID_pcw.pdf and 'none' disables it "
+                        "The plot function is only available for mdpow estimator,"
+                        "and is disabled when using alchemlyb estimators.",
+                        metavar="FILE")
+    parser.add_argument('-o', '--outfile', dest="outfile", default="pcw.txt",
+                        help="append one-line results summary to FILE ",
+                        metavar="FILE")
+    parser.add_argument('-e', '--energies', dest="energyfile", default="energies.txt",
+                        help="append solvation free energies to FILE ",
+                        metavar="FILE")
+    parser.add_argument('--estimator', dest="estimator", default='alchemlyb',
+                        choices=['mdpow', 'alchemlyb'],
+                        help="choose the estimator to be used, alchemlyb or mdpow estimators")
+    parser.add_argument('--method', dest="method", default='MBAR',
+                        choices=['TI', 'MBAR', 'BAR'],
+                        help="choose the method to calculate free energy ",)
+    parser.add_argument('--force', dest='force', default=False,
+                        action="store_true",
+                        help="force rereading all data ")
+    SIs = parser.add_mutually_exclusive_group()
+    SIs.add_argument('--SI', dest='SI',
+                     action="store_true", default=True,
+                     help="enable statistical inefficiency (SI) analysis. "
+                     "Statistical inefficiency analysis is performed by default when using"
+                     "alchemlyb estimators and is always disabled when using mdpow estimator.")
+    SIs.add_argument('--no-SI', dest='noSI',
+                     action="store_true", default=False,
+                     help="disable statistical inefficiency analysis. "
+                     "Statistical inefficiency analysis is performed by default when using"
+                     "alchemlyb estimators and is disabled when using mdpow estimator. ")
+    parser.add_argument('-s', '--stride', dest="stride", type=int, default=1,
+                        help="use every N-th datapoint from the original dV/dlambda data. ",
+                        metavar="N")
+    parser.add_argument('--start', dest="start", type=int, default=0,
+                        help="start point for the data used from the original dV/dlambda data. ")
+    parser.add_argument('--stop', dest="stop", type=int, default=None,
+                        help="stop point for the data used from the original dV/dlambda data. ",)
+    parser.add_argument('--ignore-corrupted', dest="permissive",
+                        action="store_true", default=False,
+                        help="skip lines in the md.xvg files that cannot be parsed. "
+                        "WARNING: Other lines in the file might have been corrupted in "
+                        "such a way that they appear correct but are in fact wrong. "
+                        "WRONG RESULTS CAN OCCUR! USE AT YOUR OWN RISK ")
+    opts = parser.parse_args()
 
-    if len(args) == 0:
-        logger.fatal("A directory is required. See --help.")
-        sys.exit(1)
-    elif len(args) > 1 and not opts.plotfile.lower() in ('none', 'auto'):
+    if len(opts.directory) > 1 and not opts.plotfile.lower() in ('none', 'auto'):
         logger.fatal("Can only use --plotfile=None or --plotfile=auto with multiple directories.")
         sys.exit(1)
 
-    for directory in args:
+    if opts.estimator == 'mdpow' and opts.SI and not opts.noSI:
+        logger.fatal("Statistical inefficiency analysis is only available for estimator 'alchemlyb'.")
+        sys.exit(1)
+
+    for directory in opts.directory:
         if not os.path.exists(directory):
             logger.warning("Directory %r not found, skipping...", directory)
             continue
