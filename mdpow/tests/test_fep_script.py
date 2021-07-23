@@ -16,10 +16,9 @@ class TestFEPScript(object):
     def setup(self):
         self.tmpdir = td.TempDir()
         self.old_path = os.getcwd()
-        self.resources = os.path.join(
-            self.old_path, 'mdpow', 'tests', 'testing_resources')
-        self.m = pybol.Manifest(os.path.join(self.resources,'manifest.yml'))
-        self.m.assemble('md_npt',self.tmpdir.name)
+        self.resources = os.path.join(self.old_path, 'testing_resources')
+        self.m = pybol.Manifest(os.path.join(self.resources, 'manifest.yml'))
+        self.m.assemble('md_npt', self.tmpdir.name)
 
         S = Simulation(filename=os.path.join(
             self.tmpdir.name, 'benzene', 'water.simulation'))
@@ -52,6 +51,5 @@ class TestFEPScript(object):
                 self._run_fep('water', 'benzene/')
             except Exception as err:
                 raise AssertionError('FEP simulations failed with exception:\n{0}'.format(str(err)))
-
             assert os.path.exists(os.path.join(self.tmpdir.name,
                                                'benzene', 'FEP', 'water', 'VDW', '0000', 'md.edr'))
