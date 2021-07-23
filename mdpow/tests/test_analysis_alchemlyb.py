@@ -1,4 +1,6 @@
 import os.path
+import sys
+
 import pytest
 import py.path
 
@@ -62,11 +64,15 @@ def fep_benzene_directory(tmpdir_factory):
 class TestAnalyze(object):
     def get_Gsolv(self, pth):
         gsolv = pth.join("FEP", "water", "Gsolv.fep")
-        with open(gsolv, 'rb') as f:
-            G = pickle.load(f, encoding='latin1')
-            # patch paths
-            G.basedir = pth.strpath
-            G.filename = gsolv.strpath
+        if sys.version_info.major == 3:
+            with open(gsolv, 'rb') as f:
+                G = pickle.load(f, encoding='latin1')
+                # patch paths
+        elif sys.version_info.major == 2:
+            G = pickle.load(gsolv.open())
+        G.basedir = pth.strpath
+        G.filename = gsolv.strpath
+
         return G
 
     @pytest.mark.parametrize('method, Gibbs, coulomb, vdw', [
