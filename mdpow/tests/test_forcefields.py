@@ -3,7 +3,8 @@ from __future__ import absolute_import
 import os.path
 
 import pytest
-from mdpow.config import topfiles
+
+import mdpow.config
 import mdpow.forcefields
 
 # currently supported
@@ -17,14 +18,14 @@ class TestIncludedForcefiels(object):
 
     @staticmethod
     def test_oplsaa_itp():
-        assert "ffoplsaa.itp" in topfiles
-        assert topfiles["ffoplsaa.itp"].endswith(
+        assert "ffoplsaa.itp" in mdpow.config.topfiles
+        assert mdpow.config.topfiles["ffoplsaa.itp"].endswith(
             os.path.join('mdpow', 'top', 'ffoplsaa.itp'))
 
     @staticmethod
     def test_oplsaa_ff():
-        assert "oplsaa.ff" in topfiles
-        assert topfiles["oplsaa.ff"].endswith(
+        assert "oplsaa.ff" in mdpow.config.topfiles
+        assert mdpow.config.topfiles["oplsaa.ff"].endswith(
             os.path.join('mdpow', 'top', 'oplsaa.ff'))
 
 class TestIncludedSolvents(object):
