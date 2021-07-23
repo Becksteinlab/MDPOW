@@ -194,7 +194,7 @@ if __name__ == "__main__":
     parser.add_argument('--plotfile', dest="plotfile", default='none',
                         help="plot dV/dlambda to FILE; use png or pdf suffix to "
                         "determine the file type. 'auto' generates a pdf file "
-                        "DIRECTORY/dVdl_MOLID_pcw.pdf and 'None' disables it "
+                        "DIRECTORY/dVdl_MOLID_pcw.pdf and 'none' disables it "
                         "The plot function is only available for mdpow estimator,"
                         "and is disabled when using alchemlyb estimators.",
                         metavar="FILE")
