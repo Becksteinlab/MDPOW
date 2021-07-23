@@ -42,10 +42,10 @@ software package [#GromacsWrapperFramework]_. MDPOW is tested with
 
 * Gromacs 4.6.5
 * Gromacs 2018.6
-* Gromacs 2019.1
-* Gromacs 2021.1  
+* Gromacs 2020.6
+* Gromacs 2021.1
 
-but versions 5.x, 2016.x, and 2020.x should also work. 
+but versions 5.x, 2016.x, and 2019.x should also work.
 It should be possible to use any of these Gromacs versions without
 further adjustments, thanks to the underlying GromacsWrapper library
 [#GromacsWrapperFramework]_.

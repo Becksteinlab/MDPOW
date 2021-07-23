@@ -47,7 +47,7 @@ See `INSTALL`_ for detailed instructions. Note that
 **only Python 2.7** is supported.
 
 You will also need `Gromacs`_ (currently tested with versions 4.6.5,
-2018, 2019, 2021 but 2016 and 2020 should also work).
+2018, 2020, 2021 but 2016 and 2019 should also work).
 
 
 Development version
