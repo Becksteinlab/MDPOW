@@ -128,6 +128,8 @@ import copy
 from subprocess import call
 import warnings
 
+import sys
+
 import numpy
 import pandas as pd
 
@@ -230,7 +232,7 @@ class FEPschedule(AttributeDict):
     @staticmethod
     def load(cfg, section):
         """Initialize a :class:`FEPschedule` from the *section* in the configuration *cfg*"""
-
+        from configparser import NoOptionError
         keys = {}
         keys.update(FEPschedule.mdp_keywords)
         keys.update(FEPschedule.meta_keywords)
@@ -244,16 +246,24 @@ class FEPschedule(AttributeDict):
         def getter(type, section, key):
             try:
                 return cfg_get[type](section, key)
-            except ConfigParser.NoOptionError:
+            except NoOptionError:
                 return None
         return FEPschedule((key, getter(keytype, section, key)) for key,keytype in keys.items()
                            if getter(keytype, section, key) is not None)
 
     def __deepcopy__(self, memo):
-        x = type(self)()
-        for k,v in self.iteritems():
-            x[k] = copy.deepcopy(v, memo)
-        return x
+        if sys.version_info.major == 3:
+            from collections.abc import Iterable
+            x = FEPschedule()
+            for k, v in self.items():
+                if isinstance(k, Iterable) and isinstance(v, Iterable):
+                    x[k] = copy.deepcopy(v)
+            return x
+        elif sys.version_info == 2:
+            x = FEPschedule()
+            for k, v in self.iteritems():
+                x[k] = copy.deepcopy(v)
+            return x
 
 class Gsolv(Journalled):
     """Simulations to calculate and analyze the solvation free energy.
@@ -504,7 +514,7 @@ class Gsolv(Journalled):
                 wmsg = "Directory %(dirname)r already exists --- will overwrite " \
                        "existing files." % vars(self)
                 warnings.warn(wmsg)
-                logger.warn(wmsg)
+                logger.warning(wmsg)
 
         # overrides pickle file so that we can run from elsewhere
         if not basedir is None:
@@ -720,8 +730,8 @@ class Gsolv(Journalled):
         pattern = os.path.join(*args + (self.deffnm + '*.edr',))
         edrs = glob(pattern)
         if not edrs:
-                    logger.error("Missing dgdl.edr file %(pattern)r.", vars())
-                    raise IOError(errno.ENOENT, "Missing dgdl.edr file", pattern)
+            logger.error("Missing dgdl.edr file %(pattern)r.", vars())
+            raise IOError(errno.ENOENT, "Missing dgdl.edr file", pattern)
         return [os.path.abspath(i) for i in edrs]
 
     def dgdl_tpr(self, *args):
@@ -834,8 +844,8 @@ class Gsolv(Journalled):
                     # speed is similar to 'bzip2 -9 FILE' (using a 1 Mio buffer)
                     # (Since GW 0.8, openany() does not take kwargs anymore so the write buffer cannot be
                     # set anymore (buffering=1048576) so the performance might be lower in MDPOW >= 0.7.0)
-                    with open(xvg, 'r', buffering=1048576) as source:
-                        with openany(fnbz2, 'w') as target:
+                    with open(xvg, 'rb', buffering=1048576) as source:
+                        with openany(fnbz2, 'wb') as target:
                             target.writelines(source)
                     if os.path.exists(fnbz2) and os.path.exists(xvg):
                         os.unlink(xvg)
@@ -855,19 +865,20 @@ class Gsolv(Journalled):
         :attr:`Gsolv._corrupted` as dicts of dicts with the component as
         primary and the lambda as secondary key.
         """
-        from itertools import izip
+
         def _lencorrupted(xvg):
             try:
                 return len(xvg.corrupted_lineno)
             except AttributeError:  # backwards compatible (pre gw 0.1.10 are always ok)
                 return 0
-            except TypeError:       # len(None): XVG.parse() has not been run yet
-                return 0            # ... so we cannot conclude that it does contain bad ones
+            except TypeError:  # len(None): XVG.parse() has not been run yet
+                return 0  # ... so we cannot conclude that it does contain bad ones
+
         corrupted = {}
         self._corrupted = {}        # debugging ...
         for component, (lambdas, xvgs) in self.results.xvg.items():
             corrupted[component] = numpy.any([(_lencorrupted(xvg) > 0) for xvg in xvgs])
-            self._corrupted[component] = dict(((l, _lencorrupted(xvg)) for l,xvg in izip(lambdas, xvgs)))
+            self._corrupted[component] = dict(((l, _lencorrupted(xvg)) for l, xvg in zip(lambdas, xvgs)))
         return numpy.any([x for x in corrupted.values()])
 
     def analyze(self, force=False, stride=None, autosave=True, ncorrel=25000):
@@ -960,7 +971,7 @@ class Gsolv(Journalled):
                     self.convert_edr()
                     self.collect(stride=stride, autosave=False)
                 else:
-                    logger.exception()
+                    logger.exception(err)
                     raise
         else:
             logger.info("Analyzing stored data.")
@@ -1064,7 +1075,7 @@ class Gsolv(Journalled):
                     self.convert_edr()
                     self.collect_alchemlyb(SI, start, stop, stride, autosave=False)
                 else:
-                    logger.exception()
+                    logger.exception(err)
                     raise
         else:
             logger.info("Analyzing stored data.")
@@ -1384,6 +1395,12 @@ def p_transfer(G1, G2, **kwargs):
             logger.info("The solvent is %s .", G.solvent_type)
             logger.info("Estimator is %s.", estimator)
             logger.info("Free energy calculation method is %s.", G.method)
+
+        try:
+            G.results.DeltaA.Gibbs
+            G.logger_DeltaA0()
+        except (KeyError, AttributeError):  # KeyError because results is a AttributeDict
+            logger.warning("Must analyze simulation because no hydration free energy data available...")
             if estimator == 'mdpow':
                 G.analyze(**G_kwargs)
             elif estimator == 'alchemlyb':
