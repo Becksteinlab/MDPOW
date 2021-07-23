@@ -26,6 +26,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         python-version: [2.7, 3.7, 3.8, 3.9]
+        gromacs-version: ["2021.1"]
     env:
       MPLBACKEND: agg
 
@@ -54,13 +55,12 @@ jobs:
     - name: Python version
       shell: bash -l {0}
       run: |
-        - python -c "import sys; print(sys.version)"
+        python -c "import sys; print(sys.version)"
 
     - name: Install package dependencites
       shell: bash -l {0}
       run: |
-        python -m pip install . --no-deps
-        conda list
+        mamba install GromacsWrapper MDAnalysis six numkit alchemlyb
 
     - name: Install pytest in and plugins
       shell: bash -l {0}
