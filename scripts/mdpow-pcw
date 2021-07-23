@@ -218,8 +218,8 @@ if __name__ == "__main__":
                         help="enable statistical inefficiency (SI) analysis. "
                              "Statistical inefficiency analysis is performed by default when using"
                              "alchemlyb estimators and is always disabled when using mdpow estimator.")
-    parser.add_argument('--no-SI', dest='SI',
-                        action="store_false", default=True,
+    parser.add_argument('--no-SI', dest='noSI',
+                        action="store_true", default=False,
                         help="disable statistical inefficiency analysis. "
                         "Statistical inefficiency analysis is performed by default when using"
                         "alchemlyb estimators and is disabled when using mdpow estimator. ")
@@ -248,6 +248,10 @@ if __name__ == "__main__":
         logger.fatal("Can only use --plotfile=None or --plotfile=auto with multiple directories.")
         sys.exit(1)
 
+    if opts.SI and opts.noSI:
+        logger.fatal("Can only use either --SI or --no-SI.")
+        sys.exit(1)
+
     if opts.estimator == 'mdpow' and opts.SI:
         logger.fatal("Statistical inefficiency analysis is only available for estimator 'alchemlyb'.")
         sys.exit(1)
@@ -266,7 +270,7 @@ if __name__ == "__main__":
                     energyfile=realpath_or_none(opts.energyfile),
                     force=opts.force, stride=opts.stride, start=opts.start,
                     stop=opts.stop, estimator=opts.estimator,
-                    method=opts.method, permissive=opts.permissive, SI=opts.SI)
+                    method=opts.method, permissive=opts.permissive, SI=opts.SI and not opts.noSI)
         except (OSError, IOError), err:
             logger.error("Running analysis in directory %r failed: %s", directory, str(err))
         except Exception, err:
