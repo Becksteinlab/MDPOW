@@ -62,10 +62,11 @@ def fep_benzene_directory(tmpdir_factory):
 class TestAnalyze(object):
     def get_Gsolv(self, pth):
         gsolv = pth.join("FEP", "water", "Gsolv.fep")
-        G = pickle.load(gsolv.open())
-        # patch paths
-        G.basedir = pth.strpath
-        G.filename = gsolv.strpath
+        with open(gsolv, 'rb') as f:
+            G = pickle.load(f, encoding='latin1')
+            # patch paths
+            G.basedir = pth.strpath
+            G.filename = gsolv.strpath
         return G
 
     @pytest.mark.parametrize('method, Gibbs, coulomb, vdw', [

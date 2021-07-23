@@ -3,7 +3,6 @@ import shutil
 
 import mdpow.equil
 from gromacs.utilities import in_dir
-import gromacs
 
 import pytest
 
@@ -20,10 +19,10 @@ test_file = {"OPLS-AA": 'benzene.itp',
 
 @pytest.fixture
 def setup(tmpdir):
+    os.system('echo')
     newdir = tmpdir.mkdir('resources')
     old_path = os.getcwd()
-    resources = os.path.join(
-        old_path, 'mdpow', 'tests', 'testing_resources')
+    resources = os.path.join(old_path, 'testing_resources')
     files = ['benzene.pdb', 'benzene.itp',
              'benzene_charmm.itp', 'benzene_amber.itp']
     for f in files:
@@ -52,11 +51,8 @@ def test_solvation_octanol(setup, ff):
 def test_solvation_cyclohexane(setup):
     solvation(setup, "cyclohexane")
 
-@pytest.mark.xfail(gromacs.release.startswith('4')
-                   or gromacs.release.startswith('5')
-                   or gromacs.release.startswith('2016'),
-                   reason="GROMACS < 2018 cannot easily work with mixed solvents "
-                   "(see issue #111)")
+
+@pytest.mark.xfail("gromacs.release().startswith('2019')")
 @pytest.mark.parametrize("ff", ['OPLS-AA', 'CHARMM', 'AMBER'])
 def test_solvation_wetoctanol(setup, ff):
     solvation(setup, "wetoctanol", ff)
