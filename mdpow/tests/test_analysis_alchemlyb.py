@@ -41,7 +41,7 @@ def fix_manifest(topdir):
         m = pybol.Manifest(new_manifest.strpath)
 
     """
-    manifest = yaml.load(MANIFEST.open())
+    manifest = yaml.safe_load(MANIFEST.open())
     # simple heuristic: last element of the recorded manifest::path is the name
     # of the states directory, typically 'states' (from .../testing_resources/states)
     manifest['path'] = RESOURCES.join(os.path.basename(manifest['path'])).strpath
