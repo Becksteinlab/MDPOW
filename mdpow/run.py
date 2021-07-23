@@ -71,7 +71,7 @@ def setupMD(S, protocol, cfg):
 
 def get_mdp_files(cfg, protocols):
     """Get file names of MDP files from *cfg* for all *protocols*"""
-    import ConfigParser
+    import configparser
 
     mdpfiles = {}
     for protocol in protocols:
@@ -81,7 +81,7 @@ def get_mdp_files(cfg, protocols):
             # skip anything for which we do not define sections, such as
             # the dummy run protocols
             mdp = None
-        except ConfigParser.NoOptionError:
+        except configparser.NoOptionError:
             # Should not happen... let's continue and wait for hard-coded defaults
             logger.error("No 'mdp' config file entry for protocol [%s]---check input files!", protocol)
             mdp = None
@@ -147,7 +147,7 @@ def runMD_or_exit(S, protocol, params, cfg, **kwargs):
             logger.info("Now go and run %(protocol)s in directory %(dirname)r.", vars())
             sys.exit(0)
         elif simulation_done is False:
-            logger.warn("Simulation %(protocol)s in directory %(dirname)r is incomplete (log=%)logfile)s).", vars())
+            logger.warning("Simulation %(protocol)s in directory %(dirname)r is incomplete (log=%)logfile)s).", vars())
             sys.exit(1)
         logger.info("Simulation %(protocol)s seems complete (log=%(logfile)s)", vars())
     return simulation_done
@@ -306,7 +306,7 @@ def fep_simulation(cfg, solvent, **kwargs):
     equil_savefilename = os.path.join(topdir, "%(solvent)s.simulation" % vars())
     try:
         equil_S = EquilSimulation(filename=equil_savefilename)
-    except IOError, err:
+    except IOError as err:
         if err.errno == errno.ENOENT:
             logger.critical("Missing the equilibrium simulation %(equil_savefilename)r.", vars())
             logger.critical("Run `mdpow-equilibrium -S %s %s'  first!", solvent, "RUNINPUT.cfg")
