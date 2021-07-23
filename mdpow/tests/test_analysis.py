@@ -9,6 +9,7 @@ from numpy.testing import assert_array_almost_equal
 
 from six.moves import cPickle as pickle
 
+import numkit
 import mdpow.fep
 
 from pkg_resources import resource_filename
@@ -41,7 +42,7 @@ def fix_manifest(topdir):
         m = pybol.Manifest(new_manifest.strpath)
 
     """
-    manifest = yaml.load(MANIFEST.open())
+    manifest = yaml.safe_load(MANIFEST.open())
     # simple heuristic: last element of the recorded manifest::path is the name
     # of the states directory, typically 'states' (from .../testing_resources/states)
     manifest['path'] = RESOURCES.join(os.path.basename(manifest['path'])).strpath
@@ -86,7 +87,8 @@ class TestAnalyze(object):
     def test_convert_edr(self, fep_benzene_directory):
         G = self.get_Gsolv(fep_benzene_directory)
         try:
-            G.analyze(force=True, autosave=False)
+            with pytest.warns(numkit.LowAccuracyWarning):
+                G.analyze(force=True, autosave=False)
         except IOError as err:
             raise AssertionError("Failed to auto-convert edr to xvg: {0}: {1}".format(
                 err.strerror, err.filename))
@@ -101,7 +103,8 @@ class TestAnalyze(object):
         # fep_benzene_directory locally scoped
         G.convert_edr()
         try:
-            G.analyze(force=True, autosave=False)
+            with pytest.warns(numkit.LowAccuracyWarning):
+                G.analyze(force=True, autosave=False)
         except IOError as err:
             raise AssertionError("Failed to convert edr to xvg: {0}: {1}".format(
                 err.strerror, err.filename))
