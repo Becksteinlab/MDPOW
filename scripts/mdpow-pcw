@@ -213,16 +213,17 @@ if __name__ == "__main__":
     parser.add_argument('--force', dest='force', default=False,
                         action="store_true",
                         help="force rereading all data ")
-    parser.add_argument('--SI', dest='SI',
-                        action="store_true", default=True,
-                        help="enable statistical inefficiency (SI) analysis. "
-                             "Statistical inefficiency analysis is performed by default when using"
-                             "alchemlyb estimators and is always disabled when using mdpow estimator.")
-    parser.add_argument('--no-SI', dest='noSI',
-                        action="store_true", default=False,
-                        help="disable statistical inefficiency analysis. "
-                        "Statistical inefficiency analysis is performed by default when using"
-                        "alchemlyb estimators and is disabled when using mdpow estimator. ")
+    SIs = parser.add_mutually_exclusive_group()
+    SIs.add_argument('--SI', dest='SI',
+                     action="store_true", default=True,
+                     help="enable statistical inefficiency (SI) analysis. "
+                     "Statistical inefficiency analysis is performed by default when using"
+                     "alchemlyb estimators and is always disabled when using mdpow estimator.")
+    SIs.add_argument('--no-SI', dest='noSI',
+                     action="store_true", default=False,
+                     help="disable statistical inefficiency analysis. "
+                     "Statistical inefficiency analysis is performed by default when using"
+                     "alchemlyb estimators and is disabled when using mdpow estimator. ")
     parser.add_argument('-s', '--stride', dest="stride", type=int, default=1,
                         help="use every N-th datapoint from the original dV/dlambda data. ",
                         metavar="N")
@@ -242,11 +243,7 @@ if __name__ == "__main__":
         logger.fatal("Can only use --plotfile=None or --plotfile=auto with multiple directories.")
         sys.exit(1)
 
-    if opts.SI and opts.noSI:
-        logger.fatal("Can only use either --SI or --no-SI.")
-        sys.exit(1)
-
-    if opts.estimator == 'mdpow' and opts.SI:
+    if opts.estimator == 'mdpow' and opts.SI and not opts.noSI:
         logger.fatal("Statistical inefficiency analysis is only available for estimator 'alchemlyb'.")
         sys.exit(1)
 
