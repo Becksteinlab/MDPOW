@@ -73,6 +73,9 @@ def setupMD(S, protocol, cfg):
 
 def get_mdp_files(cfg, protocols):
     """Get file names of MDP files from *cfg* for all *protocols*"""
+
+    import configparser
+
     mdpfiles = {}
     for protocol in protocols:
         try:
