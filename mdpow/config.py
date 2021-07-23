@@ -169,7 +169,6 @@ class POWConfigParser(object):
            Prior versions would convert case-insensitively (e.g. "NONE"
            and "none")
         """
-
         try:
             value = self.conf[section][option]
             return value if value != "None" else None
