@@ -28,6 +28,8 @@ from six.moves import cPickle as pickle
 import os
 import errno
 
+from six.moves import cPickle as pickle
+
 import logging
 logger = logging.getLogger('mdpow.checkpoint')
 
