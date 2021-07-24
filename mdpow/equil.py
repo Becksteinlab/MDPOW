@@ -33,9 +33,9 @@ from __future__ import absolute_import, with_statement
 
 import os, errno
 import shutil
+from six.moves import cPickle as pickle
 
 import MDAnalysis as mda
-from six.moves import cPickle as pickle
 
 try:
     import gromacs.setup, gromacs.cbook
