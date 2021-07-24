@@ -171,6 +171,8 @@ from gromacs.utilities import asiterable, AttributeDict, in_dir, openany
 
 import logging
 logger = logging.getLogger('mdpow.fep')
+if not hasattr(logger, "warning"):
+   logger.warning = logger.warn
 
 from . import config
 from .restart import Journalled
@@ -249,7 +251,6 @@ class FEPschedule(AttributeDict):
     @staticmethod
     def load(cfg, section):
         """Initialize a :class:`FEPschedule` from the *section* in the configuration *cfg*"""
-        from configparser import NoOptionError
         keys = {}
         keys.update(FEPschedule.mdp_keywords)
         keys.update(FEPschedule.meta_keywords)
@@ -875,15 +876,14 @@ class Gsolv(Journalled):
         :attr:`Gsolv._corrupted` as dicts of dicts with the component as
         primary and the lambda as secondary key.
         """
-
+        from itertools import izip
         def _lencorrupted(xvg):
             try:
                 return len(xvg.corrupted_lineno)
             except AttributeError:  # backwards compatible (pre gw 0.1.10 are always ok)
                 return 0
-            except TypeError:  # len(None): XVG.parse() has not been run yet
-                return 0  # ... so we cannot conclude that it does contain bad ones
-
+            except TypeError:       # len(None): XVG.parse() has not been run yet
+                return 0            # ... so we cannot conclude that it does contain bad ones
         corrupted = {}
         self._corrupted = {}        # debugging ...
         for component, (lambdas, xvgs) in self.results.xvg.items():

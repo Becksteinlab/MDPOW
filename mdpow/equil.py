@@ -52,6 +52,8 @@ from .restart import Journalled
 
 import logging
 logger = logging.getLogger('mdpow.equil')
+if not hasattr(logger, "warning"):
+   logger.warning = logger.warn
 
 # ITP <-- forcefields.get_solvent_model(id).itp
 # BOX <-- forcefields.get_solvent_model(id).coordinates
@@ -613,10 +615,7 @@ class Simulation(Journalled):
         """Returns the checkpoint of the most advanced step in the protocol.
         Relies on md.gro being present from previous simulation, assumes that checkpoint is then present.
         """
-        if self._lastnotempty([self.files[name] for name in self.checkpoints]) is not None:
-            return self._lastnotempty([self.files[name] for name in self.checkpoints]).replace('.gro', '.cpt')
-        return None
-
+        return self._lastnotempty([self.files[name] for name in self.checkpoints]).replace('.gro','.cpt')
 
 class WaterSimulation(Simulation):
     """Equilibrium MD of a solute in a box of water."""
