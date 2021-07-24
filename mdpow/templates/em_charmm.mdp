@@ -1,5 +1,5 @@
-; Gromacs mdp file
-; Template for energy minimization with OPLS-AA (part of POW)
+; GROMACS mdp file
+; Template for energy minimization with CHARMM (part of MDPOW)
 
 include                  = 
 define                   = -DFLEXIBLE
@@ -20,7 +20,7 @@ ns_type                  = grid
 pbc                      = xyz
 periodic_molecules       = no
 
-rlist                    = 1.0
+rlist                    = 1.2
 
 coulombtype              = PME
 rcoulomb                 = 1.0
@@ -31,9 +31,10 @@ ewald_geometry           = 3d
 epsilon_surface          = 0
 optimize_fft             = no
 
-vdwtype                  = cut-off   ; use shift for L-BFGS
-rvdw                     = 1.0
-rvdw-switch              = 0         ; 0.8 for l-bfcg
+vdwtype                  = cut-off
+vdw-modifier             = force-switch
+rvdw-switch              = 1.0
+rvdw                     = 1.2
 
 Tcoupl                   = no
 Pcoupl                   = no
