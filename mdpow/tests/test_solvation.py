@@ -22,10 +22,10 @@ test_file = {"OPLS-AA": 'benzene.itp',
 
 @pytest.fixture
 def setup(tmpdir):
-    os.system('echo')
     newdir = tmpdir.mkdir('resources')
     old_path = os.getcwd()
-    resources = os.path.join(old_path, 'testing_resources')
+    resources = os.path.join(
+        old_path, 'mdpow', 'tests', 'testing_resources')
     files = ['benzene.pdb', 'benzene.itp',
              'benzene_charmm.itp', 'benzene_amber.itp']
     for f in files:
