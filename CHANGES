@@ -40,6 +40,8 @@ Changes
     manually increasing rlist >= solute diameter
   - added comment regarding 'pme_order = 6' preventing PME calculation
     on GPUs with GROMACS 2021.
+* store version information in mdpow.__version__ instead of VERSION
+  get_version() (#165)
 
 Enhancements
 

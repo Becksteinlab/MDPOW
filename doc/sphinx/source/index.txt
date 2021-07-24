@@ -87,6 +87,24 @@ small molecule (e.g. from LigandBook_ or ParamChem_).
 
 
 
+Version information
+-------------------
+
+MDPOW uses `semantic versioning`_ with the release number consisting
+of a triplet *MAJOR.MINOR.PATCH*. *PATCH* releases are bug fixes or
+updates to docs or meta data only and do not introduce new features or
+change the API. Within a *MAJOR* release, the user API is stable
+except during the development cycles with MAJOR = 0 where the API may
+also change (rarely) between MINOR releases. *MINOR* releases can
+introduce new functionality or deprecate old ones.
+
+The version information can be accessed from the attribute
+:data:`gromacs.__version__`.
+      
+.. autodata:: gromacs.__version__
+
+.. _semantic versioning: https://semver.org	      
+
 .. Hide to use with alabaster
 .. Contents:
 
