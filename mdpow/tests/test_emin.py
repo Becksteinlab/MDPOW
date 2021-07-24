@@ -1,5 +1,8 @@
+from __future__ import absolute_import
+
+from . import tempdir as td
+
 import mdpow.equil
-import tempdir as td
 import os
 
 class TestEnergyMinimization(object):
