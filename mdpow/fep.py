@@ -127,13 +127,13 @@ import errno
 import copy
 from subprocess import call
 import warnings
-
 import sys
 
 import numpy
 import pandas as pd
 
 import scipy.integrate
+import six
 from scipy import constants
 import numkit.integration
 import numkit.timeseries
@@ -151,6 +151,8 @@ except (ImportError, OSError):
 from gromacs.utilities import asiterable, AttributeDict, in_dir, openany
 from numkit.observables import QuantityWithError
 from glob import glob
+
+# Patch due to slightly different library names
 if sys.version_info.major == 2:
     from ConfigParser import NoOptionError
 elif sys.version_info.major == 3:
@@ -257,18 +259,10 @@ class FEPschedule(AttributeDict):
                            if getter(keytype, section, key) is not None)
 
     def __deepcopy__(self, memo):
-        if sys.version_info.major == 3:
-            from collections.abc import Iterable
-            x = FEPschedule()
-            for k, v in self.items():
-                if isinstance(k, Iterable) and isinstance(v, Iterable):
-                    x[k] = copy.deepcopy(v)
-            return x
-        elif sys.version_info == 2:
-            x = FEPschedule()
-            for k, v in self.iteritems():
-                x[k] = copy.deepcopy(v)
-            return x
+        x = FEPschedule()
+        for k, v in six.iteritems(self):
+            x[k] = copy.deepcopy(v)
+        return x
 
 class Gsolv(Journalled):
     """Simulations to calculate and analyze the solvation free energy.
