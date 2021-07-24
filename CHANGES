@@ -35,7 +35,23 @@ orbeckst, VOD555, ALescoul
   object (#129)
 * support opls-aa tip4pd, amber tip4pew and cyclohexane, and charmm TIP5P
   and cyclohexane solvent type (#141)
-
+* updated MDP templates:
+  - add files for AMBER (same as OPLS) and CHARMM for em, NPT, and bar (FEP)
+    stages
+  - explicitly set "cutoff-scheme = verlet" in all MDP files; for GROMACS
+    4.6.5 FEP will fail with a FATAL ERROR "The Verlet cut-off scheme
+    does not (yet) support free-energy calculations with perturbed
+    atoms, only perturbed interactions." so you need to set the
+    cutoff-scheme to the value "group".
+  - disable energy group calculation to allow running on GPUs with
+    modern GROMACS versions (such as 2021)
+  - use standard CHARMM non-bonded parameters for em_charmm.mdp
+    (for energy minimization)
+  - added comments regarding GROMACS bug
+    https://gitlab.com/gromacs/gromacs/-/issues/3403 that requires
+    manually increasing rlist >= solute diameter
+  - added comment regarding 'pme_order = 6' preventing PME calculation
+    on GPUs with GROMACS 2021.
 
 2017-05-02    0.6.1
 orbeckst, iorga, ianmkenney, rhheilma

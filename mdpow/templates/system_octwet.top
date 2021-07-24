@@ -1,6 +1,5 @@
 ; system.top
-; Part of the POW package.
-; Copyright (c) 2010-2011 Oliver Beckstein and Bogdan Iorga
+; Part of the MDPOW package.
 ; Template for simple Gromacs simulations of a compound in water
 ; NOTE: This file is processed with mdpow.equil.topology()
 ;       which expects EXACTLY this file as input in order to be able
@@ -11,7 +10,6 @@
 
 ; Include compound topology
 #include "compound.prm"
-
 #include "compound.itp"
 
 ; Include solvent topology
@@ -23,7 +21,7 @@
 
 [ system ]
 ; Name
-Compound DRUG in solvent (OPLS-AA parameters)
+Compound DRUG in solvent
 
 [ molecules ]
 ; Compound        #mols
