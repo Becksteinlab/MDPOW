@@ -68,6 +68,7 @@ class TestAnalyze(object):
         if sys.version_info.major == 2:
             G = pickle.load(gsolv.open())
         elif sys.version_info.major == 3:
+            # Needed to read old pickle files
             with open(gsolv, 'rb') as f:
                 G = pickle.load(f, encoding='latin1')
         # patch paths
