@@ -871,7 +871,7 @@ class Gsolv(Journalled):
         :attr:`Gsolv._corrupted` as dicts of dicts with the component as
         primary and the lambda as secondary key.
         """
-        from itertools import izip
+        from six.moves import zip
         def _lencorrupted(xvg):
             try:
                 return len(xvg.corrupted_lineno)
@@ -883,7 +883,7 @@ class Gsolv(Journalled):
         self._corrupted = {}        # debugging ...
         for component, (lambdas, xvgs) in self.results.xvg.items():
             corrupted[component] = numpy.any([(_lencorrupted(xvg) > 0) for xvg in xvgs])
-            self._corrupted[component] = dict(((l, _lencorrupted(xvg)) for l,xvg in izip(lambdas, xvgs)))
+            self._corrupted[component] = dict(((l, _lencorrupted(xvg)) for l,xvg in zip(lambdas, xvgs)))
         return numpy.any([x for x in corrupted.values()])
 
     def analyze(self, force=False, stride=None, autosave=True, ncorrel=25000):
