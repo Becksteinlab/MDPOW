@@ -876,7 +876,7 @@ class Gsolv(Journalled):
         :attr:`Gsolv._corrupted` as dicts of dicts with the component as
         primary and the lambda as secondary key.
         """
-        from itertools import izip
+        from six.moves import zip
         def _lencorrupted(xvg):
             try:
                 return len(xvg.corrupted_lineno)
