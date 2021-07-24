@@ -121,8 +121,6 @@ def merge_dicts(user, default):
         if key in user:
             if isinstance(user[key], dict) and isinstance(default[key], dict):
                 merge_dicts(user[key], default[key])
-            elif user[key] == default[key]:
-                pass
         else:
             user[key] = default[key]
     return user
