@@ -95,8 +95,10 @@ from __future__ import absolute_import
 import os, errno
 from pkg_resources import resource_filename, resource_listdir
 import yaml
+import six
 
 import numpy as np
+import gromacs.utilities
 
 import logging
 logger = logging.getLogger("mdpow.config")
@@ -170,12 +172,11 @@ class POWConfigParser(object):
            and "none")
         """
 
-        value = self.conf[section]
-        if isinstance(value, dict):
-            if value[option] != 'None':
-                return value[option]
-            else:
-                return None
+        try:
+            value = self.conf[section][option]
+            return value if value != "None" else None
+        except TypeError:
+            return None
 
     # TODO:
     # The YAML parser does automatic conversion: the following
@@ -292,7 +293,8 @@ def get_template(t):
     :Raises:    :exc:`ValueError` if no file can be located.
 
     """
-    templates = [_get_template(s) for s in asiterable(t)]
+    # Not sure if this is the best way to get asiterables
+    templates = [_get_template(s) for s in gromacs.utilities.asiterable(t)]
     if len(templates) == 1:
          return templates[0]
     return templates
@@ -315,7 +317,7 @@ def get_templates(t):
     :Raises:    :exc:`ValueError` if no file can be located.
 
     """
-    return [_get_template(s) for s in asiterable(t)]
+    return [_get_template(s) for s in gromacs.utilities.asiterable(t)]
 
 def _get_template(t):
     """Return a single template *t*."""
@@ -346,7 +348,7 @@ def _get_template(t):
 
 def iterable(obj):
     """Returns ``True`` if *obj* can be iterated over and is *not* a  string."""
-    if isinstance(obj, str):
+    if isinstance(obj, six.string_types):
         return False  # avoid iterating over characters of a string
 
     if hasattr(obj, 'next'):
