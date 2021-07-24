@@ -47,7 +47,3 @@ N_AVOGADRO = 6.02214179e23
 #: Boltzmann's constant |kB| in kJ mol^-1 (`kB NIST value`_).
 kBOLTZ = 1.3806504e-23 *1e-3 * N_AVOGADRO
 
-
-from ._version import get_versions
-__version__ = get_versions()['version']
-del get_versions

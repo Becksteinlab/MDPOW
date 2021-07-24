@@ -99,6 +99,7 @@ also change (rarely) between MINOR releases. *MINOR* releases can
 introduce new functionality or deprecate old ones.
 
 The version information can be accessed from the attribute
+<<<<<<< HEAD
 :data:`mdpow.__version__`.
       
 .. autodata:: mdpow.__version__
