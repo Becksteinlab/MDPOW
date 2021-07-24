@@ -5,9 +5,6 @@
 from setuptools import setup, find_packages
 import versioneer
 
-# Dynamically calculate the version based on VERSION.
-version = __import__('mdpow.version').get_version()
-
 setup(name="MDPOW",
       version=versioneer.get_version(),
       cmdclass=versioneer.get_cmdclass(),
