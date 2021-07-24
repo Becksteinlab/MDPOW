@@ -1,5 +1,5 @@
 ; GROMACS mdp file
-; Template for MD in NPT with CHARMM (part of MDPOW)
+; Template for MD in NPT with AMBER (part of MDPOW)
 ; (isotropic P, T via Langevin dynamics)
 
 include                  = 
@@ -34,30 +34,28 @@ comm-grps                = SYSTEM
 
 ; NEIGHBORSEARCHING PARAMETERS
 ; nblist update frequency
-nstlist                  = 20
+nstlist                  = 5
 ; ns algorithm (simple or grid)
 ns_type                  = grid
 ; Periodic boundary conditions: xyz, no, xy
 pbc                      = xyz
 periodic_molecules       = no
-; nblist cut-off
-rlist                    = 1.2
-cutoff-scheme            = Verlet
+; nblist cut-off        
+rlist                    = 1.0
 
 ; OPTIONS FOR ELECTROSTATICS AND VDW
 ; Method for doing electrostatics
 coulombtype              = PME
 rcoulomb-switch          = 0
-rcoulomb                 = 1.2
+rcoulomb                 = 1.0
 
 ; Method for doing Van der Waals
 vdw-type                 = Cut-off
-vdw-modifier             = force-switch
 ; cut-off lengths       
-rvdw-switch              = 1.0
-rvdw                     = 1.2
+rvdw-switch              = 0
+rvdw                     = 1.0
 ; Apply long range dispersion corrections for Energy and Pressure
-DispCorr                 = no
+DispCorr                 = EnerPres
 ; Seperate tables between energy group pairs
 energygrp_table          = 
 ; Spacing for the PME/PPPM FFT grid
