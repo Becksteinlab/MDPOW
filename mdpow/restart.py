@@ -29,6 +29,8 @@ from six.moves import cPickle as pickle
 
 import logging
 logger = logging.getLogger('mdpow.checkpoint')
+if not hasattr(logger, "warning"):
+   logger.warning = logger.warn
 
 def checkpoint(name, sim, filename):
     """Execute the :meth:`Journalled.save` method and log the event."""

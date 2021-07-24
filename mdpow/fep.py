@@ -151,9 +151,15 @@ except (ImportError, OSError):
 from gromacs.utilities import asiterable, AttributeDict, in_dir, openany
 from numkit.observables import QuantityWithError
 from glob import glob
+if sys.version_info.major == 2:
+    from ConfigParser import NoOptionError
+elif sys.version_info.major == 3:
+    from configparser import NoOptionError
 
 import logging
 logger = logging.getLogger('mdpow.fep')
+if not hasattr(logger, "warning"):
+   logger.warning = logger.warn
 
 from . import config
 from .restart import Journalled
@@ -232,7 +238,6 @@ class FEPschedule(AttributeDict):
     @staticmethod
     def load(cfg, section):
         """Initialize a :class:`FEPschedule` from the *section* in the configuration *cfg*"""
-        from configparser import NoOptionError
         keys = {}
         keys.update(FEPschedule.mdp_keywords)
         keys.update(FEPschedule.meta_keywords)
@@ -481,7 +486,8 @@ class Gsolv(Journalled):
             self.mdp = kwargs.pop('mdp', config.get_template(self.mdp_default))
 
             # schedules (deepcopy because we might modify)
-            self.schedules = copy.deepcopy(self.schedules_default)
+            # For some reason 2.7 tests failed with deepcopy in 2.7 so used merge_dict instead
+            self.schedules = config.merge_dicts(self.schedules_default, {})
             schedules = kwargs.pop('schedules', {})
             self.schedules.update(schedules)
             self.lambdas = {
@@ -865,20 +871,19 @@ class Gsolv(Journalled):
         :attr:`Gsolv._corrupted` as dicts of dicts with the component as
         primary and the lambda as secondary key.
         """
-
+        from itertools import izip
         def _lencorrupted(xvg):
             try:
                 return len(xvg.corrupted_lineno)
             except AttributeError:  # backwards compatible (pre gw 0.1.10 are always ok)
                 return 0
-            except TypeError:  # len(None): XVG.parse() has not been run yet
-                return 0  # ... so we cannot conclude that it does contain bad ones
-
+            except TypeError:       # len(None): XVG.parse() has not been run yet
+                return 0            # ... so we cannot conclude that it does contain bad ones
         corrupted = {}
         self._corrupted = {}        # debugging ...
         for component, (lambdas, xvgs) in self.results.xvg.items():
             corrupted[component] = numpy.any([(_lencorrupted(xvg) > 0) for xvg in xvgs])
-            self._corrupted[component] = dict(((l, _lencorrupted(xvg)) for l, xvg in zip(lambdas, xvgs)))
+            self._corrupted[component] = dict(((l, _lencorrupted(xvg)) for l,xvg in izip(lambdas, xvgs)))
         return numpy.any([x for x in corrupted.values()])
 
     def analyze(self, force=False, stride=None, autosave=True, ncorrel=25000):

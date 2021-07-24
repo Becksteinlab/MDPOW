@@ -100,6 +100,8 @@ import numpy as np
 
 import logging
 logger = logging.getLogger("mdpow.config")
+if not hasattr(logger, "warning"):
+   logger.warning = logger.warn
 
 
 # Reading of configuration files
