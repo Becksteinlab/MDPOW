@@ -150,6 +150,7 @@ import numpy
 import pandas as pd
 
 import scipy.integrate
+import six
 from scipy import constants
 
 import numkit.integration
