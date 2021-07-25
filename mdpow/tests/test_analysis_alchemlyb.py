@@ -12,6 +12,7 @@ import yaml
 import pybol
 
 from numpy.testing import assert_array_almost_equal
+import pandas
 
 from six.moves import cPickle as pickle
 
@@ -93,6 +94,9 @@ class TestAnalyze(object):
                  (8.241836, 0.219235),
                  (-1.448719,  0.421548))
                 ])
+
+    @pytest.mark.xfail(pandas.__version__.startswith("1.3.0"),
+                       reason="bug in pandas 1.3.0 see alchemistry/alchemlyb#147")
     def test_estimator_alchemlyb(self, fep_benzene_directory, method,
                                  Gibbs, coulomb, vdw):
         G = self.get_Gsolv(fep_benzene_directory)
@@ -111,12 +115,14 @@ class TestAnalyze(object):
                 err.strerror, err.filename))
         DeltaA = G.results.DeltaA
         assert_array_almost_equal(DeltaA.Gibbs.astuple(), Gibbs,
-                                  decimal=6)
+                                  decimal=5)  # with more recent versions of pandas/alchemlyb/numpy the original values are only reproduced to 5 decimals, see PR #166")
         assert_array_almost_equal(DeltaA.coulomb.astuple(), coulomb,
-                                  decimal=6)
+                                  decimal=5)  # with more recent versions of pandas/alchemlyb/numpy the original values are only reproduced to 5 decimals, see PR #166")
         assert_array_almost_equal(DeltaA.vdw.astuple(), vdw,
-                                  decimal=6)
+                                  decimal=5)  # with more recent versions of pandas/alchemlyb/numpy the original values are only reproduced to 5 decimals, see PR #166")
 
+    @pytest.mark.xfail(pandas.__version__.startswith("1.3.0"),
+                       reason="bug in pandas 1.3.0 see alchemistry/alchemlyb#147")
     def test_SI(self, fep_benzene_directory):
         G = self.get_Gsolv(fep_benzene_directory)
         G.method = 'TI'
@@ -136,6 +142,8 @@ class TestAnalyze(object):
         assert_array_almost_equal(DeltaA.vdw.astuple(), (-4.846894,  2.110071),
                                   decimal=6)
 
+    @pytest.mark.xfail(pandas.__version__.startswith("1.3.0"),
+                       reason="bug in pandas 1.3.0 see alchemistry/alchemlyb#147")
     def test_start_stop_stride(self, fep_benzene_directory):
         G = self.get_Gsolv(fep_benzene_directory)
         G.method = 'TI'
