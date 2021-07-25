@@ -10,7 +10,7 @@
 *MDPOW* is a python package that automates the calculation of
 solvation free energies via molecular dynamics (MD) simulations. In
 particular, it facilitates the computation of partition
-coeffcients. Currently implemented:
+coefficients. Currently implemented:
 
 - *water-octanol* partition coefficient (|P_ow|)
 - *water-cyclohexane* partition coefficient (|P_cw|)
@@ -43,8 +43,7 @@ Documentation
 Installation
 ------------
 
-See `INSTALL`_ for detailed instructions. Note that
-**only Python 2.7** is supported.
+See `INSTALL`_ for detailed instructions. MDPOW currently supports Python 2.7 and Python 3.7 to 3.9.
 
 You will also need `Gromacs`_ (currently tested with versions 4.6.5,
 2018, 2020, 2021 but 2016 and 2019 should also work).

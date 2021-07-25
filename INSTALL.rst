@@ -2,10 +2,9 @@
  Quick installation instructions for *MDPOW*
 =============================================
 
-**Only Python 2.7 is supported** (Python 3 is *not* supported, see
-`#84 <https://github.com/Becksteinlab/MDPOW/issues/84>`_).  Python 2.7
-is rock-stable and frozen but not officially supported anymore by the
-Python developers.
+MDPOW is compatible with Python 2.7 and 3.7+ and tested
+on Ubuntu and Mac OS. Python 2.7 is rock-stable and frozen but
+not officially supported anymore by the Python developers.
 
 We recommend that you install MDPOW in a virtual environment.
 
@@ -30,12 +29,22 @@ GROMACS_.
 Conda environment with pre-requisites
 -------------------------------------
 
-We make a conda environment with the latest packages for Python 2.7
+To make a conda environment with the latest packages for Python 2.7
 and name it *mdpow*; this installs the larger dependencies that are
 pre-requisites for MDPOW::
 
  conda create -c conda-forge -n mdpow python=2.7 numpy scipy 'matplotlib<3.3' 'mdanalysis<2' 'mdanalysistests<2' pyyaml
  conda activate mdpow  
+ pip install gromacswrapper
+
+
+For Python 3.7 and up.
+
+*Note:* with Pandas version 1.3 there is an error with `Alchemlyb <https://github.com/alchemistry/alchemlyb>`_
+(see `issue #147 <https://github.com/alchemistry/alchemlyb/issues/147>`_) which will be fixed in Alchemlyb 0.5.::
+
+ conda create -c conda-forge -n mdpow python=3.7 numpy scipy 'matplotlib' 'mdanalysis' 'mdanalysistests' pyyaml
+ conda activate mdpow
  pip install gromacswrapper
 
 Installation from source
