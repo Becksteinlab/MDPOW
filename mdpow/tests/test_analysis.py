@@ -85,14 +85,13 @@ class TestAnalyze(object):
         DeltaA = G.results.DeltaA
         assert_array_almost_equal(DeltaA.Gibbs.astuple(),
                                   (-3.7217472974883794, 2.3144288928034911),
-                                  decimal=6)
+                                  decimal=5)  # with more recent versions of pandas/alchemlyb/numpy the original values are only reproduced to 5 decimals, see PR #166")
         assert_array_almost_equal(DeltaA.coulomb.astuple(),
                                   (8.3346255170099575, 0.73620918517131495),
-                                  decimal=6)
+                                  decimal=5)  # with more recent versions of pandas/alchemlyb/numpy the original values are only reproduced to 5 decimals, see PR #166")
         assert_array_almost_equal(DeltaA.vdw.astuple(),
                                   (-4.6128782195215781, 2.1942144688960972),
-                                  decimal=6)
-
+                                  decimal=5)  # with more recent versions of pandas/alchemlyb/numpy the original values are only reproduced to 5 decimals, see PR #166")
 
     def test_convert_edr(self, fep_benzene_directory):
         G = self.get_Gsolv(fep_benzene_directory)
