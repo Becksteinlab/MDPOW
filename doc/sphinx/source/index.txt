@@ -99,7 +99,6 @@ also change (rarely) between MINOR releases. *MINOR* releases can
 introduce new functionality or deprecate old ones.
 
 The version information can be accessed from the attribute
-<<<<<<< HEAD
 :data:`mdpow.__version__`.
       
 .. autodata:: mdpow.__version__
@@ -127,7 +126,7 @@ For current issues and open feature requests please look through the
 
 
 
-.. Hide to use with alabaster
+.. Hide to use with RTD theme
 .. Contents:
 
 .. toctree::
