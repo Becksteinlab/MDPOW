@@ -1,0 +1,8 @@
+six
+numpy
+scipy
+pandas
+pyyaml
+GromacsWrapper>=0.5.1
+alchemlyb
+mdanalysis<2

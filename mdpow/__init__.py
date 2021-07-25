@@ -6,11 +6,13 @@
 
 from __future__ import absolute_import
 
-from .version import VERSION, get_version, get_version_tuple
 from . import log
 
-__all__ = ['fep', 'equil']
+from ._version import get_versions
+__version__ = get_versions()['version']
+del get_versions
 
+__all__ = ['fep', 'equil']
 
 def create_logger(logfile="mdpow.log"):
     """Create the default logger.
@@ -25,7 +27,7 @@ def create_logger(logfile="mdpow.log"):
 
 def log_banner():
     """Log program name and licence at INFO level."""
-    logger.info("MDPOW %s starting.", get_version())
+    logger.info("MDPOW %s starting.", __version__)
     logger.info("Copyright (c) 2010-2021 Shujie Fan, Ian Kenney, Alia Lescoulie, Bogdan Iorga, and Oliver Beckstein")
     logger.info("Released under the GNU Public Licence, version 3.")
     logger.info("For bug reports and help: https://github.com/Becksteinlab/MDPOW/issues")
