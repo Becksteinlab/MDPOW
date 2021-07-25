@@ -69,7 +69,8 @@ def fep_benzene_directory(tmpdir_factory):
 class TestAnalyze(object):
     def get_Gsolv(self, pth):
         gsolv = pth.join("FEP", "water", "Gsolv.fep")
-        if sys.version_info.major == 3:
+        # Needed to load old pickle files in python 3
+        if sys.version_info.major >= 3:
             with open(gsolv, 'rb') as f:
                 G = pickle.load(f, encoding='latin1')
                 # patch paths
