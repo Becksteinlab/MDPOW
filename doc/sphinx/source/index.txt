@@ -87,6 +87,45 @@ small molecule (e.g. from LigandBook_ or ParamChem_).
 
 
 
+Version information
+-------------------
+
+MDPOW uses `semantic versioning`_ with the release number consisting
+of a triplet *MAJOR.MINOR.PATCH*. *PATCH* releases are bug fixes or
+updates to docs or meta data only and do not introduce new features or
+change the API. Within a *MAJOR* release, the user API is stable
+except during the development cycles with MAJOR = 0 where the API may
+also change (rarely) between MINOR releases. *MINOR* releases can
+introduce new functionality or deprecate old ones.
+
+The version information can be accessed from the attribute
+:data:`gromacs.__version__`.
+      
+.. autodata:: gromacs.__version__
+
+.. _semantic versioning: https://semver.org	      
+
+Limitations and known issues
+----------------------------
+
+For current issues and open feature requests please look through the
+`MDPOW Issue Tracker`_. Some of the major open issues are:
+
+* GROMACS versions < 2021 can silently produce incorrect free energy estimates because exclusions
+  are not properly accounted for 
+  for solutes larger than the rlist cutoff when the ``couple-intramol = no`` decoupling is used
+  (as it is in all of MDPOW), see https://gitlab.com/gromacs/gromacs/-/issues/3403.
+  MDPOW does not detect this situation and does not offer a workaround (namely doing separate 
+  vacuum simulations and use ``couple-intramol = yes``). GROMACS 2021 at least fails when the
+  failure condition occurs (see https://gitlab.com/gromacs/gromacs/-/merge_requests/861).
+* Only free energy calculations of neutral solutes are supported; the workflow also does not 
+  include addition of ions (see issue `#97 <https://github.com/Becksteinlab/MDPOW/issues/97>`_).
+* Mixed solvents (octanol and water) are only supported with the included template topology files
+  for GROMACS >= 2018.
+* Adding new solvents requires modifying the MDPOW code; instead it should be configurable.
+
+
+
 .. Hide to use with alabaster
 .. Contents:
 
