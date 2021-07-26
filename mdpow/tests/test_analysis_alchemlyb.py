@@ -137,11 +137,11 @@ class TestAnalyze(object):
                 err.strerror, err.filename))
         DeltaA = G.results.DeltaA
         assert_array_almost_equal(DeltaA.Gibbs.astuple(), (-2.908885,  2.175976),
-                                  decimal=6)
+                                  decimal=5)  # with more recent versions of pandas/alchemlyb/numpy the original values are only reproduced to 5 decimals, see PR #166")
         assert_array_almost_equal(DeltaA.coulomb.astuple(), (7.755779, 0.531481),
-                                  decimal=6)
+                                  decimal=5)  # with more recent versions of pandas/alchemlyb/numpy the original values are only reproduced to 5 decimals, see PR #166")
         assert_array_almost_equal(DeltaA.vdw.astuple(), (-4.846894,  2.110071),
-                                  decimal=6)
+                                  decimal=5)  # with more recent versions of pandas/alchemlyb/numpy the original values are only reproduced to 5 decimals, see PR #166")
 
     @pytest.mark.xfail(pandas.__version__.startswith("1.3.0"),
                        reason="bug in pandas 1.3.0 see alchemistry/alchemlyb#147")
@@ -159,8 +159,8 @@ class TestAnalyze(object):
                 err.strerror, err.filename))
         DeltaA = G.results.DeltaA
         assert_array_almost_equal(DeltaA.Gibbs.astuple(), (-3.318109,  0.905128),
-                                  decimal=6)
+                                  decimal=5)  # with more recent versions of pandas/alchemlyb/numpy the original values are only reproduced to 5 decimals, see PR #166")
         assert_array_almost_equal(DeltaA.coulomb.astuple(), (8.146806, 0.348866),
-                                  decimal=6)
+                                  decimal=5)  # with more recent versions of pandas/alchemlyb/numpy the original values are only reproduced to 5 decimals, see PR #166")
         assert_array_almost_equal(DeltaA.vdw.astuple(), (-4.828696,  0.835195),
-                                  decimal=6)
+                                  decimal=5)  # with more recent versions of pandas/alchemlyb/numpy the original values are only reproduced to 5 decimals, see PR #166")
