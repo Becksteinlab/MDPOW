@@ -1395,19 +1395,14 @@ def p_transfer(G1, G2, **kwargs):
             logger.info("Estimator is %s.", estimator)
             logger.info("Free energy calculation method is %s.", G.method)
 
-        try:
-            G.results.DeltaA.Gibbs
-            G.logger_DeltaA0()
-        except (KeyError, AttributeError):  # KeyError because results is a AttributeDict
-            logger.warning("Must analyze simulation because no hydration free energy data available...")
-            if estimator == 'mdpow':
-                G.analyze(**G_kwargs)
-            elif estimator == 'alchemlyb':
-                if G_kwargs['SI']:
-                    logger.info("Statistical inefficiency analysis will be performed.")
-                else:
-                    logger.info("Statistical inefficiency analysis won't be performed.")
-                G.analyze_alchemlyb(**G_kwargs)
+        if estimator == 'mdpow':
+            G.analyze(**G_kwargs)
+        elif estimator == 'alchemlyb':
+            if G_kwargs['SI']:
+                logger.info("Statistical inefficiency analysis will be performed.")
+            else:
+                logger.info("Statistical inefficiency analysis won't be performed.")
+            G.analyze_alchemlyb(**G_kwargs)
 
     # x.Gibbs are QuantityWithError so they do error propagation
     transferFE = G2.results.DeltaA.Gibbs - G1.results.DeltaA.Gibbs
