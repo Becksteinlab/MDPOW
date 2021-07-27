@@ -87,7 +87,6 @@ class TestAlteredConfig(object):
 
     def setup(self):
     # load default bundled configuration
-        self.old_path = os.getcwd()
         self.cfg = mdpow.config.get_configuration(
             os.path.join('mdpow', 'tests', 'testing_resources',
                          'test_configurations', 'altered_runinput.yml'))
