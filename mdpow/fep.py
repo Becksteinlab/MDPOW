@@ -1124,9 +1124,6 @@ class Gsolv(Journalled):
         self.logger_DeltaA0()
         return self.results.DeltaA.Gibbs
 
-        if autosave:
-            self.save()
-
     def write_DeltaA0(self, filename, mode='w'):
         """Write free energy components to a file.
 
