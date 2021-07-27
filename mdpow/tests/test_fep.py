@@ -1,5 +1,10 @@
 from __future__ import absolute_import
 
+import sys
+from six.moves import reload_module
+
+import pytest
+
 from . import tempdir
 
 import numpy as np
@@ -8,7 +13,7 @@ from scipy import constants
 
 import mdpow
 import mdpow.fep
-
+import gromacs
 
 def test_molar_to_nm3():
     assert_almost_equal(mdpow.fep.molar_to_nm3(1.5), 0.9033212684)
