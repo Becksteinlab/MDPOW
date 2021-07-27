@@ -153,9 +153,9 @@ from numkit.observables import QuantityWithError
 from glob import glob
 
 # Patch due to slightly different library names
-if sys.version_info.major == 2:
+try:
     from ConfigParser import NoOptionError
-elif sys.version_info.major == 3:
+except ImportError:
     from configparser import NoOptionError
 
 import logging
