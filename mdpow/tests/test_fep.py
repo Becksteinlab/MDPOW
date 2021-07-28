@@ -66,7 +66,6 @@ class TestFEPschedule(object):
     def test_Coulomb(self):
         return self._test_schedule('Coulomb')
 
-<<<<<<< HEAD
     @pytest.mark.parametrize('component', ['VDW', 'Coulomb'])
     def test_copy(self, component):
         section = 'FEP_schedule_{0}'.format(component)
@@ -101,17 +100,11 @@ class TestFEPschedule(object):
     def test_iterable(self):
         assert not mdpow.config.iterable('test')
 
-=======
->>>>>>> Cleanup test_fep.py
     def test_gromacs_import(self, monkeypatch):
         monkeypatch.setitem(sys.modules, 'gromacs.setup', None)
         with pytest.raises(ImportError):
             reload_module(gromacs.setup)
 
-<<<<<<< HEAD
-=======
-
->>>>>>> Cleanup test_fep.py
     def _test_schedule(self, component):
         section = 'FEP_schedule_{0}'.format(component)
         schedule = mdpow.fep.FEPschedule.load(self.cfg, section)
