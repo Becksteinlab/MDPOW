@@ -134,6 +134,7 @@ import pandas as pd
 
 import scipy.integrate
 import six
+from six.moves import zip
 from scipy import constants
 import numkit.integration
 import numkit.timeseries
@@ -152,11 +153,7 @@ from gromacs.utilities import asiterable, AttributeDict, in_dir, openany
 from numkit.observables import QuantityWithError
 from glob import glob
 
-# Patch due to slightly different library names
-try:
-    from ConfigParser import NoOptionError
-except ImportError:
-    from configparser import NoOptionError
+from six.moves.configparser import NoOptionError
 
 import logging
 logger = logging.getLogger('mdpow.fep')
@@ -865,7 +862,6 @@ class Gsolv(Journalled):
         :attr:`Gsolv._corrupted` as dicts of dicts with the component as
         primary and the lambda as secondary key.
         """
-        from six.moves import zip
         def _lencorrupted(xvg):
             try:
                 return len(xvg.corrupted_lineno)
