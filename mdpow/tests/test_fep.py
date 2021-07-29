@@ -10,7 +10,7 @@ from numpy.testing import assert_array_almost_equal, assert_almost_equal
 from scipy import constants
 from copy import deepcopy
 
-import mdpow
+import mdpow.config
 import mdpow.fep
 import gromacs
 
@@ -85,6 +85,12 @@ class TestFEPschedule(object):
             else:
                 assert schedule[k] == reference[k], \
                     "mismatch between loaded FEP schedule entry {0} and reference".format(k)
+
+    @pytest.mark.parametrize('component', ['VDW', 'Coulomb'])
+    def test_write(self, component):
+        self.cfg.write('cfg.yaml')
+        new_cfg = mdpow.config.get_configuration('cfg.yaml')
+        assert new_cfg.conf == self.cfg.conf
 
     def _test_schedule(self, component):
         section = 'FEP_schedule_{0}'.format(component)
