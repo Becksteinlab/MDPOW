@@ -52,8 +52,6 @@ from .restart import checkpoint
 
 import logging
 logger = logging.getLogger('mdpow.run')
-if not hasattr(logger, "warning"):
-   logger.warning = logger.warn
 
 
 def setupMD(S, protocol, cfg):

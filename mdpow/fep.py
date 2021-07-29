@@ -157,8 +157,6 @@ from six.moves.configparser import NoOptionError
 
 import logging
 logger = logging.getLogger('mdpow.fep')
-if not hasattr(logger, "warning"):
-   logger.warning = logger.warn
 
 from . import config
 from .restart import Journalled

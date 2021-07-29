@@ -56,8 +56,6 @@ from collections import defaultdict
 
 import logging
 logger = logging.getLogger("mdpow.forecefields")
-if not hasattr(logger, "warning"):
-   logger.warning = logger.warn
 
 #: Default force field. At the moment, only OPLS-AA is directly
 #: supported.

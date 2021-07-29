@@ -50,8 +50,6 @@ from .restart import Journalled
 
 import logging
 logger = logging.getLogger('mdpow.equil')
-if not hasattr(logger, "warning"):
-   logger.warning = logger.warn
 
 # ITP <-- forcefields.get_solvent_model(id).itp
 # BOX <-- forcefields.get_solvent_model(id).coordinates
