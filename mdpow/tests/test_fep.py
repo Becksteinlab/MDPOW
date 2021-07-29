@@ -92,6 +92,11 @@ class TestFEPschedule(object):
         new_cfg = mdpow.config.get_configuration('cfg.yaml')
         assert new_cfg.conf == self.cfg.conf
 
+    def test_get(self):
+        tmp_cfg = mdpow.config.POWConfigParser()
+        item = tmp_cfg.get('VDW', 'label')
+        assert item is None
+
     def _test_schedule(self, component):
         section = 'FEP_schedule_{0}'.format(component)
         schedule = mdpow.fep.FEPschedule.load(self.cfg, section)
