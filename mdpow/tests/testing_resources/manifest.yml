@@ -40,3 +40,8 @@ analysis:
     files:
         - []
 
+ensemble:
+    options:
+        - full_transfer
+    files:
+        - []

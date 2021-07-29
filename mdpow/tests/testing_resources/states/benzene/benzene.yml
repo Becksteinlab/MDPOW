@@ -1,0 +1,140 @@
+# example run input file for the the equilibrium simulation
+# use with 
+#   - mdpow-equilibrium
+#   - mdpow-fep
+#
+# Note: enclose strings (especially names) with quotes.
+
+DEFAULT:
+    qscripts: "local.sh"
+
+setup:
+    name: "benzene"
+         # common, descriptive name, e.g. benzene
+    molecule: "BNZ"
+         # Gromacs [ molecule ] identifier from the itp file (typically a 3-letter code)
+    watermodel: "tip4p"
+         # water model available in Gromacs (OPLS-AA):
+         # tip4p, tip5p, tip3p, spc, spce     
+    itp: "benzene/benzene.itp"
+         # Gromacs itp file name 
+    structure: "benzene/benzene.pdb"
+         # coordinate file name (pdb, gro, ... anything that Gromacs can read)
+    distance:  None
+         # minimum distance between solute and box face (by default
+         # (None) this is set to a 1.0 nm for water and 1.5 nm for
+         # other solvents)    
+    boxtype: dodecahedron
+         # box type understood by Gromacs 'gmx editconf' (cubic,
+         # triclinic, octahedron, dodecahedron    
+    maxwarn: 0
+         # maximum number of warnings tolerated by grompp during setup
+    gromacsoutput: True
+         # True: print output from Gromacs command to screen (useful for debugging)
+         # False: only show the MDPOW messages
+
+# energy minimization
+
+energy_minimize:
+    mdp: "em_opls.mdp"
+         # run parameter file for Gromacs;
+         # (will be searched as (1) absolute path, (2) in current directory (3)
+         # in the package templates)
+
+
+# short simulation with a time step of 0.1 fs to gently relax steric clashes
+
+MD_relaxed:
+    qscript: "local.sh"
+         # queuing system scripts to produce
+    runlocal: True
+         # True: launch Gromacs mdrun and wait for it
+         # False: produce queuing system scripts and stop
+    runtime: 1
+         # run time in ps
+    mdp: "NPT_opls.mdp"
+         #  run parameter file for Gromacs;
+         # (will be searched as (1) absolute path, (2) in current directory (3)
+         # in the package templates)
+         # special index groups  __main__ __environment__ can be used
+
+# equilibrium simulation at constant temperature and pressure with a
+# time step of 2 fs.
+
+MD_NPT:
+    qscript: "local.sh"
+         # queuing system scripts to produce
+    runtime: 10
+         # simulation run time in ps (for this example, a VERY short
+         # run time was used; for real work, this must be many ns)
+    runlocal: True
+         # True: launch Gromacs mdrun and wait for it
+         # False: produce queuing system scripts and stop
+    mdp: "NPT_opls.mdp"
+         # run parameter file for Gromacs;
+         # (will be searched as (1) absolute path, (2) in current directory (3)
+         # in the package templates)
+         # special index groups  __main__ __environment__ can be used
+
+FEP:
+    method: "BAR"
+         # BAR or TI
+    qscript: "local.sh"
+         # queuing system scripts to produce
+    runtime: 25
+         # run time in ps for each free energy window (the run time
+         # for this example is VERY short)
+    runlocal: True
+         # True: launch Gromacs mdrun and run all windows in a serial fashion
+         # False: produce queuing system scripts and stop
+    maxwarn: 1
+         # maximum number of warnings tolerated by grompp during setting up FEP runs
+         # Set to 1 if you want to ignore the warning (in 4.6.x):
+         #
+         # WARNING 1 [file md.mdp]:
+         #  With coulomb soft core, the reciprocal space calculation will not
+         #  necessarily cancel.  It may be necessary to decrease the reciprocal space
+         #  energy, and increase the cutoff radius to get sufficiently close matches
+         #  to energies with free energy turned off.
+    mdp: "bar_opls.mdp"
+         # run parameter file for Gromacs;
+         # (will be searched as (1) absolute path, (2) in current directory (3)
+         # in the package templates)
+         # special index groups  __main__ __environment__ can be used
+
+FEP_schedule_Coulomb:
+    name: "Coulomb"
+    description: "dis-charging vdw+q --> vdw"
+    label: "Coul"
+    couple_lambda0: "vdw-q"
+    couple_lambda1: "vdw"
+         # soft core alpha: linear scaling for coulomb (sc_alpha = 0)
+         # ignore the other sc_*
+    sc_alpha: 0
+    sc_power: 1
+    sc_sigma: 0.3
+    lambdas: 0, 0.25, 0.5, 0.75, 1.0
+
+FEP_schedule_VDW:
+    name: "vdw"
+    description: "decoupling vdw --> none"
+    label: "VDW"
+    couple_lambda0: "vdw"
+    couple_lambda1: "none"
+         # recommended values for soft cores (Mobley, Shirts et al)
+    sc_alpha: 0.5
+    sc_power: 1
+    sc_sigma: 0.3
+    lambdas: 0.0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1
+
+
+# options to control a mdrun process
+mdrun:
+    stepout: 1000
+         # how often to report progress (-stepout)
+    verbose: True
+         # report progress verbosely (True is -v)
+    nice: 19
+         # nicel level
+    maxthreads: None
+         # maximum number of threads (-nt), 0 or None lets mdrun automatically choose

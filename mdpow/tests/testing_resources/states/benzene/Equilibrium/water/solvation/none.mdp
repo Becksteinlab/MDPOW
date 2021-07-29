@@ -1,0 +1,5 @@
+; empty mdp file
+include =  -I. -I.. -I/nfs/homes3/alescoul/benzene_mdpow/benzene/Equilibrium/water/top -I/nfs/homes3/alescoul/.local/lib/python2.7/site-packages/mdpow/top -I/nfs/homes3/alescoul/benzene_mdpow/benzene/Equilibrium/water/top
+rcoulomb = 1
+rvdw = 1
+rlist = 1
