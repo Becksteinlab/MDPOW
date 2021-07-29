@@ -1,6 +1,4 @@
-from __future__ import absolute_import
-
-from . import tempdir as td
+import mdpow.tests.tempdir as td
 
 import os.path
 import sys
