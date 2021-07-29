@@ -63,7 +63,6 @@ class Ensemble(object):
     def __len__(self):
         return self.num_systems
 
-
     def __getitem__(self, index):
         """Allows dictionary like indexing"""
         try:
@@ -74,7 +73,6 @@ class Ensemble(object):
 
     def __iter__(self):
         """Returns list of systems with object iterated over"""
-
         sys_list = []
         for key in self.system_keys:
             sys_list.append(self[key])
