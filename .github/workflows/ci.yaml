@@ -37,6 +37,12 @@ jobs:
             gromacs-version: "2018.6"
           - os: macOS-latest
             gromacs-version: "2020.6"
+          - os: macOS-latest
+            python-version: 3.8
+          - os: macOS-latest
+            python-version: 3.7
+          - os: macOS-latest
+            python-version: 3.6
         include:
           - os: macOS-latest
             python-version: 3.9
