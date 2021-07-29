@@ -39,17 +39,17 @@ jobs:
             gromacs-version: "2020.6"
         include:
           - os: macOS-latest
-          python-version 3.9
-          gromacs-version: "2021.1"
+            python-version: 3.9
+            gromacs-version: "2021.1"
           - os: ubuntu-latest
-          python-version: 3.7
-          gromacs-version: "2021.1"
+            python-version: 3.7
+            gromacs-version: "2021.1"
           - os: ubuntu-latest
-          python-version: 3.8
-          gromacs-version: "2021.1"
+            python-version: 3.8
+            gromacs-version: "2021.1"
           - os: ubuntu-latest
-          python-version: 3.9
-          gromacs-version: "2021.1"
+            python-version: 3.9
+            gromacs-version: "2021.1"
 
     env:
       MPLBACKEND: agg
