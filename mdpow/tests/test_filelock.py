@@ -1,7 +1,5 @@
 from __future__ import absolute_import
 
-from . import tempdir
-
 import os.path
 
 import pytest
