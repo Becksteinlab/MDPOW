@@ -11,7 +11,7 @@ orbeckst, VOD555, ALescoulie
 Changes
 
 * renamed package to MDPOW
-* support python 3.7 -- 3.9
+* support python 3.7 -- 3.9 (#84)
 * tested with GROMACS 4.6.5, 2018.6, 2020.6, 2021.1 (PR #159, #164)
 * removed all generated docs from package
 * config parser MERGES user runinput.yml with the package defaults
