@@ -57,7 +57,6 @@ from collections import defaultdict
 import logging
 logger = logging.getLogger("mdpow.forecefields")
 
-
 #: Default force field. At the moment, only OPLS-AA is directly
 #: supported.
 DEFAULT_FORCEFIELD = "OPLS-AA"

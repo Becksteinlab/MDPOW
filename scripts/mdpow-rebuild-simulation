@@ -7,6 +7,7 @@ adjusted paths.
 (This should only be necessary when the directories are moved or
 copied to a different machine.)
 """
+from __future__ import absolute_import, print_statement, division
 
 import os
 import mdpow.equil
@@ -58,7 +59,7 @@ if __name__ == "__main__":
             logger.debug("%r is not a directory, skipping!", directory)
             continue
         if not os.path.exists(directory):
-            logger.warn("Directory %r not found, skipping!", directory)
+            logger.warning("Directory %r not found, skipping!", directory)
             continue
         logger.info("Rebuilding under directory %r... (can take a while)", directory)
         with in_dir(directory, create=False):

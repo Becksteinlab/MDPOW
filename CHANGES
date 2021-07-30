@@ -6,11 +6,13 @@ Add summary of changes for each release. Use ISO dates. Reference
 GitHub issues numbers and PR numbers.
 
 2021-07-xx    0.7.0
-orbeckst, VOD555, ALescoul
+orbeckst, VOD555, ALescoulie
 
 Changes
 
 * renamed package to MDPOW
+* support Python 3.7 -- 3.9 on Linux and macOS (#84)
+* tested with GROMACS 4.6.5, 2018.6, 2020.6, 2021.1 (PR #159, #164)
 * removed all generated docs from package
 * config parser MERGES user runinput.yml with the package defaults
   (#8)
@@ -50,7 +52,7 @@ Enhancements
 * supported CHARMM and AMBER forcefield, including PRM parameter files
   with the "setup.prm" parameter in the configuration file (#104)
 * supported wet-octanol mixed solvent boxtype but this only works with
-  GROMACS >= 2018 (#98)  
+  GROMACS >= 2018 (#98)
 * support OPLS-AA TIP4PD, AMBER TIP4PEW and cyclohexane, and CHARMM TIP5P
   and cyclohexane solvent types (#141)
 * supported forcefield options in scripts (#123)
@@ -72,7 +74,7 @@ Fixes
   found. Either supply the name of the right checkpoint file or do not use
   -append": mdpow.run.runMD_or_exit() does not anymore add -append to GROMACS
   invocation (#128)
-* fixed mdpow-pow and mdpow-pcw scripts (#138)  
+* fixed mdpow-pow and mdpow-pcw scripts (#138)
 * fixed template em_charmm.mdp to use standard CHARMM non-bonded parameters
   for energy minimization (PR #155)
 
