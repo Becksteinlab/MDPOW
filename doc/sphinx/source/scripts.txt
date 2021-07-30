@@ -62,8 +62,8 @@ be found). The required **input** is
   2. a structure file (PDB or GRO) for the compound
   3. a Gromacs ITP file for the compound (OPLS/AA force field)
 
-A template *RUNFILE* can be generated with :option:`mdpow-get-runinput
-runinput.yml`, which will copy the default run input file bundled with
+A template *RUNFILE* can be generated with :program:`mdpow-get-runinput`
+``runinput.yml``, which will copy the default run input file bundled with
 MDPOW and put it in the current directory under the name
 ``runinput.yml``.
 
@@ -79,14 +79,16 @@ by :mod:`yaml`).
           numbers. For example, a name "005" would be interpreted as
           the number 5 unless explicitly quoted.
 
-The script keeps track of the stages of the simulation protocol and allows the
-user to **restart from the last completed stage**. For instance, one can use the
-script to set up a simulation, then run the simulation on a cluster, transfer
-back the generated files, and start :program:`mdpow-equilibrium` again with the
-exact same input to finish the protocol. Since Gromacs 4.5 it is also possible
-to interrupt a running :program:`mdrun` process (e.g. with :kbd:`Control-c`)
-and then resume the simulation at the last saved trajectory checkpoint by
-running :program:`mdpow-equilibrium` again.
+The script keeps track of the stages of the simulation protocol (in
+the state files :file:`water.simulation`, :file:`octanol.simulation`
+etc) and allows the user to **restart from the last completed
+stage**. For instance, one can use the script to set up a simulation,
+then run the simulation on a cluster, transfer back the generated
+files, and start :program:`mdpow-equilibrium` again with the exact
+same input to finish the protocol. Since Gromacs 4.5 it is also
+possible to interrupt a running :program:`mdrun` process (e.g. with
+:kbd:`Control-c`) and then resume the simulation at the last saved
+trajectory checkpoint by running :program:`mdpow-equilibrium` again.
 
 If in doubt, just try running :program:`mdpow-equilibrium` running again and
 let it figure out the best course of action. Look at the log file to see what
@@ -103,17 +105,24 @@ Usage of the command:
    compound and one solvent. All parameters except the solvent are specified in
    the *RUNFILE*.
 
+   Arguments:
+
+   .. option:: RUNFILE
+
+      The runfile :file:`runinput.yml` with all configuration parameters.
+   
+
    Options:
 
-   .. cmdoption:: -h, --help
+   .. option:: -h, --help
 
       show this help message and exit
 
-   .. cmdoption:: -S <NAME>, --solvent=<NAME>
+   .. option:: -S <NAME>, --solvent=<NAME>
 
       solvent ``<NAME>`` for compound, can be 'water', 'octanol', 'cyclohexane' [water]
 
-   .. cmdoption:: -d <DIRECTORY>, --dirname=<DIRECTORY>
+   .. option:: -d <DIRECTORY>, --dirname=<DIRECTORY>
 
       generate files and directories in ``<DIRECTORY>``, which is created if it does not
       already exist. The default is to use the molecule *name* from the run input
@@ -143,21 +152,23 @@ Usage of the command:
 
    :program:`mdpow-fep`  [options] *RUNFILE*
 
+   Arguments:
+
+   .. option:: RUNFILE
+
+      The runfile :file:`runinput.yml` with all configuration parameters.
+
    Options:
 
-   .. cmdoption:: -h, --help
+   .. option:: -h, --help
 
       show this help message and exit
 
-   .. cmdoption:: --get-template        
-
-      generate a template *RUNFILE* and exit
-
-   .. cmdoption:: -S <NAME>, --solvent=<NAME>
+   .. option:: -S <NAME>, --solvent=<NAME>
 
       solvent ``<NAME>`` for compound, can be 'water' or 'octanol' [water]
 
-   .. cmdoption:: -d <DIRECTORY>, --dirname=<DIRECTORY>
+   .. option:: -d <DIRECTORY>, --dirname=<DIRECTORY>
 
       generate files and directories in ``<DIRECTORY>``, which is created if it
       does not already exist. The default is to use the molecule *name* from the run
@@ -200,9 +211,9 @@ Usage of the command:
    relies on the canonical naming scheme (basically: just use the defaults
    as in the tutorial).
 
-   The dV/dlambda plots can be produced automatically (``--plot=auto``). If
+   The dV/dlambda plots can be produced automatically (``--plotfile auto``). If
    multiple ``DIRECTORY`` arguments are provided then one has to choose the
-   "auto" option (or ``None``).
+   "auto" option (or "none").
 
    The total solvation free energy is calculated as
    
@@ -237,47 +248,101 @@ Usage of the command:
        folder in which the simulations were stored
 
 
-   Options:
-
-   .. cmdoption:: -h, --help
-
-      show this help message and exit
-
-   .. cmdoption:: -S <NAME>, --solvent=<NAME>
+   positional arguments:
    
-      solvent NAME for compound, 'water', 'octanol', or 'cyclohexane' [water]
+   .. option::  DIRECTORY [DIRECTORY ...]
 
-   .. cmdoption:: -p <FILE>, --plotfile=<FILE>
+		directory or directories which contain all the files
+		resulting from running :meth:`mdpow.fep.Ghyd.setup`
 
-      plot dV/dlambda to :file:`{FILE}`; use png or pdf suffix to determine the
-      file type. 'auto' generates a pdf file :file:`{DIRECTORY}/dVdl.pdf` and
-      'None' disables it [auto]
+   optional arguments:
+   
+   .. option::  -h, --help
 
-   .. cmdoption:: -e <FILE>, --energies=<FILE>
+		show this help message and exit
+   .. option::  --plotfile FILE
 
-      append solvation free energies to ``<FILE>`` [:file:`energies.txt`]
+		plot dV/dlambda to FILE; use png or pdf suffix to
+		determine the file type. *'auto'* generates a pdf file
+		:file:`{DIRECTORY}/dVdl_{molname}_{solvent}.pdf` and
+		*none* disables it The plot function is only
+		available for mdpow estimator,and is disabled when
+		using alchemlyb estimators. (default: none)
+		
+   .. option::  --solvent NAME, -S NAME
 
-   .. cmdoption:: -s <N>, --stride=<N>
+		solvent `NAME` for compound, 'water', 'octanol', or
+		'cyclohexane' (default: water)
+		
+   .. option::  -o FILE, --outfile FILE
 
-      Use every N-th datapoint from the original dV/dlambda data. Using a
-      number larger than 1 can significantly reduce memory usage with little
-      impact on the precision of the final output. [10]
+		append one-line results summary to `FILE` (default:
+		:file:`gsolv.txt`)
+		
+   .. option::  -e FILE, --energies FILE
 
-   .. cmdoption:: --force
+		append solvation free energies to FILE (default:
+		:file:`energies.txt`)
+		
+   .. option:: --estimator {mdpow,alchemlyb}
+		
+		choose the estimator to be used, *alchemlyb* or *mdpow*
+		estimators (default: *alchemlyb*)
+		
+   .. option:: --method {TI,MBAR,BAR}
+		
+		choose the method to calculate free energy (default:
+		*MBAR*)
+		
+   .. option:: --force
 
-      force rereading all data [False]
+		 force rereading all data (default: False)
+		 
+   .. option:: --SI
 
-   .. cmdoption:: --ignore-corrupted
+		 enable statistical inefficiency (SI) analysis.
+		 Statistical inefficiency analysis is performed by
+		 default when usingalchemlyb estimators and is always
+		 disabled when using mdpow estimator. (default: True)
+		 
+   .. option:: --no-SI
 
-      skip lines in the md.xvg files that cannot be parsed, perhaps because to an
-      intermittent file system problem. In order to salvage the existing data,
-      this option is provided for diagnostic purposes.  [False]
+		 disable statistical inefficiency
+                 analysis. Statistical inefficiency analysis is
+                 performed by default when usingalchemlyb estimators
+                 and is disabled when using mdpow estimator. (default:
+                 False)
+		 
+   .. option:: -s N, --stride N
 
-      .. Warning:: Only use this option with care; skipped lines can indicate that
-	 other parts of the file have been corrupted but still pass the line
-	 corruption test. USE AT YOUR OWN RISK. 
+		 use every `N`-th datapoint from the original dV/dlambda
+		 data. (default: 1)
+		 
+   .. option:: --start START
+		
+		 start point for the data used from the original
+		 dV/dlambda data. (default: 0)
+		 
+   .. option:: --stop STOP
 
-      It is recommended to simply rerun the affected simulation(s).
+		stop point for the data used from the original
+		dV/dlambda data. (default: None)
+		
+   .. option:: --ignore-corrupted
+
+		skip lines in the md.xvg files that cannot be parsed.
+		(default: False)
+		
+		.. warning::
+		   
+		   Other lines in the file might have been corrupted
+		   in such a way that they appear correct but are in
+		   fact wrong. WRONG RESULTS CAN OCCUR! USE AT YOUR
+		   OWN RISK 
+
+                It is recommended to simply rerun the affected simulation(s).
+       
+
 
 
 Partition coefficients
@@ -294,6 +359,9 @@ The :program:`mdpow-pow` script
 * appends results to ``pow.txt`` and ``energies.txt`` (when the
   default names are chosen), see :ref:`mdpow-pow-outputformat-label`.
 
+An equivalent script :program:`mdpow-pcw` for the water-cyclohexane
+partition coefficient is also included. 
+  
 Usage of the command:
 
    .. program:: mdpow-pow
@@ -308,45 +376,108 @@ Usage of the command:
    of the MD FEP simulations. It relies on the canonical naming scheme (basically:
    just use the defaults as in the tutorial).
 
-   The dV/dlambda plots can be produced automatically (:option:`mdpow-pow
-   -p` auto). If multiple *DIRECTORY* arguments are provided then one has to
-   choose the auto option (or ``None``).
+   The dV/dlambda plots can be produced automatically
+   (``--plotfile auto``). If multiple *DIRECTORY*
+   arguments are provided then one has to choose the "auto" option (or
+   "none").
 
-   Options:
 
-   .. cmdoption:: -h, --help
+   positional arguments:
+   
+   .. option::  DIRECTORY [DIRECTORY ...]
 
-      show this help message and exit
+		One or more directories that contain the state pickle
+                files (:file:`water.simulation`,
+                :file:`octanol.simulation`) for the solvation free
+                energy calculations in water and octanol. These
+                directory or directories should contain all the files
+                resulting from running :meth:`mdpow.fep.Ghyd.setup` and
+                :meth:`mdpow.fep.Goct.setup` and the results of the MD FEP
+                simulations.
+		
+   optional arguments:
+   
+   .. option::  -h, --help
 
-   .. cmdoption:: -p <FILE>, --plotfile=<FILE>
+		show this help message and exit
+		
+   .. option::  --plotfile FILE
 
-      plot dV/dlambda to :file:`{FILE}`; use png or pdf suffix to determine the
-      file type. 'auto' generates a pdf file :file:`{DIRECTORY}/dVdl.pdf` and
-      'None' disables it [auto]
+		plot dV/dlambda to FILE; use png or pdf suffix to
+		determine the file type. *'auto'* generates a pdf file
+		:file:`{DIRECTORY}/dVdl_{molname}_pow.pdf` and
+		*none* disables it The plot function is only
+		available for mdpow estimator,and is disabled when
+		using alchemlyb estimators. (default: none)
+		
+   .. option::  -o FILE, --outfile FILE
 
-   .. cmdoption:: -o <FILE>, --outfile=<FILE>
+		append one-line results summary to `FILE` (default:
+		:file:`pow.txt`)
+		
+   .. option::  -e FILE, --energies FILE
 
-      append one-line results summary to ``<FILE>`` [:file:`pow.txt`]
+		append solvation free energies to FILE (default:
+		:file:`energies.txt`)
+		
+   .. option:: --estimator {mdpow,alchemlyb}
+		
+		choose the estimator to be used, *alchemlyb* or *mdpow*
+		estimators (default: *alchemlyb*)
+		
+   .. option:: --method {TI,MBAR,BAR}
+		
+		choose the method to calculate free energy (default:
+		*MBAR*)
+		
+   .. option:: --force
 
-   .. cmdoption:: -e <FILE>, --energies=<FILE>
+		 force rereading all data (default: False)
+		 
+   .. option:: --SI
 
-      append solvation free energies to ``<FILE>`` [:file:`energies.txt`]
+		 enable statistical inefficiency (SI) analysis.
+		 Statistical inefficiency analysis is performed by
+		 default when usingalchemlyb estimators and is always
+		 disabled when using mdpow estimator. (default: True)
+		 
+   .. option:: --no-SI
 
-   .. cmdoption:: --force
+		 disable statistical inefficiency
+                 analysis. Statistical inefficiency analysis is
+                 performed by default when usingalchemlyb estimators
+                 and is disabled when using mdpow estimator. (default:
+                 False)
+		 
+   .. option:: -s N, --stride N
 
-      force rereading all data [False]
+		 use every `N`-th datapoint from the original dV/dlambda
+		 data. (default: 1)
+		 
+   .. option:: --start START
+		
+		 start point for the data used from the original
+		 dV/dlambda data. (default: 0)
+		 
+   .. option:: --stop STOP
 
-   .. cmdoption:: --ignore-corrupted
+		stop point for the data used from the original
+		dV/dlambda data. (default: None)
+		
+   .. option:: --ignore-corrupted
 
-      skip lines in the md.xvg files that cannot be parsed, perhaps because to an
-      intermittent file system problem. In order to salvage the existing data,
-      this option is provided for diagnostic purposes.  [False]
+		skip lines in the md.xvg files that cannot be parsed.
+		(default: False)
+		
+		.. warning::
+		   
+		   Other lines in the file might have been corrupted
+		   in such a way that they appear correct but are in
+		   fact wrong. WRONG RESULTS CAN OCCUR! USE AT YOUR
+		   OWN RISK 
 
-      .. Warning:: Only use this option with care; skipped lines can indicate that
-	 other parts of the file have been corrupted but still pass the line
-	 corruption test. USE AT YOUR OWN RISK. 
-
-      It is recommended to simply rerun the affected simulation(s).
+                It is recommended to simply rerun the affected simulation(s).
+       
 
 
 .. _mdpow-pow-outputformat-label:
@@ -543,11 +674,11 @@ Usage of the command:
 
    Options:
 
-   .. cmdoption:: -h, --help
+   .. option:: -h, --help
 
       show this help message and exit
 
-   .. cmdoption:: -o <FILE>, --outfile=<FILE>
+   .. option:: -o <FILE>, --outfile=<FILE>
 
       write status results to :file:`{FILE}` [:file:`status.txt`]
 
@@ -573,11 +704,11 @@ Usage of the command:
 
    Options:
 
-   .. cmdoption:: -h, --help
+   .. option:: -h, --help
 
       show this help message and exit
 
-   .. cmdoption:: --solvent=<NAME>
+   .. option:: --solvent=<NAME>
 
       rebuild file for 'water', 'octanol', or 'all' [all]
 
@@ -607,15 +738,15 @@ Usage of the command:
 
    Options:
 
-   .. cmdoption:: -h, --help
+   .. option:: -h, --help
 
       show this help message and exit
 
-   .. cmdoption:: --solvent=<NAME>
+   .. option:: --solvent=<NAME>
 
       rebuild fep for 'water', 'octanol', or 'all' [all]
 
-   .. cmdoption:: --setup=<LIST>
+   .. option:: --setup=<LIST>
 
       Re-generate queuing system scripts with appropriate paths: runs
       :meth:`fep.Gsolv.setup` with argument `qscript=[LIST]` after
