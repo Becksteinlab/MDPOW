@@ -1,7 +1,7 @@
 ; topology for 1-octanol
 ; 
 ; The molecule is named SOL so that genbox automatically adds the
-; numbers to the topology file. Otherwise it should be  SOL...
+; numbers to the topology file. Otherwise it should be 1OCT...
 ; (Copy and rename if it is to be used as a solute compound in POW.)
 
 

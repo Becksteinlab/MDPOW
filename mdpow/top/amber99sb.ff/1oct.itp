@@ -1,4 +1,4 @@
-; SOL_GMX.itp created by acpype (Rev: 0) on Wed Feb 27 15:44:41 2019
+;OcOH_GMX.itp created by acpype (Rev: 0) on Wed Feb 27 15:44:41 2019
 ;[ atomtypes ]
 ;name   bond_type     mass     charge   ptype   sigma         epsilon       Amb
 ; c3       c3          0.00000  0.00000   A     3.39967e-01   4.57730e-01 ; 1.91  0.1094
