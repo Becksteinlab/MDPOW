@@ -45,8 +45,7 @@ directory
     folder in which the simulations were stored
 
 """
-
-from __future__ import with_statement
+from __future__ import absolute_import, print_statement, division
 
 import os
 import mdpow.fep
@@ -282,7 +281,7 @@ if __name__ == "__main__":
 
     for directory in opts.directory:
         if not os.path.exists(directory):
-            logger.warn("Directory %r not found, skipping...", directory)
+            logger.warning("Directory %r not found, skipping...", directory)
             continue
         logger.info("Analyzing directory %r... (can take a while)", directory)
 
