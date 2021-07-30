@@ -120,40 +120,41 @@ TODO
   See `Free Energy Tutorial`_.
 
 """
-from __future__ import absolute_import, with_statement
+from __future__ import absolute_import, division
+
+import six
+from six.moves import zip
+from six.moves.configparser import NoOptionError
 
 import os
 import errno
 import copy
 from subprocess import call
 import warnings
-import sys
+from glob import glob
 
 import numpy
 import pandas as pd
 
 import scipy.integrate
-import six
-from six.moves import zip
 from scipy import constants
+
 import numkit.integration
 import numkit.timeseries
+from numkit.observables import QuantityWithError
 
 from alchemlyb.parsing.gmx import extract_dHdl, extract_u_nk
 from alchemlyb.estimators import TI, BAR, MBAR
 from alchemlyb.parsing.gmx import _extract_dataframe
 from pymbar.timeseries import (statisticalInefficiency,
                                subsampleCorrelatedData, )
-import gromacs, gromacs.utilities
+import gromacs
+import gromacs.utilities
 try:
     import gromacs.setup
 except (ImportError, OSError):
     raise ImportError("Gromacs installation not found, source GMXRC?")
 from gromacs.utilities import asiterable, AttributeDict, in_dir, openany
-from numkit.observables import QuantityWithError
-from glob import glob
-
-from six.moves.configparser import NoOptionError
 
 import logging
 logger = logging.getLogger('mdpow.fep')

@@ -29,11 +29,12 @@ model.
 .. autodata:: DIST
 """
 
-from __future__ import absolute_import, with_statement
+from __future__ import absolute_import, division
+
+from six.moves import cPickle as pickle
 
 import os, errno
 import shutil
-from six.moves import cPickle as pickle
 
 import MDAnalysis as mda
 

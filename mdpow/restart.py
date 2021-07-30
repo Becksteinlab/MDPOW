@@ -23,9 +23,10 @@ restartable simulation protocols (for example :program:`mdpow-equilibrium`).
 """
 from __future__ import absolute_import
 
+from six.moves import cPickle as pickle
+
 import os
 import errno
-from six.moves import cPickle as pickle
 
 import logging
 logger = logging.getLogger('mdpow.checkpoint')

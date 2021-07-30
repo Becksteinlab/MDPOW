@@ -90,12 +90,13 @@ Gromacs force field files are ok).
 
 """
 
-from __future__ import absolute_import
+from __future__ import absolute_import, division
+
+import six
 
 import os, errno
 from pkg_resources import resource_filename, resource_listdir
 import yaml
-import six
 
 import numpy as np
 import gromacs.utilities
