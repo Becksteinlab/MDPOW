@@ -1,7 +1,7 @@
 ; topology for 1-octanol
 ; 
 ; The molecule is named SOL so that genbox automatically adds the
-; numbers to the topology file. Otherwise it should be 1OCT...
+; numbers to the topology file. Otherwise it should be  SOL...
 ; (Copy and rename if it is to be used as a solute compound in POW.)
 
 
@@ -14,33 +14,33 @@ SOL                3
 
 [ atoms ]
 ;   nr       type  resnr residue  atom   cgnr     charge       mass  typeB    chargeB      massB
-     1   opls_155      1   1OCT     HO      1      0.418      1.008   ; qtot 0.418
-     2   opls_154      1   1OCT     OH      1     -0.683    15.9994   ; qtot -0.265
-     3   opls_140      1   1OCT    HA1      1       0.06      1.008   ; qtot -0.205
-     4   opls_140      1   1OCT    HA2      1       0.06      1.008   ; qtot -0.145
-     5   opls_157      1   1OCT     CA      1      0.145     12.011   ; qtot 0
-     6   opls_140      1   1OCT    HB1      2       0.06      1.008   ; qtot 0.06
-     7   opls_140      1   1OCT    HB2      2       0.06      1.008   ; qtot 0.12
-     8   opls_136      1   1OCT     CB      2      -0.12     12.011   ; qtot 0
-     9   opls_140      1   1OCT    HC1      3       0.06      1.008   ; qtot 0.06
-    10   opls_140      1   1OCT    HC2      3       0.06      1.008   ; qtot 0.12
-    11   opls_136      1   1OCT     CC      3      -0.12     12.011   ; qtot 0
-    12   opls_140      1   1OCT    HD1      4       0.06      1.008   ; qtot 0.06
-    13   opls_140      1   1OCT    HD2      4       0.06      1.008   ; qtot 0.12
-    14   opls_136      1   1OCT     CD      4      -0.12     12.011   ; qtot 0
-    15   opls_140      1   1OCT    HE1      5       0.06      1.008   ; qtot 0.06
-    16   opls_140      1   1OCT    HE2      5       0.06      1.008   ; qtot 0.12
-    17   opls_136      1   1OCT     CE      5      -0.12     12.011   ; qtot 0
-    18   opls_140      1   1OCT    HF1      6       0.06      1.008   ; qtot 0.06
-    19   opls_140      1   1OCT    HF2      6       0.06      1.008   ; qtot 0.12
-    20   opls_136      1   1OCT     CF      6      -0.12     12.011   ; qtot 0
-    21   opls_140      1   1OCT    HG1      7       0.06      1.008   ; qtot 0.06
-    22   opls_140      1   1OCT    HG2      7       0.06      1.008   ; qtot 0.12
-    23   opls_136      1   1OCT     CG      7      -0.12     12.011   ; qtot 0
-    24   opls_140      1   1OCT    HH1      8       0.06      1.008   ; qtot 0.06
-    25   opls_140      1   1OCT    HH2      8       0.06      1.008   ; qtot 0.12
-    26   opls_140      1   1OCT    HH3      8       0.06      1.008   ; qtot 0.18
-    27   opls_135      1   1OCT     CH      8      -0.18     12.011   ; qtot 0
+     1   opls_155      1    SOL     HO      1      0.418      1.008   ; qtot 0.418
+     2   opls_154      1    SOL     OH      1     -0.683    15.9994   ; qtot -0.265
+     3   opls_140      1    SOL    HA1      1       0.06      1.008   ; qtot -0.205
+     4   opls_140      1    SOL    HA2      1       0.06      1.008   ; qtot -0.145
+     5   opls_157      1    SOL     CA      1      0.145     12.011   ; qtot 0
+     6   opls_140      1    SOL    HB1      2       0.06      1.008   ; qtot 0.06
+     7   opls_140      1    SOL    HB2      2       0.06      1.008   ; qtot 0.12
+     8   opls_136      1    SOL     CB      2      -0.12     12.011   ; qtot 0
+     9   opls_140      1    SOL    HC1      3       0.06      1.008   ; qtot 0.06
+    10   opls_140      1    SOL    HC2      3       0.06      1.008   ; qtot 0.12
+    11   opls_136      1    SOL     CC      3      -0.12     12.011   ; qtot 0
+    12   opls_140      1    SOL    HD1      4       0.06      1.008   ; qtot 0.06
+    13   opls_140      1    SOL    HD2      4       0.06      1.008   ; qtot 0.12
+    14   opls_136      1    SOL     CD      4      -0.12     12.011   ; qtot 0
+    15   opls_140      1    SOL    HE1      5       0.06      1.008   ; qtot 0.06
+    16   opls_140      1    SOL    HE2      5       0.06      1.008   ; qtot 0.12
+    17   opls_136      1    SOL     CE      5      -0.12     12.011   ; qtot 0
+    18   opls_140      1    SOL    HF1      6       0.06      1.008   ; qtot 0.06
+    19   opls_140      1    SOL    HF2      6       0.06      1.008   ; qtot 0.12
+    20   opls_136      1    SOL     CF      6      -0.12     12.011   ; qtot 0
+    21   opls_140      1    SOL    HG1      7       0.06      1.008   ; qtot 0.06
+    22   opls_140      1    SOL    HG2      7       0.06      1.008   ; qtot 0.12
+    23   opls_136      1    SOL     CG      7      -0.12     12.011   ; qtot 0
+    24   opls_140      1    SOL    HH1      8       0.06      1.008   ; qtot 0.06
+    25   opls_140      1    SOL    HH2      8       0.06      1.008   ; qtot 0.12
+    26   opls_140      1    SOL    HH3      8       0.06      1.008   ; qtot 0.18
+    27   opls_135      1    SOL     CH      8      -0.18     12.011   ; qtot 0
 
 [ bonds ]
 ;  ai    aj funct            c0            c1            c2            c3

@@ -1,4 +1,4 @@
-;OcOH_GMX.itp created by acpype (Rev: 0) on Wed Feb 27 15:44:41 2019
+; SOL_GMX.itp created by acpype (Rev: 0) on Wed Feb 27 15:44:41 2019
 ;[ atomtypes ]
 ;name   bond_type     mass     charge   ptype   sigma         epsilon       Amb
 ; c3       c3          0.00000  0.00000   A     3.39967e-01   4.57730e-01 ; 1.91  0.1094
@@ -14,33 +14,33 @@ SOL               3
 
 [ atoms ]
 ;   nr  type  resi  res  atom  cgnr     charge      mass       ; qtot   bond_type
-     1   CT     1  OcOH    C8    1     0.131400     12.01000 ; qtot 0.131
-     2   OH     1  OcOH    O9    2    -0.599801     16.00000 ; qtot -0.468
-     3   H1     1  OcOH   H25    3     0.019700      1.00800 ; qtot -0.449
-     4   H1     1  OcOH   H26    4     0.019700      1.00800 ; qtot -0.429
-     5   HO     1  OcOH   H27    5     0.398000      1.00800 ; qtot -0.031
-     6   CT     1  OcOH    C1    6    -0.093100     12.01000 ; qtot -0.124
-     7   HC     1  OcOH   H10    7     0.032700      1.00800 ; qtot -0.091
-     8   HC     1  OcOH   H11    8     0.032700      1.00800 ; qtot -0.059
-     9   HC     1  OcOH   H12    9     0.032700      1.00800 ; qtot -0.026
-    10   CT     1  OcOH    C2   10    -0.080400     12.01000 ; qtot -0.106
-    11   HC     1  OcOH   H13   11     0.038700      1.00800 ; qtot -0.068
-    12   HC     1  OcOH   H14   12     0.038700      1.00800 ; qtot -0.029
-    13   CT     1  OcOH    C3   13    -0.079400     12.01000 ; qtot -0.108
-    14   HC     1  OcOH   H15   14     0.039700      1.00800 ; qtot -0.069
-    15   HC     1  OcOH   H16   15     0.039700      1.00800 ; qtot -0.029
-    16   CT     1  OcOH    C4   16    -0.079400     12.01000 ; qtot -0.108
-    17   HC     1  OcOH   H17   17     0.038700      1.00800 ; qtot -0.070
-    18   HC     1  OcOH   H18   18     0.038700      1.00800 ; qtot -0.031
-    19   CT     1  OcOH    C5   19    -0.078400     12.01000 ; qtot -0.109
-    20   HC     1  OcOH   H19   20     0.041700      1.00800 ; qtot -0.068
-    21   HC     1  OcOH   H20   21     0.041700      1.00800 ; qtot -0.026
-    22   CT     1  OcOH    C6   22    -0.078400     12.01000 ; qtot -0.104
-    23   HC     1  OcOH   H21   23     0.038700      1.00800 ; qtot -0.066
-    24   HC     1  OcOH   H22   24     0.038700      1.00800 ; qtot -0.027
-    25   CT     1  OcOH    C7   25    -0.084400     12.01000 ; qtot -0.111
-    26   HC     1  OcOH   H23   26     0.055700      1.00800 ; qtot -0.056
-    27   HC     1  OcOH   H24   27     0.055700      1.00800 ; qtot 0.000
+     1   CT     1   SOL    C8    1     0.131400     12.01000 ; qtot 0.131
+     2   OH     1   SOL    O9    2    -0.599801     16.00000 ; qtot -0.468
+     3   H1     1   SOL   H25    3     0.019700      1.00800 ; qtot -0.449
+     4   H1     1   SOL   H26    4     0.019700      1.00800 ; qtot -0.429
+     5   HO     1   SOL   H27    5     0.398000      1.00800 ; qtot -0.031
+     6   CT     1   SOL    C1    6    -0.093100     12.01000 ; qtot -0.124
+     7   HC     1   SOL   H10    7     0.032700      1.00800 ; qtot -0.091
+     8   HC     1   SOL   H11    8     0.032700      1.00800 ; qtot -0.059
+     9   HC     1   SOL   H12    9     0.032700      1.00800 ; qtot -0.026
+    10   CT     1   SOL    C2   10    -0.080400     12.01000 ; qtot -0.106
+    11   HC     1   SOL   H13   11     0.038700      1.00800 ; qtot -0.068
+    12   HC     1   SOL   H14   12     0.038700      1.00800 ; qtot -0.029
+    13   CT     1   SOL    C3   13    -0.079400     12.01000 ; qtot -0.108
+    14   HC     1   SOL   H15   14     0.039700      1.00800 ; qtot -0.069
+    15   HC     1   SOL   H16   15     0.039700      1.00800 ; qtot -0.029
+    16   CT     1   SOL    C4   16    -0.079400     12.01000 ; qtot -0.108
+    17   HC     1   SOL   H17   17     0.038700      1.00800 ; qtot -0.070
+    18   HC     1   SOL   H18   18     0.038700      1.00800 ; qtot -0.031
+    19   CT     1   SOL    C5   19    -0.078400     12.01000 ; qtot -0.109
+    20   HC     1   SOL   H19   20     0.041700      1.00800 ; qtot -0.068
+    21   HC     1   SOL   H20   21     0.041700      1.00800 ; qtot -0.026
+    22   CT     1   SOL    C6   22    -0.078400     12.01000 ; qtot -0.104
+    23   HC     1   SOL   H21   23     0.038700      1.00800 ; qtot -0.066
+    24   HC     1   SOL   H22   24     0.038700      1.00800 ; qtot -0.027
+    25   CT     1   SOL    C7   25    -0.084400     12.01000 ; qtot -0.111
+    26   HC     1   SOL   H23   26     0.055700      1.00800 ; qtot -0.056
+    27   HC     1   SOL   H24   27     0.055700      1.00800 ; qtot 0.000
 
 [ bonds ]
 ;   ai     aj funct   r             k

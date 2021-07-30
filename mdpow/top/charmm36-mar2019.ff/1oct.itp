@@ -6,34 +6,34 @@ SOL 				 3
 
 [ atoms ]
 ;	 nr		  type	resnr residue  atom   cgnr	   charge		mass  typeB    chargeB		massB
-; residue	 1 OcOH rtp OcOH q	qsum
-     1      CG321      1   OcOH     C8      1      0.050     12.011   ;
-     2      OG311      1   OcOH     O9      2     -0.649     15.999   ;
-     3       HGA2      1   OcOH    H25      3      0.090      1.008   ;
-     4       HGA2      1   OcOH    H26      4      0.090      1.008   ;
-     5       HGP1      1   OcOH    H27      5      0.420      1.008   ;
-     6      CG331      1   OcOH     C1      6     -0.270     12.011   ;
-     7       HGA3      1   OcOH    H10      7      0.090      1.008   ;
-     8       HGA3      1   OcOH    H11      8      0.090      1.008   ;
-     9       HGA3      1   OcOH    H12      9      0.090      1.008   ;
-    10      CG321      1   OcOH     C2     10     -0.180     12.011   ;
-    11       HGA2      1   OcOH    H13     11      0.090      1.008   ;
-    12       HGA2      1   OcOH    H14     12      0.090      1.008   ;
-    13      CG321      1   OcOH     C3     13     -0.180     12.011   ;
-    14       HGA2      1   OcOH    H15     14      0.090      1.008   ;
-    15       HGA2      1   OcOH    H16     15      0.090      1.008   ;
-    16      CG321      1   OcOH     C4     16     -0.180     12.011   ;
-    17       HGA2      1   OcOH    H17     17      0.090      1.008   ;
-    18       HGA2      1   OcOH    H18     18      0.090      1.008   ;
-    19      CG321      1   OcOH     C5     19     -0.180     12.011   ;
-    20       HGA2      1   OcOH    H19     20      0.090      1.008   ;
-    21       HGA2      1   OcOH    H20     21      0.090      1.008   ;
-    22      CG321      1   OcOH     C6     22     -0.180     12.011   ;
-    23       HGA2      1   OcOH    H21     23      0.090      1.008   ;
-    24       HGA2      1   OcOH    H22     24      0.090      1.008   ;
-    25      CG321      1   OcOH     C7     25     -0.181     12.011   ;
-    26       HGA2      1   OcOH    H23     26      0.090      1.008   ;
-    27       HGA2      1   OcOH    H24     27      0.090      1.008   ;
+; residue	 1  SOL rtp  SOL q	qsum
+     1      CG321      1    SOL     C8      1      0.050     12.011   ;
+     2      OG311      1    SOL     O9      2     -0.649     15.999   ;
+     3       HGA2      1    SOL    H25      3      0.090      1.008   ;
+     4       HGA2      1    SOL    H26      4      0.090      1.008   ;
+     5       HGP1      1    SOL    H27      5      0.420      1.008   ;
+     6      CG331      1    SOL     C1      6     -0.270     12.011   ;
+     7       HGA3      1    SOL    H10      7      0.090      1.008   ;
+     8       HGA3      1    SOL    H11      8      0.090      1.008   ;
+     9       HGA3      1    SOL    H12      9      0.090      1.008   ;
+    10      CG321      1    SOL     C2     10     -0.180     12.011   ;
+    11       HGA2      1    SOL    H13     11      0.090      1.008   ;
+    12       HGA2      1    SOL    H14     12      0.090      1.008   ;
+    13      CG321      1    SOL     C3     13     -0.180     12.011   ;
+    14       HGA2      1    SOL    H15     14      0.090      1.008   ;
+    15       HGA2      1    SOL    H16     15      0.090      1.008   ;
+    16      CG321      1    SOL     C4     16     -0.180     12.011   ;
+    17       HGA2      1    SOL    H17     17      0.090      1.008   ;
+    18       HGA2      1    SOL    H18     18      0.090      1.008   ;
+    19      CG321      1    SOL     C5     19     -0.180     12.011   ;
+    20       HGA2      1    SOL    H19     20      0.090      1.008   ;
+    21       HGA2      1    SOL    H20     21      0.090      1.008   ;
+    22      CG321      1    SOL     C6     22     -0.180     12.011   ;
+    23       HGA2      1    SOL    H21     23      0.090      1.008   ;
+    24       HGA2      1    SOL    H22     24      0.090      1.008   ;
+    25      CG321      1    SOL     C7     25     -0.181     12.011   ;
+    26       HGA2      1    SOL    H23     26      0.090      1.008   ;
+    27       HGA2      1    SOL    H24     27      0.090      1.008   ;
 
 [ bonds ]
 ;	ai	  aj funct			  c0			c1			  c2			c3
