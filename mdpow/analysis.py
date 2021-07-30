@@ -10,6 +10,7 @@ import os
 
 from gromacs.utilities import in_dir
 import MDAnalysis as mda
+from MDAnalysis.analysis.dihedrals import calc_dihedrals
 from MDAnalysis.analysis.base import AnalysisBase
 from MDAnalysis.exceptions import FileFormatWarning, NoDataError, MissingDataWarning, SelectionError
 import numpy as np
@@ -138,10 +139,14 @@ class Ensemble(object):
                                     except NoDataWarning:
                                         continue
 
-    def add_system(self, key, topology=None, trajectory=None):
-        if not os.path.exists(trajectory) and os.path.exists(topology):
+    def add_system(self, key, topology=None, trajectory=None, universe=None):
+        if not universe is None:
+            self.ensemble[key] = universe
+        elif (topology is None or trajectory is None) or \
+                (os.path.exists(trajectory) and os.path.exists(topology)):
             logger.error("%s does not exist" % trajectory)
-        self.ensemble[key] = mda.Universe(topology, trajectory)
+        else:
+            self.ensemble[key] = mda.Universe(topology, trajectory)
         self.system_keys.append(key)
         self.num_systems += 1
 
@@ -227,6 +232,12 @@ class EnsembleAtomGroup(object):
                 continue
         return EnsembleAtomGroup(selections)
 
+    def ensemble(self):
+        ens = Ensemble()
+        for k in self.group_keys():
+            ens.add_system(k, universe=self[k].universe)
+        return ens
+
 
 class EnsembleAnalysis(object):
     """Base class for running multi system analysis
@@ -254,7 +265,7 @@ class EnsembleAnalysis(object):
         self.frames = np.zeros(self.n_frames, dtype=int)
         self.times = np.zeros(self.n_frames)
 
-    def _single_system(self):
+    def _single_universe(self):
         """Calculations on a single Universe object.
 
             Run on each universe in the ensemble during when
@@ -269,16 +280,30 @@ class EnsembleAnalysis(object):
         """
         pass
 
-    def _prepare(self):
+    def _prepare_ensemble(self):
         """For establishing data structures used in running
-        analysis.
+        analysis on the entire ensemble.
+
+        Data structures will not be overwritten upon moving to
+        next system in ensemble.
+        """
+        pass
+
+    def _prepare_universe(self):
+        """For establishing data structures used in running
+        analysis on each trajectory in ensemble
+
+        Data structures will be overwritten between upon after
+        each trajectory has been run
         """
         pass
 
     def _conclude_universe(self):
+        """Run after each trajectory is finished"""
         pass
 
     def _conclude_ensemble(self):
+        """Run after all trajectories in ensemble are finished"""
         pass
 
     def run(self, start=None, stop=None, step=None):
@@ -286,10 +311,11 @@ class EnsembleAnalysis(object):
         on each frame in the system.
         """
         logger.info("Setting up systems")
-        self._prepare()
+        self._prepare_ensemble()
         for key in self._ensemble.group_keys():
             self._setup_system(key, start=start, stop=stop, step=step)
-            self._single_system()
+            self._prepare_universe()
+            self._single_universe()
             for ts, i in self._trajectory[start:stop:step], range(start, stop, step):
                 self._frame_index = i
                 self._ts = ts
@@ -302,3 +328,26 @@ class EnsembleAnalysis(object):
         logger.info("Finishing up")
         self._conclude_ensemble()
         return self
+
+
+class DihedralAnalysis(EnsembleAnalysis):
+    def __init__(self, DihedralGroup):
+        super(DihedralAnalysis, self).__init__(ensemble=DihedralGroup.ensemble)
+
+        self._sel = DihedralGroup
+
+    def _prepare_ensemble(self):
+        pass
+
+    def _prepare_universe(self):
+        pass
+
+    def _single_frame(self):
+        calc_dihedrals(self._sel[self._key].positions)
+
+
+    def _conclude_universe(self):
+        pass
+
+    def _conclude_ensemble(self):
+        pass
