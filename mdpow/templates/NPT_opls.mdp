@@ -1,5 +1,5 @@
-; Gromacs mdp file
-; Template for MD in NPT with OPLS-AA (part of POW)
+; GROMACS mdp file
+; Template for MD in NPT with OPLS-AA (part of MDPOW)
 ; (isotropic P, T via Langevin dynamics)
 
 include                  = 
@@ -26,7 +26,10 @@ nstcomm                  = 1000
 comm-grps                = SYSTEM
 
 ; Selection of energy groups
-energygrps               = __main__ __environment__
+; Separate energy groups are not supported on GPUs. If you need
+; them, use "gmx mdrun -rerun". For MDPOW, they are not needed
+; so they are commented out.
+;energygrps               = __main__ __environment__
 
 
 ; NEIGHBORSEARCHING PARAMETERS
@@ -45,9 +48,7 @@ rlist                    = 1.0
 coulombtype              = PME
 rcoulomb-switch          = 0
 rcoulomb                 = 1.0
-; Relative dielectric constant for the medium and the reaction field
-epsilon_r                = 1
-epsilon_rf               = 1
+
 ; Method for doing Van der Waals
 vdw-type                 = Cut-off
 ; cut-off lengths       
@@ -64,6 +65,9 @@ fourier_nx               = 0
 fourier_ny               = 0
 fourier_nz               = 0
 ; EWALD/PME/PPPM parameters
+; NOTE: GROMACS 2021 will only do PME on GPU with pme_order = 4.
+;       For consistency with earlier versions of MDPOW the setting is left at 6 but
+;       at the cost of slower performance.
 pme_order                = 6
 ewald_rtol               = 1e-06
 ewald_geometry           = 3d

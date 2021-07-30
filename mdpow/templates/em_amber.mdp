@@ -1,5 +1,5 @@
 ; GROMACS mdp file
-; Template for energy minimization with OPLS-AA (part of MDPOW)
+; Template for energy minimization with AMBER (part of MDPOW)
 
 include                  = 
 
