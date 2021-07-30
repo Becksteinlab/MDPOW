@@ -97,6 +97,9 @@ class TestFEPschedule(object):
         item = tmp_cfg.get('VDW', 'label')
         assert item is None
 
+    def test_iterable(self):
+        assert not mdpow.config.iterable('test')
+
     def _test_schedule(self, component):
         section = 'FEP_schedule_{0}'.format(component)
         schedule = mdpow.fep.FEPschedule.load(self.cfg, section)
