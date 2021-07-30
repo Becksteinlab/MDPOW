@@ -49,7 +49,7 @@ directory
     folder in which the simulations were stored
 
 """
-from __future__ import absolute_import, print_statement, division
+from __future__ import absolute_import, print_function, division
 
 import os
 import warnings
