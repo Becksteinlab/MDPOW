@@ -1,4 +1,8 @@
+from __future__ import absolute_import
+
 import os.path
+import sys
+
 import pytest
 import py.path
 
@@ -6,6 +10,7 @@ import yaml
 import pybol
 
 from numpy.testing import assert_array_almost_equal
+import pandas
 
 from six.moves import cPickle as pickle
 
@@ -62,10 +67,16 @@ def fep_benzene_directory(tmpdir_factory):
 class TestAnalyze(object):
     def get_Gsolv(self, pth):
         gsolv = pth.join("FEP", "water", "Gsolv.fep")
-        G = pickle.load(gsolv.open())
-        # patch paths
+        # Needed to load old pickle files in python 3
+        if sys.version_info.major >= 3:
+            with open(gsolv, 'rb') as f:
+                G = pickle.load(f, encoding='latin1')
+                # patch paths
+        elif sys.version_info.major == 2:
+            G = pickle.load(gsolv.open())
         G.basedir = pth.strpath
         G.filename = gsolv.strpath
+
         return G
 
     @pytest.mark.parametrize('method, Gibbs, coulomb, vdw', [
@@ -82,6 +93,9 @@ class TestAnalyze(object):
                  (8.241836, 0.219235),
                  (-1.448719,  0.421548))
                 ])
+
+    @pytest.mark.xfail(pandas.__version__.startswith("1.3.0"),
+                       reason="bug in pandas 1.3.0 see alchemistry/alchemlyb#147")
     def test_estimator_alchemlyb(self, fep_benzene_directory, method,
                                  Gibbs, coulomb, vdw):
         G = self.get_Gsolv(fep_benzene_directory)
@@ -100,12 +114,14 @@ class TestAnalyze(object):
                 err.strerror, err.filename))
         DeltaA = G.results.DeltaA
         assert_array_almost_equal(DeltaA.Gibbs.astuple(), Gibbs,
-                                  decimal=6)
+                                  decimal=5)  # with more recent versions of pandas/alchemlyb/numpy the original values are only reproduced to 5 decimals, see PR #166")
         assert_array_almost_equal(DeltaA.coulomb.astuple(), coulomb,
-                                  decimal=6)
+                                  decimal=5)  # with more recent versions of pandas/alchemlyb/numpy the original values are only reproduced to 5 decimals, see PR #166")
         assert_array_almost_equal(DeltaA.vdw.astuple(), vdw,
-                                  decimal=6)
+                                  decimal=5)  # with more recent versions of pandas/alchemlyb/numpy the original values are only reproduced to 5 decimals, see PR #166")
 
+    @pytest.mark.xfail(pandas.__version__.startswith("1.3.0"),
+                       reason="bug in pandas 1.3.0 see alchemistry/alchemlyb#147")
     def test_SI(self, fep_benzene_directory):
         G = self.get_Gsolv(fep_benzene_directory)
         G.method = 'TI'
@@ -119,12 +135,14 @@ class TestAnalyze(object):
                 err.strerror, err.filename))
         DeltaA = G.results.DeltaA
         assert_array_almost_equal(DeltaA.Gibbs.astuple(), (-2.908885,  2.175976),
-                                  decimal=6)
+                                  decimal=5)  # with more recent versions of pandas/alchemlyb/numpy the original values are only reproduced to 5 decimals, see PR #166")
         assert_array_almost_equal(DeltaA.coulomb.astuple(), (7.755779, 0.531481),
-                                  decimal=6)
+                                  decimal=5)  # with more recent versions of pandas/alchemlyb/numpy the original values are only reproduced to 5 decimals, see PR #166")
         assert_array_almost_equal(DeltaA.vdw.astuple(), (-4.846894,  2.110071),
-                                  decimal=6)
+                                  decimal=5)  # with more recent versions of pandas/alchemlyb/numpy the original values are only reproduced to 5 decimals, see PR #166")
 
+    @pytest.mark.xfail(pandas.__version__.startswith("1.3.0"),
+                       reason="bug in pandas 1.3.0 see alchemistry/alchemlyb#147")
     def test_start_stop_stride(self, fep_benzene_directory):
         G = self.get_Gsolv(fep_benzene_directory)
         G.method = 'TI'
@@ -139,8 +157,8 @@ class TestAnalyze(object):
                 err.strerror, err.filename))
         DeltaA = G.results.DeltaA
         assert_array_almost_equal(DeltaA.Gibbs.astuple(), (-3.318109,  0.905128),
-                                  decimal=6)
+                                  decimal=5)  # with more recent versions of pandas/alchemlyb/numpy the original values are only reproduced to 5 decimals, see PR #166")
         assert_array_almost_equal(DeltaA.coulomb.astuple(), (8.146806, 0.348866),
-                                  decimal=6)
+                                  decimal=5)  # with more recent versions of pandas/alchemlyb/numpy the original values are only reproduced to 5 decimals, see PR #166")
         assert_array_almost_equal(DeltaA.vdw.astuple(), (-4.828696,  0.835195),
-                                  decimal=6)
+                                  decimal=5)  # with more recent versions of pandas/alchemlyb/numpy the original values are only reproduced to 5 decimals, see PR #166")

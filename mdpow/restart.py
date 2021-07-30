@@ -23,9 +23,10 @@ restartable simulation protocols (for example :program:`mdpow-equilibrium`).
 """
 from __future__ import absolute_import
 
+from six.moves import cPickle as pickle
+
 import os
 import errno
-import cPickle
 
 import logging
 logger = logging.getLogger('mdpow.checkpoint')
@@ -240,7 +241,7 @@ class Journalled(object):
         else:
             self.filename = os.path.abspath(filename)
         with open(self.filename, 'wb') as f:
-            cPickle.dump(self, f, protocol=cPickle.HIGHEST_PROTOCOL)
+            pickle.dump(self, f)
         logger.debug("Instance pickled to %(filename)r" % vars(self))
 
     def load(self, filename=None):
@@ -260,6 +261,6 @@ class Journalled(object):
                 logger.error(errmsg)
                 raise ValueError(errmsg)
         with open(filename, 'rb') as f:
-            instance = cPickle.load(f)
+            instance = pickle.load(f)
         self.__dict__.update(instance.__dict__)
         logger.debug("Instance loaded from %(filename)r" % vars())

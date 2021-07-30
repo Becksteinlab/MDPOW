@@ -120,35 +120,41 @@ TODO
   See `Free Energy Tutorial`_.
 
 """
-from __future__ import absolute_import, with_statement
+from __future__ import absolute_import, division
+
+import six
+from six.moves import zip
+from six.moves.configparser import NoOptionError
 
 import os
 import errno
 import copy
 from subprocess import call
 import warnings
+from glob import glob
 
 import numpy
 import pandas as pd
 
 import scipy.integrate
 from scipy import constants
+
 import numkit.integration
 import numkit.timeseries
+from numkit.observables import QuantityWithError
 
 from alchemlyb.parsing.gmx import extract_dHdl, extract_u_nk
 from alchemlyb.estimators import TI, BAR, MBAR
 from alchemlyb.parsing.gmx import _extract_dataframe
 from pymbar.timeseries import (statisticalInefficiency,
                                subsampleCorrelatedData, )
-import gromacs, gromacs.utilities
+import gromacs
+import gromacs.utilities
 try:
     import gromacs.setup
 except (ImportError, OSError):
     raise ImportError("Gromacs installation not found, source GMXRC?")
 from gromacs.utilities import asiterable, AttributeDict, in_dir, openany
-from numkit.observables import QuantityWithError
-from glob import glob
 
 import logging
 logger = logging.getLogger('mdpow.fep')
@@ -230,7 +236,6 @@ class FEPschedule(AttributeDict):
     @staticmethod
     def load(cfg, section):
         """Initialize a :class:`FEPschedule` from the *section* in the configuration *cfg*"""
-
         keys = {}
         keys.update(FEPschedule.mdp_keywords)
         keys.update(FEPschedule.meta_keywords)
@@ -244,15 +249,15 @@ class FEPschedule(AttributeDict):
         def getter(type, section, key):
             try:
                 return cfg_get[type](section, key)
-            except ConfigParser.NoOptionError:
+            except NoOptionError:
                 return None
         return FEPschedule((key, getter(keytype, section, key)) for key,keytype in keys.items()
                            if getter(keytype, section, key) is not None)
 
     def __deepcopy__(self, memo):
-        x = type(self)()
-        for k,v in self.iteritems():
-            x[k] = copy.deepcopy(v, memo)
+        x = FEPschedule()
+        for k, v in six.iteritems(self):
+            x[k] = copy.deepcopy(v)
         return x
 
 class Gsolv(Journalled):
@@ -471,7 +476,8 @@ class Gsolv(Journalled):
             self.mdp = kwargs.pop('mdp', config.get_template(self.mdp_default))
 
             # schedules (deepcopy because we might modify)
-            self.schedules = copy.deepcopy(self.schedules_default)
+            # For some reason 2.7 tests failed with deepcopy in 2.7 so used merge_dict instead
+            self.schedules = config.merge_dicts(self.schedules_default, {})
             schedules = kwargs.pop('schedules', {})
             self.schedules.update(schedules)
             self.lambdas = {
@@ -504,7 +510,7 @@ class Gsolv(Journalled):
                 wmsg = "Directory %(dirname)r already exists --- will overwrite " \
                        "existing files." % vars(self)
                 warnings.warn(wmsg)
-                logger.warn(wmsg)
+                logger.warning(wmsg)
 
         # overrides pickle file so that we can run from elsewhere
         if not basedir is None:
@@ -720,8 +726,8 @@ class Gsolv(Journalled):
         pattern = os.path.join(*args + (self.deffnm + '*.edr',))
         edrs = glob(pattern)
         if not edrs:
-                    logger.error("Missing dgdl.edr file %(pattern)r.", vars())
-                    raise IOError(errno.ENOENT, "Missing dgdl.edr file", pattern)
+            logger.error("Missing dgdl.edr file %(pattern)r.", vars())
+            raise IOError(errno.ENOENT, "Missing dgdl.edr file", pattern)
         return [os.path.abspath(i) for i in edrs]
 
     def dgdl_tpr(self, *args):
@@ -834,8 +840,8 @@ class Gsolv(Journalled):
                     # speed is similar to 'bzip2 -9 FILE' (using a 1 Mio buffer)
                     # (Since GW 0.8, openany() does not take kwargs anymore so the write buffer cannot be
                     # set anymore (buffering=1048576) so the performance might be lower in MDPOW >= 0.7.0)
-                    with open(xvg, 'r', buffering=1048576) as source:
-                        with openany(fnbz2, 'w') as target:
+                    with open(xvg, 'rb', buffering=1048576) as source:
+                        with openany(fnbz2, 'wb') as target:
                             target.writelines(source)
                     if os.path.exists(fnbz2) and os.path.exists(xvg):
                         os.unlink(xvg)
@@ -855,7 +861,6 @@ class Gsolv(Journalled):
         :attr:`Gsolv._corrupted` as dicts of dicts with the component as
         primary and the lambda as secondary key.
         """
-        from itertools import izip
         def _lencorrupted(xvg):
             try:
                 return len(xvg.corrupted_lineno)
@@ -867,7 +872,7 @@ class Gsolv(Journalled):
         self._corrupted = {}        # debugging ...
         for component, (lambdas, xvgs) in self.results.xvg.items():
             corrupted[component] = numpy.any([(_lencorrupted(xvg) > 0) for xvg in xvgs])
-            self._corrupted[component] = dict(((l, _lencorrupted(xvg)) for l,xvg in izip(lambdas, xvgs)))
+            self._corrupted[component] = dict(((l, _lencorrupted(xvg)) for l,xvg in zip(lambdas, xvgs)))
         return numpy.any([x for x in corrupted.values()])
 
     def analyze(self, force=False, stride=None, autosave=True, ncorrel=25000):
@@ -960,7 +965,7 @@ class Gsolv(Journalled):
                     self.convert_edr()
                     self.collect(stride=stride, autosave=False)
                 else:
-                    logger.exception()
+                    logger.exception(err)
                     raise
         else:
             logger.info("Analyzing stored data.")
@@ -1064,7 +1069,7 @@ class Gsolv(Journalled):
                     self.convert_edr()
                     self.collect_alchemlyb(SI, start, stop, stride, autosave=False)
                 else:
-                    logger.exception()
+                    logger.exception(err)
                     raise
         else:
             logger.info("Analyzing stored data.")
@@ -1384,14 +1389,15 @@ def p_transfer(G1, G2, **kwargs):
             logger.info("The solvent is %s .", G.solvent_type)
             logger.info("Estimator is %s.", estimator)
             logger.info("Free energy calculation method is %s.", G.method)
-            if estimator == 'mdpow':
-                G.analyze(**G_kwargs)
-            elif estimator == 'alchemlyb':
-                if G_kwargs['SI']:
-                    logger.info("Statistical inefficiency analysis will be performed.")
-                else:
-                    logger.info("Statistical inefficiency analysis won't be performed.")
-                G.analyze_alchemlyb(**G_kwargs)
+
+    if estimator == 'mdpow':
+        G.analyze(**G_kwargs)
+    elif estimator == 'alchemlyb':
+        if G_kwargs['SI']:
+            logger.info("Statistical inefficiency analysis will be performed.")
+        else:
+            logger.info("Statistical inefficiency analysis won't be performed.")
+        G.analyze_alchemlyb(**G_kwargs)
 
     # x.Gibbs are QuantityWithError so they do error propagation
     transferFE = G2.results.DeltaA.Gibbs - G1.results.DeltaA.Gibbs
