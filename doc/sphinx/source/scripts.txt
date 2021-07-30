@@ -189,50 +189,52 @@ Usage of the command:
 
    .. program:: mdpow-solvationenergy
 
-      :program:`mdpow-solvationenergy` [options] DIRECTORY [DIRECTORY ...]
-            
-      Run the free energy analysis for a solvent in ``<DIRECTORY>/FEP`` and
-      return ``DeltaG``.
+   :program:`mdpow-solvationenergy` [options] DIRECTORY [DIRECTORY ...]
 
-      ``DIRECTORY`` should contain all the files resulting from running
-      ``mdpow.fep.Ghyd.setup()`` (or the corresponding ``Goct.setup()`` or
-      ``Gcyclohexane.setup()`` and the results of the MD FEP simulations. It
-      relies on the canonical naming scheme (basically: just use the defaults
-      as in the tutorial).
+   Run the free energy analysis for a solvent in ``<DIRECTORY>/FEP`` and
+   return ``DeltaG``.
 
-      The dV/dlambda plots can be produced automatically (``--plot=auto``). If
-      multiple ``DIRECTORY`` arguments are provided then one has to choose the
-      "auto" option (or ``None``).
+   ``DIRECTORY`` should contain all the files resulting from running
+   ``mdpow.fep.Ghyd.setup()`` (or the corresponding ``Goct.setup()`` or
+   ``Gcyclohexane.setup()`` and the results of the MD FEP simulations. It
+   relies on the canonical naming scheme (basically: just use the defaults
+   as in the tutorial).
 
-      The total solvation free energy is calculated as
+   The dV/dlambda plots can be produced automatically (``--plot=auto``). If
+   multiple ``DIRECTORY`` arguments are provided then one has to choose the
+   "auto" option (or ``None``).
 
-           DeltaG* = -(DeltaG_coul + DeltaG_vdw)
+   The total solvation free energy is calculated as
+   
+   .. math::
 
-      Note that the standard state refers to the "Ben-Naim" standard state of
-      transferring 1 M of compound in the gas phase to 1 M in the aqueous
-      phase.
+	\Delta G^{*} = -(\Delta G_{\text{coul}} + \Delta G_{\text{vdw}})
 
-      Results are *appended* to a data file with **Output file format**::
+   Note that the standard state refers to the "Ben-Naim" standard state of
+   transferring 1 M of compound in the gas phase to 1 M in the aqueous
+   phase.
 
-		.                 ---------- kJ/mol ---
-		molecule solvent  DeltaG*  coulomb  vdw
+   Results are *appended* to a data file with **Output file format**::
 
-      All observables are quoted with an error estimate, which is derived
-      from the correlation time and error propagation through Simpson's rule
-      (see :meth:`mdpow.fep.Gsolv`). It ultimately comes from the error on
-      <dV/dlambda>, which is estimated as the error to determine the
-      average.
+	     .                 ---------- kJ/mol ---
+	     molecule solvent  DeltaG*  coulomb  vdw
 
-      :molecule:
-	  molecule name as used in the itp
-      :DeltaG*:
-	  solvation free energy vacuum --> solvent, in kJ/mol
-      :coulomb:
-	  discharging contribution to the DeltaG*
-      :vdw:
-	  decoupling contribution to the DeltaG*
-      :directory:
-	  folder in which the simulations were stored
+   All observables are quoted with an error estimate, which is derived
+   from the correlation time and error propagation through Simpson's rule
+   (see :meth:`mdpow.fep.Gsolv`). It ultimately comes from the error on
+   <dV/dlambda>, which is estimated as the error to determine the
+   average.
+
+   :molecule:
+       molecule name as used in the itp
+   :DeltaG*:
+       solvation free energy vacuum --> solvent, in kJ/mol
+   :coulomb:
+       discharging contribution to the DeltaG*
+   :vdw:
+       decoupling contribution to the DeltaG*
+   :directory:
+       folder in which the simulations were stored
 
 
    Options:

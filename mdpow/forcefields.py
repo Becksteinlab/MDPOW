@@ -182,6 +182,8 @@ AMBER_SOLVENT_MODELS = {
         identifier="cyclohexane", itp="1cyclo.itp", coordinates="1cyclo_amber.gro"),
     }
 
+#: Solvents available in GROMACS; the keys of the dictionary
+#: are the forcefields.
 GROMACS_SOLVENT_MODELS = {
     'OPLS-AA': OPLS_SOLVENT_MODELS,
     'CHARMM': CHARMM_SOLVENT_MODELS,
@@ -264,6 +266,7 @@ def get_ff_paths(forcefield='OPLS-AA'):
 
 
 def get_top_template(identifier):
+    """Return the topology file template suitable for the solvent model."""
     templates = {'water': 'system.top', 'octanol': 'system.top',
                  'cyclohexane': 'system.top', 'wetoctanol': 'system_octwet.top'}
     try:

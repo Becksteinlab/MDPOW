@@ -107,7 +107,6 @@ pygments_style = 'sphinx'
 html_theme = 'sphinx_rtd_theme'
 
 html_theme_options = {
-    'canonical_url': '',
     #'logo_only': True,
     'display_version': True,
     'prev_next_buttons_location': 'bottom',
@@ -229,7 +228,7 @@ latex_documents = [
 intersphinx_mapping = {'https://docs.python.org/': None,
                        'https://numpy.org/doc/stable/': None,
                        'https://docs.scipy.org/doc/scipy/reference/': None,
-                       'https://gromacswrapper.readthedocs.org/en/latest/': None,
+                       'https://gromacswrapper.readthedocs.io/en/latest': None,
                    }
 
 
