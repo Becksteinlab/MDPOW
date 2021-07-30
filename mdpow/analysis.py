@@ -1,18 +1,18 @@
 # mdpow: analysis.py
 # 2021 Alia Lescoulie
 
-"""
+"""A set of objects for analyzing MDPOW simulations
 
 """
 from __future__ import absolute_import
 
 import os
 
-import gromacs
 from gromacs.utilities import in_dir
 import MDAnalysis as mda
+from MDAnalysis.analysis.base import AnalysisBase
 from MDAnalysis.exceptions import FileFormatWarning, NoDataError, MissingDataWarning, SelectionError
-import numpy
+import numpy as np
 import pandas as pd
 
 import six
@@ -165,4 +165,140 @@ class Ensemble(object):
             except SelectionError as err:
                 logger.warning("%s on system %r" % (err, key))
                 continue
-        return selections
+        return EnsembleAtomGroup(selections)
+
+
+class EnsembleAtomGroup(object):
+    """Group for storing AtomGroups from Ensemble.select_atoms"""
+    def __init__(self, group_dict=None):
+        self.groups = group_dict
+        if isinstance(group_dict, dict):
+            self.keys = group_dict.keys
+        else:
+            self.keys = None
+
+    def __getitem__(self, index):
+        try:
+            item = self.groups[index]
+            return item
+        except KeyError:
+            logger.error(KeyError("Invalid system key"))
+
+    def __eq__(self, other):
+        if len(self) == len(other):
+            for k_s, k_o in self.group_keys(), other.group_keys:
+                if self[k_s] != other[k_o]:
+                    return False
+            return True
+        else:
+            return False
+
+    def __len__(self):
+        return len(self.group_keys())
+
+    def group_keys(self):
+        return self.keys
+
+    def positions(self, keys=[None]):
+        positions = {}
+        if not keys is None:
+            for k in keys:
+                try:
+                    positions[k] = self[k].positions
+                except KeyError:
+                    logger.warning("%s is an invalid key")
+                    continue
+        else:
+            for k in self.group_keys():
+                positions[k] = self[k].positions
+        return positions
+
+    def select_atoms(self, selection):
+        """Returns atom groups for Universe from objects
+
+        Presumes that solute in systems is the same"""
+        selections = {}
+        for key in self.group_keys():
+            try:
+                ag = self[key].select_atoms(selection)
+                selections[key] = ag
+            except SelectionError as err:
+                logger.warning("%s on system %r" % (err, key))
+                continue
+        return EnsembleAtomGroup(selections)
+
+
+class EnsembleAnalysis(object):
+    """Base class for running multi system analysis
+
+    The class is designed based on the AnalysisBase
+    class in MDAnalysis https://docs.mdanalysis.org
+    and is a template for creating multiuniverse
+    multiframe analyses using the Ensemble object
+    """
+    def __init__(self, ensemble=None, **kwargs):
+        self._ensemble = ensemble
+
+    def _setup_system(self, key, start=None, stop=None, step=None):
+        self._system = self._ensemble[key]
+        self._key = key
+        self._setup_frames(self._system, start=start, stop=stop, step=step)
+
+    def _setup_frames(self, trajectory, start=None, stop=None, step=None):
+        self._trajectory = trajectory
+        stop, start, step = trajectory.check_slice_indices(start, stop, step)
+        self.start = start
+        self.stop = stop
+        self.step = step
+        self.n_frames = len(range(start, stop, step))
+        self.frames = np.zeros(self.n_frames, dtype=int)
+        self.times = np.zeros(self.n_frames)
+
+    def _single_system(self):
+        """Calculations on a single Universe object.
+
+            Run on each universe in the ensemble during when
+            self.run in called.
+        """
+        pass
+
+    def _single_frame(self):
+        """Calculate data from a single frame of trajectory
+
+        Called on each frame for universes in the Ensemble.
+        """
+        pass
+
+    def _prepare(self):
+        """For establishing data structures used in running
+        analysis.
+        """
+        pass
+
+    def _conclude_universe(self):
+        pass
+
+    def _conclude_ensemble(self):
+        pass
+
+    def run(self, start=None, stop=None, step=None):
+        """Runs _single_system on each system and _single_frame
+        on each frame in the system.
+        """
+        logger.info("Setting up systems")
+        self._prepare()
+        for key in self._ensemble.group_keys():
+            self._setup_system(key, start=start, stop=stop, step=step)
+            self._single_system()
+            for ts, i in self._trajectory[start:stop:step], range(start, stop, step):
+                self._frame_index = i
+                self._ts = ts
+                self.frames[i] = ts.frame
+                self.times[i] = ts.time
+                self._conclude_universe()
+                self._single_frame()
+            self._conclude_universe()
+            logger.info("Moving to next universe")
+        logger.info("Finishing up")
+        self._conclude_ensemble()
+        return self
