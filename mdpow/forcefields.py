@@ -215,7 +215,7 @@ def get_solvent_identifier(solvent_type, model=None, forcefield='OPLS-AA'):
     :Returns: Either an identifier or ``None``
 
     """
-    if solvent_type is "water":
+    if solvent_type == "water":
         identifier = model if not model in (None, 'water') else DEFAULT_WATER_MODEL
         return identifier if identifier in GROMACS_WATER_MODELS else None
     if not model in GROMACS_SOLVENT_MODELS[forcefield]:
@@ -232,7 +232,7 @@ def get_solvent_model(identifier, forcefield='OPLS-AA'):
     If identifier is "water" then the :data:`DEFAULT_WATER_MODEL` is assumed.
     """
 
-    if identifier is "water":
+    if identifier == "water":
         identifier = DEFAULT_WATER_MODEL
     try:
         return GROMACS_WATER_MODELS[identifier]
