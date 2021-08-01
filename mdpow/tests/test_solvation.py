@@ -33,13 +33,13 @@ def setup(tmpdir):
         shutil.copy(orig, newdir.dirname)
     return newdir.dirname
 
-def solvation(setup, solvent, ff='OPLS-AA'):
+def solvation(setup, solvent, ff='OPLS-AA', concentration=0):
     itp = test_file[ff]
     with in_dir(setup, create=False):
         try:
             S = sims[solvent](molecule='BNZ', forcefield=ff)
             S.topology(itp=itp)
-            S.solvate(struct='benzene.pdb')
+            S.solvate(struct='benzene.pdb', concentration=concentration)
         except Exception:
             raise AssertionError('Solvation failed.')
 
@@ -62,7 +62,7 @@ def test_solvation_cyclohexane(setup):
 @pytest.mark.parametrize("ff", ['OPLS-AA', 'CHARMM', 'AMBER'])
 def test_solvation_wetoctanol(setup, ff):
     solvation(setup, "wetoctanol", ff)
-    
+
 @pytest.mark.xfail(gromacs.release.startswith('4')
                    or gromacs.release.startswith('5')
                    or gromacs.release.startswith('2016'),
