@@ -346,7 +346,6 @@ class DihedralAnalysis(EnsembleAnalysis):
     def _single_frame(self):
         calc_dihedrals(self._sel[self._key].positions)
 
-
     def _conclude_universe(self):
         pass
 
