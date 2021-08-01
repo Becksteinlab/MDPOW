@@ -7,7 +7,7 @@ adjusted paths.
 (This should only be necessary when the directories are moved or
 copied to a different machine.)
 """
-from __future__ import absolute_import, print_statement, division
+from __future__ import absolute_import, print_function, division
 
 import os
 import mdpow.equil

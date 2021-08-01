@@ -9,7 +9,7 @@ error. A quick way to find problems is to do a ::
   cat status.txt | gawk -F '|' '$2 !~ /OK/ {print $0}'
 
 """
-from __future__ import absolute_import, print_statement, division
+from __future__ import absolute_import, print_function, division
 
 import logging
 logger = logging.getLogger('mdpow')

@@ -21,7 +21,7 @@ restartable simulation protocols (for example :program:`mdpow-equilibrium`).
 
 .. autofunction:: checkpoint
 """
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 
 from six.moves import cPickle as pickle
 
@@ -66,7 +66,7 @@ class Journal(object):
       J.start('main')
       ...
       # main does not finish properly
-      print J.incomplete
+      print(J.incomplete)
       # --> 'main'
       J.start('post')
       # raises JournalSequenceError

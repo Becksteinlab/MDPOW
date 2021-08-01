@@ -73,9 +73,20 @@ solvation free energy in octanol there is
 
 .. autoclass:: Gsolv
    :members:
+   :inherited-members:
+
 .. autoclass:: Ghyd
+   :members:
+   :inherited-members:
+
 .. autoclass:: Goct
+   :members:
+   :inherited-members:
+
 .. autoclass:: Gcyclo
+   :members:
+   :inherited-members:
+
 .. autofunction:: pOW
 .. autofunction:: pCW
 
@@ -876,7 +887,7 @@ class Gsolv(Journalled):
         return numpy.any([x for x in corrupted.values()])
 
     def analyze(self, force=False, stride=None, autosave=True, ncorrel=25000):
-        """Extract dV/dl from output and calculate dG by TI.
+        r"""Extract dV/dl from output and calculate dG by TI.
 
         Thermodynamic integration (TI) is performed on the individual
         component window calculation (typically the Coulomb and the
@@ -889,7 +900,8 @@ class Gsolv(Journalled):
         interaction switched on and ``lambda=1`` as switched off.
 
         .. math::
-            \Delta A* &= -(\Delta A_{\mathrm{coul}} + \Delta A_{\mathrm{vdw}})\\
+
+            \Delta A^{*} = -(\Delta A_{\mathrm{coul}} + \Delta A_{\mathrm{vdw}})
 
         Data are stored in :attr:`Gsolv.results`.
 
@@ -936,23 +948,27 @@ class Gsolv(Journalled):
           *ncorrel*
               aim for <= 25,000 samples for t_correl
 
-        ..rubric:: Notes
+        .. rubric:: Notes
 
-        Error on the mean of the data, taking the correlation time into account.
+        The error on the mean of the data :math:`\epsilon_y`, taking
+        the correlation time into account, is calculated according to
+        [FrenkelSmit2002]_ `p526`_:
 
-        See [FrenkelSmit2002]_ `p526`_:
+        .. math::
 
-           error = sqrt(2*tc*acf[0]/T)
+           \epsilon_y  = \sqrt{2 \tau_c \mathrm{acf}(0)/T}
 
-        where acf() is the autocorrelation function of the fluctuations around
-        the mean, y-<y>, tc is the correlation time, and T the total length of
-        the simulation.
+        where :math:`\mathrm{acf}()` is the autocorrelation function
+        of the fluctuations around the mean, :math:`y - \langle y
+        \rangle`, :math:`\tau_c` is the correlation time, and :math:`T`
+        the total length of the simulation.
 
         .. [FrenkelSmit2002] D. Frenkel and B. Smit, Understanding
                              Molecular Simulation. Academic Press, San
                              Diego 2002
 
         .. _p526: http://books.google.co.uk/books?id=XmyO2oRUg0cC&pg=PA526
+
         """
         stride = stride or self.stride
         logger.info("Analysis stride is %s.",stride)

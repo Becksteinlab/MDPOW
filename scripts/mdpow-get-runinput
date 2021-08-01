@@ -3,7 +3,7 @@
 
 Generate a template RUNINPUTFILE.
 """
-from __future__ import absolute_import, print_statement, division
+from __future__ import absolute_import, print_function, division
 
 from mdpow.config import get_configuration
 
