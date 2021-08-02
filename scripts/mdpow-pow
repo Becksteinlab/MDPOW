@@ -32,8 +32,7 @@ wat_ok, octa_ok
 directory
     folder in which the simulations were stored
 """
-
-from __future__ import with_statement
+from __future__ import absolute_import, print_function, division
 
 import os
 import mdpow.fep
@@ -239,7 +238,7 @@ if __name__ == "__main__":
 
     for directory in args:
         if not os.path.exists(directory):
-            logger.warn("Directory %r not found, skipping...", directory)
+            logger.warning("Directory %r not found, skipping...", directory)
             continue
         logger.info("Analyzing directory %r... (can take a while)", directory)
 
@@ -251,10 +250,10 @@ if __name__ == "__main__":
                     energyfile=realpath_or_none(opts.energyfile),
                     force=opts.force, stride=opts.stride, start=opts.start,
                     stop=opts.stop, estimator=opts.estimator,
-                    method=opts.method, permissive=opts.permissive, SI=opts.SI)
-        except (OSError, IOError), err:
+                    method=opts.method, permissive=opts.permissive, SI=opts.SI and not opts.noSI)
+        except (OSError, IOError) as err:
             logger.error("Running analysis in directory %r failed: %s", directory, str(err))
-        except Exception, err:
+        except Exception as err:
             logger.fatal("Running analysis in directory %r failed", directory)
             logger.exception("Catastrophic problem occurred, see the stack trace for hints.")
             raise

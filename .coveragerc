@@ -3,3 +3,5 @@ branch = True
 omit =
     # omit all tests
     mdpow/tests/*
+    mdpow/_version.py
+    

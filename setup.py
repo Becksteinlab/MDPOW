@@ -2,16 +2,15 @@
 # Copyright (c) 2010 Oliver Beckstein <orbeckst@gmail.com>
 # Released under the GNU Public License 3 (or higher, your choice)
 
-
 from setuptools import setup, find_packages
-
-# Dynamically calculate the version based on VERSION.
-version = __import__('mdpow.version').get_version()
+import versioneer
 
 setup(name="MDPOW",
-      version=version,
+      version=versioneer.get_version(),
+      cmdclass=versioneer.get_cmdclass(),
       description="A library for computing solvation/water partitioning coefficients using molecular dynamics simulations",
       long_description=open("README.rst").read(),
+      long_description_content_type="text/x-rst",
       author="Oliver Beckstein",
       author_email="orbeckst@gmail.com",
       license="GPLv3",
@@ -23,7 +22,14 @@ setup(name="MDPOW",
           "Intended Audience :: Science/Research",
           "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
           "Operating System :: POSIX",
+          'Operating System :: MacOS :: MacOS X',
+          'Programming Language :: Python',
+          'Programming Language :: Python :: 2',
           "Programming Language :: Python :: 2.7",
+          "Programming Language :: Python :: 3",
+          "Programming Language :: Python :: 3.7",
+          "Programming Language :: Python :: 3.8",
+          "Programming Language :: Python :: 3.9",
           "Topic :: Scientific/Engineering :: Chemistry",
           "Topic :: Scientific/Engineering :: Physics",
       ],

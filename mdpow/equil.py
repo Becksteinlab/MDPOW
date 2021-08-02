@@ -29,11 +29,13 @@ model.
 .. autodata:: DIST
 """
 
-from __future__ import absolute_import, with_statement
+from __future__ import absolute_import, division
+
+from six.moves import cPickle as pickle
 
 import os, errno
 import shutil
-import cPickle
+
 import MDAnalysis as mda
 
 try:
@@ -227,7 +229,7 @@ class Simulation(Journalled):
         else:
             self.filename = filename
         with open(filename, 'wb') as f:
-            cPickle.dump(self, f, protocol=cPickle.HIGHEST_PROTOCOL)
+            pickle.dump(self, f, protocol=pickle.HIGHEST_PROTOCOL)
         logger.debug("Instance pickled to %(filename)r" % vars())
 
     def load(self, filename=None):
@@ -238,7 +240,7 @@ class Simulation(Journalled):
                 logger.warning("No filename known, trying name %r", self.filename)
             filename = self.filename
         with open(filename, 'rb') as f:
-            instance = cPickle.load(f)
+            instance = pickle.load(f)
         self.__dict__.update(instance.__dict__)
         logger.debug("Instance loaded from %(filename)r" % vars())
 
@@ -273,8 +275,8 @@ class Simulation(Journalled):
                 self.mdp[key] = fn.replace(basedir, prefix)
             except AttributeError:
                 pass
-        logger.warn("make_paths_relative(): check/manually adjust %s.dirs.includes = %r !",
-                    self.__class__.__name__, self.dirs.includes)
+        logger.warning("make_paths_relative(): check/manually adjust %s.dirs.includes = %r !",
+                       self.__class__.__name__, self.dirs.includes)
 
     def topology(self, itp='drug.itp', prm=None, **kwargs):
         """Generate a topology for compound *molecule*.
@@ -305,7 +307,7 @@ class Simulation(Journalled):
         itp = os.path.realpath(itp)
         _itp = os.path.basename(itp)
 
-        if prm==None:
+        if prm is None:
             prm_kw = ''
         else:
             prm = os.path.realpath(prm)
@@ -466,8 +468,8 @@ class Simulation(Journalled):
         # so instead of fuffing with GMXLIB we just dump it into the directory
         try:
             shutil.copy(config.topfiles['residuetypes.dat'], self.dirs[protocol])
-        except:
-            logger.warn("Failed to copy 'residuetypes.dat': mdrun will likely fail to write a final structure")
+        except IOError:
+            logger.warning("Failed to copy 'residuetypes.dat': mdrun will likely fail to write a final structure")
 
         self.journal.completed(protocol)
         return params

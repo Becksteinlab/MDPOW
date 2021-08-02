@@ -9,6 +9,7 @@ error. A quick way to find problems is to do a ::
   cat status.txt | gawk -F '|' '$2 !~ /OK/ {print $0}'
 
 """
+from __future__ import absolute_import, print_function, division
 
 import logging
 logger = logging.getLogger('mdpow')
@@ -28,7 +29,7 @@ if __name__ == "__main__":
                       metavar="FILE")
     parser.set_defaults(outfile="status.txt")
     opts,args = parser.parse_args()
-    
+
     logger.info("Writing status to %r", opts.outfile)
 
     # dir status type comment
@@ -36,7 +37,7 @@ if __name__ == "__main__":
     with open(opts.outfile, 'w') as status:
         def swrite(*args):
             all_args = tuple([directory] + list(args))
-            status.write(fmt % all_args) 
+            status.write(fmt % all_args)
             sys.stderr.write(fmt % all_args)
         for directory in args:
             score = 0
@@ -47,13 +48,13 @@ if __name__ == "__main__":
             # directory itself
             if not os.path.exists(directory):
                 swrite("NOTFOUND", "directory", "not found")
-                logger.warn("Directory %r not found, skipping...", directory)
+                logger.warning("Directory %r not found, skipping...", directory)
                 continue
 
             # output from simulations
             solvents = ('water', 'octanol')
             nmin_fepsims = {'Coulomb':5, 'VDW':16}
-            for solvent in solvents: 
+            for solvent in solvents:
                 for feptype,nmin in nmin_fepsims.items():
                     xvg = os.path.join(
                         directory, 'FEP', solvent,
@@ -76,7 +77,7 @@ if __name__ == "__main__":
                     swrite("OK", "pickle", fn)
                 else:
                     swrite("NOTFOUND", "pickle", picklefile)
-            
+
             # combined graph from mdpow-pow
             graphs = glob(os.path.join(directory, 'dVdl_*.*'))
             if len(graphs) > 0:
