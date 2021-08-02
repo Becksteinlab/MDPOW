@@ -261,14 +261,14 @@ class EnsembleAnalysis(object):
     def _setup_system(self, key, start=None, stop=None, step=None):
         self._system = self._ensemble[key]
         self._key = key
-        self._setup_frames(self._system.trajectory, start=start, stop=stop, step=step)
-
-    def _setup_frames(self, trajectory, start=None, stop=None, step=None):
-        self._trajectory = trajectory
-        stop, start, step = trajectory.check_slice_indices(start, stop, step)
         self.start = start
         self.stop = stop
         self.step = step
+        self._setup_frames(self._system.trajectory)
+
+    def _setup_frames(self, trajectory):
+        self._trajectory = trajectory
+        start, stop, step = trajectory.check_slice_indices(self.start, self.stop, self.step)
         self.n_frames = len(range(start, stop, step))
         self.frames = np.zeros(self.n_frames, dtype=int)
         self.times = np.zeros(self.n_frames)
@@ -332,7 +332,6 @@ class EnsembleAnalysis(object):
                         self._ts = ts
                         self.frames[i] = ts.frame
                         self.times[i] = ts.time
-                        self._conclude_universe()
                         self._single_frame()
                     self._conclude_universe()
                     logger.info("Moving to next universe")
