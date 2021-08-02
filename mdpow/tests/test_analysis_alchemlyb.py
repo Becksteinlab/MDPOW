@@ -76,7 +76,6 @@ class TestAnalyze(object):
             G = pickle.load(gsolv.open())
         G.basedir = pth.strpath
         G.filename = gsolv.strpath
-
         return G
 
     @pytest.mark.parametrize('method, Gibbs, coulomb, vdw', [
