@@ -12,6 +12,7 @@ from gromacs.utilities import in_dir
 import MDAnalysis as mda
 from MDAnalysis.analysis.dihedrals import calc_dihedrals
 from MDAnalysis.analysis.base import AnalysisBase
+from MDAnalysis.lib.log import ProgressBar
 from MDAnalysis.exceptions import FileFormatWarning, NoDataError, MissingDataWarning, SelectionError
 import numpy as np
 import pandas as pd
@@ -19,6 +20,7 @@ import pandas as pd
 import six
 
 import logging
+
 logger = logging.getLogger('mdpow.analysis')
 
 
@@ -40,6 +42,7 @@ class Ensemble(object):
         ens = Ensemble(dirname='molecule')
 
     """
+
     def __init__(self, dirname=None, solvents=['octanol', 'water'], **kwargs):
         """
 
@@ -143,8 +146,9 @@ class Ensemble(object):
     def add_system(self, key, topology=None, trajectory=None, universe=None):
         if not universe is None:
             self.ensemble[key] = universe
-        elif (topology is None or trajectory is None) or \
-                (os.path.exists(trajectory) and os.path.exists(topology)):
+        elif topology is None or trajectory is None:
+            logger.error("%s does not exist" % trajectory)
+        elif not os.path.exists(trajectory) and not os.path.exists(topology):
             logger.error("%s does not exist" % trajectory)
         else:
             self.ensemble[key] = mda.Universe(topology, trajectory)
@@ -171,15 +175,17 @@ class Ensemble(object):
             except SelectionError as err:
                 logger.warning("%s on system %r" % (err, key))
                 continue
-        return EnsembleAtomGroup(selections)
+        return EnsembleAtomGroup(selections, Ensemble_dir=self.ensemble_dir)
 
 
 class EnsembleAtomGroup(object):
     """Group for storing AtomGroups from Ensemble.select_atoms"""
-    def __init__(self, group_dict=None):
+
+    def __init__(self, group_dict=None, Ensemble_dir=None):
         self.groups = group_dict
+        self.ens_dir = Ensemble_dir
         if isinstance(group_dict, dict):
-            self.keys = group_dict.keys
+            self.keys = group_dict.keys()
         else:
             self.keys = None
 
@@ -234,7 +240,7 @@ class EnsembleAtomGroup(object):
         return EnsembleAtomGroup(selections)
 
     def ensemble(self):
-        ens = Ensemble()
+        ens = Ensemble(dirname=self.ens_dir)
         for k in self.group_keys():
             ens.add_system(k, universe=self[k].universe)
         return ens
@@ -248,13 +254,14 @@ class EnsembleAnalysis(object):
     and is a template for creating multiuniverse
     multiframe analyses using the Ensemble object
     """
-    def __init__(self, ensemble=None, **kwargs):
+
+    def __init__(self, ensemble=None):
         self._ensemble = ensemble
 
     def _setup_system(self, key, start=None, stop=None, step=None):
         self._system = self._ensemble[key]
         self._key = key
-        self._setup_frames(self._system, start=start, stop=stop, step=step)
+        self._setup_frames(self._system.trajectory, start=start, stop=stop, step=step)
 
     def _setup_frames(self, trajectory, start=None, stop=None, step=None):
         self._trajectory = trajectory
@@ -313,21 +320,24 @@ class EnsembleAnalysis(object):
         """
         logger.info("Setting up systems")
         self._prepare_ensemble()
-        for key in self._ensemble.group_keys():
-            self._setup_system(key, start=start, stop=stop, step=step)
-            self._prepare_universe()
-            self._single_universe()
-            for ts, i in self._trajectory[start:stop:step], range(start, stop, step):
-                self._frame_index = i
-                self._ts = ts
-                self.frames[i] = ts.frame
-                self.times[i] = ts.time
-                self._conclude_universe()
-                self._single_frame()
-            self._conclude_universe()
-            logger.info("Moving to next universe")
-        logger.info("Finishing up")
-        self._conclude_ensemble()
+        with in_dir(os.path.join(self._sel.ens_dir, 'FEP'), create=False):
+            for self._key in self._ensemble.get_keys():
+                with in_dir(os.path.join(os.curdir, self._key[0], self._key[1], self._key[2]),
+                            create=False):
+                    self._setup_system(self._key, start=start, stop=stop, step=step)
+                    self._prepare_universe()
+                    self._single_universe()
+                    for i, ts in enumerate(ProgressBar(self._trajectory[self.start:self.stop:self.step], verbose=True)):
+                        self._frame_index = i
+                        self._ts = ts
+                        self.frames[i] = ts.frame
+                        self.times[i] = ts.time
+                        self._conclude_universe()
+                        self._single_frame()
+                    self._conclude_universe()
+                    logger.info("Moving to next universe")
+            logger.info("Finishing up")
+            self._conclude_ensemble()
         return self
 
 
