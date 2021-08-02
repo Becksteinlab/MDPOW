@@ -40,20 +40,30 @@ MD engine
 Calculations are performed with the Gromacs_ molecular dynamics (MD)
 software package [#GromacsWrapperFramework]_. MDPOW is tested with
 
-* Gromacs 4.6.x
-* Gromacs 5.1.x
-* Gromacs 2016.x
+* Gromacs 4.6.5
+* Gromacs 2018.6
+* Gromacs 2020.6
+* Gromacs 2021.1
 
+but versions 5.x, 2016.x, and 2019.x should also work.
 It should be possible to use any of these Gromacs versions without
 further adjustments, thanks to the underlying GromacsWrapper library
 [#GromacsWrapperFramework]_.
+
+Nevertheless, you should *always* check the topology and runinput
+(mdp) files for the version of Gromacs_ that you are using.
 
 
 Force fields
 ------------
 
-Currently, the *OPLS-AA force field* parameters are supported out of
-the box. In principle it is possible to add force fields sets by
+Currently
+
+* OPLS-AA
+* CHARMM/CGenFF
+* AMBER/GAFF
+
+are supported. In principle it is possible to add force fields sets by
 changing the :envvar:`GMXLIB` environment variable and providing
 appropriate template files but this is currently untested.
 
@@ -77,7 +87,46 @@ small molecule (e.g. from LigandBook_ or ParamChem_).
 
 
 
-.. Hide to use with alabaster
+Version information
+-------------------
+
+MDPOW uses `semantic versioning`_ with the release number consisting
+of a triplet *MAJOR.MINOR.PATCH*. *PATCH* releases are bug fixes or
+updates to docs or meta data only and do not introduce new features or
+change the API. Within a *MAJOR* release, the user API is stable
+except during the development cycles with MAJOR = 0 where the API may
+also change (rarely) between MINOR releases. *MINOR* releases can
+introduce new functionality or deprecate old ones.
+
+The version information can be accessed from the attribute
+:data:`mdpow.__version__`.
+      
+.. autodata:: mdpow.__version__
+
+.. _semantic versioning: https://semver.org	      
+
+Limitations and known issues
+----------------------------
+
+For current issues and open feature requests please look through the
+`MDPOW Issue Tracker`_. Some of the major open issues are:
+
+* GROMACS versions < 2021 can silently produce incorrect free energy estimates because exclusions
+  are not properly accounted for 
+  for solutes larger than the rlist cutoff when the ``couple-intramol = no`` decoupling is used
+  (as it is in all of MDPOW), see https://gitlab.com/gromacs/gromacs/-/issues/3403.
+  MDPOW does not detect this situation and does not offer a workaround (namely doing separate 
+  vacuum simulations and use ``couple-intramol = yes``). GROMACS 2021 at least fails when the
+  failure condition occurs (see https://gitlab.com/gromacs/gromacs/-/merge_requests/861).
+* Only free energy calculations of neutral solutes are supported; the workflow also does not 
+  include addition of ions (see issue `#97 <https://github.com/Becksteinlab/MDPOW/issues/97>`_).
+* Mixed solvents (octanol and water) are only supported with the included template topology files
+  for GROMACS >= 2018.
+* Adding new solvents requires modifying the MDPOW code; instead it should be configurable.
+
+
+
+.. Hide to use with RTD theme
 .. Contents:
 
 .. toctree::
@@ -92,7 +141,6 @@ small molecule (e.g. from LigandBook_ or ParamChem_).
    fep
    utilities
    forcefields
-   tables
 
 
 .. rubric:: Indices and tables

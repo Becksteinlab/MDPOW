@@ -45,8 +45,7 @@ directory
     folder in which the simulations were stored
 
 """
-
-from __future__ import with_statement
+from __future__ import absolute_import, print_function, division
 
 import os
 import mdpow.fep
@@ -224,7 +223,7 @@ if __name__ == "__main__":
     parser.add_argument('--plotfile', dest="plotfile", default='none',
                         help="plot dV/dlambda to FILE; use png or pdf suffix to "
                         "determine the file type. 'auto' generates a pdf file "
-                        "DIRECTORY/dVdl_<molname>_<solvent>.pdf and 'None' disables it. "
+                        "DIRECTORY/dVdl_<molname>_<solvent>.pdf and 'none' disables it. "
                         "The plot function is only available for mdpow estimator, "
                         "and is disabled when using alchemlyb estimators.",
                         metavar="FILE")
@@ -246,16 +245,17 @@ if __name__ == "__main__":
     parser.add_argument('--force', dest='force', default=False,
                         action="store_true",
                         help="force rereading all data ")
-    parser.add_argument('--SI', dest='SI',
-                        action="store_true", default=True,
-                        help="enable statistical inefficiency (SI) analysis. "
-                             "Statistical inefficiency analysis is performed by default when using "
-                             "alchemlyb estimators and is always disabled when using mdpow estimator.")
-    parser.add_argument('--no-SI', dest='SI',
-                        action="store_false", default=True,
-                        help="disable statistical inefficiency analysis. "
-                        "Statistical inefficiency analysis is performed by default when using "
-                        "alchemlyb estimators and is disabled when using mdpow estimator. ")
+    SIs = parser.add_mutually_exclusive_group()
+    SIs.add_argument('--SI', dest='SI',
+                     action="store_true", default=True,
+                     help="enable statistical inefficiency (SI) analysis. "
+                     "Statistical inefficiency analysis is performed by default when using "
+                     "alchemlyb estimators and is always disabled when using mdpow estimator.")
+    SIs.add_argument('--no-SI', dest='noSI',
+                     action="store_true", default=False,
+                     help="disable statistical inefficiency analysis. "
+                     "Statistical inefficiency analysis is performed by default when using "
+                     "alchemlyb estimators and is disabled when using mdpow estimator. ")
     parser.add_argument('-s', '--stride', dest="stride", type=int, default=1,
                         help="use every N-th datapoint from the original dV/dlambda data. ",
                         metavar="N")
@@ -275,13 +275,13 @@ if __name__ == "__main__":
         logger.fatal("Can only use --plotfile=None or --plotfile=auto with multiple directories.")
         sys.exit(1)
 
-    if opts.estimator == 'mdpow' and opts.SI:
+    if opts.estimator == 'mdpow' and opts.SI and not opts.noSI:
         logger.fatal("Statistical inefficiency analysis is only available for estimator 'alchemlyb'.")
         sys.exit(1)
 
     for directory in opts.directory:
         if not os.path.exists(directory):
-            logger.warn("Directory %r not found, skipping...", directory)
+            logger.warning("Directory %r not found, skipping...", directory)
             continue
         logger.info("Analyzing directory %r... (can take a while)", directory)
 
@@ -292,10 +292,10 @@ if __name__ == "__main__":
                       energyfile=realpath_or_none(opts.energyfile),
                       force=opts.force, stride=opts.stride, start=opts.start,
                       stop=opts.stop, estimator=opts.estimator,
-                      method=opts.method, permissive=opts.permissive, SI=opts.SI)
-        except (OSError, IOError), err:
+                      method=opts.method, permissive=opts.permissive, SI=opts.SI and not opts.noSI)
+        except (OSError, IOError) as err:
             logger.error("Running analysis in directory %r failed: %s", directory, str(err))
-        except Exception, err:
+        except Exception as err:
             logger.fatal("Running analysis in directory %r failed", directory)
             logger.exception("Catastrophic problem occurred, see the stack trace for hints.")
             raise

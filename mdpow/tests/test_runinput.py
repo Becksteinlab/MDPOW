@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import os.path
 
 import numpy as np
@@ -79,7 +81,7 @@ class TestAlteredConfig(object):
             'stepout': 12000,
             'verbose': False,
             'nice': 12,
-            'maxthreads': 3
+            'maxthreads': 1
             }
     }
 

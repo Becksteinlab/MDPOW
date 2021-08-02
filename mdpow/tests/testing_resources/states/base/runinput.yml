@@ -119,8 +119,6 @@ mdrun:
          # report progress verbosely (True is -v)
     nice: 19
          # nicel level
-    maxthreads: 3
+    maxthreads: None
          # maximum number of threads (-nt), 0 or None lets mdrun
          # automatically choose
-         # For testing on travis, needs to be either 3 or 1.
-         # See https://github.com/Becksteinlab/MDPOW/pull/77

@@ -1,4 +1,8 @@
+from __future__ import absolute_import
+
 import os.path
+import sys
+
 import pytest
 import py.path
 
@@ -9,6 +13,7 @@ from numpy.testing import assert_array_almost_equal
 
 from six.moves import cPickle as pickle
 
+import numkit
 import mdpow.fep
 
 from pkg_resources import resource_filename
@@ -41,7 +46,7 @@ def fix_manifest(topdir):
         m = pybol.Manifest(new_manifest.strpath)
 
     """
-    manifest = yaml.load(MANIFEST.open())
+    manifest = yaml.safe_load(MANIFEST.open())
     # simple heuristic: last element of the recorded manifest::path is the name
     # of the states directory, typically 'states' (from .../testing_resources/states)
     manifest['path'] = RESOURCES.join(os.path.basename(manifest['path'])).strpath
@@ -62,7 +67,12 @@ def fep_benzene_directory(tmpdir_factory):
 class TestAnalyze(object):
     def get_Gsolv(self, pth):
         gsolv = pth.join("FEP", "water", "Gsolv.fep")
-        G = pickle.load(gsolv.open())
+        if sys.version_info.major == 2:
+            G = pickle.load(gsolv.open())
+        elif sys.version_info.major == 3:
+            # Needed to read old pickle files
+            with open(gsolv, 'rb') as f:
+                G = pickle.load(f, encoding='latin1')
         # patch paths
         G.basedir = pth.strpath
         G.filename = gsolv.strpath
@@ -73,19 +83,19 @@ class TestAnalyze(object):
         DeltaA = G.results.DeltaA
         assert_array_almost_equal(DeltaA.Gibbs.astuple(),
                                   (-3.7217472974883794, 2.3144288928034911),
-                                  decimal=6)
+                                  decimal=5)  # with more recent versions of pandas/alchemlyb/numpy the original values are only reproduced to 5 decimals, see PR #166")
         assert_array_almost_equal(DeltaA.coulomb.astuple(),
                                   (8.3346255170099575, 0.73620918517131495),
-                                  decimal=6)
+                                  decimal=5)  # with more recent versions of pandas/alchemlyb/numpy the original values are only reproduced to 5 decimals, see PR #166")
         assert_array_almost_equal(DeltaA.vdw.astuple(),
                                   (-4.6128782195215781, 2.1942144688960972),
-                                  decimal=6)
-
+                                  decimal=5)  # with more recent versions of pandas/alchemlyb/numpy the original values are only reproduced to 5 decimals, see PR #166")
 
     def test_convert_edr(self, fep_benzene_directory):
         G = self.get_Gsolv(fep_benzene_directory)
         try:
-            G.analyze(force=True, autosave=False)
+            with pytest.warns(numkit.LowAccuracyWarning):
+                G.analyze(force=True, autosave=False)
         except IOError as err:
             raise AssertionError("Failed to auto-convert edr to xvg: {0}: {1}".format(
                 err.strerror, err.filename))
@@ -100,7 +110,8 @@ class TestAnalyze(object):
         # fep_benzene_directory locally scoped
         G.convert_edr()
         try:
-            G.analyze(force=True, autosave=False)
+            with pytest.warns(numkit.LowAccuracyWarning):
+                G.analyze(force=True, autosave=False)
         except IOError as err:
             raise AssertionError("Failed to convert edr to xvg: {0}: {1}".format(
                 err.strerror, err.filename))

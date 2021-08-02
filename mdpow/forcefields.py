@@ -1,16 +1,20 @@
+# -*- coding: utf-8 -*-
 # POW package __init__.py
 # Copyright (c) 2012 Oliver Beckstein <orbeckst@gmail.com>
 # Released under the GNU Public License 3 (or higher, your choice)
 # See the file COPYING for details.
 
 """
-Configuration settings related to force fields
-==============================================
+Force field selection
+=====================
 
-At the moment, only the OPLS-AA force field is directly supported
-(although in the principle it is possible to switch to a different
-force field by supplying alternative template files). However, in the
-future we want to support a simple configuration based switch.
+The :mod:`mdpow.forcefields` module contains settings for selecting
+different force fields and the corresponding solvent topologies.
+
+The OPLS-AA, CHARMM/CGENFF and the AMBER/GAFF force field are directly
+supported. In the principle it is possible to switch to a
+different force field by supplying alternative template
+files.
 
 .. autodata:: DEFAULT_FORCEFIELD
 .. autodata:: DEFAULT_WATER_MODEL
@@ -46,6 +50,7 @@ Internal classes and functions
 .. autofunction:: get_solvent_identifier
 
 .. autofunction:: get_solvent_model
+
 """
 
 from __future__ import absolute_import
@@ -55,7 +60,6 @@ from collections import defaultdict
 
 import logging
 logger = logging.getLogger("mdpow.forecefields")
-
 
 #: Default force field. At the moment, only OPLS-AA is directly
 #: supported.
@@ -146,7 +150,7 @@ def get_water_model(watermodel=DEFAULT_WATER_MODEL):
 
 #: Other solvents (not water, see :data:`GROMACS_WATER_MODELS` for those).
 new_octanol = '''Zangi R (2018) Refinement of the OPLSAA force-field
-                for liquid alcohols.; ACS Omega 3(12):18089–18099.
+                for liquid alcohols.; ACS Omega 3(12):18089-18099.
                 doi: 10.1021/acsomega.8b03132'''
 
 OPLS_SOLVENT_MODELS = {
@@ -182,6 +186,8 @@ AMBER_SOLVENT_MODELS = {
         identifier="cyclohexane", itp="1cyclo.itp", coordinates="1cyclo_amber.gro"),
     }
 
+#: Solvents available in GROMACS; the keys of the dictionary
+#: are the forcefields.
 GROMACS_SOLVENT_MODELS = {
     'OPLS-AA': OPLS_SOLVENT_MODELS,
     'CHARMM': CHARMM_SOLVENT_MODELS,
@@ -213,7 +219,7 @@ def get_solvent_identifier(solvent_type, model=None, forcefield='OPLS-AA'):
     :Returns: Either an identifier or ``None``
 
     """
-    if solvent_type is "water":
+    if solvent_type == "water":
         identifier = model if not model in (None, 'water') else DEFAULT_WATER_MODEL
         return identifier if identifier in GROMACS_WATER_MODELS else None
     if not model in GROMACS_SOLVENT_MODELS[forcefield]:
@@ -230,7 +236,7 @@ def get_solvent_model(identifier, forcefield='OPLS-AA'):
     If identifier is "water" then the :data:`DEFAULT_WATER_MODEL` is assumed.
     """
 
-    if identifier is "water":
+    if identifier == "water":
         identifier = DEFAULT_WATER_MODEL
     try:
         return GROMACS_WATER_MODELS[identifier]
@@ -264,6 +270,7 @@ def get_ff_paths(forcefield='OPLS-AA'):
 
 
 def get_top_template(identifier):
+    """Return the topology file template suitable for the solvent model."""
     templates = {'water': 'system.top', 'octanol': 'system.top',
                  'cyclohexane': 'system.top', 'wetoctanol': 'system_octwet.top'}
     try:

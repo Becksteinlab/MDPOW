@@ -26,7 +26,7 @@ recipe, please share it in the comments. ;)
 
 """
 
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 
 import os
 import time
@@ -62,7 +62,7 @@ class FileLock(object):
         while True:
             try:
                 self.fd = os.open(self.lockfile, os.O_CREAT|os.O_EXCL|os.O_RDWR)
-                break;
+                break
             except OSError as e:
                 if e.errno != errno.EEXIST:
                     raise

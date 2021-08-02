@@ -7,6 +7,7 @@ equilibrium simulation file under <DIRECTORY>/FEP.
 (This should only be necessary when the fep file was destroyed due to
 a software error.)
 """
+from __future__ import absolute_import, print_function, division
 
 import os
 import mdpow.equil
@@ -30,8 +31,8 @@ def fixFEP(solvent, fepfile, simfile, basedir):
         G = Gsolv[solvent](simulation=S, basedir=basedir, permissive=True)
     except Exception as err:
         logger.error(str(err))
-        logger.warn("Could not get the simulation pickle file %(simfile)r", vars())
-        logger.warn("The FEP pickle file will be fixed as it is (no path adjustments)")
+        logger.warning("Could not get the simulation pickle file %(simfile)r", vars())
+        logger.warning("The FEP pickle file will be fixed as it is (no path adjustments)")
         G = Gsolv[solvent](filename=fepfile)
 
     # remove pre-0.2 standard-state correction (wrong!) and pdV (wrong)
@@ -96,7 +97,7 @@ if __name__ == "__main__":
             logger.debug("%r is not a directory, skipping!", directory)
             continue
         if not os.path.exists(directory):
-            logger.warn("Directory %r not found, skipping!", directory)
+            logger.warning("Directory %r not found, skipping!", directory)
             continue
         logger.info("Rebuilding under directory %r... (can take a while)", directory)
         with in_dir(directory, create=False):

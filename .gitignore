@@ -1,6 +1,8 @@
+*~
 #*
 .#*
 *.pyc
+__pycache__
 *.log
 *.egg-info
 .eggs
@@ -8,3 +10,5 @@
 build
 dist
 doc/examples/benzene/Equilibrium/
+.coverage
+coverage.xml

@@ -21,6 +21,7 @@ You will require:
 # TODO:
 #
 #  2) Default config file in user's home dir.
+from __future__ import absolute_import, print_function, division
 
 from mdpow.run import equilibrium_simulation
 from mdpow.config import get_configuration

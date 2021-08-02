@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import os.path
 
 import pytest
@@ -42,33 +44,15 @@ class TestIncludedSolvents(object):
         },
     }
 
-    # using nosetest-style test generators.. .feel free to rewrite for
-    # py.test but I found the docs for parameterizing tests in py.test
-    # too complicated
-
-    def _test_solvent(self, name):
-        solvent = self.solvents[name]
-        def _assert_has_filename(filename):
+    @pytest.mark.parametrize("solvent_name", ["tip4p", "octanol", "cyclohexane"])
+    def test_solvent(self, solvent_name):
+        solvent = self.solvents[solvent_name]
+        for filename, path in solvent.items():
             assert filename in mdpow.config.topfiles
-        def _assert_correct_path(filename, path):
             assert mdpow.config.topfiles[filename].endswith(path)
 
-        for filename, path in solvent:
-            yield _assert_has_filename, filename
-            yield _assert_correct_path, filename, path
-
-    def test_tip4p(self):
-        self._test_solvent('tip4p')
-
-    def test_octanol(self):
-        self._test_solvent('octanol')
-
-    def test_cyclohexane(self):
-        self._test_solvent('cyclohexane')
 
 class TestWatermodels(object):
-    watermodels = WATERMODELS
-
     @staticmethod
     def test_default_water_model():
         assert mdpow.forcefields.DEFAULT_WATER_MODEL == "tip4p"
@@ -79,21 +63,16 @@ class TestWatermodels(object):
                              self._simple_line_parser(included_watermodels)):
             assert line.strip() == ref.strip()
 
-    def test_gromacs_water_models(self):
+    @pytest.mark.parametrize('identifier', WATERMODELS)
+    def test_gromacs_water_models(self, identifier):
         models = mdpow.forcefields.GROMACS_WATER_MODELS
-        def has_identifier(identifier):
-            assert identifier in models
-        def itp_in_top(identifier):
-            model = models[identifier]
-            assert model.itp in mdpow.config.topfiles
-        def coordinates_in_top(identifier):
-            model = models[identifier]
-            assert model.coordinates in mdpow.config.topfiles
 
-        for identifier in self.watermodels:
-            yield has_identifier, identifier
-            yield itp_in_top, identifier
-            yield coordinates_in_top, identifier
+        assert identifier in models
+
+        model = models[identifier]
+        assert model.itp in mdpow.config.topfiles
+        assert model.coordinates in mdpow.config.topfiles
+
 
     @staticmethod
     def _simple_line_parser(string):
@@ -114,11 +93,7 @@ class TestWatermodels(object):
         with pytest.raises(ValueError):
             mdpow.forcefields.get_water_model("The Jabberwock is an imaginary beast.")
 
-
 class TestSolventModels(object):
-    watermodels = WATERMODELS
-    solventmodels = [model for model in SOLVENTMODELS if model != "water"]
-
     @staticmethod
     def test_get_solvent_default_water():
         model = "water"
@@ -139,15 +114,13 @@ class TestSolventModels(object):
                 mdpow.forcefields.GROMACS_SOLVENT_MODELS[forcefield][model])
 
     @pytest.mark.parametrize("forcefield", ['OPLS-AA', 'CHARMM', 'AMBER'])
-    @staticmethod
-    def test_get_solvent_octanol(forcefield):
+    def test_get_solvent_octanol(self, forcefield):
         model = 'octanol'
         assert (mdpow.forcefields.get_solvent_model(model, forcefield=forcefield) is
                 mdpow.forcefields.GROMACS_SOLVENT_MODELS[forcefield][model])
 
     @pytest.mark.parametrize("forcefield", ['OPLS-AA', 'CHARMM', 'AMBER'])
-    @staticmethod
-    def test_get_solvent_wetoctanol(forcefield):
+    def test_get_solvent_wetoctanol(self, forcefield):
         model = 'wetoctanol'
         assert (mdpow.forcefields.get_solvent_model(model, forcefield=forcefield) is
                 mdpow.forcefields.GROMACS_SOLVENT_MODELS[forcefield][model])
@@ -157,23 +130,16 @@ class TestSolventModels(object):
         assert (mdpow.forcefields.get_solvent_identifier('water') is
                 mdpow.forcefields.DEFAULT_WATER_MODEL)
 
-    def test_get_solvent_identifier_water(self):
-        def _assert_model(model):
-            assert mdpow.forcefields.get_solvent_identifier('water', model=model) is model
+    @pytest.mark.parametrize("model", WATERMODELS)
+    def test_get_solvent_identifier_water(self, model):
+        assert mdpow.forcefields.get_solvent_identifier('water', model=model) is model
 
-        for model in self.watermodels:
-            yield _assert_model, model
-
-    def test_get_solvent_identifier_solvents(self):
-        def _assert_model(solvent, model):
-            assert mdpow.forcefields.get_solvent_identifier(solvent, model=model) is solvent
-
-        for solvent in self.solventmodels:
-            yield _assert_model, solvent, None
-
-        # make sure that model is ignored
-        for solvent in self.solventmodels:
-            yield _assert_model, solvent, "Jabberwock model"
+    @pytest.mark.parametrize('solvent',
+                             [model for model in SOLVENTMODELS if model != "water"])
+    @pytest.mark.parametrize('model', [None, "Jabberwock model"])
+    def test_get_solvent_identifier_solvents(self, solvent, model):
+        # The model="Jabberwock model" checks that "model" is properly ignored.
+        assert mdpow.forcefields.get_solvent_identifier(solvent, model=model) is solvent
 
     @staticmethod
     def test_get_solvent_identifier_None():
