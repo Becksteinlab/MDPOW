@@ -2,9 +2,9 @@
 # Copyright (c) 2010 Oliver Beckstein <orbeckst@gmail.com>
 # Released under the GNU Public License 3 (or higher, your choice)
 # See the file COPYING for details.
-import log
+import mdpow.log as log
 
-from _version import get_versions
+from mdpow._version import get_versions
 __version__ = get_versions()['version']
 del get_versions
 

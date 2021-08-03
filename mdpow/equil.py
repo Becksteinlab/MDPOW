@@ -42,9 +42,9 @@ except (ImportError, OSError):
 from gromacs.utilities import in_dir, realpath, asiterable, AttributeDict
 import gromacs.utilities
 
-import config
-import forcefields
-from restart import Journalled
+import mdpow.config as config
+import mdpow.forcefields as forcefields
+from mdpow.restart import Journalled
 
 import logging
 logger = logging.getLogger('mdpow.equil')
@@ -226,7 +226,7 @@ class Simulation(Journalled):
         else:
             self.filename = filename
         with open(filename, 'wb') as f:
-            pickle.dump(self, f, protocol=pickle.HIGHEST_PROTOCOL)
+            pickle.dump(self, f)
         logger.debug("Instance pickled to %(filename)r" % vars())
 
     def load(self, filename=None):

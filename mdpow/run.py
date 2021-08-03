@@ -44,10 +44,10 @@ import errno
 
 import gromacs.run
 
-from config import get_configuration, set_gromacsoutput
-import equil
-import fep
-from restart import checkpoint
+from mdpow.config import get_configuration, set_gromacsoutput
+import mdpow.equil as equil
+import mdpow.fep as fep
+from mdpow.restart import checkpoint
 
 import logging
 logger = logging.getLogger('mdpow.run')
