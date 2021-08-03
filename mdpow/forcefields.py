@@ -52,9 +52,6 @@ Internal classes and functions
 .. autofunction:: get_solvent_model
 
 """
-
-from __future__ import absolute_import
-
 import os
 from collections import defaultdict
 

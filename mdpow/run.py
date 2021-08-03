@@ -36,10 +36,7 @@ Support
 .. autofunction:: runMD_or_exit
 
 """
-
-from __future__ import absolute_import
-
-from six.moves import configparser
+import configparser
 
 import sys
 import os
@@ -47,10 +44,10 @@ import errno
 
 import gromacs.run
 
-from .config import get_configuration, set_gromacsoutput
-from . import equil
-from . import fep
-from .restart import checkpoint
+from config import get_configuration, set_gromacsoutput
+import equil
+import fep
+from restart import checkpoint
 
 import logging
 logger = logging.getLogger('mdpow.run')

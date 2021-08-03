@@ -131,11 +131,9 @@ TODO
   See `Free Energy Tutorial`_.
 
 """
-from __future__ import absolute_import, division
-
 import six
 from six.moves import zip
-from six.moves.configparser import NoOptionError
+from configparser import NoOptionError
 
 import os
 import errno
@@ -170,9 +168,9 @@ from gromacs.utilities import asiterable, AttributeDict, in_dir, openany
 import logging
 logger = logging.getLogger('mdpow.fep')
 
-from . import config
-from .restart import Journalled
-from . import kBOLTZ, N_AVOGADRO
+import config
+from restart import Journalled
+from __init__ import kBOLTZ, N_AVOGADRO
 
 def molar_to_nm3(c):
     """Convert a concentration in Molar to nm|^-3|."""

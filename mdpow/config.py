@@ -89,11 +89,6 @@ Gromacs force field files are ok).
 .. autofunction:: _generate_template_dict
 
 """
-
-from __future__ import absolute_import, division
-
-import six
-
 import os, errno
 from pkg_resources import resource_filename, resource_listdir
 import yaml
@@ -346,7 +341,7 @@ def _get_template(t):
 
 def iterable(obj):
     """Returns ``True`` if *obj* can be iterated over and is *not* a  string."""
-    if isinstance(obj, six.string_types):
+    if isinstance(obj, str):
         return False  # avoid iterating over characters of a string
 
     if hasattr(obj, 'next'):

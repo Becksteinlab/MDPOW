@@ -28,10 +28,7 @@ model.
 
 .. autodata:: DIST
 """
-
-from __future__ import absolute_import, division
-
-from six.moves import cPickle as pickle
+import _pickle as pickle
 
 import os, errno
 import shutil
@@ -45,9 +42,9 @@ except (ImportError, OSError):
 from gromacs.utilities import in_dir, realpath, asiterable, AttributeDict
 import gromacs.utilities
 
-from . import config
-from . import forcefields
-from .restart import Journalled
+import config
+import forcefields
+from restart import Journalled
 
 import logging
 logger = logging.getLogger('mdpow.equil')
