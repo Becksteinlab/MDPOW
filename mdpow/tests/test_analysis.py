@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import os.path
 import sys
 
@@ -11,10 +9,9 @@ import pybol
 
 from numpy.testing import assert_array_almost_equal
 
-from six.moves import cPickle as pickle
+import _pickle as pickle
 
 import numkit
-import mdpow.fep
 
 from pkg_resources import resource_filename
 RESOURCES = py.path.local(resource_filename(__name__, 'testing_resources'))
@@ -67,12 +64,8 @@ def fep_benzene_directory(tmpdir_factory):
 class TestAnalyze(object):
     def get_Gsolv(self, pth):
         gsolv = pth.join("FEP", "water", "Gsolv.fep")
-        if sys.version_info.major == 2:
-            G = pickle.load(gsolv.open())
-        elif sys.version_info.major == 3:
-            # Needed to read old pickle files
-            with open(gsolv, 'rb') as f:
-                G = pickle.load(f, encoding='latin1')
+        with open(gsolv, 'rb') as f:
+            G = pickle.load(f, encoding='latin1')
         # patch paths
         G.basedir = pth.strpath
         G.filename = gsolv.strpath

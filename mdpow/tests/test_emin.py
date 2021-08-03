@@ -1,4 +1,4 @@
-import tempdir as td
+import mdpow.tests.tempdir as td
 
 import mdpow.equil
 import os
