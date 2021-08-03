@@ -1,6 +1,4 @@
-from __future__ import absolute_import
-
-from . import tempdir as td
+import tempdir as td
 
 import os
 import pybol

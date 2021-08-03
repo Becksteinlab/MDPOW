@@ -1,8 +1,3 @@
-from __future__ import absolute_import
-
-import sys
-from six.moves import reload_module
-
 import pytest
 
 import numpy as np
