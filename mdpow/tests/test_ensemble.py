@@ -11,9 +11,7 @@ import py.path
 import yaml
 import pybol
 
-from six.moves import cPickle as pickle
-
-from mdpow.ensemble import Ensemble
+from mdpow.ensemble import Ensemble, EnsembleAnalysis
 import mdpow.fep
 from gromacs.utilities import in_dir
 
@@ -71,6 +69,7 @@ class TestEnsemble(object):
             bnz.add_system(('water', 'VDW', '0000'), topology=top_dir, trajectory=trj_dir)
             assert bnz.get_keys() == [('water', 'VDW', '0000')]
             assert bnz.num_systems == 1
+            assert bnz.__repr__() == "<Ensemble Containing 1 System>"
             assert len(bnz) == 1
             bnz.pop_system(('water', 'VDW', '0000'))
             assert bnz.num_systems == 0
@@ -80,5 +79,34 @@ class TestEnsemble(object):
         with in_dir(os.path.join(self.resources, 'states'), create=False):
             bnz = Ensemble(dirname='benzene', solvents=['water'])
             solute = bnz.select_atoms('not resname SOL')
-            for k in solute.keys():
+            for k in solute.group_keys():
                 assert len(solute[k]) == 12
+
+    def test_eq_positions(self):
+        with in_dir(os.path.join(self.resources, 'states'), create=False):
+            BW = Ensemble(dirname='benzene', solvents=['water'])
+            BO = Ensemble(dirname='benzene', solvents=['octanol'])
+            Sol1 = BW.select_atoms('resname SOL')
+            Sol2 = BO.select_atoms('resname SOL')
+        assert not Sol1 == Sol2
+
+    def test_ensemble_analysis(self):
+        class TestAnalysis(EnsembleAnalysis):
+            def __init__(self, Ensemble):
+                super(TestAnalysis, self).__init__(Ensemble)
+
+                self._ens = Ensemble
+
+            def _prepare_ensemble(self):
+                self.key_list = []
+
+            def _single_universe(self):
+                self.key_list.append(self._key)
+
+            def _conclude_universe(self):
+                assert self.n_frames == self.stop
+
+        with in_dir(os.path.join(self.resources, 'states'), create=False):
+            BNZ = Ensemble(dirname='benzene', solvents=['water'])
+            TestRun = TestAnalysis(BNZ).run(start=0, step=1, stop=10)
+            assert BNZ.get_keys() == TestRun.key_list
