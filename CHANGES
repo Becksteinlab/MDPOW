@@ -6,8 +6,8 @@ Add summary of changes for each release. Use ISO dates. Reference
 GitHub issues numbers and PR numbers.
 
 
-2021-xx-xx    0.7.1
-orbeckst
+2021-08-04    0.7.1
+orbeckst, iorga
 
 Fixes
 
@@ -19,6 +19,7 @@ Fixes
   error like "results.DeltaA does not contain 'Gibbs'") (PR #185)
 * ensure that pickle files created under Python 2 are also readable under
   Python 3  
+* documentation fixes (PR #176)
 
 
 2021-08-02    0.7.0
