@@ -183,7 +183,7 @@ if __name__ == "__main__":
     parser.add_option('-p', '--plotfile', dest="plotfile",
                       help="plot dV/dlambda to FILE; use png or pdf suffix to "
                       "determine the file type. 'auto' generates a pdf file "
-                      "DIRECTORY/dVdl_<molname>_<solvent>.pdf and 'None' disables it [%default]",
+                      "DIRECTORY/dVdl_<molname>_<solvent>.pdf and 'none' disables it [%default]",
                       metavar="FILE")
     parser.add_option('-e', '--energies', dest="energyfile",
                       help="append solvation free energies to FILE [%default]",
