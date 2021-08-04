@@ -2,6 +2,7 @@
 # Copyright (c) 2010 Oliver Beckstein <orbeckst@gmail.com>
 # Released under the GNU Public License 3 (or higher, your choice)
 
+import sys
 from setuptools import setup, find_packages
 import versioneer
 
@@ -57,7 +58,7 @@ setup(name="MDPOW",
                         'numkit',
                         'six',
                         'mdanalysis',
-                        'alchemlyb',
+                        'alchemlyb' if sys.version_info.major > 2 else 'alchemlyb<0.5.0',
                         'pandas',
                         'pymbar',
       ],
