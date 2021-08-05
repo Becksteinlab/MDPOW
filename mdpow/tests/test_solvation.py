@@ -1,16 +1,16 @@
 import os
 import shutil
 
-import mdpow.equil
+from .. import equil
 from gromacs.utilities import in_dir
 import gromacs
 
 import pytest
 
-sims = {"water" : mdpow.equil.WaterSimulation,
-        "octanol" : mdpow.equil.OctanolSimulation,
-        "cyclohexane" : mdpow.equil.CyclohexaneSimulation,
-        "wetoctanol" : mdpow.equil.WetOctanolSimulation,
+sims = {"water" : equil.WaterSimulation,
+        "octanol" : equil.OctanolSimulation,
+        "cyclohexane" : equil.CyclohexaneSimulation,
+        "wetoctanol" : equil.WetOctanolSimulation,
         }
 
 test_file = {"OPLS-AA": 'benzene.itp',

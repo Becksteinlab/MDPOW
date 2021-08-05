@@ -1,6 +1,6 @@
 import mdpow.tests.tempdir as td
 
-import mdpow.equil
+from .. import equil
 import os
 
 class TestEnergyMinimization(object):

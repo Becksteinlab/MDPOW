@@ -6,9 +6,9 @@ import pybol
 import gromacs
 
 import mdpow
-from mdpow.equil import Simulation
-from mdpow.run import fep_simulation
-from mdpow.config import get_configuration
+from ..equil import Simulation
+from ..run import fep_simulation
+from ..config import get_configuration
 
 class TestFEPScript(object):
     def setup(self):
