@@ -107,7 +107,8 @@ pygments_style = 'sphinx'
 html_theme = 'sphinx_rtd_theme'
 
 html_theme_options = {
-    'logo_only': False,
+    'canonical_url': '',
+    #'logo_only': True,
     'display_version': True,
     'prev_next_buttons_location': 'bottom',
     'style_external_links': False,
@@ -136,12 +137,12 @@ html_theme_path = [
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = "_static/mdpow-logo.png"
+#html_logo = None
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
-html_favicon = "_static/mdpow.ico"
+#html_favicon = None
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -228,7 +229,7 @@ latex_documents = [
 intersphinx_mapping = {'https://docs.python.org/': None,
                        'https://numpy.org/doc/stable/': None,
                        'https://docs.scipy.org/doc/scipy/reference/': None,
-                       'https://gromacswrapper.readthedocs.io/en/latest': None,
+                       'https://gromacswrapper.readthedocs.org/en/latest/': None,
                    }
 
 

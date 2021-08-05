@@ -50,7 +50,7 @@ It should be possible to use any of these Gromacs versions without
 further adjustments, thanks to the underlying GromacsWrapper library
 [#GromacsWrapperFramework]_.
 
-Nevertheless, you should *always* check the topology and runinput
+Nevertheless, you should _always_ check the topology and runinput
 (mdp) files for the version of Gromacs_ that you are using.
 
 
@@ -141,6 +141,7 @@ For current issues and open feature requests please look through the
    fep
    utilities
    forcefields
+   tables
 
 
 .. rubric:: Indices and tables
