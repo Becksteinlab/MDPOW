@@ -249,9 +249,11 @@ class EnsembleAtomGroup(object):
         return len(self.group_keys())
 
     def group_keys(self):
+        """List of keys to specific atom groups in the system"""
         return self.keys
 
     def positions(self, keys=[None]):
+        """Returns the positions of the keys of the selected atoms."""
         positions = {}
         if not keys is None:
             for k in keys:
@@ -280,6 +282,7 @@ class EnsembleAtomGroup(object):
         return EnsembleAtomGroup(selections)
 
     def ensemble(self):
+        """Returns the ensemble of the EnsembleAtomGroup"""
         ens = Ensemble(dirname=self.ens_dir)
         for k in self.group_keys():
             ens.add_system(k, universe=self[k].universe)
@@ -293,6 +296,43 @@ class EnsembleAnalysis(object):
     class in MDAnalysis https://docs.mdanalysis.org
     and is a template for creating multiuniverse
     multiframe analyses using the Ensemble object
+
+    Typical workflow::
+
+        class DihedralAnalysis(mdpow.ensemble.EnsembleAnalysis):
+            def __init__(self, DihedralEnsembleGroup):
+                super(DihedralAnalysis, self).__init__(DihedralEnsembleGroup.ensemble())
+
+                self._sel = DihedralEnsembleGroup
+
+            def _prepare_ensemble(self):
+                self.result_dict = {}
+                for s in ['water', 'octanol']:
+                    self.result_dict[s] = {'Coulomb': {},
+                                           'VDW': {}}
+                for key in self._sel.group_keys():
+                    self.result_dict[key[0]][key[1]][key[2]] = None
+
+            def _prepare_universe(self):
+                self.angle_dict = {'angle': None,
+                                   'time': None}
+                self.angles = []
+
+            def _single_frame(self):
+                angle = calc_dihedrals(self._sel[self._key].positions[0], self._sel[self._key].positions[1],
+                                       self._sel[self._key].positions[2], self._sel[self._key].positions[3])
+                self.angles.append(angle)
+
+            def _conclude_universe(self):
+                self.angle_dict['time'] = self.times
+                self.angle_dict['angle'] = self.angles
+                self.result_dict[self._key[0]][self._key[1]][self._key[2]] = self.angle_dict
+
+            def _conclude_ensemble(self):
+                self.results = pd.DataFrame(data=self.result_dict)
+
+        DihedralAnalysis.run(start=0 stop=10, step=1)
+
     """
 
     def __init__(self, ensemble=None):

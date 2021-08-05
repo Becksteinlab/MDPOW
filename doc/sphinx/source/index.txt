@@ -141,6 +141,7 @@ For current issues and open feature requests please look through the
    fep
    utilities
    forcefields
+   analysis
 
 
 .. rubric:: Indices and tables
