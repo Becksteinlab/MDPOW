@@ -120,6 +120,7 @@ TODO
   See `Free Energy Tutorial`_.
 
 """
+import six
 from six.moves import zip
 from configparser import NoOptionError
 
