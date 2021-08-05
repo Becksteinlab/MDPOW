@@ -249,6 +249,10 @@ class Journalled(object):
 
         If no *filename* was supplied then the filename is taken from the
         attribute :attr:`~Journalled.filename`.
+
+        .. versionchanged:: 0.7.1
+           Can read pickle files with either Python 2.7 or 3.x, regardless of
+           the Python version that created the pickle.
         """
         if filename is None:
             try:
@@ -260,7 +264,15 @@ class Journalled(object):
                 errmsg = "Neither filename nor default filename provided to load from."
                 logger.error(errmsg)
                 raise ValueError(errmsg)
+
+        # Do not remove this code when dropping Py 2.7 support as it is needed to
+        # be able to read old data files with Python 3 MDPOW.
         with open(filename, 'rb') as f:
-            instance = pickle.load(f)
+            try:
+                instance = pickle.load(f)
+            except UnicodeDecodeError:
+                logger.debug("Reading old Python 2 Pickle file %(filename)r" % vars())
+                instance = pickle.load(f, encoding='latin1')
+
         self.__dict__.update(instance.__dict__)
         logger.debug("Instance loaded from %(filename)r" % vars())

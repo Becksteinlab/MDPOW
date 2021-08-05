@@ -132,7 +132,7 @@ def run_gsolv(solvent, directory, **kwargs):
         kwargs.setdefault('SI', gsolv.SI)
 
     # make sure that we have data
-    if kwargs['force'] or (not hasattr(gsolv.results.DeltaA, 'Gibbs')):
+    if kwargs['force'] or 'Gibbs' not in gsolv.results.DeltaA:
         logger.info("[%(directory)s] Forcing (re)analysis of hydration free energy data", vars())
         # write out the settings when the analysis is performed
         logger.info("Estimator is %s.", estimator)
