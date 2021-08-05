@@ -15,6 +15,10 @@ Fixes
   due to an unsatisfiable pandas dependency) (#180)
 * fix failure of mdpow-solvation script "AttributeError: 'AttributeDict' object
   has no attribute 'Gibbs'" (#180)
+* fix fep.p_transfer() only analyzing the second input Gsolv (would lead to an
+  error like "results.DeltaA does not contain 'Gibbs'") (PR #185)
+* ensure that pickle files created under Python 2 are also readable under
+  Python 3  
 
 
 2021-08-02    0.7.0

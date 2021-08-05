@@ -1,10 +1,8 @@
 from __future__ import absolute_import
 
 import os.path
-import sys
 
 import pytest
-import py.path
 
 import yaml
 import pybol
@@ -16,8 +14,8 @@ from six.moves import cPickle as pickle
 
 import mdpow.fep
 
-from pkg_resources import resource_filename
-RESOURCES = py.path.local(resource_filename(__name__, 'testing_resources'))
+from . import RESOURCES
+
 MANIFEST = RESOURCES.join("manifest.yml")
 
 def fix_manifest(topdir):
@@ -31,7 +29,7 @@ def fix_manifest(topdir):
     ---------
     topdir : py.path.local
         existing temporary directory (as provided by, for instance,
-        `pytest.tmpdir`)
+       `pytest.tmpdir`)
 
     Returns
     -------
@@ -67,16 +65,12 @@ def fep_benzene_directory(tmpdir_factory):
 class TestAnalyze(object):
     def get_Gsolv(self, pth):
         gsolv = pth.join("FEP", "water", "Gsolv.fep")
-        # Needed to load old pickle files in python 3
-        if sys.version_info.major >= 3:
-            with open(gsolv, 'rb') as f:
-                G = pickle.load(f, encoding='latin1')
-                # patch paths
-        elif sys.version_info.major == 2:
-            G = pickle.load(gsolv.open())
+        # Loading only works with magic code in restart.Journalled.load()
+        # so that Pickles produced with Python 2 can also be read with 3:
+        G = mdpow.fep.Ghyd(filename=gsolv.strpath)
+        # patch paths
         G.basedir = pth.strpath
         G.filename = gsolv.strpath
-
         return G
 
     @pytest.mark.parametrize('method, Gibbs, coulomb, vdw', [

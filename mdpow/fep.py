@@ -3,7 +3,7 @@
 # mdpow: fep.py
 # Copyright (c) 2010 Oliver Beckstein
 
-"""
+r"""
 :mod:`mdpow.fep` -- Calculate free energy of solvation
 ======================================================
 
@@ -272,7 +272,7 @@ class FEPschedule(AttributeDict):
         return x
 
 class Gsolv(Journalled):
-    """Simulations to calculate and analyze the solvation free energy.
+    r"""Simulations to calculate and analyze the solvation free energy.
 
     :math:`\Delta A` is computed from the decharging and the
     decoupling step. With our choice of ``lambda=0`` being the fully
@@ -1029,6 +1029,11 @@ class Gsolv(Journalled):
         return self.results.DeltaA.Gibbs
 
     def collect_alchemlyb(self, SI=True, start=0, stop=None, stride=None, autosave=True, autocompress=True):
+        """Collect the data files using alchemlyb.
+
+        Unlike :meth:`collect`, this method can subsample with the
+        statistical inefficiency (parameter `SI`).
+        """
         extract = self.estimators[self.method]['extract']
 
         if autocompress:
@@ -1062,6 +1067,13 @@ class Gsolv(Journalled):
             self.save()
 
     def analyze_alchemlyb(self, SI=True, start=0, stop=None, stride=None, force=False, autosave=True):
+        """Compute the free energy from the simulation data with alchemlyb.
+
+        Unlike :meth:`analyze`, the MBAR estimator is available (in
+        addition to TI). Note that SI should be enabled for meaningful
+        error estimates.
+
+        """
         stride = stride or self.stride
         start = start or self.start
         stop = stop or self.stop
@@ -1400,20 +1412,21 @@ def p_transfer(G1, G2, **kwargs):
                 logger.error(errmsg)
                 raise ValueError(errmsg)
 
+        logger.info("The solvent is %s .", G.solvent_type)
         if kwargs['force'] or 'Gibbs' not in G.results.DeltaA:
             # write out the settings when the analysis is performed
-            logger.info("The solvent is %s .", G.solvent_type)
             logger.info("Estimator is %s.", estimator)
             logger.info("Free energy calculation method is %s.", G.method)
 
-    if estimator == 'mdpow':
-        G.analyze(**G_kwargs)
-    elif estimator == 'alchemlyb':
-        if G_kwargs['SI']:
-            logger.info("Statistical inefficiency analysis will be performed.")
+            if estimator == 'mdpow':
+                G_kwargs.pop('SI', None)  # G.analyze() does not know SI
+                G.analyze(**G_kwargs)
+            elif estimator == 'alchemlyb':
+                logger.info("Statistical inefficiency analysis will %s be performed." %
+                            ("" if G_kwargs['SI'] else "not"))
+                G.analyze_alchemlyb(**G_kwargs)
         else:
-            logger.info("Statistical inefficiency analysis won't be performed.")
-        G.analyze_alchemlyb(**G_kwargs)
+            logger.info("Using already calculated free energy DeltaA")
 
     # x.Gibbs are QuantityWithError so they do error propagation
     transferFE = G2.results.DeltaA.Gibbs - G1.results.DeltaA.Gibbs
