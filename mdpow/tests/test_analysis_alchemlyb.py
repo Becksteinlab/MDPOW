@@ -10,7 +10,7 @@ import pybol
 from numpy.testing import assert_array_almost_equal
 import pandas
 
-import _pickle as pickle
+import pickle
 
 import mdpow.fep
 

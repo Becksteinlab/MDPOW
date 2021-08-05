@@ -28,7 +28,7 @@ model.
 
 .. autodata:: DIST
 """
-import _pickle as pickle
+import pickle
 
 import os, errno
 import shutil

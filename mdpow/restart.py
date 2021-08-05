@@ -21,7 +21,7 @@ restartable simulation protocols (for example :program:`mdpow-equilibrium`).
 
 .. autofunction:: checkpoint
 """
-import _pickle as pickle
+import pickle
 
 import os
 
