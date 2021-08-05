@@ -42,9 +42,9 @@ except (ImportError, OSError):
 from gromacs.utilities import in_dir, realpath, asiterable, AttributeDict
 import gromacs.utilities
 
-import mdpow.config as config
-import mdpow.forcefields as forcefields
-from mdpow.restart import Journalled
+from . import config as config
+from . import forcefields as forcefields
+from .restart import Journalled
 
 import logging
 logger = logging.getLogger('mdpow.equil')
