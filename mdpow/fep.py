@@ -1400,7 +1400,7 @@ def p_transfer(G1, G2, **kwargs):
                 logger.error(errmsg)
                 raise ValueError(errmsg)
 
-        if kwargs['force'] or (not hasattr(G.results.DeltaA, 'Gibbs')):
+        if kwargs['force'] or 'Gibbs' not in G.results.DeltaA:
             # write out the settings when the analysis is performed
             logger.info("The solvent is %s .", G.solvent_type)
             logger.info("Estimator is %s.", estimator)

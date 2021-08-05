@@ -13,6 +13,8 @@ Fixes
 
 * restrict alchemlyb to <0.5.0 for Python 2 (otherwise the installation fails
   due to an unsatisfiable pandas dependency) (#180)
+* fix failure of mdpow-solvation script "AttributeError: 'AttributeDict' object
+  has no attribute 'Gibbs'" (#180)
 
 
 2021-08-02    0.7.0
