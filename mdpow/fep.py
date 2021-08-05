@@ -157,9 +157,9 @@ from gromacs.utilities import asiterable, AttributeDict, in_dir, openany
 import logging
 logger = logging.getLogger('mdpow.fep')
 
-import mdpow.config as config
-from mdpow.restart import Journalled
-from mdpow.__init__ import kBOLTZ, N_AVOGADRO
+from . import config as config
+from .restart import Journalled
+from .__init__ import kBOLTZ, N_AVOGADRO
 
 def molar_to_nm3(c):
     """Convert a concentration in Molar to nm|^-3|."""
