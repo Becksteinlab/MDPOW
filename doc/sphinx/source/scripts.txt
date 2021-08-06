@@ -36,6 +36,49 @@ input file (see `Equilibrium simulations`_) is the value of the
 variable ``name`` in the ``[setup]`` section.
 
 
+.. _runinput-file:
+
+Run input file
+--------------
+
+The ``mdpow-*`` scripts are the **commandline interface** (CLI) to the
+Python API functionality in the :mod:`mdpow` package. Whereas the
+Python API requires passing of parameters to classes and functions and
+therefore exposes the full flexibility of MDPOW, the CLI works with a
+narrower set of options which are collected in a **run input
+file**. This run input file or *RUNFILE* is named :file:`runinput.yml`
+by default.
+
+A template *RUNFILE* can be generated with
+:program:`mdpow-get-runinput`
+
+.. code-block:: bash	   
+
+   mdpow-get-runinput runinput.yml
+
+which will copy the default run input file bundled with MDPOW and put
+it in the current directory under the name :file:`runinput.yml`.
+
+For an example of a *RUNFILE* see :download:`benzene.yml
+<../../examples/benzene.yml>`. The comments in the file serve as the
+documentation.
+
+The run input file uses `YAML`_ syntax (and is parsed by :mod:`yaml`).
+
+.. Note::
+   
+   It is recommended to use absolute paths to file names. 
+
+.. Note::
+
+   It is recommended to enclose all strings in the input file in
+   quotes, especially if they can be interpreted as numbers. For
+   example, a name "005" would be interpreted as the number 5 unless
+   explicitly quoted.
+
+.. _YAML: http://yaml.org/
+
+
 .. _mdpow-equilibrium-label:
 
 Equilibrium simulations
@@ -50,10 +93,10 @@ The :program:`mdpow-equilibrium` script
   :program:`mdrun` herself (e.g. on a cluster) or let the script do it
   locally on the workstation
 
-The script runs essentially the same steps as described in the tutorial
-:ref:`example_octanol-label` but it gathers all required parameters from a run
-input file and it allows one to stop and continue and the protocol
-transparently.
+The script runs essentially the same steps as described in the
+tutorial :ref:`example_octanol-label` but it gathers all required
+parameters from the :ref:`run input file<runinput-file>` and it allows
+one to stop and continue and the protocol transparently.
 
 It requires as at least Gromacs 4.6.5 ready to run (check that all commands can
 be found). The required **input** is
@@ -62,31 +105,16 @@ be found). The required **input** is
   2. a structure file (PDB or GRO) for the compound
   3. a Gromacs ITP file for the compound (OPLS/AA force field)
 
-A template *RUNFILE* can be generated with :option:`mdpow-get-runinput
-runinput.yml`, which will copy the default run input file bundled with
-MDPOW and put it in the current directory under the name
-``runinput.yml``.
-
-For an example of a *RUNFILE* see :download:`benzene.yml
-<../../examples/benzene.yml>`. It is recommended to use absolute paths
-to file names. The run input file uses `YAML`_ syntax (and is parsed
-by :mod:`yaml`).
-
-.. _YAML: http://yaml.org/
-
-.. Note:: It is recommended to enclose all strings in the input file
-          in quotes, especially if they can be interpreted as
-          numbers. For example, a name "005" would be interpreted as
-          the number 5 unless explicitly quoted.
-
-The script keeps track of the stages of the simulation protocol and allows the
-user to **restart from the last completed stage**. For instance, one can use the
-script to set up a simulation, then run the simulation on a cluster, transfer
-back the generated files, and start :program:`mdpow-equilibrium` again with the
-exact same input to finish the protocol. Since Gromacs 4.5 it is also possible
-to interrupt a running :program:`mdrun` process (e.g. with :kbd:`Control-c`)
-and then resume the simulation at the last saved trajectory checkpoint by
-running :program:`mdpow-equilibrium` again.
+The script keeps track of the stages of the simulation protocol (in
+the state files :file:`water.simulation`, :file:`octanol.simulation`
+etc) and allows the user to **restart from the last completed
+stage**. For instance, one can use the script to set up a simulation,
+then run the simulation on a cluster, transfer back the generated
+files, and start :program:`mdpow-equilibrium` again with the exact
+same input to finish the protocol. Since Gromacs 4.5 it is also
+possible to interrupt a running :program:`mdrun` process (e.g. with
+:kbd:`Control-c`) and then resume the simulation at the last saved
+trajectory checkpoint by running :program:`mdpow-equilibrium` again.
 
 If in doubt, just try running :program:`mdpow-equilibrium` running again and
 let it figure out the best course of action. Look at the log file to see what
@@ -132,7 +160,7 @@ input file.
 
 You will require:
 
-1. at least Gromacs 4.0.5 ready to run (check that all commands can
+1. at least Gromacs 4.6.5 ready to run (check that all commands can
    be found)
 2. the results from a previous complete run of :program:`mdpow-equilibrium`
 
@@ -461,16 +489,6 @@ compounds as above.
 
   error on **VDW**
 
-**Vdp**
-
-  correction if the FEP are run at constant volume but the
-  desired solvation free energy is the Gibbs energy (**currently
-  neglected** and set to 0)
- 
-**errVdp**
-
-  error on **Vdp**
-
 **w2oct**
 
   transfer free energy from water to octanol (difference between
@@ -498,19 +516,19 @@ compounds as above.
 .. _table-energies-label:
 
 .. Table:: Solvation free energies for compounds in water and octanol (in kJ/mol). 
-
-   ========== ========== ======== ========  ======== ========  ======== ========  ======== ========  ======== ========   ======== ========  ====================
-   molecule   solvent     DeltaG0   errDG0   coulomb  errCoul      VDW    errVDW       Vdp   errVdp     w2oct errw2oct     logPOW  errlogP  directory
-   ========== ========== ======== ========  ======== ========  ======== ========  ======== ========  ======== ========   ======== ========  ====================
-   BNZ        water         -2.97     0.21     +7.65     0.07     -4.68     0.20     +0.00     0.00    -12.87     0.43      +2.24     0.07  benzene
-   BNZ        octanol      -15.84     0.37     +1.40     0.19    +14.44     0.32     +0.00     0.00    -12.87     0.43      +2.24     0.07  benzene
-   OC9        water        -16.03     0.32    +27.35     0.09    -11.32     0.31     +0.00     0.00    -16.24     1.12      +2.83     0.20  octanol
-   OC9        octanol      -32.28     1.08    +11.32     0.92    +20.96     0.56     +0.00     0.00    -16.24     1.12      +2.83     0.20  octanol
-   URE        water        -53.52     0.17    +56.94     0.11     -3.41     0.14     +0.00     0.00     +4.66     1.13      -0.81     0.20  urea
-   URE        octanol      -48.86     1.12    +35.75     1.09    +13.11     0.25     +0.00     0.00     +4.66     1.13      -0.81     0.20  urea
-   902        water        -25.46     0.11    +34.93     0.10     -9.48     0.06     +0.00     0.00     +9.35     1.06      -1.63     0.18  water_TIP4P
-   902        octanol      -16.11     1.05    +21.16     1.05     -5.05     0.09     +0.00     0.00     +9.35     1.06      -1.63     0.18  water_TIP4P
-   ========== ========== ======== ========  ======== ========  ======== ========  ======== ========  ======== ========   ======== ========  ====================
+										  
+   ========== ========== ======== ========  ======== ========  ======== ========  ======== ========   ======== ========  ====================
+   molecule   solvent     DeltaG0   errDG0   coulomb  errCoul      VDW    errVDW     w2oct errw2oct     logPOW  errlogP  directory
+   ========== ========== ======== ========  ======== ========  ======== ========  ======== ========   ======== ========  ====================
+   BNZ        water         -2.97     0.21     +7.65     0.07     -4.68     0.20    -12.87     0.43      +2.24     0.07  benzene
+   BNZ        octanol      -15.84     0.37     +1.40     0.19    +14.44     0.32    -12.87     0.43      +2.24     0.07  benzene
+   OC9        water        -16.03     0.32    +27.35     0.09    -11.32     0.31    -16.24     1.12      +2.83     0.20  octanol
+   OC9        octanol      -32.28     1.08    +11.32     0.92    +20.96     0.56    -16.24     1.12      +2.83     0.20  octanol
+   URE        water        -53.52     0.17    +56.94     0.11     -3.41     0.14     +4.66     1.13      -0.81     0.20  urea
+   URE        octanol      -48.86     1.12    +35.75     1.09    +13.11     0.25     +4.66     1.13      -0.81     0.20  urea
+   902        water        -25.46     0.11    +34.93     0.10     -9.48     0.06     +9.35     1.06      -1.63     0.18  water_TIP4P
+   902        octanol      -16.11     1.05    +21.16     1.05     -5.05     0.09     +9.35     1.06      -1.63     0.18  water_TIP4P
+   ========== ========== ======== ========  ======== ========  ======== ========  ======== ========   ======== ========  ====================
 
 
 House-keeping scripts
