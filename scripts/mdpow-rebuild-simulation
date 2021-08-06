@@ -69,7 +69,7 @@ if __name__ == "__main__":
 
                 try:
                     S = fixSimulation(solvent, simfile, os.path.realpath(os.path.curdir))
-                except Exception,err:
+                except Exception as err:
                     logger.error("[%(solvent)8s] Failed to fix %(simfile)r", vars())
                     logger.error(str(err))
 

@@ -230,9 +230,9 @@ if __name__ == "__main__":
             run_ghyd(directory, plotfile=opts.plotfile,
                      energyfile=realpath_or_none(opts.energyfile),
                      force=opts.force, stride=opts.stride, permissive=opts.permissive)
-        except (OSError, IOError), err:
+        except (OSError, IOError) as err:
             logger.error("Running analysis in directory %r failed: %s", directory, str(err))
-        except Exception, err:
+        except Exception as err:
             logger.fatal("Running analysis in directory %r failed", directory)
             logger.exception("Catastrophic problem occurred, see the stack trace for hints.")
             raise
