@@ -62,8 +62,8 @@ be found). The required **input** is
   2. a structure file (PDB or GRO) for the compound
   3. a Gromacs ITP file for the compound (OPLS/AA force field)
 
-A template *RUNFILE* can be generated with :option:`mdpow-get-runinput
-runinput.yml`, which will copy the default run input file bundled with
+A template *RUNFILE* can be generated with :program:`mdpow-get-runinput`
+``runinput.yml``, which will copy the default run input file bundled with
 MDPOW and put it in the current directory under the name
 ``runinput.yml``.
 
@@ -79,14 +79,16 @@ by :mod:`yaml`).
           numbers. For example, a name "005" would be interpreted as
           the number 5 unless explicitly quoted.
 
-The script keeps track of the stages of the simulation protocol and allows the
-user to **restart from the last completed stage**. For instance, one can use the
-script to set up a simulation, then run the simulation on a cluster, transfer
-back the generated files, and start :program:`mdpow-equilibrium` again with the
-exact same input to finish the protocol. Since Gromacs 4.5 it is also possible
-to interrupt a running :program:`mdrun` process (e.g. with :kbd:`Control-c`)
-and then resume the simulation at the last saved trajectory checkpoint by
-running :program:`mdpow-equilibrium` again.
+The script keeps track of the stages of the simulation protocol (in
+the state files :file:`water.simulation`, :file:`octanol.simulation`
+etc) and allows the user to **restart from the last completed
+stage**. For instance, one can use the script to set up a simulation,
+then run the simulation on a cluster, transfer back the generated
+files, and start :program:`mdpow-equilibrium` again with the exact
+same input to finish the protocol. Since Gromacs 4.5 it is also
+possible to interrupt a running :program:`mdrun` process (e.g. with
+:kbd:`Control-c`) and then resume the simulation at the last saved
+trajectory checkpoint by running :program:`mdpow-equilibrium` again.
 
 If in doubt, just try running :program:`mdpow-equilibrium` running again and
 let it figure out the best course of action. Look at the log file to see what

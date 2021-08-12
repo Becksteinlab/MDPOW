@@ -5,6 +5,23 @@ CHANGES for MDPOW
 Add summary of changes for each release. Use ISO dates. Reference
 GitHub issues numbers and PR numbers.
 
+
+2021-08-04    0.7.1
+orbeckst, iorga
+
+Fixes
+
+* restrict alchemlyb to <0.5.0 for Python 2 (otherwise the installation fails
+  due to an unsatisfiable pandas dependency) (#180)
+* fix failure of mdpow-solvation script "AttributeError: 'AttributeDict' object
+  has no attribute 'Gibbs'" (#180)
+* fix fep.p_transfer() only analyzing the second input Gsolv (would lead to an
+  error like "results.DeltaA does not contain 'Gibbs'") (PR #185)
+* ensure that pickle files created under Python 2 are also readable under
+  Python 3  
+* documentation fixes (PR #176)
+
+
 2021-08-02    0.7.0
 orbeckst, VOD555, ALescoulie
 

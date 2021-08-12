@@ -1,8 +1,6 @@
 import os.path
-import sys
 
 import pytest
-import py.path
 
 import yaml
 import pybol
@@ -13,8 +11,8 @@ import pickle
 
 import numkit
 
-from pkg_resources import resource_filename
-RESOURCES = py.path.local(resource_filename(__name__, 'testing_resources'))
+from . import RESOURCES
+
 MANIFEST = RESOURCES.join("manifest.yml")
 
 def fix_manifest(topdir):
@@ -28,7 +26,7 @@ def fix_manifest(topdir):
     ---------
     topdir : py.path.local
         existing temporary directory (as provided by, for instance,
-        `pytest.tmpdir`)
+       `pytest.tmpdir`)
 
     Returns
     -------

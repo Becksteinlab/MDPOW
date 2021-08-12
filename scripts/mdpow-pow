@@ -193,22 +193,22 @@ if __name__ == "__main__":
     parser.add_argument('--plotfile', dest="plotfile", default='none',
                         help="plot dV/dlambda to FILE; use png or pdf suffix to "
                         "determine the file type. 'auto' generates a pdf file "
-                        "DIRECTORY/dVdl_MOLID_pcw.pdf and 'none' disables it "
-                        "The plot function is only available for mdpow estimator,"
+                        "DIRECTORY/dVdl_<molname>_pow.pdf and 'none' disables it. "
+                        "The plot function is only available for mdpow estimator, "
                         "and is disabled when using alchemlyb estimators.",
                         metavar="FILE")
     parser.add_argument('-o', '--outfile', dest="outfile", default="pow.txt",
-                        help="append one-line results summary to FILE ",
+                        help="append one-line results summary to FILE",
                         metavar="FILE")
     parser.add_argument('-e', '--energies', dest="energyfile", default="energies.txt",
-                        help="append solvation free energies to FILE ",
+                        help="append solvation free energies to FILE",
                         metavar="FILE")
     parser.add_argument('--estimator', dest="estimator", default='alchemlyb',
                         choices=['mdpow', 'alchemlyb'],
-                        help="choose the estimator to be used, alchemlyb or mdpow estimators")
+                        help="choose the estimator implementation to be used, alchemlyb or mdpow estimators")
     parser.add_argument('--method', dest="method", default='MBAR',
                         choices=['TI', 'MBAR', 'BAR'],
-                        help="choose the method to calculate free energy ",)
+                        help="choose the estimator method to calculate free energy",)
     parser.add_argument('--force', dest='force', default=False,
                         action="store_true",
                         help="force rereading all data ")
@@ -216,26 +216,26 @@ if __name__ == "__main__":
     SIs.add_argument('--SI', dest='SI',
                      action="store_true", default=True,
                      help="enable statistical inefficiency (SI) analysis. "
-                     "Statistical inefficiency analysis is performed by default when using"
+                     "Statistical inefficiency analysis is performed by default when using "
                      "alchemlyb estimators and is always disabled when using mdpow estimator.")
     SIs.add_argument('--no-SI', dest='noSI',
                      action="store_true", default=False,
                      help="disable statistical inefficiency analysis. "
-                     "Statistical inefficiency analysis is performed by default when using"
+                     "Statistical inefficiency analysis is performed by default when using "
                      "alchemlyb estimators and is disabled when using mdpow estimator. ")
     parser.add_argument('-s', '--stride', dest="stride", type=int, default=1,
-                        help="use every N-th datapoint from the original dV/dlambda data. ",
+                        help="use every N-th datapoint from the original dV/dlambda data.",
                         metavar="N")
     parser.add_argument('--start', dest="start", type=int, default=0,
-                        help="start point for the data used from the original dV/dlambda data. ")
+                        help="start point for the data used from the original dV/dlambda data.")
     parser.add_argument('--stop', dest="stop", type=int, default=None,
-                        help="stop point for the data used from the original dV/dlambda data. ",)
+                        help="stop point for the data used from the original dV/dlambda data.")
     parser.add_argument('--ignore-corrupted', dest="permissive",
                         action="store_true", default=False,
                         help="skip lines in the md.xvg files that cannot be parsed. "
                         "WARNING: Other lines in the file might have been corrupted in "
                         "such a way that they appear correct but are in fact wrong. "
-                        "WRONG RESULTS CAN OCCUR! USE AT YOUR OWN RISK ")
+                        "WRONG RESULTS CAN OCCUR! USE AT YOUR OWN RISK.")
     opts = parser.parse_args()
 
     if len(opts.directory) > 1 and not opts.plotfile.lower() in ('none', 'auto'):
