@@ -1,4 +1,4 @@
-import mdpow.tests.tempdir as td
+from . import tempdir as td
 
 import os.path
 import pybol
@@ -43,4 +43,3 @@ class TestEquilibriumScript(object):
         assert os.path.exists(
             os.path.join(self.tmpdir.name,
                          'benzene', 'Equilibrium', 'water', 'MD_NPT', 'md.gro'))
-

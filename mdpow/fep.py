@@ -73,10 +73,22 @@ solvation free energy in octanol there is
 
 .. autoclass:: Gsolv
    :members:
+   :inherited-members:   
+   
 .. autoclass:: Ghyd
+   :members:
+   :inherited-members:
+   
 .. autoclass:: Goct
+   :members:
+   :inherited-members:
+   
 .. autoclass:: Gcyclo
+   :members:
+   :inherited-members:
+   
 .. autofunction:: pOW
+
 .. autofunction:: pCW
 
 
@@ -120,9 +132,6 @@ TODO
   See `Free Energy Tutorial`_.
 
 """
-import six
-from six.moves import zip
-from configparser import NoOptionError
 
 import os
 import errno
@@ -130,6 +139,7 @@ import copy
 from subprocess import call
 import warnings
 from glob import glob
+from configparser import NoOptionError
 
 import numpy
 import pandas as pd
@@ -157,9 +167,9 @@ from gromacs.utilities import asiterable, AttributeDict, in_dir, openany
 import logging
 logger = logging.getLogger('mdpow.fep')
 
-from . import config as config
+from . import config
 from .restart import Journalled
-from .__init__ import kBOLTZ, N_AVOGADRO
+from . import kBOLTZ, N_AVOGADRO
 
 def molar_to_nm3(c):
     """Convert a concentration in Molar to nm|^-3|."""
@@ -254,7 +264,7 @@ class FEPschedule(AttributeDict):
 
     def __deepcopy__(self, memo):
         x = FEPschedule()
-        for k, v in six.iteritems(self):
+        for k, v in self.items():
             x[k] = copy.deepcopy(v)
         return x
 
@@ -268,7 +278,7 @@ class Gsolv(Journalled):
 
     .. math::
 
-            \Delta A = -(\Delta A_{\mathrm{coul}} + \Delta A_{\mathrm{vdw}})
+       \Delta A = -(\Delta A_{\mathrm{coul}} + \Delta A_{\mathrm{vdw}})
 
     With this protocol, the concentration in the liquid and in the gas
     phase is the same. (Under the assumption of ideal solution/ideal
@@ -874,7 +884,7 @@ class Gsolv(Journalled):
         return numpy.any([x for x in corrupted.values()])
 
     def analyze(self, force=False, stride=None, autosave=True, ncorrel=25000):
-        """Extract dV/dl from output and calculate dG by TI.
+        r"""Extract dV/dl from output and calculate dG by TI.
 
         Thermodynamic integration (TI) is performed on the individual
         component window calculation (typically the Coulomb and the
@@ -887,7 +897,7 @@ class Gsolv(Journalled):
         interaction switched on and ``lambda=1`` as switched off.
 
         .. math::
-            \Delta A* &= -(\Delta A_{\mathrm{coul}} + \Delta A_{\mathrm{vdw}})\\
+            \Delta A^{*} = -(\Delta A_{\mathrm{coul}} + \Delta A_{\mathrm{vdw}})
 
         Data are stored in :attr:`Gsolv.results`.
 
@@ -934,17 +944,20 @@ class Gsolv(Journalled):
           *ncorrel*
               aim for <= 25,000 samples for t_correl
 
-        ..rubric:: Notes
+        .. rubric:: Notes
 
-        Error on the mean of the data, taking the correlation time into account.
-
-        See [FrenkelSmit2002]_ `p526`_:
-
-           error = sqrt(2*tc*acf[0]/T)
-
-        where acf() is the autocorrelation function of the fluctuations around
-        the mean, y-<y>, tc is the correlation time, and T the total length of
-        the simulation.
+        The error on the mean of the data :math:`\epsilon_y`, taking
+        the correlation time into account, is calculated according to
+        [FrenkelSmit2002]_ `p526`_:
+        
+        .. math::
+        
+           \epsilon_y  = \sqrt{2 \tau_c \mathrm{acf}(0)/T}
+           
+        where :math:`\mathrm{acf}()` is the autocorrelation function
+        of the fluctuations around the mean, :math:`y - \langle y
+        \rangle`, :math:`\tau_c` is the correlation time, and :math:`T`
+        the total length of the simulation
 
         .. [FrenkelSmit2002] D. Frenkel and B. Smit, Understanding
                              Molecular Simulation. Academic Press, San

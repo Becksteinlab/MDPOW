@@ -44,9 +44,9 @@ import errno
 
 import gromacs.run
 
-from mdpow.config import get_configuration, set_gromacsoutput
-from . import equil as equil
-from . import fep as fep
+from .config import get_configuration, set_gromacsoutput
+from . import equil
+from . import fep
 from .restart import checkpoint
 
 import logging

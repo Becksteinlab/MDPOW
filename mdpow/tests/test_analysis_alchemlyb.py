@@ -11,7 +11,6 @@ import pandas
 import pickle
 
 import mdpow.fep
-
 from . import RESOURCES
 
 MANIFEST = RESOURCES.join("manifest.yml")
@@ -63,8 +62,10 @@ def fep_benzene_directory(tmpdir_factory):
 class TestAnalyze(object):
     def get_Gsolv(self, pth):
         gsolv = pth.join("FEP", "water", "Gsolv.fep")
-        with open(gsolv, 'rb') as f:
-            G = pickle.load(f, encoding='latin1')
+        # Loading only works with magic code in restart.Journalled.load()
+        # so that Pickles produced with Python 2 can also be read with 3:
+        G = mdpow.fep.Ghyd(filename=gsolv.strpath)
+        # patch paths
         G.basedir = pth.strpath
         G.filename = gsolv.strpath
         return G

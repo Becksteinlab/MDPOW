@@ -1,11 +1,11 @@
-import mdpow.tests.tempdir as td
+from . import tempdir as td
 
 import os
 import pybol
 import numpy as np
 from gromacs.utilities import in_dir
 
-from .. import fep, equil
+from mdpow import fep, equil
 
 class Test_Gsolv_manual(object):
 

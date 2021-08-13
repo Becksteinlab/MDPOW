@@ -3,7 +3,7 @@ import os.path
 import numpy as np
 from numpy.testing import assert_array_almost_equal
 
-from .. import config
+from mdpow import config
 
 class TestAlteredConfig(object):
     params_altered = {
@@ -126,4 +126,3 @@ class TestAlteredConfig(object):
 
     def test_mdrun(self):
         return self._test_section("mdrun")
-

@@ -1,11 +1,12 @@
 import os
 import shutil
 
-from .. import equil
 from gromacs.utilities import in_dir
 import gromacs
 
 import pytest
+
+from mdpow import equil
 
 sims = {"water" : equil.WaterSimulation,
         "octanol" : equil.OctanolSimulation,

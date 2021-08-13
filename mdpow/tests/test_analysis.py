@@ -13,6 +13,8 @@ import numkit
 
 from . import RESOURCES
 
+import mdpow.fep
+
 MANIFEST = RESOURCES.join("manifest.yml")
 
 def fix_manifest(topdir):
@@ -62,8 +64,9 @@ def fep_benzene_directory(tmpdir_factory):
 class TestAnalyze(object):
     def get_Gsolv(self, pth):
         gsolv = pth.join("FEP", "water", "Gsolv.fep")
-        with open(gsolv, 'rb') as f:
-            G = pickle.load(f, encoding='latin1')
+        # Loading only works with magic code in restart.Journalled.load()
+        # so that Pickles produced with Python 2 can also be read with 3:
+        G = mdpow.fep.Ghyd(filename=gsolv.strpath)
         # patch paths
         G.basedir = pth.strpath
         G.filename = gsolv.strpath
@@ -107,4 +110,3 @@ class TestAnalyze(object):
             raise AssertionError("Failed to convert edr to xvg: {0}: {1}".format(
                 err.strerror, err.filename))
         self.assert_DeltaA(G)
-

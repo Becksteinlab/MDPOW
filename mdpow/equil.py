@@ -42,8 +42,8 @@ except (ImportError, OSError):
 from gromacs.utilities import in_dir, realpath, asiterable, AttributeDict
 import gromacs.utilities
 
-from . import config as config
-from . import forcefields as forcefields
+from . import config
+from . import forcefields
 from .restart import Journalled
 
 import logging
