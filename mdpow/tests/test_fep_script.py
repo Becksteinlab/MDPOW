@@ -1,4 +1,4 @@
-import mdpow.tests.tempdir as td
+from . import tempdir as td
 
 import os
 import pybol
