@@ -131,9 +131,9 @@ class Ensemble(object):
         if len(top) == 0 or len(trj) == 0:
             logger.warning('No MD files detected in %s' % os.curdir)
             raise NoDataWarning
-
+        trj.sort()
         try:
-            system = mda.Universe(top[0], trj)
+            system = mda.Universe(os.path.abspath(top[0]), [os.path.abspath(p) for p in trj])
             return system
         except FileFormatWarning or MissingDataWarning or NoDataError or ValueError:
             logger.warning('Mutiple trajectories deteceted in %s attempting'
@@ -404,21 +404,18 @@ class EnsembleAnalysis(object):
         """
         logger.info("Setting up systems")
         self._prepare_ensemble()
-        with in_dir(os.path.join(self._ensemble.ensemble_dir, 'FEP'), create=False):
-            for self._key in self._ensemble.get_keys():
-                with in_dir(os.path.join(os.curdir, self._key[0], self._key[1], self._key[2]),
-                            create=False):
-                    self._setup_system(self._key, start=start, stop=stop, step=step)
-                    self._prepare_universe()
-                    self._single_universe()
-                    for i, ts in enumerate(ProgressBar(self._trajectory[self.start:self.stop:self.step], verbose=True)):
-                        self._frame_index = i
-                        self._ts = ts
-                        self.frames[i] = ts.frame
-                        self.times[i] = ts.time
-                        self._single_frame()
-                    self._conclude_universe()
-                    logger.info("Moving to next universe")
-            logger.info("Finishing up")
-            self._conclude_ensemble()
+        for self._key in self._ensemble.get_keys():
+                self._setup_system(self._key, start=start, stop=stop, step=step)
+                self._prepare_universe()
+                self._single_universe()
+                for i, ts in enumerate(ProgressBar(self._trajectory[self.start:self.stop:self.step], verbose=True)):
+                    self._frame_index = i
+                    self._ts = ts
+                    self.frames[i] = ts.frame
+                    self.times[i] = ts.time
+                    self._single_frame()
+                self._conclude_universe()
+                logger.info("Moving to next universe")
+        logger.info("Finishing up")
+        self._conclude_ensemble()
         return self

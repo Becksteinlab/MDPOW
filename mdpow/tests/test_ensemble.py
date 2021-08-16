@@ -103,10 +103,12 @@ class TestEnsemble(object):
             def _single_universe(self):
                 self.key_list.append(self._key)
 
+
+
             def _conclude_universe(self):
                 assert self.n_frames == self.stop
 
         with in_dir(os.path.join(self.resources, 'states'), create=False):
             BNZ = Ensemble(dirname='benzene', solvents=['water'])
-            TestRun = TestAnalysis(BNZ).run(start=0, step=1, stop=10)
-            assert BNZ.get_keys() == TestRun.key_list
+        TestRun = TestAnalysis(BNZ).run(start=0, step=1, stop=10)
+        assert BNZ.get_keys() == TestRun.key_list
