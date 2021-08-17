@@ -8,6 +8,8 @@ import pytest
 
 from mdpow import equil
 
+from . import RESOURCES
+
 sims = {"water" : equil.WaterSimulation,
         "octanol" : equil.OctanolSimulation,
         "cyclohexane" : equil.CyclohexaneSimulation,
@@ -22,13 +24,10 @@ test_file = {"OPLS-AA": 'benzene.itp',
 @pytest.fixture
 def setup(tmpdir):
     newdir = tmpdir.mkdir('resources')
-    old_path = os.getcwd()
-    resources = os.path.join(
-        old_path, 'mdpow', 'tests', 'testing_resources')
     files = ['benzene.pdb', 'benzene.itp',
              'benzene_charmm.itp', 'benzene_amber.itp']
     for f in files:
-        orig = os.path.join(resources, 'molecules', 'benzene', f)
+        orig = RESOURCES / 'molecules' / 'benzene' / f
         shutil.copy(orig, newdir.dirname)
     return newdir.dirname
 

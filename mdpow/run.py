@@ -36,7 +36,6 @@ Support
 .. autofunction:: runMD_or_exit
 
 """
-import configparser
 
 import sys
 import os
@@ -44,7 +43,8 @@ import errno
 
 import gromacs.run
 
-from .config import get_configuration, set_gromacsoutput
+from .config import (get_configuration, set_gromacsoutput,
+                     NoSectionError)
 from . import equil
 from . import fep
 from .restart import checkpoint
@@ -73,20 +73,21 @@ def get_mdp_files(cfg, protocols):
     mdpfiles = {}
     for protocol in protocols:
         try:
-            mdp = cfg.getpath(protocol, 'mdp')
-        except KeyError:
+            mdp = cfg.findfile(protocol, 'mdp')
+        except NoSectionError:
             # skip anything for which we do not define sections, such as
             # the dummy run protocols
-            mdp = None
-        except configparser.NoOptionError:
-            # Should not happen... let's continue and wait for hard-coded defaults
-            logger.error("No 'mdp' config file entry for protocol [%s]---check input files!", protocol)
             mdp = None
         except ValueError:
             # But it is a problem if we can't find a file!
             logger.critical("Failed to find custom MDP file %r for protocol [%s]",
                             cfg.get(protocol, 'mdp'), protocol)
             raise
+        else:
+            if mdp is None:
+                # Should not happen... let's continue and wait for hard-coded defaults
+                logger.warning("No 'mdp' config file entry for protocol [%s]---check input files! "
+                               "Using package defaults.", protocol)
         if mdp:
             mdpfiles[protocol] = mdp
             logger.debug("%(protocol)s: Using MDP file %(mdp)r from config file", vars())

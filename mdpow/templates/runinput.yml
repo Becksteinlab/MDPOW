@@ -48,7 +48,7 @@ MD_relaxed:
     runlocal: True
          # True: launch Gromacs mdrun and wait for it
          # False: produce queuing system scripts and stop
-    runtime: 5
+    runtime: 5.0
          # run time in ps
     mdp: 'NPT_opls.mdp'
          #  run parameter file for Gromacs;
@@ -59,7 +59,7 @@ MD_relaxed:
 MD_NPT:
     qscript: 'local.sh'
          # queuing system script to produce
-    runtime: 50000
+    runtime: 50000.0
          # simulation run time in ps [50 ns is generous, probably can be shorter]
     runlocal: False
          # True: launch Gromacs mdrun and wait for it
@@ -75,7 +75,7 @@ FEP:
          # BAR (also MBAR) or TI
     qscript: 'local.sh'
          # queuing system script to produce
-    runtime: 5000
+    runtime: 5000.0
          # run time in ps for each free energy window
     runlocal: False
          # True: launch Gromacs mdrun and run all windows in a serial fashion
