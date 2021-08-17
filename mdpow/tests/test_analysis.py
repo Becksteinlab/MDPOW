@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import os.path
 
 import pytest
@@ -9,12 +7,13 @@ import pybol
 
 from numpy.testing import assert_array_almost_equal
 
-from six.moves import cPickle as pickle
+import pickle
 
 import numkit
-import mdpow.fep
 
 from . import RESOURCES
+
+import mdpow.fep
 
 MANIFEST = RESOURCES.join("manifest.yml")
 
@@ -111,4 +110,3 @@ class TestAnalyze(object):
             raise AssertionError("Failed to convert edr to xvg: {0}: {1}".format(
                 err.strerror, err.filename))
         self.assert_DeltaA(G)
-

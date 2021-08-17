@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import os.path
 
 import pytest
@@ -10,10 +8,9 @@ import pybol
 from numpy.testing import assert_array_almost_equal
 import pandas
 
-from six.moves import cPickle as pickle
+import pickle
 
 import mdpow.fep
-
 from . import RESOURCES
 
 MANIFEST = RESOURCES.join("manifest.yml")

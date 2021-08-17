@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 from . import tempdir as td
 
 import os.path
@@ -45,4 +43,3 @@ class TestEquilibriumScript(object):
         assert os.path.exists(
             os.path.join(self.tmpdir.name,
                          'benzene', 'Equilibrium', 'water', 'MD_NPT', 'md.gro'))
-
