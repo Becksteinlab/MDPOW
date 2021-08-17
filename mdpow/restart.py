@@ -21,12 +21,9 @@ restartable simulation protocols (for example :program:`mdpow-equilibrium`).
 
 .. autofunction:: checkpoint
 """
-from __future__ import absolute_import, print_function
-
-from six.moves import cPickle as pickle
+import pickle
 
 import os
-import errno
 
 import logging
 logger = logging.getLogger('mdpow.checkpoint')

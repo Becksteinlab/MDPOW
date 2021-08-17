@@ -136,7 +136,7 @@ Usage of the command:
    .. option:: RUNFILE
 
       The runfile :file:`runinput.yml` with all configuration parameters.
-   
+
 
    Options:
 
@@ -242,7 +242,7 @@ Usage of the command:
    "auto" option (or "none").
 
    The total solvation free energy is calculated as
-   
+
    .. math::
 
 	\Delta G^{*} = -(\Delta G_{\text{coul}} + \Delta G_{\text{vdw}})
@@ -275,14 +275,14 @@ Usage of the command:
 
 
    positional arguments:
-   
+
    .. option::  DIRECTORY [DIRECTORY ...]
 
 		directory or directories which contain all the files
 		resulting from running :meth:`mdpow.fep.Ghyd.setup`
 
    optional arguments:
-   
+
    .. option::  -h, --help
 
 		show this help message and exit
@@ -294,43 +294,43 @@ Usage of the command:
 		*none* disables it The plot function is only
 		available for mdpow estimator,and is disabled when
 		using alchemlyb estimators. (default: none)
-		
+
    .. option::  --solvent NAME, -S NAME
 
 		solvent `NAME` for compound, 'water', 'octanol', or
 		'cyclohexane' (default: water)
-		
+
    .. option::  -o FILE, --outfile FILE
 
 		append one-line results summary to `FILE` (default:
 		:file:`gsolv.txt`)
-		
+
    .. option::  -e FILE, --energies FILE
 
 		append solvation free energies to FILE (default:
 		:file:`energies.txt`)
-		
+
    .. option:: --estimator {mdpow,alchemlyb}
-		
+
 		choose the estimator to be used, *alchemlyb* or *mdpow*
 		estimators (default: *alchemlyb*)
-		
+
    .. option:: --method {TI,MBAR,BAR}
-		
+
 		choose the method to calculate free energy (default:
 		*MBAR*)
-		
+
    .. option:: --force
 
 		 force rereading all data (default: False)
-		 
+
    .. option:: --SI
 
 		 enable statistical inefficiency (SI) analysis.
 		 Statistical inefficiency analysis is performed by
 		 default when usingalchemlyb estimators and is always
 		 disabled when using mdpow estimator. (default: True)
-		 
+
    .. option:: --no-SI
 
 		 disable statistical inefficiency
@@ -338,36 +338,36 @@ Usage of the command:
                  performed by default when usingalchemlyb estimators
                  and is disabled when using mdpow estimator. (default:
                  False)
-		 
+
    .. option:: -s N, --stride N
 
 		 use every `N`-th datapoint from the original dV/dlambda
 		 data. (default: 1)
-		 
+
    .. option:: --start START
-		
+
 		 start point for the data used from the original
 		 dV/dlambda data. (default: 0)
-		 
+
    .. option:: --stop STOP
 
 		stop point for the data used from the original
 		dV/dlambda data. (default: None)
-		
+
    .. option:: --ignore-corrupted
 
 		skip lines in the md.xvg files that cannot be parsed.
 		(default: False)
-		
+
 		.. warning::
-		   
+
 		   Other lines in the file might have been corrupted
 		   in such a way that they appear correct but are in
 		   fact wrong. WRONG RESULTS CAN OCCUR! USE AT YOUR
-		   OWN RISK 
+		   OWN RISK
 
                 It is recommended to simply rerun the affected simulation(s).
-       
+
 
 
 
@@ -409,7 +409,7 @@ Usage of the command:
 
 
    positional arguments:
-   
+
    .. option::  DIRECTORY [DIRECTORY ...]
 
 		One or more directories that contain the state pickle
@@ -420,13 +420,13 @@ Usage of the command:
                 resulting from running :meth:`mdpow.fep.Ghyd.setup` and
                 :meth:`mdpow.fep.Goct.setup` and the results of the MD FEP
                 simulations.
-		
+
    optional arguments:
-   
+
    .. option::  -h, --help
 
 		show this help message and exit
-		
+
    .. option::  --plotfile FILE
 
 		plot dV/dlambda to FILE; use png or pdf suffix to
@@ -435,38 +435,38 @@ Usage of the command:
 		*none* disables it The plot function is only
 		available for mdpow estimator,and is disabled when
 		using alchemlyb estimators. (default: none)
-		
+
    .. option::  -o FILE, --outfile FILE
 
 		append one-line results summary to `FILE` (default:
 		:file:`pow.txt`)
-		
+
    .. option::  -e FILE, --energies FILE
 
 		append solvation free energies to FILE (default:
 		:file:`energies.txt`)
-		
+
    .. option:: --estimator {mdpow,alchemlyb}
-		
+
 		choose the estimator to be used, *alchemlyb* or *mdpow*
 		estimators (default: *alchemlyb*)
-		
+
    .. option:: --method {TI,MBAR,BAR}
-		
+
 		choose the method to calculate free energy (default:
 		*MBAR*)
-		
+
    .. option:: --force
 
 		 force rereading all data (default: False)
-		 
+
    .. option:: --SI
 
 		 enable statistical inefficiency (SI) analysis.
 		 Statistical inefficiency analysis is performed by
 		 default when usingalchemlyb estimators and is always
 		 disabled when using mdpow estimator. (default: True)
-		 
+
    .. option:: --no-SI
 
 		 disable statistical inefficiency
@@ -474,36 +474,36 @@ Usage of the command:
                  performed by default when usingalchemlyb estimators
                  and is disabled when using mdpow estimator. (default:
                  False)
-		 
+
    .. option:: -s N, --stride N
 
 		 use every `N`-th datapoint from the original dV/dlambda
 		 data. (default: 1)
-		 
+
    .. option:: --start START
-		
+
 		 start point for the data used from the original
 		 dV/dlambda data. (default: 0)
-		 
+
    .. option:: --stop STOP
 
 		stop point for the data used from the original
 		dV/dlambda data. (default: None)
-		
+
    .. option:: --ignore-corrupted
 
 		skip lines in the md.xvg files that cannot be parsed.
 		(default: False)
-		
+
 		.. warning::
-		   
+
 		   Other lines in the file might have been corrupted
 		   in such a way that they appear correct but are in
 		   fact wrong. WRONG RESULTS CAN OCCUR! USE AT YOUR
-		   OWN RISK 
+		   OWN RISK
 
                 It is recommended to simply rerun the affected simulation(s).
-       
+
 
 
 .. _mdpow-pow-outputformat-label:

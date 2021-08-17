@@ -54,9 +54,6 @@ Internal classes and functions
 .. autofunction:: get_solvent_model
 
 """
-
-from __future__ import absolute_import
-
 import os
 from collections import defaultdict
 
@@ -228,12 +225,12 @@ def get_solvent_identifier(solvent_type, model=None, forcefield='OPLS-AA'):
     model. For other solvents and forcefields, "model" is not required.
 
     :Returns: Either an identifier or ``None``
-
     """
+    
     if solvent_type == "water":
         identifier = model if not model in (None, 'water') else DEFAULT_WATER_MODEL
         return identifier if identifier in GROMACS_WATER_MODELS else None
-    if not model in GROMACS_SOLVENT_MODELS[forcefield]:
+    if model not in GROMACS_SOLVENT_MODELS[forcefield]:
         if solvent_type in GROMACS_SOLVENT_MODELS[forcefield]:
             model = solvent_type
         else:
@@ -264,6 +261,7 @@ def get_ff_paths(forcefield='OPLS-AA'):
     """Return a :list: containing the forcefield directory, paths of ions
     and default watermodel itp files.
     """
+    
     settings = {
                 'OPLS-AA': ['oplsaa.ff/', 'oplsaa.ff/ions_opls.itp',
                             'oplsaa.ff/tip4p.itp'],
@@ -282,6 +280,7 @@ def get_ff_paths(forcefield='OPLS-AA'):
 
 def get_top_template(identifier):
     """Return the topology file template suitable for the solvent model."""
+      
     templates = {'water': 'system.top', 'octanol': 'system.top',
                  'cyclohexane': 'system.top', 'wetoctanol': 'system_octwet.top'}
     try:

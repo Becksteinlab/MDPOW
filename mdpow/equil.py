@@ -28,10 +28,7 @@ model.
 
 .. autodata:: DIST
 """
-
-from __future__ import absolute_import, division
-
-from six.moves import cPickle as pickle
+import pickle
 
 import os, errno
 import shutil
@@ -229,7 +226,7 @@ class Simulation(Journalled):
         else:
             self.filename = filename
         with open(filename, 'wb') as f:
-            pickle.dump(self, f, protocol=pickle.HIGHEST_PROTOCOL)
+            pickle.dump(self, f)
         logger.debug("Instance pickled to %(filename)r" % vars())
 
     def load(self, filename=None):

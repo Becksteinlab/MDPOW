@@ -73,21 +73,22 @@ solvation free energy in octanol there is
 
 .. autoclass:: Gsolv
    :members:
-   :inherited-members:
-
+   :inherited-members:   
+   
 .. autoclass:: Ghyd
    :members:
    :inherited-members:
-
+   
 .. autoclass:: Goct
    :members:
    :inherited-members:
-
+   
 .. autoclass:: Gcyclo
    :members:
    :inherited-members:
-
+   
 .. autofunction:: pOW
+
 .. autofunction:: pCW
 
 
@@ -131,11 +132,6 @@ TODO
   See `Free Energy Tutorial`_.
 
 """
-from __future__ import absolute_import, division
-
-import six
-from six.moves import zip
-from six.moves.configparser import NoOptionError
 
 import os
 import errno
@@ -143,6 +139,7 @@ import copy
 from subprocess import call
 import warnings
 from glob import glob
+from configparser import NoOptionError
 
 import numpy
 import pandas as pd
@@ -267,7 +264,7 @@ class FEPschedule(AttributeDict):
 
     def __deepcopy__(self, memo):
         x = FEPschedule()
-        for k, v in six.iteritems(self):
+        for k, v in self.items():
             x[k] = copy.deepcopy(v)
         return x
 
@@ -281,7 +278,7 @@ class Gsolv(Journalled):
 
     .. math::
 
-            \Delta A = -(\Delta A_{\mathrm{coul}} + \Delta A_{\mathrm{vdw}})
+       \Delta A = -(\Delta A_{\mathrm{coul}} + \Delta A_{\mathrm{vdw}})
 
     With this protocol, the concentration in the liquid and in the gas
     phase is the same. (Under the assumption of ideal solution/ideal
@@ -900,7 +897,6 @@ class Gsolv(Journalled):
         interaction switched on and ``lambda=1`` as switched off.
 
         .. math::
-
             \Delta A^{*} = -(\Delta A_{\mathrm{coul}} + \Delta A_{\mathrm{vdw}})
 
         Data are stored in :attr:`Gsolv.results`.
@@ -953,22 +949,21 @@ class Gsolv(Journalled):
         The error on the mean of the data :math:`\epsilon_y`, taking
         the correlation time into account, is calculated according to
         [FrenkelSmit2002]_ `p526`_:
-
+        
         .. math::
-
+        
            \epsilon_y  = \sqrt{2 \tau_c \mathrm{acf}(0)/T}
-
+           
         where :math:`\mathrm{acf}()` is the autocorrelation function
         of the fluctuations around the mean, :math:`y - \langle y
         \rangle`, :math:`\tau_c` is the correlation time, and :math:`T`
-        the total length of the simulation.
+        the total length of the simulation
 
         .. [FrenkelSmit2002] D. Frenkel and B. Smit, Understanding
                              Molecular Simulation. Academic Press, San
                              Diego 2002
 
         .. _p526: http://books.google.co.uk/books?id=XmyO2oRUg0cC&pg=PA526
-
         """
         stride = stride or self.stride
         logger.info("Analysis stride is %s.",stride)

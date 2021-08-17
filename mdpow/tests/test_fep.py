@@ -1,7 +1,3 @@
-from __future__ import absolute_import
-
-import sys
-
 import pytest
 
 import numpy as np
@@ -9,9 +5,10 @@ from numpy.testing import assert_array_almost_equal, assert_almost_equal
 from scipy import constants
 from copy import deepcopy
 
+import gromacs
+
 import mdpow.config
 import mdpow.fep
-import gromacs
 
 def test_molar_to_nm3():
     assert_almost_equal(mdpow.fep.molar_to_nm3(1.5), 0.9033212684)
@@ -117,5 +114,3 @@ class TestFEPschedule(object):
             else:
                 assert schedule[k] == reference[k], \
                     "mismatch between loaded FEP schedule entry {0} and reference".format(k)
-
-

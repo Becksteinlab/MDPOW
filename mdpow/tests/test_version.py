@@ -1,6 +1,3 @@
-from __future__ import absolute_import
-
-import six
 import pytest
 
 import mdpow
@@ -10,7 +7,7 @@ def version():
     return mdpow.__version__
 
 def test_version_string(version):
-    assert isinstance(version, six.string_types)
+    assert isinstance(version, str)
 
 def test_version(version):
     # generic non-empty check because versioneer can provide different
