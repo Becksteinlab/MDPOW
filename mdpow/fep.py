@@ -73,20 +73,20 @@ solvation free energy in octanol there is
 
 .. autoclass:: Gsolv
    :members:
-   :inherited-members:   
-   
+   :inherited-members:
+
 .. autoclass:: Ghyd
    :members:
    :inherited-members:
-   
+
 .. autoclass:: Goct
    :members:
    :inherited-members:
-   
+
 .. autoclass:: Gcyclo
    :members:
    :inherited-members:
-   
+
 .. autofunction:: pOW
 
 .. autofunction:: pCW
@@ -141,7 +141,7 @@ import warnings
 from glob import glob
 from configparser import NoOptionError
 
-import numpy
+import numpy as np
 import pandas as pd
 
 import scipy.integrate
@@ -252,13 +252,19 @@ class FEPschedule(AttributeDict):
         cfg_get = {float: cfg.getfloat,
                    int: cfg.getint,
                    str: cfg.getstr,    # literal strings, no conversion of None (which we need for the MDP!)
+                                       # CHECK: THIS IS LIKELY NOT GUARANTEED ANYMORE since getstr == get
                    list: cfg.getarray  # numpy float array from list
                    }
         def getter(type, section, key):
+            value = cfg_get[type](section, key)
             try:
-                return cfg_get[type](section, key)
-            except NoOptionError:
-                return None
+                # for empty list [] and array array([])
+                if len(value) == 0:
+                    value = None
+            except TypeError:
+                pass
+            return value
+        # skip any None values
         return FEPschedule((key, getter(keytype, section, key)) for key,keytype in keys.items()
                            if getter(keytype, section, key) is not None)
 
@@ -327,7 +333,7 @@ class Gsolv(Journalled):
                                      label='Coul',
                                      couple_lambda0='vdw-q', couple_lambda1='vdw',
                                      sc_alpha=0,      # linear scaling for coulomb
-                                     lambdas=numpy.array([0.0, 0.25, 0.5, 0.75, 1.0]),  # default values
+                                     lambdas=np.array([0.0, 0.25, 0.5, 0.75, 1.0]),  # default values
                                  ),
                          'vdw':
                          FEPschedule(name='vdw',
@@ -335,7 +341,7 @@ class Gsolv(Journalled):
                                      label='VDW',
                                      couple_lambda0='vdw', couple_lambda1='none',
                                      sc_alpha=0.5, sc_power=1, sc_sigma=0.3, # recommended values
-                                     lambdas=numpy.array([0.0, 0.05, 0.1, 0.2, 0.3,
+                                     lambdas=np.array([0.0, 0.05, 0.1, 0.2, 0.3,
                                               0.4, 0.5, 0.6, 0.65, 0.7, 0.75, 0.8,
                                               0.85, 0.9, 0.95, 1]), # defaults
                                  ),
@@ -670,8 +676,8 @@ class Gsolv(Journalled):
             logger.info('Setting dhdl file to xvg format')
             kwargs.setdefault('separate-dhdl-file', 'yes')
 
-        foreign_lambdas = numpy.asarray(foreign_lambdas)
-        lambda_index = numpy.where(foreign_lambdas == lmbda)[0][0]
+        foreign_lambdas = np.asarray(foreign_lambdas)
+        lambda_index = np.where(foreign_lambdas == lmbda)[0][0]
 
         kwargs.update(dirname=wdir, struct=self.struct, top=self.top,
                       mdp=self.mdp,
@@ -823,7 +829,7 @@ class Gsolv(Journalled):
 
         for component, lambdas in self.lambdas.items():
             xvg_files = [self.dgdl_xvg(self.wdir(component, l)) for l in lambdas]
-            self.results.xvg[component] = (numpy.array(lambdas),
+            self.results.xvg[component] = (np.array(lambdas),
                                            [XVG(xvg, permissive=self.permissive, stride=self.stride)
                                             for xvg in xvg_files])
         if autosave:
@@ -879,9 +885,9 @@ class Gsolv(Journalled):
         corrupted = {}
         self._corrupted = {}        # debugging ...
         for component, (lambdas, xvgs) in self.results.xvg.items():
-            corrupted[component] = numpy.any([(_lencorrupted(xvg) > 0) for xvg in xvgs])
+            corrupted[component] = np.any([(_lencorrupted(xvg) > 0) for xvg in xvgs])
             self._corrupted[component] = dict(((l, _lencorrupted(xvg)) for l,xvg in zip(lambdas, xvgs)))
-        return numpy.any([x for x in corrupted.values()])
+        return np.any([x for x in corrupted.values()])
 
     def analyze(self, force=False, stride=None, autosave=True, ncorrel=25000):
         r"""Extract dV/dl from output and calculate dG by TI.
@@ -949,11 +955,11 @@ class Gsolv(Journalled):
         The error on the mean of the data :math:`\epsilon_y`, taking
         the correlation time into account, is calculated according to
         [FrenkelSmit2002]_ `p526`_:
-        
+
         .. math::
-        
+
            \epsilon_y  = \sqrt{2 \tau_c \mathrm{acf}(0)/T}
-           
+
         where :math:`\mathrm{acf}()` is the autocorrelation function
         of the fluctuations around the mean, :math:`y - \langle y
         \rangle`, :math:`\tau_c` is the correlation time, and :math:`T`
@@ -990,18 +996,18 @@ class Gsolv(Journalled):
             # for TI just get the average dv/dl value (in array column 1; col 0 is the time)
             # (This can take a while if the XVG is now reading the array from disk first time)
             # Use XVG class properties: first data in column 0!
-            Y = numpy.array([x.mean[0] for x in xvgs])
-            stdY = numpy.array([x.std[0]  for x in xvgs])
+            Y = np.array([x.mean[0] for x in xvgs])
+            stdY = np.array([x.std[0]  for x in xvgs])
 
             # compute auto correlation time and error estimate for independent samples
             # (this can take a while). x.array[0] == time, x.array[1] == dHdl
             # nstep is calculated to give ncorrel samples (or all samples if less than ncorrel are
             # available)
             tc_data = [numkit.timeseries.tcorrel(x.array[0], x.array[1],
-                                                 nstep=int(numpy.ceil(len(x.array[0])/float(ncorrel))))
+                                                 nstep=int(np.ceil(len(x.array[0])/float(ncorrel))))
                                                  for x in xvgs]
-            DY = numpy.array([tc['sigma'] for tc in tc_data])
-            tc = numpy.array([tc['tc'] for tc in tc_data])
+            DY = np.array([tc['sigma'] for tc in tc_data])
+            tc = np.array([tc['tc'] for tc in tc_data])
 
             self.results.dvdl[component] = {'lambdas':lambdas, 'mean':Y, 'error':DY,
                                             'stddev':stdY, 'tcorrel':tc}
@@ -1050,13 +1056,13 @@ class Gsolv(Journalled):
                     # calculate statistical inefficiency of series
                     statinef  = statisticalInefficiency(ts, fast=False)
                     logger.info("The statistical inefficiency value is {:.4f}.".format(statinef))
-                    logger.info("The data are subsampled every {:d} frames.".format(int(numpy.ceil(statinef))))
+                    logger.info("The data are subsampled every {:d} frames.".format(int(np.ceil(statinef))))
                     # use the subsampleCorrelatedData function to get the subsample index
                     indices = subsampleCorrelatedData(ts, g=statinef,
                                                       conservative=True)
                     xvg_df = xvg_df.iloc[indices]
                 val.append(xvg_df)
-            self.results.xvg[component] = (numpy.array(lambdas), pd.concat(val))
+            self.results.xvg[component] = (np.array(lambdas), pd.concat(val))
 
         if autosave:
             self.save()
@@ -1104,8 +1110,8 @@ class Gsolv(Journalled):
             result = estimator().fit(xvgs)
             if self.method == 'BAR':
                 DeltaA = QuantityWithError(0,0)
-                a_s= numpy.diagonal(result.delta_f_, offset=1)
-                da_s = numpy.diagonal(result.d_delta_f_, offset=1)
+                a_s= np.diagonal(result.delta_f_, offset=1)
+                da_s = np.diagonal(result.d_delta_f_, offset=1)
                 for a, da in zip(a_s, da_s):
                     DeltaA += QuantityWithError(a, da)
                 self.results.DeltaA[component] = kBT_to_kJ(DeltaA, self.Temperature)
@@ -1184,7 +1190,7 @@ class Gsolv(Journalled):
                 return False
         except AttributeError:
             return False
-        return numpy.all(numpy.array([len(xvgs) for (lambdas,xvgs) in self.results.xvg.values()]) > 0)
+        return np.all(np.array([len(xvgs) for (lambdas,xvgs) in self.results.xvg.values()]) > 0)
 
     def plot(self, **kwargs):
         """Plot the TI data with error bars.
@@ -1212,7 +1218,7 @@ class Gsolv(Journalled):
         dvdl = self.results.dvdl
         nplots = len(dvdl)
         fig, axs = plt.subplots(nrows=1, ncols=nplots)
-        for i, component in enumerate(numpy.sort(dvdl.keys())):  # stable plot order
+        for i, component in enumerate(np.sort(dvdl.keys())):  # stable plot order
             x,y,dy = [dvdl[component][k] for k in ('lambdas', 'mean', 'error')]
             iplot = i
             ax = axs[i]
@@ -1427,7 +1433,7 @@ def p_transfer(G1, G2, **kwargs):
     transferFE = G2.results.DeltaA.Gibbs - G1.results.DeltaA.Gibbs
     # note minus sign, with our convention of the free energy difference to be
     # opposite to the partition coefficient.
-    logPow = -transferFE / (kBOLTZ * G1.Temperature) * numpy.log10(numpy.e)
+    logPow = -transferFE / (kBOLTZ * G1.Temperature) * np.log10(np.e)
 
     molecule = G1.molecule
 

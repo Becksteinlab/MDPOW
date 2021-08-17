@@ -1,7 +1,9 @@
-import os.path
+import pytest
 
 import numpy as np
 from numpy.testing import assert_array_almost_equal
+
+from . import CONFIGURATIONS
 
 from mdpow import config
 
@@ -83,46 +85,44 @@ class TestAlteredConfig(object):
             }
     }
 
-    def setup(self):
-    # load default bundled configuration
-        self.cfg = config.get_configuration(
-            os.path.join('mdpow', 'tests', 'testing_resources',
-                         'test_configurations', 'altered_runinput.yml'))
+    @pytest.fixture
+    def cfg(self):
+        return config.get_configuration(str(CONFIGURATIONS / 'altered_runinput.yml'))
 
-    def _test_section(self,section):
+    def _test_section(self, cfg, section):
         section_dict = self.params_altered[section]
         for k in section_dict.keys():
             if k == 'lambdas':
-                parsed = np.array([float(x.strip()) for x in self.cfg.get(section,k).split(",")])
+                parsed = np.array([float(x.strip()) for x in cfg.get(section,k).split(",")])
                 assert_array_almost_equal(parsed, section_dict[k],
                                           err_msg="mismatch in lambdas")
             else:
-                assert self.cfg.get(section,k) == section_dict[k], \
+                assert cfg.get(section,k) == section_dict[k], \
                     "mismatch in {}:{}".format(section,k)
 
-    def test_DEFAULT(self):
-        return self._test_section("DEFAULT")
+    def test_DEFAULT(self, cfg):
+        return self._test_section(cfg, "DEFAULT")
 
-    def test_setup(self):
-        return self._test_section("setup")
+    def test_setup(self, cfg):
+        return self._test_section(cfg, "setup")
 
-    def test_energy_minimize(self):
-        return self._test_section("energy_minimize")
+    def test_energy_minimize(self, cfg):
+        return self._test_section(cfg, "energy_minimize")
 
-    def test_MD_relaxed(self):
-        return self._test_section("MD_relaxed")
+    def test_MD_relaxed(self, cfg):
+        return self._test_section(cfg, "MD_relaxed")
 
-    def test_MD_NPT(self):
-        return self._test_section("MD_NPT")
+    def test_MD_NPT(self, cfg):
+        return self._test_section(cfg, "MD_NPT")
 
-    def test_FEP(self):
-        return self._test_section("FEP")
+    def test_FEP(self, cfg):
+        return self._test_section(cfg, "FEP")
 
-    def test_FEP_schedule_Coulomb(self):
-        return self._test_section("FEP_schedule_Coulomb")
+    def test_FEP_schedule_Coulomb(self, cfg):
+        return self._test_section(cfg, "FEP_schedule_Coulomb")
 
-    def test_FEP_schedule_VDW(self):
-        return self._test_section("FEP_schedule_VDW")
+    def test_FEP_schedule_VDW(self, cfg):
+        return self._test_section(cfg, "FEP_schedule_VDW")
 
-    def test_mdrun(self):
-        return self._test_section("mdrun")
+    def test_mdrun(self, cfg):
+        return self._test_section(cfg, "mdrun")

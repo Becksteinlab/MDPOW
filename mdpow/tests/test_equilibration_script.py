@@ -8,14 +8,14 @@ from gromacs.utilities import in_dir
 from mdpow.run import equilibrium_simulation
 from mdpow.config import get_configuration
 
+from . import RESOURCES
 
 class TestEquilibriumScript(object):
     def setup(self):
         self.tmpdir = td.TempDir()
         self.old_path = os.getcwd()
-        self.resources = os.path.join(
-            self.old_path, 'mdpow', 'tests', 'testing_resources')
-        m = pybol.Manifest(os.path.join(self.resources, 'manifest.yml'))
+        self.resources = RESOURCES
+        m = pybol.Manifest(str(self.resources / 'manifest.yml'))
         m.assemble('base', self.tmpdir.name)
 
     def teardown(self):

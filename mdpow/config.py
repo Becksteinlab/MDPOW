@@ -88,6 +88,12 @@ Gromacs force field files are ok).
 
 .. autofunction:: _generate_template_dict
 
+Exceptions
+----------
+
+.. autoexception:: NoSectionError
+.. autoclass:: NoOptionWarning
+
 """
 import os, errno
 from pkg_resources import resource_filename, resource_listdir
@@ -96,6 +102,7 @@ import yaml
 import numpy as np
 import gromacs.utilities
 
+import warnings
 import logging
 logger = logging.getLogger("mdpow.config")
 
@@ -107,8 +114,22 @@ defaults = {
     "runinput": resource_filename(__name__, "templates/runinput.yml"),
     }
 
+class NoSectionError(ValueError):
+    """Section entry is missing.
+
+    .. versionadded:: 0.8.0
+    """
+
+# not used at the moment
+# class NoOptionError(ValueError):
+#    """Option entry is missing from section"""
+
+class NoOptionWarning(UserWarning):
+    """Warning that an option is missing."""
+
 def merge_dicts(user, default):
     """Merge two dictionaries recursively.
+
     Uses recursive method to accurately
     merge nested dictionaries
     """
@@ -122,7 +143,19 @@ def merge_dicts(user, default):
 
 
 class POWConfigParser(object):
-    """Parse YAML config file."""
+    """Parse YAML config file.
+
+    Raises :exc:`NoSectionError` if a protocol section is missing.
+    Warns with :exc:`NoOptionWarning` if option under a protocol is missing
+    and returns ``None``.
+
+    .. versionchanged:: 0.8.0
+       :exc:`NoSectionError` is now raised to clearly distinguish
+       file structure problems (missing sections) from missing
+       entries (options).
+
+       The `getintarray()` method was removed.
+    """
 
     def __init__(self):
         self.conf = None
@@ -131,9 +164,14 @@ class POWConfigParser(object):
         """Read YAML from open stream ``fn``.
 
         Overwrites everything.
+
+        Returns self.
+
+        .. versionchanged:: 0.8.0
+           Returns self instead of ``True``.
         """
         self.conf = yaml.safe_load(fn)
-        return True
+        return self
 
     def merge(self, fn):
         """Load YAML from open stream ``fn`` and merge into :attr:`conf`.
@@ -155,21 +193,35 @@ class POWConfigParser(object):
         """Return option, unless its "None" --> ``None``,
 
         Conversion to basic python types str, float, int, boolean is
-        carried out automatically (unless it was None).
+        carried out automatically.
 
         .. Note:: "none" remains a string, which is essential, see
                   `Issue 20 <https://github.com/Becksteinlab/MDPOW/issues/20>`_
+                  Conversions are performed by the pyyaml parser.
 
         .. versionchanged:: 0.6.0
            Prior versions would convert case-insensitively (e.g. "NONE"
            and "none")
         """
-
         try:
-            value = self.conf[section][option]
-            return value if value != "None" else None
-        except TypeError:
-            return None
+            sec = self.conf[section]
+        except (KeyError, TypeError):
+            # TypeError when self.conf is None
+            raise NoSectionError(f"Config file has no section {section}")
+        try:
+            value = sec[option]
+            value = value if value != "None" else None  # still needed??
+        except KeyError:
+            # Returning None has been standard behavior.
+            #raise NoOptionError(f"Config file section {section} contains "
+            #                    f"no option {option}.")
+            msg = (f"Config file section {section} contains "
+                  f"no option {option}. Using 'None'.")
+            warnings.warn(msg, category=NoOptionWarning)
+            logger.warning(msg)
+            value = None
+        logger.debug("%s: %s = %r", section, option, value)
+        return value
 
     # TODO:
     # The YAML parser does automatic conversion: the following
@@ -181,40 +233,57 @@ class POWConfigParser(object):
     getboolean = get
 
     def getpath(self, section, option):
-        """Return option as an expanded path."""
-        return os.path.expanduser(os.path.expandvars(self.get(section, option)))
+        """Return option as an expanded path (or ``None``).
+
+        .. versionchanged:: 0.8.0
+           If the entry is ``None`` this method returns ``None``
+           instead of raising a :exc:`TypeError`.
+        """
+        item = self.get(section, option)
+        return os.path.expanduser(
+            os.path.expandvars(item)) if item is not None else None
 
     def findfile(self, section, option):
-        """Return location of a file ``option``.
+        """Return location of a file ``option`` or ``None``.
 
         Uses :func:`mdpow.config.get_template`.
         """
-        return get_template(self.getpath(section, option))
+        pth = self.getpath(section, option)
+        return get_template(pth) if pth is not None else None
 
     # TODO: Change input file format to use yaml lists and make this method superfluous
     def getlist(self, section, option):
-        """Return option as a list of strings.
+        """Return option as a list of strings or ``[]``.
 
         *option* must be comma-separated; leading/trailing whitespace
         is stripped and quotes are treated verbatim.
+
+        .. versionchanged:: 0.8.0
+           If the entry is ``None``, an empty list is returned
+           instead of raising a :exc:`TypeError`.
         """
-        return [x.strip() for x in str(self.get(section, option)).split(",")]
+        item = self.get(section, option)
+        return [x.strip()
+            for x in str(item).split(",")] if item is not None else []
 
     def getarray(self, section, option):
-        """Return option as a numpy array of floats.
+        """Return option as a numpy array of floats or ``np.array([])``.
 
         *option* must be comma-separated; leading/trailing whitespace
         is stripped and quotes are treated verbatim.
-        """
-        return np.asarray(self.getlist(section, option), dtype=np.float)
 
-    def getintarray(self, section, option):
-        """Return option as a numpy array of integers.
-
-        *option* must be comma-separated; leading/trailing whitespace
-        is stripped and quotes are treated verbatim.
+        .. versionchanged:: 0.8.0
+           If the entry is ``None``, an empty array is returned.
         """
-        return np.asarray(self.getlist(section, option), dtype=np.int)
+        return np.asarray(self.getlist(section, option), dtype=float)
+
+#    def getintarray(self, section, option):
+#        """Return option as a numpy array of integers.
+#
+#        *option* must be comma-separated; leading/trailing whitespace
+#        is stripped and quotes are treated verbatim.
+#        """
+#        return np.asarray(self.getlist(section, option), dtype=int)
 
 def get_configuration(filename=None):
     """Reads and parses a run input config file.
@@ -420,4 +489,3 @@ if not 'GMXLIB' in os.environ:
 else:
     logger.warning("Using user-supplied environment variable GMXLIB=%r to find force fields", os.environ['GMXLIB'])
     logger.info("(You can use the MDPOW default by executing 'unset GMXLIB' in your shell before running MDPOW.)")
-
