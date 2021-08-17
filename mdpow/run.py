@@ -36,10 +36,7 @@ Support
 .. autofunction:: runMD_or_exit
 
 """
-
-from __future__ import absolute_import
-
-from six.moves import configparser
+import configparser
 
 import sys
 import os

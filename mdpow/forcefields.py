@@ -37,7 +37,9 @@ Internal data
 
 .. autodata:: SPECIAL_WATER_COORDINATE_FILES
 .. autodata:: GROMACS_WATER_MODELS
+   :noindex:
 .. autodata:: GROMACS_SOLVENT_MODELS
+   :noindex:
 
 Internal classes and functions
 ------------------------------
@@ -52,17 +54,15 @@ Internal classes and functions
 .. autofunction:: get_solvent_model
 
 """
-
-from __future__ import absolute_import
-
 import os
 from collections import defaultdict
 
 import logging
 logger = logging.getLogger("mdpow.forecefields")
 
-#: Default force field. At the moment, only OPLS-AA is directly
-#: supported.
+#: Default force field. At the moment, OPLS-AA, CHARMM/CGENFF, and AMBER/GAFF
+#: are directly supported. However, it is not recommended to change the
+#: default here as this behavior is not tested.
 DEFAULT_FORCEFIELD = "OPLS-AA"
 
 #------------------------------------------------------------
@@ -127,8 +127,16 @@ def _create_water_models(watermodelsdat):
             description=description)
     return models
 
-#: Use the default water model unless another water model is chosen in the runinput
-#: file (``setup.watermodel``).
+#: Use the default water model unless another water model is chosen in the
+#: :ref:`run input file <runinput-file>` file by setting the
+#: ``setup.watermodel`` parameter.
+#:
+#: .. warning::
+#:    Select the native water model **manually** and do not rely on the default
+#:    set here. For CHARMM/GAFF the CHARMM TIP3P model is recommended.
+#:    For AMBER/GAFF the TIP3P mdeol is often used. Choosing the correct water model
+#:    is a *scientific* decision that *you* have to make conscientiously.
+#:
 DEFAULT_WATER_MODEL = "tip4p"
 
 #: Dictionary of :class:`GromacsSolventModel` instances, one for each Gromacs water
@@ -217,12 +225,12 @@ def get_solvent_identifier(solvent_type, model=None, forcefield='OPLS-AA'):
     model. For other solvents and forcefields, "model" is not required.
 
     :Returns: Either an identifier or ``None``
-
     """
+    
     if solvent_type == "water":
         identifier = model if not model in (None, 'water') else DEFAULT_WATER_MODEL
         return identifier if identifier in GROMACS_WATER_MODELS else None
-    if not model in GROMACS_SOLVENT_MODELS[forcefield]:
+    if model not in GROMACS_SOLVENT_MODELS[forcefield]:
         if solvent_type in GROMACS_SOLVENT_MODELS[forcefield]:
             model = solvent_type
         else:
@@ -253,6 +261,7 @@ def get_ff_paths(forcefield='OPLS-AA'):
     """Return a :list: containing the forcefield directory, paths of ions
     and default watermodel itp files.
     """
+    
     settings = {
                 'OPLS-AA': ['oplsaa.ff/', 'oplsaa.ff/ions_opls.itp',
                             'oplsaa.ff/tip4p.itp'],
@@ -271,6 +280,7 @@ def get_ff_paths(forcefield='OPLS-AA'):
 
 def get_top_template(identifier):
     """Return the topology file template suitable for the solvent model."""
+      
     templates = {'water': 'system.top', 'octanol': 'system.top',
                  'cyclohexane': 'system.top', 'wetoctanol': 'system_octwet.top'}
     try:

@@ -109,13 +109,13 @@ if __name__ == "__main__":
 
                 try:
                     G = fixFEP(solvent, fepfile, simfile, os.path.realpath(os.path.curdir))
-                except Exception,err:
+                except Exception as err:
                     logger.warning(str(err))
 
                 if qscript:
                     logger.info("[%(solvent)8s] Setting up FEP jobs for %(qscript)r...", vars())
                     try:
                         G.setup(qscript=qscript)
-                    except Exception,err:
+                    except Exception as err:
                         logger.error(str(err))
 

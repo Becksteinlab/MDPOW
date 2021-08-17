@@ -18,9 +18,6 @@ In modules simply use::
   import logging
   logger = logging.getLogger(logname)
 """
-
-from __future__ import absolute_import
-
 # log is the only package that is imported in __init__ so it MAY NOT
 # HAVE ANY DEPENDENCIES except standard library; in particular, DO NOT
 # 'from . import config' or similar because it will break pip install

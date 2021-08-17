@@ -1,6 +1,6 @@
-=================== 
+===================
  README for MDPOW
-=================== 
+===================
 
 |build| |cov| |docs|
 
@@ -35,7 +35,7 @@ Documentation
 * https://mdpow.readthedocs.io
 * `Tutorial`_ : computing the octanol-water partition coefficient of
   benzene (uses the `example files`_)
-  
+
 
 .. _Tutorial: http://mdpow.readthedocs.io/en/latest/init.html#tutorial-using-the-mdpow-scripts-to-compute-logpow-of-benzene
 .. _example files: https://github.com/Becksteinlab/MDPOW/tree/develop/doc/examples
@@ -43,7 +43,7 @@ Documentation
 Installation
 ------------
 
-See `INSTALL`_ for detailed instructions. MDPOW currently supports Python 2.7 and Python 3.7 to 3.9.
+See `INSTALL`_ for detailed instructions. MDPOW currently supports Python 3.7 to 3.9.
 
 You will also need `Gromacs`_ (currently tested with versions 4.6.5,
 2018, 2020, 2021 but 2016 and 2019 should also work).
@@ -55,7 +55,7 @@ Development version
 If you want to install the development version, get the sources from
 GitHub (the development branch) ::
 
-  git clone https://github.com/Becksteinlab/MDPOW.git  
+  git clone https://github.com/Becksteinlab/MDPOW.git
 
 and Install from the checked out source::
 
@@ -71,7 +71,7 @@ Source code
 *MDPOW* is open source and published under the `GNU General Public License
 v3`_. Source code is available at https://github.com/Becksteinlab/MDPOW .
 
-.. _`GNU General Public License v3`: 
+.. _`GNU General Public License v3`:
    http://www.gnu.org/licenses/gpl-3.0.html
 
 Footnotes
@@ -91,5 +91,5 @@ Footnotes
 .. |docs| image:: https://readthedocs.org/projects/mdpow/badge/?version=latest
    :target: http://mdpow.readthedocs.org/en/latest/?badge=latest
    :alt: Documentation
-   
+
 .. _INSTALL: INSTALL.rst

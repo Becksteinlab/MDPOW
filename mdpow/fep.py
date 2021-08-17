@@ -3,7 +3,7 @@
 # mdpow: fep.py
 # Copyright (c) 2010 Oliver Beckstein
 
-"""
+r"""
 :mod:`mdpow.fep` -- Calculate free energy of solvation
 ======================================================
 
@@ -73,21 +73,22 @@ solvation free energy in octanol there is
 
 .. autoclass:: Gsolv
    :members:
-   :inherited-members:
-
+   :inherited-members:   
+   
 .. autoclass:: Ghyd
    :members:
    :inherited-members:
-
+   
 .. autoclass:: Goct
    :members:
    :inherited-members:
-
+   
 .. autoclass:: Gcyclo
    :members:
    :inherited-members:
-
+   
 .. autofunction:: pOW
+
 .. autofunction:: pCW
 
 
@@ -131,11 +132,6 @@ TODO
   See `Free Energy Tutorial`_.
 
 """
-from __future__ import absolute_import, division
-
-import six
-from six.moves import zip
-from six.moves.configparser import NoOptionError
 
 import os
 import errno
@@ -143,6 +139,7 @@ import copy
 from subprocess import call
 import warnings
 from glob import glob
+from configparser import NoOptionError
 
 import numpy
 import pandas as pd
@@ -267,12 +264,12 @@ class FEPschedule(AttributeDict):
 
     def __deepcopy__(self, memo):
         x = FEPschedule()
-        for k, v in six.iteritems(self):
+        for k, v in self.items():
             x[k] = copy.deepcopy(v)
         return x
 
 class Gsolv(Journalled):
-    """Simulations to calculate and analyze the solvation free energy.
+    r"""Simulations to calculate and analyze the solvation free energy.
 
     :math:`\Delta A` is computed from the decharging and the
     decoupling step. With our choice of ``lambda=0`` being the fully
@@ -281,7 +278,7 @@ class Gsolv(Journalled):
 
     .. math::
 
-            \Delta A = -(\Delta A_{\mathrm{coul}} + \Delta A_{\mathrm{vdw}})
+       \Delta A = -(\Delta A_{\mathrm{coul}} + \Delta A_{\mathrm{vdw}})
 
     With this protocol, the concentration in the liquid and in the gas
     phase is the same. (Under the assumption of ideal solution/ideal
@@ -900,7 +897,6 @@ class Gsolv(Journalled):
         interaction switched on and ``lambda=1`` as switched off.
 
         .. math::
-
             \Delta A^{*} = -(\Delta A_{\mathrm{coul}} + \Delta A_{\mathrm{vdw}})
 
         Data are stored in :attr:`Gsolv.results`.
@@ -953,22 +949,21 @@ class Gsolv(Journalled):
         The error on the mean of the data :math:`\epsilon_y`, taking
         the correlation time into account, is calculated according to
         [FrenkelSmit2002]_ `p526`_:
-
+        
         .. math::
-
+        
            \epsilon_y  = \sqrt{2 \tau_c \mathrm{acf}(0)/T}
-
+           
         where :math:`\mathrm{acf}()` is the autocorrelation function
         of the fluctuations around the mean, :math:`y - \langle y
         \rangle`, :math:`\tau_c` is the correlation time, and :math:`T`
-        the total length of the simulation.
+        the total length of the simulation
 
         .. [FrenkelSmit2002] D. Frenkel and B. Smit, Understanding
                              Molecular Simulation. Academic Press, San
                              Diego 2002
 
         .. _p526: http://books.google.co.uk/books?id=XmyO2oRUg0cC&pg=PA526
-
         """
         stride = stride or self.stride
         logger.info("Analysis stride is %s.",stride)
@@ -1029,6 +1024,11 @@ class Gsolv(Journalled):
         return self.results.DeltaA.Gibbs
 
     def collect_alchemlyb(self, SI=True, start=0, stop=None, stride=None, autosave=True, autocompress=True):
+        """Collect the data files using alchemlyb.
+
+        Unlike :meth:`collect`, this method can subsample with the
+        statistical inefficiency (parameter `SI`).
+        """
         extract = self.estimators[self.method]['extract']
 
         if autocompress:
@@ -1062,6 +1062,13 @@ class Gsolv(Journalled):
             self.save()
 
     def analyze_alchemlyb(self, SI=True, start=0, stop=None, stride=None, force=False, autosave=True):
+        """Compute the free energy from the simulation data with alchemlyb.
+
+        Unlike :meth:`analyze`, the MBAR estimator is available (in
+        addition to TI). Note that SI should be enabled for meaningful
+        error estimates.
+
+        """
         stride = stride or self.stride
         start = start or self.start
         stop = stop or self.stop
@@ -1400,20 +1407,21 @@ def p_transfer(G1, G2, **kwargs):
                 logger.error(errmsg)
                 raise ValueError(errmsg)
 
-        if kwargs['force'] or (not hasattr(G.results.DeltaA, 'Gibbs')):
+        logger.info("The solvent is %s .", G.solvent_type)
+        if kwargs['force'] or 'Gibbs' not in G.results.DeltaA:
             # write out the settings when the analysis is performed
-            logger.info("The solvent is %s .", G.solvent_type)
             logger.info("Estimator is %s.", estimator)
             logger.info("Free energy calculation method is %s.", G.method)
 
-    if estimator == 'mdpow':
-        G.analyze(**G_kwargs)
-    elif estimator == 'alchemlyb':
-        if G_kwargs['SI']:
-            logger.info("Statistical inefficiency analysis will be performed.")
+            if estimator == 'mdpow':
+                G_kwargs.pop('SI', None)  # G.analyze() does not know SI
+                G.analyze(**G_kwargs)
+            elif estimator == 'alchemlyb':
+                logger.info("Statistical inefficiency analysis will %s be performed." %
+                            ("" if G_kwargs['SI'] else "not"))
+                G.analyze_alchemlyb(**G_kwargs)
         else:
-            logger.info("Statistical inefficiency analysis won't be performed.")
-        G.analyze_alchemlyb(**G_kwargs)
+            logger.info("Using already calculated free energy DeltaA")
 
     # x.Gibbs are QuantityWithError so they do error propagation
     transferFE = G2.results.DeltaA.Gibbs - G1.results.DeltaA.Gibbs

@@ -2,6 +2,7 @@
 # Copyright (c) 2010 Oliver Beckstein <orbeckst@gmail.com>
 # Released under the GNU Public License 3 (or higher, your choice)
 
+import sys
 from setuptools import setup, find_packages
 import versioneer
 
@@ -24,8 +25,6 @@ setup(name="MDPOW",
           "Operating System :: POSIX",
           'Operating System :: MacOS :: MacOS X',
           'Programming Language :: Python',
-          'Programming Language :: Python :: 2',
-          "Programming Language :: Python :: 2.7",
           "Programming Language :: Python :: 3",
           "Programming Language :: Python :: 3.7",
           "Programming Language :: Python :: 3.8",
