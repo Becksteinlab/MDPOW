@@ -11,7 +11,9 @@ import py.path
 import yaml
 import pybol
 
-from mdpow.ensemble import Ensemble, EnsembleAnalysis
+import numpy as np
+
+from mdpow.ensemble import Ensemble, EnsembleAnalysis, EnsembleAtomGroup
 import mdpow.fep
 from gromacs.utilities import in_dir
 
@@ -82,13 +84,19 @@ class TestEnsemble(object):
             for k in solute.group_keys():
                 assert len(solute[k]) == 12
 
-    def test_eq_positions(self):
+    def test_ensemble_ag_methods(self):
         with in_dir(os.path.join(self.resources, 'states'), create=False):
             BW = Ensemble(dirname='benzene', solvents=['water'])
             BO = Ensemble(dirname='benzene', solvents=['octanol'])
-            Sol1 = BW.select_atoms('resname SOL')
-            Sol2 = BO.select_atoms('resname SOL')
+        Sol1 = BW.select_atoms('resname SOL')
+        Sol2 = BO.select_atoms('resname SOL')
+        Sol1_pos = Sol1.select_atoms('resid 1').positions()
+        for k in Sol1_pos:
+            assert np.shape(Sol1_pos[k]) == (3, 3)
         assert not Sol1 == Sol2
+        assert type(Sol1.select_atoms('resid 1')) == EnsembleAtomGroup
+        assert Sol1.select_atoms('resid 1') == Sol1.select_atoms('resid 1')
+        assert BW.get_keys() == Sol1.ensemble().get_keys()
 
     def test_ensemble_analysis(self):
         class TestAnalysis(EnsembleAnalysis):
@@ -103,7 +111,8 @@ class TestEnsemble(object):
             def _single_universe(self):
                 self.key_list.append(self._key)
 
-
+            def _single_frame(self):
+                assert len(self._system.select_atoms('not resname SOL')) == 12
 
             def _conclude_universe(self):
                 assert self.n_frames == self.stop

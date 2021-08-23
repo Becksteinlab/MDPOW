@@ -258,7 +258,7 @@ class EnsembleAtomGroup(object):
         if not keys is None:
             for k in keys:
                 try:
-                    positions[k] = self[k].positions
+                    positions[k] = self.groups[k].positions
                 except KeyError as err:
                     logger.warning(f"{err} is an invalid key")
                     continue
