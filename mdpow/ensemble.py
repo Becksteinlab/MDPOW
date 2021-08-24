@@ -77,10 +77,16 @@ class Ensemble(object):
         """
 
         """
+        try:
+            self.top: dict = kwargs.pop('top_paths')
+        except KeyError:
+            self.top = None
+
         self.num_systems = 0
         self.ensemble = {}
         self.system_keys = []
         self.solvents = solvents
+
 
         if dirname is None:
             return
@@ -111,8 +117,7 @@ class Ensemble(object):
             sys_list.append(self[key])
         return sys_list
 
-    @staticmethod
-    def _load_dir_unv():
+    def _load_dir_unv(self, solvent):
         """Loads system in directory into an MDAnalysis Universe
 
         logs warning if more than one topology is in directory. If
@@ -120,11 +125,15 @@ class Ensemble(object):
         in a universe if that fail will try to load each individually"""
         cur_dir = os.listdir(os.curdir)
         trj = []
-        top = []
+        if self.top is None:
+            top = []
+        else:
+            # if top is specified in kwargs, saved to list
+            top = [self.top[solvent]]
         for file in cur_dir:
             if file.endswith('.xtc'):
                 trj.append(file)
-            if file.endswith('.gro'):
+            if file.endswith('.gro') and self.top is None:
                 top.append(file)
         if len(top) > 1:
             logger.warning('More than one topology detected in %s will just use first topology' % os.curdir)
@@ -136,7 +145,7 @@ class Ensemble(object):
             system = mda.Universe(os.path.abspath(top[0]), [os.path.abspath(p) for p in trj])
             return system
         except FileFormatWarning or MissingDataWarning or NoDataError or ValueError:
-            logger.warning('Mutiple trajectories deteceted in %s attempting'
+            logger.warning('Multiple trajectories detected in %s attempting'
                            ' to find correct one for topology' % os.curdir)
             while len(trj) > 0:
                 try:
@@ -157,20 +166,17 @@ class Ensemble(object):
         and interaction directories to search lambda directories for system files."""
         fep_dir = os.path.join(self.ensemble_dir, 'FEP')
         for solvent in self.solvents:  # Ugly set of loops, may have to find way to clean up
-            solvent_dict = {'Coulomb': {},
-                            'VDW': {}}
-            for dirs in ["Coulomb", "VDW"]:
+            for dirs in ["Coulomb", "VDW"]:  # Attribute folder names
                 int_dir = os.path.join(fep_dir, solvent, dirs)
-
                 if os.path.exists(int_dir):
-                    with in_dir(int_dir, create=False):
+                    with in_dir(int_dir, create=False):  # Entering attribute folders
                         logger.info("Searching %s directory for systems" % os.curdir)
                         files = os.listdir(os.curdir)
-                        for file in files:
+                        for file in files:  # Traversing lambda directories
                             if os.path.isdir(file):
                                 with in_dir(file, create=False):
                                     try:
-                                        self.ensemble[solvent, dirs, file] = self._load_dir_unv()
+                                        self.ensemble[(solvent, dirs, file)] = self._load_dir_unv(solvent)
                                         self.system_keys.append((solvent, dirs, file))
                                         self.num_systems += 1
                                     except NoDataWarning:
