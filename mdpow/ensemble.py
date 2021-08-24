@@ -87,7 +87,6 @@ class Ensemble(object):
         self.system_keys = []
         self.solvents = solvents
 
-
         if dirname is None:
             return
 
@@ -133,12 +132,13 @@ class Ensemble(object):
         for file in cur_dir:
             if file.endswith('.xtc'):
                 trj.append(file)
-            if file.endswith('.gro') and self.top is None:
+            if (file.endswith('.tpr') or file.endswith('gro')) and self.top is None:
                 top.append(file)
         if len(top) > 1:
-            logger.warning('More than one topology detected in %s will just use first topology' % os.curdir)
+            logger.warning('More than one topology detected in %s will just use first topology',
+                           os.curdir)
         if len(top) == 0 or len(trj) == 0:
-            logger.warning('No MD files detected in %s' % os.curdir)
+            logger.warning('No MD files detected in %s', os.curdir)
             raise NoDataWarning
         trj.sort()
         try:
@@ -148,15 +148,8 @@ class Ensemble(object):
                 system = mda.Universe(top[0], [os.path.abspath(p) for p in trj])
             return system
         except FileFormatWarning or MissingDataWarning or NoDataError or ValueError:
-            logger.warning('Multiple trajectories detected in %s attempting'
-                           ' to find correct one for topology' % os.curdir)
-            while len(trj) > 0:
-                try:
-                    system = mda.Universe(top[0], top.pop())
-                    return system
-                except FileFormatWarning or MissingDataWarning or NoDataError or ValueError:
-                    continue
-            logger.warning('No files in %s are compatible skipping directory' % os.curdir)
+            logger.error('Multiple trajectories detected in %s attempting'
+                           ' to find correct one for topology', os.curdir)
             raise NoDataWarning
 
     def get_keys(self):
@@ -180,10 +173,11 @@ class Ensemble(object):
                                 with in_dir(file, create=False):
                                     try:
                                         self.ensemble[(solvent, dirs, file)] = self._load_dir_unv(solvent)
-                                        self.system_keys.append((solvent, dirs, file))
-                                        self.num_systems += 1
                                     except NoDataWarning:
                                         continue
+                                    else:
+                                        self.system_keys.append((solvent, dirs, file))
+                                        self.num_systems += 1
 
     def add_system(self, key, topology=None, trajectory=None, universe=None):
         """Adds system from universe object for trajectory and topology files
@@ -193,11 +187,15 @@ class Ensemble(object):
         if not universe is None:
             self.ensemble[key] = universe
         elif topology is None or trajectory is None:
-            logger.error("%s does not exist" % trajectory)
+            err = f"{topology} does not exist"
+            logger.error(err)
+            raise ValueError(err)
         elif not os.path.exists(trajectory) and not os.path.exists(topology):
-            logger.error("%s does not exist" % trajectory)
+            err = f"{trajectory} does not exist"
+            logger.error(err)
+            raise ValueError(err)
         else:
-            self.ensemble[key] = mda.Universe(topology, trajectory)
+            self.ensemble[key] = mda.Universe(os.path.abspath(topology), os.path.abspath(trajectory))
         self.system_keys.append(key)
         self.num_systems += 1
 
