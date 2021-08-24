@@ -142,7 +142,10 @@ class Ensemble(object):
             raise NoDataWarning
         trj.sort()
         try:
-            system = mda.Universe(os.path.abspath(top[0]), [os.path.abspath(p) for p in trj])
+            if self.top is None:
+                system = mda.Universe(os.path.abspath(top[0]), [os.path.abspath(p) for p in trj])
+            else:
+                system = mda.Universe(top[0], [os.path.abspath(p) for p in trj])
             return system
         except FileFormatWarning or MissingDataWarning or NoDataError or ValueError:
             logger.warning('Multiple trajectories detected in %s attempting'

@@ -48,6 +48,13 @@ class TestEnsemble(object):
             diff = set(bnz.get_keys()) ^ set(ensemble_keys)
             assert not diff
 
+    def test_kwargs(self):
+        with in_dir(os.path.join(self.resources, 'states'), create=False):
+            l_dir = os.path.abspath(os.path.join('example_FEP', 'FEP', 'md.gro'))
+            bnz = Ensemble(dirname='example_FEP', solvents=['water'], top_paths={'water': l_dir})
+            diff = set(bnz.get_keys()) ^ set(ensemble_keys)
+            assert not diff
+
     def test_add_remove_systems(self):
         with in_dir(os.path.join(self.resources, 'states'), create=False):
             bnz = Ensemble()
