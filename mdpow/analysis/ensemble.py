@@ -69,7 +69,7 @@ class Ensemble(object):
     Typical workflow for manual addition::
 
         ens = Ensemble()
-        ens.add_system(topology='md.gro', trajectory='md.xvg')
+        ens.add_system(topology='md.gro', trajectory='md.xtc')
 
     """
 
@@ -227,7 +227,7 @@ class Ensemble(object):
 
 
 class EnsembleAtomGroup(object):
-    """Group for storing AtomGroups from Ensemble.select_atoms"""
+    """Group for storing AtomGroups from Ensemble.select_atoms()"""
 
     def __init__(self, group_dict=None, Ensemble_dir=None):
         self.groups = group_dict

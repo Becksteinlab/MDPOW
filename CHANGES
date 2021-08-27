@@ -21,7 +21,9 @@ Enhancements
 * new config.NoOptionWarning when undefined options are used (with
   default None) and POWConfigParser.get() now logs when an option is used
   at level DEBUG (PR #187)
-
+* new Ensemble and EnsembleAtomGroup objects for loading set of system
+  simulations (PR #179)
+* new EnsembleAnalysis framework for collecting data from MDPOW simulations (PR #179)
 
 Fixes
 

@@ -10,28 +10,15 @@ the objects in mdpow.ensemble allow for a molecule directory's
 systems to be loaded into `MDAnalysis <https://mdanalysis.org>`_
 Universes and be analyzed as a group.
 
-Ensemble Objects
-================
-
-This section assumes a basic understanding of objects in python and is
-for users who wish to construct their own analyses.
-
-Ensemble
-________
-
-.. autoclass:: mdpow.ensemble.Ensemble
-    :members:
-
-EnsembleAtomGroup
-_________________
-
-.. autoclass:: mdpow.ensemble.EnsembleAtomGroup
-    :members:
+Ensemble Analysis Framework
+===========================
 
 EnsembleAnalysis
 ----------------
 
-.. autoclass:: mdpow.ensemble.EnsembleAnalysis
+A framework for analyzing MDPOW simulations loaded into ensemble objects.
+
+.. autoclass:: mdpow.analysis.ensemble.EnsembleAnalysis
     :members:
 
     .. automethod:: _prepare_ensemble
