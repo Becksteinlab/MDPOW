@@ -3,18 +3,14 @@ from __future__ import absolute_import
 from . import tempdir as td
 
 import os.path
-import sys
 
-import pytest
 import py.path
 
-import yaml
 import pybol
 
 import numpy as np
 
-from mdpow.ensemble import Ensemble, EnsembleAnalysis, EnsembleAtomGroup
-import mdpow.fep
+from ..analysis.ensemble import Ensemble, EnsembleAnalysis, EnsembleAtomGroup
 from gromacs.utilities import in_dir
 
 from pkg_resources import resource_filename
