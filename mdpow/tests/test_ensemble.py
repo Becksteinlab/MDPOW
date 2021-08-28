@@ -82,7 +82,7 @@ class TestEnsemble(object):
         for k in Sol2_pos:
             assert np.shape(Sol2_pos[k]) == (3, 3)
         assert not Sol1 == Sol2
-        assert type(Sol2) == EnsembleAtomGroup
+        assert isinstance(Sol2, EnsembleAtomGroup)
         assert Sol2 == Sol1.select_atoms('resid 1')
         assert BW.get_keys() == Sol1.ensemble().get_keys()
 
