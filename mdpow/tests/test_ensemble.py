@@ -7,11 +7,14 @@ import os.path
 import py.path
 
 import pybol
+import pytest
 
 import numpy as np
 
-from ..analysis.ensemble import Ensemble, EnsembleAnalysis, EnsembleAtomGroup
 from gromacs.utilities import in_dir
+
+from ..analysis.ensemble import Ensemble, EnsembleAnalysis, EnsembleAtomGroup
+from ..analysis import NoDataWarning
 
 from pkg_resources import resource_filename
 RESOURCES = py.path.local(resource_filename(__name__, 'testing_resources'))
@@ -29,32 +32,28 @@ ensemble_keys = [('water', 'Coulomb', '0000'),
 class TestEnsemble(object):
     def setup(self):
         self.tmpdir = td.TempDir()
-        self.old_path = os.getcwd()
-        self.resources = os.path.join(
-            self.old_path, 'mdpow', 'tests', 'testing_resources')
-        m = pybol.Manifest(os.path.join(self.resources, 'manifest.yml'))
-        m.assemble('FEP', self.tmpdir.name)
+        self.m = pybol.Manifest(str(RESOURCES / 'manifest.yml'))
+        self.m.assemble('example_FEP', self.tmpdir.name)
 
     def teardown(self):
         self.tmpdir.dissolve()
 
     def test_build_ensemble(self):
-        with in_dir(os.path.join(self.resources, 'states'), create=False):
-            bnz = Ensemble(dirname='example_FEP', solvents=['water'])
-            diff = set(bnz.get_keys()) ^ set(ensemble_keys)
-            assert not diff
+        # Octanol will be added later
+        Sim = Ensemble(dirname=self.tmpdir.name, solvents=['water'])
+        diff = set(Sim.get_keys()) ^ set(ensemble_keys)
+        assert not diff
 
     def test_kwargs(self):
-        with in_dir(os.path.join(self.resources, 'states'), create=False):
-            l_dir = os.path.abspath(os.path.join('example_FEP', 'FEP', 'md.gro'))
-            bnz = Ensemble(dirname='example_FEP', solvents=['water'], top_paths={'water': l_dir})
-            diff = set(bnz.get_keys()) ^ set(ensemble_keys)
-            assert not diff
+        l_dir = os.path.abspath(os.path.join(self.tmpdir.name, 'FEP', 'md.gro'))
+        bnz = Ensemble(dirname=self.tmpdir.name, solvents=['water'], topology_paths={'water': l_dir})
+        diff = set(bnz.get_keys()) ^ set(ensemble_keys)
+        assert not diff
 
     def test_add_remove_systems(self):
-        with in_dir(os.path.join(self.resources, 'states'), create=False):
+        with in_dir(self.tmpdir.name, create=False):
             bnz = Ensemble()
-            l_dir = os.path.join(os.curdir, 'example_FEP', 'FEP', 'water', 'Coulomb', '0000')
+            l_dir = os.path.join(os.curdir, 'FEP', 'water', 'Coulomb', '0000')
             top_dir = os.path.join(l_dir, 'md.gro')
             trj_dir = os.path.join(l_dir, 'md_red.xtc')
             bnz.add_system(('water', 'Coulomb', '0000'), topology=top_dir, trajectory=trj_dir)
@@ -67,16 +66,14 @@ class TestEnsemble(object):
             assert len(bnz) == 0
 
     def test_selection(self):
-        with in_dir(os.path.join(self.resources, 'states'), create=False):
-            bnz = Ensemble(dirname='example_FEP', solvents=['water'])
-            solute = bnz.select_atoms('not resname SOL')
-            for k in solute.group_keys():
-                assert len(solute[k]) == 42
+        Sim = Ensemble(dirname=self.tmpdir.name, solvents=['water'])
+        solute = Sim.select_atoms('not resname SOL')
+        for k in solute.group_keys():
+            assert len(solute[k]) == 42
 
     def test_ensemble_ag_methods(self):
-        with in_dir(os.path.join(self.resources, 'states'), create=False):
-            BW = Ensemble(dirname='example_FEP', solvents=['water'])
-        Sol1 = BW.select_atoms('resname SOL')
+        Solv_system = Ensemble(dirname=self.tmpdir.name, solvents=['water'])
+        Sol1 = Solv_system.select_atoms('resname SOL')
         Sol2 = Sol1.select_atoms('resid 1')
         Sol2_pos = Sol2.positions()
         for k in Sol2_pos:
@@ -84,7 +81,13 @@ class TestEnsemble(object):
         assert not Sol1 == Sol2
         assert isinstance(Sol2, EnsembleAtomGroup)
         assert Sol2 == Sol1.select_atoms('resid 1')
-        assert BW.get_keys() == Sol1.ensemble().get_keys()
+        assert ensemble_keys.sort() == Sol1.ensemble().get_keys().sort()
+
+    def test_build_exception(self):
+        ens = Ensemble()
+        with in_dir(os.path.join(self.tmpdir.name, 'FEP', 'test_solv'), create=False):
+            with pytest.raises(NoDataWarning):
+                ens._load_universe_from_dir(solvent=None)
 
     def test_ensemble_analysis(self):
         class TestAnalysis(EnsembleAnalysis):
@@ -105,7 +108,6 @@ class TestEnsemble(object):
             def _conclude_universe(self):
                 assert self.n_frames == self.stop
 
-        with in_dir(os.path.join(self.resources, 'states'), create=False):
-            BNZ = Ensemble(dirname='example_FEP', solvents=['water'])
-        TestRun = TestAnalysis(BNZ).run(start=0, step=1, stop=10)
-        assert BNZ.get_keys() == TestRun.key_list
+        Sim = Ensemble(dirname=self.tmpdir.name, solvents=['water'])
+        TestRun = TestAnalysis(Sim).run(start=0, step=1, stop=10)
+        assert Sim.get_keys() == TestRun.key_list

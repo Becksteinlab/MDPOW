@@ -16,7 +16,10 @@ Ensemble Analysis Framework
 EnsembleAnalysis
 ----------------
 
-A framework for analyzing MDPOW simulations loaded into ensemble objects.
+:class:`EnsembleAnalysis` is a class inspired by the :class:`MDAnalysis.analysis.base.AnalysisBase` which
+iterates over the systemsin the ensemble and the frames in the systems. It sets up both iterations between
+universes and universe frames allowing for analysis to be run on both whole systems and the frames of those
+ systems. This allows for users to easily run analyses on MDPOW simulations.
 
 .. autoclass:: mdpow.analysis.ensemble.EnsembleAnalysis
     :members:
