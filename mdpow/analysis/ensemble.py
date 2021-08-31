@@ -153,7 +153,8 @@ class Ensemble(object):
             raise NoDataWarning
 
         self.trj = self._sort_trajectories(self.trj)
-        self.top = self._sort_topologies(self.top)
+        if len(self.top) > 1:
+            self.top = self._sort_topologies(self.top)
 
     def keys(self):
         """Returns list of system keys"""
