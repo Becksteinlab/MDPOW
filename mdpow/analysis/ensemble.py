@@ -1,4 +1,4 @@
-# MDPOW: ensemble.py
+# MDPOW: _ensemble.py
 # 2021 Alia Lescoulie
 
 import os
@@ -15,7 +15,7 @@ from . import NoDataWarning
 
 import logging
 
-logger = logging.getLogger('mdpow.ensemble')
+logger = logging.getLogger('mdpow._ensemble')
 
 
 class Ensemble(object):
@@ -27,6 +27,33 @@ class Ensemble(object):
     Given a mdpow simulation directory will load the MD
     simulation files with the directory structure as keys.
 
+    :Keywords:
+    *dirname*
+        Molecule Simulation directory. Loads simulation files present in
+        lambda directories into the new instance. With this method for
+        generating an :class:`~mdpow.analysis.ensemble.Ensemble` the
+        lambda directories are explored and
+        :meth:`~mdpow.analysis.ensemble.Ensemble._load_universe_from_dir`
+        searches for .gro, .gro.b2z, .gro.gz, and .tpr files for topology,
+        and .xtc files for trajectory. It will default to using the tpr file
+        available.
+
+    *solvents*
+        Solvents from directory given to the new instance. Default
+        :code:`solvents=('water', 'octanol')`
+
+    *topology_paths*
+        Specifies topologies used in loading simulated systems. Given
+        with a dictionary with keys-value pair for each solvent and
+        its respective topology path.
+
+    *interactions*
+        Interactions from directory given to the instance. Default
+        :code:`interactions=('Coulomb', 'VDW')`
+
+    .. rubric:: Examples
+
+
     Typical workflow for MDPOW directory::
 
         ens = Ensemble(dirname='molecule')
@@ -36,50 +63,67 @@ class Ensemble(object):
         ens = Ensemble()
         ens.add_system(topology='md.gro', trajectory='md.xtc')
 
-    Topology paths can be specified when defining the ensemble
+    Topology paths can be specified when defining the _ensemble
     by giving the paths to each solvent topology in a dictionary
     with the topology_paths argument::
 
         ens = Ensemble(dirname='molecule', topology_paths={'water': water_path,
                                                            'octanol': octanol_path}
 
+    Interactions can also be specified when initializing the with
+    a list using the interactions argument::
+
+        ens = Ensemble(dirname='molecule', interactions=['Coulomb']
+
+    .. versionadded:: 0.8.0
     """
 
-    def __init__(self, dirname=None, solvents=['octanol', 'water'], topology_paths=None):
-
-        self.top = topology_paths
-        self.num_systems = 0
-        self.ensemble = {}
-        self.system_keys = []
-        self.solvents = solvents
-        self.interactions = ["Coulomb", "VDW"]
+    def __init__(self, dirname=None, solvents=('octanol', 'water'),
+                 topology_paths=None, interactions=('Coulomb', 'VDW')):
+        self.top_dict = topology_paths
+        self._num_systems = 0
+        self._ensemble = {}
+        self._keys = []
+        self._solvents = solvents
+        self._interactions = interactions
 
         if dirname is None:
             return
 
         if not os.path.exists(dirname):
             logger.error(f"Directory {dirname} does not exist")
-        self.ensemble_dir = dirname
+            raise FileNotFoundError
+
+        self._ensemble_dir = dirname
         self._build_ensemble()
 
     def __repr__(self):
-        return f"<Ensemble Containing {self.num_systems} System>"
+        return f"<Ensemble Containing {self._num_systems} System>"
 
     def __len__(self):
-        return self.num_systems
+        return self._num_systems
 
     def __getitem__(self, index):
         """Allows dictionary like indexing"""
-        try:
-            item = self.ensemble[index]
-            return item
-        except KeyError:
-            logger.error(KeyError("Invalid system key"))
+        return self._ensemble[index]
 
     @staticmethod
-    def sort_trajectories(trajectories: list):
+    def _sort_trajectories(trajectories: list):
         """sort list of trajectory files alphabetically"""
         return sorted(trajectories)
+
+    @staticmethod
+    def _sort_topologies(topologies: list):
+        """sorts list of trajectory files with .tpr first"""
+        top = []
+        logger.info('If more than one topology is present the tpr will be the one used')
+        for i in range(len(topologies)):
+            file = topologies[i]
+            if file.endswith('.tpr'):
+                topologies.pop(i)
+                top = [file] + topologies
+                break
+        return top
 
     def _load_universe_from_dir(self, solvent):
         """Loads system in directory into an MDAnalysis Universe
@@ -88,49 +132,40 @@ class Ensemble(object):
         more than one trajectory attempts to load both of them
         in a universe if that fail will try to load each individually"""
         cur_dir = os.listdir(os.curdir)
-        trj = []
-        if self.top is None:
-            top = []
-        else:
+        self.trj = []
+        self.top = []
+
+        if not self.top_dict is None:
             # if top is specified in kwargs, saved to list
-            top = [self.top[solvent]]
+            self.top = [self.top_dict[solvent]]
+
         for file in cur_dir:
             if file.endswith('.xtc'):
-                trj.append(file)
-            if file.endswith('.tpr') and self.top is None:
-                # Ensures .tpr is used first if available
-                top = [file] + top
-            if (file.endswith('gro') or file.endswith('gro.b2z') or file.endswith('gro.gz')) and self.top is None:
-                top.append(file)
-        if len(top) > 1:
-            logger.warning('More than one topology detected in %s will use first topology',
-                           os.curdir)
-        if len(top) == 0 or len(trj) == 0:
+                # Saving trajectory directories
+                self.trj.append(file)
+            elif (file.endswith('gro') or file.endswith('.tpr') or file.endswith('gro.b2z') or file.endswith('gro.gz'))\
+                    and self.top_dict is None:
+                # Saving topology directories
+                self.top.append(file)
+
+        if len(self.top) == 0 or len(self.trj) == 0:
             logger.warning('No MD files detected in %s', os.curdir)
             raise NoDataWarning
 
-        trj = self.sort_trajectories(trj)
+        self.trj = self._sort_trajectories(self.trj)
+        self.top = self._sort_topologies(self.top)
 
-        try:
-            if self.top is None:
-                system = mda.Universe(os.path.abspath(top[0]), [os.path.abspath(p) for p in trj])
-            else:
-                system = mda.Universe(top[0], [os.path.abspath(p) for p in trj])
-            return system
-        except (FileFormatWarning, MissingDataWarning, NoDataError, ValueError):
-            logger.error('Multiple incompatible trajectories detected in %s', os.curdir)
-            raise NoDataWarning
-
-    def get_keys(self):
-        return self.system_keys
+    def keys(self):
+        """Returns list of system keys"""
+        return self._keys
 
     def _build_ensemble(self):
         """Goes through given mdpow directory and attempts to build universe in the lambda directories.
         Run if dirname is passed into __init__. First enters FEP directory, then goes through solvent
         and interaction directories to search lambda directories for system files."""
-        fep_dir = os.path.join(self.ensemble_dir, 'FEP')
-        for solvent in self.solvents:  # Ugly set of loops, may have to find way to clean up
-            for dirs in self.interactions:  # Attribute folder names
+        fep_dir = os.path.join(self._ensemble_dir, 'FEP')
+        for solvent in self._solvents:  # Ugly set of loops, may have to find way to clean up
+            for dirs in self._interactions:  # Attribute folder names
                 int_dir = os.path.join(fep_dir, solvent, dirs)
                 if os.path.exists(int_dir):
                     with in_dir(int_dir, create=False):  # Entering attribute folders
@@ -140,13 +175,15 @@ class Ensemble(object):
                             if os.path.isdir(file):
                                 with in_dir(file, create=False):
                                     try:
-                                        self.ensemble[(solvent, dirs, file)] = self._load_universe_from_dir(solvent)
+                                        self._load_universe_from_dir(solvent)
+                                        self.add_system((solvent, dirs, file), topology=self.top[0],
+                                                        trajectory=self.trj)
                                     except NoDataWarning:
                                         logger.warning('Failed to load universe in %s', file)
                                         continue
-                                    else:
-                                        self.system_keys.append((solvent, dirs, file))
-                                        self.num_systems += 1
+                else:
+                    logger.error('%r directory does not exist', int_dir)
+                    raise NoDataError
 
     def add_system(self, key, topology=None, trajectory=None, universe=None):
         """Adds system from universe object for trajectory and topology files
@@ -154,67 +191,121 @@ class Ensemble(object):
         Takes specified key and either existing mda.Universe object or
         trajectory and topology path."""
         if not universe is None:
-            self.ensemble[key] = universe
-        elif topology is None or trajectory is None:
-            err = f"{topology} does not exist"
-            logger.error(err)
-            raise ValueError(err)
-        elif not os.path.exists(trajectory) and not os.path.exists(topology):
-            err = f"{trajectory} does not exist"
-            logger.error(err)
-            raise ValueError(err)
+            self._ensemble[key] = universe
+            self._keys.append(key)
+            self._num_systems += 1
+            return
+        if isinstance(trajectory, list):
+            # setting abs paths for trajectory
+            trajectory = [os.path.abspath(trj) for trj in trajectory]
+        try:
+            self._ensemble[key] = mda.Universe(os.path.abspath(topology), trajectory)
+        except (ValueError, FileFormatWarning, NoDataError, MissingDataWarning, OSError) as err:
+            logger.warning('Error loading systems at %r', key)
+            raise NoDataWarning
         else:
-            self.ensemble[key] = mda.Universe(os.path.abspath(topology), os.path.abspath(trajectory))
-        self.system_keys.append(key)
-        self.num_systems += 1
+            self._keys.append(key)
+            self._num_systems += 1
+            return
 
-    def pop_system(self, key):
+    def pop(self, key):
         """Removes and returns system at specified key.
 
         Logs if KeyError is raised."""
-        try:
-            system = self.ensemble.pop(key)
-            self.num_systems -= 1
-            return system
-        except KeyError as err:
-            logger.error("%s with key %r" % (err, key))
+        system = self._ensemble.pop(key)
+        self._num_systems -= 1
+        return system
 
-    def select_atoms(self, selection):
-        """Returns atom groups for Universe from objects
+    def select_atoms(self, *args, **kwargs):
+        """Returns :class:`~mdpow.analysis.ensemble.EnsembleAtomGroup` for
+         Universes from the :class:`~mdpow.analysis.ensemble.Ensemble`
 
-        Presumes that solute in systems is the same"""
+        Uses the same
+        `selection commands <https://docs.mdanalysis.org/stable/documentation_pages/selections.html>`
+        as MDAnalysis."""
         selections = {}
-        for key in self.system_keys:
+        for key in self.keys():
             try:
-                ag = self[key].select_atoms(selection)
-                selections[key] = ag
+                ag = self[key].select_atoms(*args, **kwargs)
             except SelectionError as err:
-                logger.warning("%s on system %r" % (err, key))
-                continue
-        return EnsembleAtomGroup(selections, Ensemble_dir=self.ensemble_dir)
+                logger.error("%r on system %r with selection settings %r %r", err, key, args, kwargs)
+                raise
+            else:
+                selections[key] = ag
+        return EnsembleAtomGroup(selections, ensemble_dir=self._ensemble_dir)
+
+    def select_systems(self, keys=None, solvents=None, interactions=None,
+                       lambdas=None, lambda_range=None):
+        """Select specific subset of systems and returns them in an Ensemble.
+
+        This can be accomplished in two ways, by specific keys, or by
+        specifying the desired system attributes solvents, interactions and
+        lambdas. All arguments are stored in list form.
+
+        Specific key workflow example::
+
+            Ens = Ensemble(dirname='Mol')
+            w_v_0_25 = Ens.select_systems(keys=[('water', 'VDW', '0000'),
+                                                ('water', 'VDW', '0025')]
+
+        For the system attributes workflow there are two ways of selecting lambdas,
+        the :param lambdas: keyword saves specific lambdas or the :param lambda_range:
+        which saves the lambdas that fall within the given range.
+
+        Specific lambdas example::
+
+            Ens = Ensemble(dirname='Mol')
+            w_v_0_25 = Ens.select_systems(solvents=['water'], interactions=['VDW'],
+                                          lambdas=['0000', '0025'])
+        Range of lambdas example::
+
+            Ens = Ensemble(dirname='Mol')
+            w_v = Ens.select_systems(solvents=['water'], interactions=['VDW'],
+                                     lambda_range=[0, 1])
+
+        """
+        new_ens = Ensemble()
+        new_key = []
+        if not keys is None:
+            # Selection by giving keys
+            new_key = keys
+        elif not solvents is None:
+            # Selection by attributes
+            for s in solvents:
+                if not interactions is None:
+                    for i in interactions:
+                        if not lambdas is None:
+                            # Selecting specific lambdas
+                            for l in lambdas:
+                                new_key.append((s, i, l))
+                        elif not lambda_range is None:
+                            # Selecting range of lambdas
+                            for k in self.keys():
+                                if lambda_range[0] <= int(k[2])/1000 <= lambda_range[1]:
+                                    new_key.append((s, i, k[2]))
+        for k in new_key:
+            logger.info('adding system %r to ensemble', k)
+            new_ens.add_system(k, universe=self[k])
+        new_ens._ensemble_dir = self._ensemble_dir
+        return new_ens
 
 
 class EnsembleAtomGroup(object):
-    """Group for storing AtomGroups from Ensemble.select_atoms()"""
+    """Group for storing selections from :class:`~mdpow.analysis.ensemble.Ensemble`
+     objects made using the :meth:`~mdpow.analysis.ensemble.Ensemble.select_atoms` method.
+    """
 
-    def __init__(self, group_dict=None, Ensemble_dir=None):
-        self.groups = group_dict
-        self.ens_dir = Ensemble_dir
-        if isinstance(group_dict, dict):
-            self.keys = group_dict.keys()
-        else:
-            self.keys = None
+    def __init__(self, group_dict: dict, ensemble_dir=None):
+        self._groups = group_dict
+        self._ens_dir = ensemble_dir
+        self._keys = group_dict.keys()
 
     def __getitem__(self, index):
-        try:
-            item = self.groups[index]
-            return item
-        except KeyError:
-            logger.error(KeyError("Invalid system key"))
+        return self._groups[index]
 
     def __eq__(self, other):
-        if self.group_keys() == other.group_keys():
-            for k in self.group_keys():
+        if self.keys() == other.keys():
+            for k in self.keys():
                 if self[k] != other[k]:
                     return False
             return True
@@ -222,63 +313,72 @@ class EnsembleAtomGroup(object):
             return False
 
     def __len__(self):
-        return len(self.group_keys())
+        return len(self.keys())
 
-    def group_keys(self):
+    def keys(self):
         """List of keys to specific atom groups in the system"""
-        return self.keys
+        return self._keys
 
-    def positions(self, keys=[None]):
-        """Returns the positions of the keys of the selected atoms."""
+    def positions(self, keys=None):
+        """Returns the positions of the keys of the selected atoms.
+
+        If no keys are specified positions for all keys are returned"""
         positions = {}
         if not keys is None:
             for k in keys:
-                try:
-                    positions[k] = self.groups[k].positions
-                except KeyError as err:
-                    logger.warning(f"{err} is an invalid key")
-                    continue
+                positions[k] = self._groups[k].positions
         else:
-            for k in self.group_keys():
+            for k in self.keys():
                 positions[k] = self[k].positions
         return positions
 
-    def select_atoms(self, selection):
-        """Returns atom groups for Universe from objects
+    def select_atoms(self, *args, **kwargs):
+        """Returns :class:`~mdpow.analysis.ensemble.EnsembleAtomGroup` for
+         Universes from the :class:`~mdpow.analysis.ensemble.EnsembleAtomGroup`
 
-        Presumes that solute in systems is the same"""
+        Uses the same
+        `selection commands <https://docs.mdanalysis.org/stable/documentation_pages/selections.html>`
+        as MDAnalysis."""
         selections = {}
-        for key in self.group_keys():
+        for key in self.keys():
             try:
-                ag = self[key].select_atoms(selection)
-                selections[key] = ag
+                ag = self[key].select_atoms(*args, **kwargs)
             except SelectionError as err:
-                logger.warning("%s on system %r" % (err, key))
-                continue
-        return EnsembleAtomGroup(selections)
+                logger.error("%r on system %r with selection settings %r %r", err, key, args, kwargs)
+                raise
+            else:
+                selections[key] = ag
+        return EnsembleAtomGroup(selections, ensemble_dir=self._ens_dir)
 
     def ensemble(self):
-        """Returns the ensemble of the EnsembleAtomGroup"""
+        """Returns the _ensemble of the EnsembleAtomGroup"""
         ens = Ensemble()
-        for k in self.group_keys():
+        for k in self.keys():
             ens.add_system(k, universe=self[k].universe)
-        ens.ensemble_dir = self.ens_dir
+        ens._ensemble_dir = self._ens_dir
         return ens
 
 
 class EnsembleAnalysis(object):
-    """Base class for running multi system analysis
+    """Base class for running multi-system analyses
 
     The class is designed based on the `AnalysisBase
     class in MDAnalysis <https://docs.mdanalysis.org/stable/documentation_pages/analysis/base.html>`_
-    and is a template for creating multiuniverse
-    multiframe analyses using the Ensemble object
+    and is a template for creating multi-universe multi-frame analyses using the
+    :class:`~mdpow.analysis.ensemble.Ensemble` object
 
-    Typical workflow::
+    :Keywords:
+    *ensemble*
+        The :class:`~mdpow.analysis.ensemble.Ensemble` being analyzed in the class
 
-        class DihedralAnalysis(mdpow.ensemble.EnsembleAnalysis):
+
+    .. rubric:: Example Analysis
+
+    Dihedral Analysis Demonstration::
+
+        class DihedralAnalysis(mdpow._ensemble.EnsembleAnalysis):
             def __init__(self, DihedralEnsembleGroup):
-                super(DihedralAnalysis, self).__init__(DihedralEnsembleGroup.ensemble())
+                super(DihedralAnalysis, self).__init__(DihedralEnsembleGroup._ensemble())
 
                 self._sel = DihedralEnsembleGroup
 
@@ -308,7 +408,7 @@ class EnsembleAnalysis(object):
             def _conclude_ensemble(self):
                 self.results = pd.DataFrame(data=self.result_dict)
 
-        DihedralAnalysis.run(start=0 stop=10, step=1)
+        D = DihedralAnalysis.run(start=0 stop=10, step=1)
 
     """
 
@@ -333,43 +433,43 @@ class EnsembleAnalysis(object):
     def _single_universe(self):
         """Calculations on a single Universe object.
 
-            Run on each universe in the ensemble during when
+            Run on each universe in the _ensemble during when
             self.run in called.
         """
-        pass
+        pass  # pragma: no cover
 
     def _single_frame(self):
         """Calculate data from a single frame of trajectory
 
         Called on each frame for universes in the Ensemble.
         """
-        pass
+        pass  # pragma: no cover
 
     def _prepare_ensemble(self):
         """For establishing data structures used in running
-        analysis on the entire ensemble.
+        analysis on the entire _ensemble.
 
         Data structures will not be overwritten upon moving to
-        next system in ensemble.
+        next system in _ensemble.
         """
-        pass
+        pass  # pragma: no cover
 
     def _prepare_universe(self):
         """For establishing data structures used in running
-        analysis on each trajectory in ensemble
+        analysis on each trajectory in _ensemble
 
         Data structures will be overwritten between upon after
         each trajectory has been run
         """
-        pass
+        pass  # pragma: no cover
 
     def _conclude_universe(self):
         """Run after each trajectory is finished"""
-        pass
+        pass  # pragma: no cover
 
     def _conclude_ensemble(self):
-        """Run after all trajectories in ensemble are finished"""
-        pass
+        """Run after all trajectories in _ensemble are finished"""
+        pass  # pragma: no cover
 
     def run(self, start=None, stop=None, step=None):
         """Runs _single_universe on each system and _single_frame
@@ -381,18 +481,18 @@ class EnsembleAnalysis(object):
         """
         logger.info("Setting up systems")
         self._prepare_ensemble()
-        for self._key in self._ensemble.get_keys():
-                self._setup_system(self._key, start=start, stop=stop, step=step)
-                self._prepare_universe()
-                self._single_universe()
-                for i, ts in enumerate(ProgressBar(self._trajectory[self.start:self.stop:self.step], verbose=True)):
-                    self._frame_index = i
-                    self._ts = ts
-                    self.frames[i] = ts.frame
-                    self.times[i] = ts.time
-                    self._single_frame()
-                self._conclude_universe()
-                logger.info("Moving to next universe")
+        for self._key in ProgressBar(self._ensemble.keys(), verbose=True):
+            self._setup_system(self._key, start=start, stop=stop, step=step)
+            self._prepare_universe()
+            self._single_universe()
+            for i, ts in enumerate(ProgressBar(self._trajectory[self.start:self.stop:self.step], verbose=True, postfix=f'running system {self._key}')):
+                self._frame_index = i
+                self._ts = ts
+                self.frames[i] = ts.frame
+                self.times[i] = ts.time
+                self._single_frame()
+            self._conclude_universe()
+            logger.info("Moving to next universe")
         logger.info("Finishing up")
         self._conclude_ensemble()
         return self

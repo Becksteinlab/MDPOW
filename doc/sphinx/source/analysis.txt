@@ -2,8 +2,15 @@
 Analysis Submodule
 ==================
 
-MDPOW module for analyzing simulations. The Ensemble objects and Ensemble
-Analysis Framework allow for the construction the simplified of analyses
+.. versionadded:: 0.8.0
+
+MDPOW module for analyzing simulations. The :doc:`analysis/ensemble` objects
+and :doc:`analysis/ensemble_analysis` allow for the construction the simplified of analyses.
+
+The :doc:`analysis/ensemble` and :doc:`analysis/ensemble_analysis` sections
+assumes a basic understanding of object oriented programming in python and
+are for users who wish to construct their own analyses.
+
 
 .. toctree::
    :maxdepth: 1
