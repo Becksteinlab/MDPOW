@@ -222,7 +222,7 @@ class Ensemble(object):
          Universes from the :class:`~mdpow.analysis.ensemble.Ensemble`
 
         Uses the same
-        `selection commands <https://docs.mdanalysis.org/stable/documentation_pages/selections.html>`
+        `selection commands <https://docs.mdanalysis.org/stable/documentation_pages/selections.html>`_
         as MDAnalysis."""
         selections = {}
         for key in self.keys():
@@ -338,7 +338,7 @@ class EnsembleAtomGroup(object):
          Universes from the :class:`~mdpow.analysis.ensemble.EnsembleAtomGroup`
 
         Uses the same
-        `selection commands <https://docs.mdanalysis.org/stable/documentation_pages/selections.html>`
+        `selection commands <https://docs.mdanalysis.org/stable/documentation_pages/selections.html>`_
         as MDAnalysis."""
         selections = {}
         for key in self.keys():
