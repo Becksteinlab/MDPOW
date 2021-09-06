@@ -25,6 +25,7 @@ Enhancements
   simulations (PR #179)
 * new EnsembleAnalysis framework for collecting data from MDPOW simulations (PR #179)
 
+
 Fixes
 
 * run.get_mdp_files() finds the full path for an MDP file and raises ValueError
