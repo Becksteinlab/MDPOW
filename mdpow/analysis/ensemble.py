@@ -335,12 +335,8 @@ class EnsembleAtomGroup(object):
 
     def __eq__(self, other):
         if self.keys() == other.keys():
-            for k in self.keys():
-                if self[k] != other[k]:
-                    return False
-            return True
-        else:
-            return False
+            return all(self[k] == other[k] for k in self.keys())
+        return False
 
     def __len__(self):
         return len(self.keys())
