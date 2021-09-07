@@ -11,12 +11,12 @@ import pytest
 
 import numpy as np
 
+import MDAnalysis as mda
 from MDAnalysis.exceptions import NoDataError, SelectionError
 
 from gromacs.utilities import in_dir
 
 from ..analysis.ensemble import Ensemble, EnsembleAnalysis, EnsembleAtomGroup
-from ..analysis import NoDataWarning
 
 from pkg_resources import resource_filename
 
@@ -59,7 +59,8 @@ class TestEnsemble(object):
             l_dir = os.path.join(os.curdir, 'FEP', 'water', 'Coulomb', '0000')
             top_dir = os.path.join(l_dir, 'md.gro')
             trj_dir = os.path.join(l_dir, 'md_red.xtc')
-            bnz.add_system(('water', 'Coulomb', '0000'), topology=top_dir, trajectory=trj_dir)
+            U = mda.Universe(top_dir, trj_dir)
+            bnz.add_system(('water', 'Coulomb', '0000'), U)
             assert bnz.keys() == [('water', 'Coulomb', '0000')]
             assert bnz._num_systems == 1
             assert bnz.__repr__() == "<Ensemble Containing 1 System>"
@@ -115,12 +116,6 @@ class TestEnsemble(object):
     def test_ensemble_build_exceptions(self):
         with pytest.raises(NoDataError):
             ens = Ensemble(self.tmpdir.name, solvents=['test_solv'])
-
-    def test_add_systems_exception(self):
-        ens = Ensemble()
-        with in_dir(os.path.join(self.tmpdir.name, 'FEP', 'test_solv', 'Coulomb', '0000'), create=False):
-            with pytest.raises(NoDataWarning):
-                ens.add_system('key', 'md.gro', 'md_red.xtc')
 
     def test_ensemble_selection_error(self):
         ens = Ensemble(dirname=self.tmpdir.name, solvents=['water'])

@@ -2,6 +2,8 @@
 # 2021 Alia Lescoulie
 
 import os
+import errno
+from typing import Optional
 
 import numpy as np
 
@@ -10,8 +12,6 @@ from MDAnalysis.lib.log import ProgressBar
 from MDAnalysis.exceptions import FileFormatWarning, NoDataError, MissingDataWarning, SelectionError
 
 from gromacs.utilities import in_dir
-
-from . import NoDataWarning
 
 import logging
 
@@ -92,7 +92,8 @@ class Ensemble(object):
 
         if not os.path.exists(dirname):
             logger.error(f"Directory {dirname} does not exist")
-            raise FileNotFoundError
+            raise FileNotFoundError(errno.ENOENT, 'Directory does not'
+                                                  'exist', dirname)
 
         self._ensemble_dir = dirname
         self._build_ensemble()
@@ -108,53 +109,61 @@ class Ensemble(object):
         return self._ensemble[index]
 
     @staticmethod
-    def _sort_trajectories(trajectories: list):
-        """sort list of trajectory files alphabetically"""
-        return sorted(trajectories)
-
-    @staticmethod
-    def _sort_topologies(topologies: list):
-        """sorts list of trajectory files with .tpr first"""
-        top = []
-        logger.info('If more than one topology is present the tpr will be the one used')
-        for i in range(len(topologies)):
-            file = topologies[i]
-            if file.endswith('.tpr'):
-                topologies.pop(i)
-                top = [file] + topologies
-                break
-        return top
-
-    def _load_universe_from_dir(self, solvent):
+    def _load_universe_from_dir(solv_dir=None) -> Optional[mda.Universe]:
         """Loads system in directory into an MDAnalysis Universe
 
         logs warning if more than one topology is in directory. If
         more than one trajectory attempts to load both of them
         in a universe if that fail will try to load each individually"""
-        cur_dir = os.listdir(os.curdir)
-        self.trj = []
-        self.top = []
 
-        if not self.top_dict is None:
+        def _sort_trajectories(trajectories: list) -> list:
+            """Sorts list of trajectory files alphabetically and makes paths
+            absolute"""
+            sorted(trajectories)
+            return [os.path.abspath(t) for t in trajectories]
+
+        def _sort_topologies(topologies: list) -> list:
+            """sorts list of trajectory files with .tpr first"""
+            tops = []
+            logger.info('If more than one topology is present the tpr will be the one used')
+            for i in range(len(topologies)):
+                f = topologies[i]
+                if f.endswith('.tpr'):
+                    topologies.pop(i)
+                    tops = [f] + topologies
+                    break
+            return top
+
+        cur_dir = os.listdir(os.curdir)
+        trj = []
+        top = []
+
+        if solv_dir is not None:
             # if top is specified in kwargs, saved to list
-            self.top = [self.top_dict[solvent]]
+            top = [solv_dir]
 
         for file in cur_dir:
             if file.endswith('.xtc'):
                 # Saving trajectory directories
-                self.trj.append(file)
+                trj.append(file)
             elif (file.endswith('gro') or file.endswith('.tpr') or file.endswith('gro.b2z') or file.endswith('gro.gz'))\
-                    and self.top_dict is None:
+                    and solv_dir is None:
                 # Saving topology directories
-                self.top.append(file)
+                top.append(file)
 
-        if len(self.top) == 0 or len(self.trj) == 0:
+        if len(top) == 0 or len(trj) == 0:
             logger.warning('No MD files detected in %s', os.curdir)
-            raise NoDataWarning
+            return
 
-        self.trj = self._sort_trajectories(self.trj)
-        if len(self.top) > 1:
-            self.top = self._sort_topologies(self.top)
+        trj = _sort_trajectories(trj)
+        if len(top) > 1:
+            stop = _sort_topologies(top)
+
+        try:
+            return mda.Universe(os.path.abspath(top[0]), trj)
+        except (ValueError, FileFormatWarning, NoDataError, MissingDataWarning, OSError) as err:
+            logger.error(f'{err} raised while loading {top[0]} {trj} in dir {cur_dir}')
+            raise NoDataError
 
     def keys(self):
         """Returns list of system keys"""
@@ -165,7 +174,10 @@ class Ensemble(object):
         Run if dirname is passed into __init__. First enters FEP directory, then goes through solvent
         and interaction directories to search lambda directories for system files."""
         fep_dir = os.path.join(self._ensemble_dir, 'FEP')
+        solv_top_path = None
         for solvent in self._solvents:  # Ugly set of loops, may have to find way to clean up
+            if self.top_dict is not None:
+                solv_top_path = self.top_dict[solvent]
             for dirs in self._interactions:  # Attribute folder names
                 int_dir = os.path.join(fep_dir, solvent, dirs)
                 if os.path.exists(int_dir):
@@ -176,38 +188,21 @@ class Ensemble(object):
                             if os.path.isdir(file):
                                 with in_dir(file, create=False):
                                     try:
-                                        self._load_universe_from_dir(solvent)
-                                        self.add_system((solvent, dirs, file), topology=self.top[0],
-                                                        trajectory=self.trj)
-                                    except NoDataWarning:
-                                        logger.warning('Failed to load universe in %s', file)
-                                        continue
-                else:
-                    logger.error('%r directory does not exist', int_dir)
-                    raise NoDataError
+                                        self.add_system((solvent, dirs, file),
+                                                        self._load_universe_from_dir(solv_dir=solv_top_path))
+                                    except NoDataError:
+                                        logger.error('Failed to load universe in %s', file)
+                                        raise
 
-    def add_system(self, key, topology=None, trajectory=None, universe=None):
+    def add_system(self, key, universe: Optional[mda.Universe] = None):
         """Adds system from universe object for trajectory and topology files
 
         Takes specified key and either existing mda.Universe object or
         trajectory and topology path."""
-        if not universe is None:
+        if universe is not None:
             self._ensemble[key] = universe
             self._keys.append(key)
             self._num_systems += 1
-            return
-        if isinstance(trajectory, list):
-            # setting abs paths for trajectory
-            trajectory = [os.path.abspath(trj) for trj in trajectory]
-        try:
-            self._ensemble[key] = mda.Universe(os.path.abspath(topology), trajectory)
-        except (ValueError, FileFormatWarning, NoDataError, MissingDataWarning, OSError) as err:
-            logger.warning('Error loading systems at %r', key)
-            raise NoDataWarning
-        else:
-            self._keys.append(key)
-            self._num_systems += 1
-            return
 
     def pop(self, key):
         """Removes and returns system at specified key.
