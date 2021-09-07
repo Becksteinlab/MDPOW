@@ -240,11 +240,34 @@ class Ensemble(object):
 
     def select_systems(self, keys=None, solvents=None, interactions=None,
                        lambdas=None, lambda_range=None):
-        """Select specific subset of systems and returns them in an Ensemble.
+        """
+        Select specific subset of systems and returns them in an Ensemble.
 
         This can be accomplished in two ways, by specific keys, or by
         specifying the desired system attributes solvents, interactions and
         lambdas. All arguments are stored in list form.
+
+        :keywords:
+
+        *keys*
+            System keys from :class:`~mdpow.analysis.ensemble.Ensemble`
+            to be returned.
+
+        *solvents*
+            Solvents from :class:`~mdpow.analysis.ensemble.Ensemble`
+            to be returned.
+
+        *interactions*
+            Interactions from :class:`~mdpow.analysis.ensemble.Ensemble`
+            to be returned
+
+        *lambdas*
+            Specific lambdas to be returned
+
+        *lambda_range*
+            Range of lambda to be returned
+
+        .. rubric:: Examples
 
         Specific key workflow example::
 
@@ -270,19 +293,19 @@ class Ensemble(object):
         """
         new_ens = Ensemble()
         new_key = []
-        if not keys is None:
+        if keys is not None:
             # Selection by giving keys
             new_key = keys
-        elif not solvents is None:
+        elif solvents is not None:
             # Selection by attributes
             for s in solvents:
-                if not interactions is None:
+                if interactions is not None:
                     for i in interactions:
-                        if not lambdas is None:
+                        if lambdas is not None:
                             # Selecting specific lambdas
                             for l in lambdas:
                                 new_key.append((s, i, l))
-                        elif not lambda_range is None:
+                        elif lambda_range is not None:
                             # Selecting range of lambdas
                             for k in self.keys():
                                 if lambda_range[0] <= int(k[2]) / 1000 <= lambda_range[1]:
