@@ -155,7 +155,7 @@ class Ensemble(object):
             if file.endswith('.xtc'):
                 # Saving trajectory directories
                 trj.append(file)
-            elif (file.endswith('gro') or file.endswith('.tpr') or file.endswith('gro.b2z')
+            elif (file.endswith('gro') or file.endswith('.tpr') or file.endswith('gro.bz2')
                   or file.endswith('gro.gz')) and solv_dir is None:
                 # Saving topology directories
                 top.append(file)
@@ -191,7 +191,7 @@ class Ensemble(object):
                 int_dir = os.path.join(fep_dir, solvent, dirs)
                 with in_dir(int_dir, create=False):  # Entering attribute folders
                     logger.info("Searching %s directory for systems", os.curdir)
-                    files: list = os.listdir(os.curdir)
+                    files = os.listdir(os.curdir)
                     for file in sorted(files):  # Traversing lambda directories
                         if os.path.isdir(file):
                             with in_dir(file, create=False):
@@ -205,9 +205,8 @@ class Ensemble(object):
     def add_system(self, key, universe: mda.Universe):
         """Adds system from universe object for trajectory and topology files
 
-        Takes specified key and either existing mda.Universe object or
-        trajectory and topology path. Ensure that paths are set to absolute
-        when creating the universe."""
+        Existing mda.Universe object or trajectory and topology path. Ensure
+        that paths are set to absolute when creating the universe."""
         self._ensemble[key] = universe
         self._keys.append(key)
         self._num_systems += 1
