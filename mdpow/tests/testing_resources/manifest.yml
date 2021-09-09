@@ -40,3 +40,8 @@ analysis:
     files:
         - []
 
+example_FEP:
+    options:
+        - full_transfer
+    files:
+        - []
