@@ -25,6 +25,10 @@ can also be built by manually adding and popping universes into an empty instanc
 .. autoclass:: mdpow.analysis.ensemble.Ensemble
     :members:
 
+    .. automethod:: _build_ensemble
+
+    .. automethod:: _load_universe_from_dir
+
 EnsembleAtomGroup
 _________________
 

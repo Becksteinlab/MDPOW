@@ -1,4 +1,4 @@
-# MDPOW: _ensemble.py
+# MDPOW: ensemble.py
 # 2021 Alia Lescoulie
 
 import os
@@ -119,11 +119,17 @@ class Ensemble(object):
 
     @staticmethod
     def _load_universe_from_dir(solv_dir=None, **universe_kwargs) -> Optional[mda.Universe]:
-        """Loads system in directory into an MDAnalysis Universe
+        """Loads system simulation files in directory into an
+        :class:`MDAnalysis.Universe <MDAnalysis.core.groups.universe.Universe>`
 
-        logs warning if more than one topology is in directory. If
-        more than one trajectory attempts to load both of them
-        in a universe if that fail will try to load each individually"""
+
+        If multiple topologies are found it will default to using
+        the .tpr file. If more than one trajectory is present they
+        will be sorted alphabetically and passed into the
+        :class:`MDAnalysis.Universe <MDAnalysis.core.groups.universe.Universe>`
+        This method is run automatically by :meth:`~mdpow/analysis/ensemble.Ensemble._build_ensemble`
+        when initializing the class using the :code:`dirname` argument.
+        """
 
         def _sort_trajectories(trajectories: list) -> list:
             """Sorts list of trajectory files alphabetically and makes paths
@@ -179,9 +185,13 @@ class Ensemble(object):
         return self._keys
 
     def _build_ensemble(self):
-        """Goes through given mdpow directory and attempts to build universe in the lambda directories.
-        Run if dirname is passed into __init__. First enters FEP directory, then goes through solvent
-        and interaction directories to search lambda directories for system files."""
+        """Finds simulation files genderated by MDPOW and attempts to build
+        :class:`MDAnalysis.Universe <MDAnalysis.core.groups.universe.Universe>`
+        in the lambda directories.
+
+        Run if :code:`dirname` argument is given when initializing the class.
+        First enters FEP directory, then traverses solvent and interaction
+        directories to search lambda directories for system files."""
         fep_dir = os.path.join(self._ensemble_dir, 'FEP')
         solv_top_path = None
         for solvent in self._solvents:  # Ugly set of loops, may have to find way to clean up
