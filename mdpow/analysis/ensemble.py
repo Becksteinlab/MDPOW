@@ -68,7 +68,8 @@ class Ensemble(object):
     Typical workflow for adding universes individually::
 
         ens = Ensemble()
-        ens.add_system(topology='md.gro', trajectory='md.xtc')
+        u = mda.Universe(md.gro', 'md.xtc')
+        ens.add_system(u)
 
     Topology paths can be specified when defining the _ensemble
     by giving the paths to each solvent topology in a dictionary
