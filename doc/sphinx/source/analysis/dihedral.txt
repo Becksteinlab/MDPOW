@@ -1,0 +1,10 @@
+=================
+Dihedral Analysis
+=================
+
+.. versionadded:: 0.8.0
+
+.. autoclass:: mdpow.analysis.dihedral.DihedralAnalysis
+    :members:
+
+    .. automethod:: run

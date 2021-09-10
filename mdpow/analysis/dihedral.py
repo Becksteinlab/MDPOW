@@ -15,10 +15,15 @@ logger = logging.getLogger('mdpow.analysis.dihedral')
 
 
 class DihedralAnalysis(EnsembleAnalysis):
-    """Analyzes dihedral angles of a simulation.
+    """Analyzes dihedral angles of selections from a single
+    :class:`~mdpow.analysis.ensemble.Ensemble` .
 
-    Accepts an :class:`~mdpow.analysis.ensemble.EnsembleAtomGroup`
-    with four atoms selected on each.
+    Accepts a list of :class:`~mdpow.analysis.ensemble.EnsembleAtomGroup`
+    with four atoms selected on each. All selections must be from the same
+    :class:`~mdpow.analysis.ensemble.Ensemble` .
+
+    Data is returned in a :class:`pandas.DataFrame` with observations sorted by
+    selection, solvent, interaction, lambda, time.
     """
 
     def __init__(self, dihedralgroups: List[EnsembleAtomGroup]):
