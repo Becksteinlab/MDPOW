@@ -3,12 +3,12 @@
 
 from typing import List
 
-import numpy as np
 import pandas as pd
 
+from MDAnalysis.exceptions import SelectionError
 from MDAnalysis.analysis.dihedrals import calc_dihedrals
 
-from .ensemble import Ensemble, EnsembleAtomGroup, EnsembleAnalysis
+from .ensemble import EnsembleAtomGroup, EnsembleAnalysis
 
 import logging
 logger = logging.getLogger('mdpow.analysis.dihedral')
@@ -24,6 +24,22 @@ class DihedralAnalysis(EnsembleAnalysis):
     def __init__(self, dihedralgroups: List[EnsembleAtomGroup]):
         super(DihedralAnalysis, self).__init__(dihedralgroups[0].ensemble)
         self._sel = dihedralgroups
+        self._check_inputs()
+
+    def _check_inputs(self):
+        for i in range(len(self._sel) - 1):
+            # Checking if EnsembleAtomGroup.ensemble references same object in memory
+            if self._sel[i].ensemble is not self._sel[i - 1]:
+                logger.error('Dihedral selections from different Ensembles,'
+                             'ensure that all EnsembleAtomGroups are created'
+                             'from the same Ensemble.')
+                raise MemoryError
+        for group in self._sel:
+            for k in group.keys():
+                if len(group[k]) != 4:
+                    logger.error('Dihedral calculations require AtomGroups with'
+                                 'only 4 atoms, %s selected' % len(group))
+                    raise SelectionError
 
     def _prepare_ensemble(self):
         self._col = ['selection', 'solvent', 'interaction',
