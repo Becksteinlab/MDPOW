@@ -13,6 +13,8 @@ Changes
 * dropped support for Python 2 and <3.6: only Python 3.7--3.9
   are supported (#177)
 * removed unused POWConfigParser.getintarray() (PR #187)
+* removed deprecated mdpow-gyhd script, use mdpow-solvationenergy
+  instead (#183)
 
 Enhancements
 
