@@ -39,7 +39,7 @@ class TestDihedral(object):
 
         results = dh_run.results
 
-        assert results['solvent'] == ['water']*28
-        assert results['interaction'] == ['Coulomb']*12 + ['VDW']*16
-
-
+        for s in results['solvent']:
+            assert s == 'water'
+        for i in results['interaction'][:12]:
+            assert i == 'Coulomb'
