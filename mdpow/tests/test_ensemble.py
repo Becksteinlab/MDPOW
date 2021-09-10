@@ -102,7 +102,7 @@ class TestEnsemble(object):
         assert not Sol1 == Sol2
         assert isinstance(Sol2, EnsembleAtomGroup)
         assert Sol2 == Sol1.select_atoms('resid 2')
-        assert ensemble_keys.sort() == Sol1.ensemble().keys().sort()
+        assert ensemble_keys.sort() == Sol1.ensemble.keys().sort()
         Sol1._groups.pop(('water', 'Coulomb', '0000'))
         Sol1._keys = Sol1._groups.keys()
         assert not Sol1 == Sol2
