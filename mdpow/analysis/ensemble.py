@@ -246,7 +246,7 @@ class Ensemble(object):
                 raise
             else:
                 selections[key] = ag
-        return EnsembleAtomGroup(selections, ensemble_dir=self._ensemble_dir)
+        return EnsembleAtomGroup(selections, ensemble=self)
 
     def select_systems(self, keys=None, solvents=None, interactions=None,
                        lambdas=None, lambda_range=None):
@@ -335,9 +335,9 @@ class EnsembleAtomGroup(object):
     they should be obtained by selecting atoms from an existing object.
     """
 
-    def __init__(self, group_dict: dict, ensemble_dir=None):
+    def __init__(self, group_dict: dict, ensemble: Ensemble):
         self._groups = group_dict
-        self._ens_dir = ensemble_dir
+        self._ensemble = ensemble
         self._keys = group_dict.keys()
 
     def __getitem__(self, index):
@@ -384,15 +384,11 @@ class EnsembleAtomGroup(object):
                 raise
             else:
                 selections[key] = ag
-        return EnsembleAtomGroup(selections, ensemble_dir=self._ens_dir)
+        return EnsembleAtomGroup(selections, ensemble=self._ensemble)
 
     def ensemble(self):
         """Returns the _ensemble of the EnsembleAtomGroup"""
-        ens = Ensemble()
-        for k in self.keys():
-            ens.add_system(k, universe=self[k].universe)
-        ens._ensemble_dir = self._ens_dir
-        return ens
+        return self._ensemble
 
 
 class EnsembleAnalysis(object):
