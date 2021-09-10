@@ -22,7 +22,7 @@ class DihedralAnalysis(EnsembleAnalysis):
     """
 
     def __init__(self, dihedralgroups: List[EnsembleAtomGroup]):
-        super(DihedralAnalysis, self).__init__(dihedralgroups[0].ensemble())
+        super(DihedralAnalysis, self).__init__(dihedralgroups[0].ensemble)
         self._sel = dihedralgroups
 
     def _prepare_ensemble(self):
