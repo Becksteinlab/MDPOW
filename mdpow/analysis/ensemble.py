@@ -386,6 +386,7 @@ class EnsembleAtomGroup(object):
                 selections[key] = ag
         return EnsembleAtomGroup(selections, ensemble=self._ensemble)
 
+    @property
     def ensemble(self):
         """Returns the ensemble of the EnsembleAtomGroup"""
         return self._ensemble
@@ -410,7 +411,7 @@ class EnsembleAnalysis(object):
 
         class DihedralAnalysis(mdpow.ensemble.EnsembleAnalysis):
             def __init__(self, DihedralEnsembleGroup):
-                super(DihedralAnalysis, self).__init__(DihedralEnsembleGroup.ensemble())
+                super(DihedralAnalysis, self).__init__(DihedralEnsembleGroup.ensemble)
 
                 self._sel = DihedralEnsembleGroup
 
