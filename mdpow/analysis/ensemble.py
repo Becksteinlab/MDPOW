@@ -387,7 +387,7 @@ class EnsembleAtomGroup(object):
         return EnsembleAtomGroup(selections, ensemble=self._ensemble)
 
     def ensemble(self):
-        """Returns the _ensemble of the EnsembleAtomGroup"""
+        """Returns the ensemble of the EnsembleAtomGroup"""
         return self._ensemble
 
 
@@ -408,9 +408,9 @@ class EnsembleAnalysis(object):
 
     Dihedral Analysis Demonstration::
 
-        class DihedralAnalysis(mdpow._ensemble.EnsembleAnalysis):
+        class DihedralAnalysis(mdpow.ensemble.EnsembleAnalysis):
             def __init__(self, DihedralEnsembleGroup):
-                super(DihedralAnalysis, self).__init__(DihedralEnsembleGroup._ensemble())
+                super(DihedralAnalysis, self).__init__(DihedralEnsembleGroup.ensemble())
 
                 self._sel = DihedralEnsembleGroup
 
@@ -465,7 +465,7 @@ class EnsembleAnalysis(object):
     def _single_universe(self):
         """Calculations on a single Universe object.
 
-            Run on each universe in the _ensemble during when
+            Run on each universe in the ensemble during when
             self.run in called.
         """
         pass  # pragma: no cover
@@ -479,16 +479,16 @@ class EnsembleAnalysis(object):
 
     def _prepare_ensemble(self):
         """For establishing data structures used in running
-        analysis on the entire _ensemble.
+        analysis on the entire ensemble.
 
         Data structures will not be overwritten upon moving to
-        next system in _ensemble.
+        next system in ensemble.
         """
         pass  # pragma: no cover
 
     def _prepare_universe(self):
         """For establishing data structures used in running
-        analysis on each trajectory in _ensemble
+        analysis on each trajectory in ensemble
 
         Data structures will be overwritten between upon after
         each trajectory has been run
@@ -500,14 +500,14 @@ class EnsembleAnalysis(object):
         pass  # pragma: no cover
 
     def _conclude_ensemble(self):
-        """Run after all trajectories in _ensemble are finished"""
+        """Run after all trajectories in ensemble are finished"""
         pass  # pragma: no cover
 
     def run(self, start=None, stop=None, step=None):
         """Runs _single_universe on each system and _single_frame
         on each frame in the system.
 
-        First iterates through keys of _ensemble, then runs _setup_system
+        First iterates through keys of ensemble, then runs _setup_system
         which defines the system and trajectory. Then iterates over
         trajectory frames.
         """
