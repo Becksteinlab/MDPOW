@@ -532,7 +532,7 @@ class EnsembleAnalysis(object):
         return self
 
     @staticmethod
-    def check_groups_from_common_ensemble(*groups: List[EnsembleAtomGroup]):
+    def check_groups_from_common_ensemble(groups: List[EnsembleAtomGroup]):
         """Checks if inputted list of
         :class:`~mdpow.analysis.ensemble.EnsembleAtomGroup` originate from
         the same :class:`~mdpow.analysis.ensemble.Ensemble`
