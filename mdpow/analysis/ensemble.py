@@ -542,7 +542,7 @@ class EnsembleAnalysis(object):
         in memory. If two :class:`~mdpow.analysis.ensemble.EnsembleAtomGroup`
         object don't have a common :class:`~mdpow.analysis.ensemble.Ensemble`
         :class:`ValueError` is raised."""
-        for i in range(len(groups) - 1):
+        for i in range((len(groups) - 1) // 2):
             # Checking if EnsembleAtomGroup.ensemble references same object in memory
             if groups[i].ensemble is not groups[-1 - i]:
                 msg = '''Dihedral selections from different Ensembles,
