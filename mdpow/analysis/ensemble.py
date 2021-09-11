@@ -3,7 +3,7 @@
 
 import os
 import errno
-from typing import Optional
+from typing import Optional, List
 
 import numpy as np
 
@@ -530,3 +530,23 @@ class EnsembleAnalysis(object):
         logger.info("Finishing up")
         self._conclude_ensemble()
         return self
+
+    @staticmethod
+    def check_groups_from_common_ensemble(*groups: List[EnsembleAtomGroup]):
+        """Checks if inputted list of
+        :class:`~mdpow.analysis.ensemble.EnsembleAtomGroup` originate from
+        the same :class:`~mdpow.analysis.ensemble.Ensemble`
+
+        Checks every :class:`~mdpow.analysis.ensemble.EnsembleAtomGroup` in
+        list to determine if their :meth:`ensemble` references the same object
+        in memory. If two :class:`~mdpow.analysis.ensemble.EnsembleAtomGroup`
+        object don't have a common :class:`~mdpow.analysis.ensemble.Ensemble`
+        :class:`ValueError` is raised."""
+        for i in range(len(groups) - 1):
+            # Checking if EnsembleAtomGroup.ensemble references same object in memory
+            if groups[i].ensemble is not groups[-1 - i]:
+                msg = '''Dihedral selections from different Ensembles,
+                          ensure that all EnsembleAtomGroups are created
+                          from the same Ensemble.'''
+                logger.error(msg)
+                raise ValueError(msg)

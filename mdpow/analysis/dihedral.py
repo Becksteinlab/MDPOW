@@ -18,33 +18,32 @@ class DihedralAnalysis(EnsembleAnalysis):
     """Analyzes dihedral angles of selections from a single
     :class:`~mdpow.analysis.ensemble.Ensemble` .
 
-    Accepts a list of :class:`~mdpow.analysis.ensemble.EnsembleAtomGroup`
-    with four atoms selected on each. All selections must be from the same
-    :class:`~mdpow.analysis.ensemble.Ensemble` .
+    :keywords:
+
+    *dihedral_groups
+        list of :class:`~mdpow.analysis.ensemble.EnsembleAtomGroup`
+        with four atoms selected on each. All selections must be from the same
+        :class:`~mdpow.analysis.ensemble.Ensemble` .
 
     Data is returned in a :class:`pandas.DataFrame` with observations sorted by
     selection, solvent, interaction, lambda, time.
     """
 
-    def __init__(self, dihedralgroups: List[EnsembleAtomGroup]):
-        super(DihedralAnalysis, self).__init__(dihedralgroups[0].ensemble)
-        self._sel = dihedralgroups
-        self._check_inputs()
+    def __init__(self, dihedral_groups: List[EnsembleAtomGroup]):
+        self.check_groups_from_common_ensemble(dihedral_groups)
+        self.check_dihedral_inputs(dihedral_groups)
+        super(DihedralAnalysis, self).__init__(dihedral_groups[0].ensemble)
+        self._sel = dihedral_groups
 
-    def _check_inputs(self):
-        for i in range(len(self._sel) - 1):
-            # Checking if EnsembleAtomGroup.ensemble references same object in memory
-            if self._sel[i].ensemble is not self._sel[i - 1]:
-                logger.error('Dihedral selections from different Ensembles,'
-                             'ensure that all EnsembleAtomGroups are created'
-                             'from the same Ensemble.')
-                raise MemoryError
-        for group in self._sel:
+    @staticmethod
+    def check_dihedral_inputs(selections):
+        for group in selections:
             for k in group.keys():
                 if len(group[k]) != 4:
-                    logger.error('Dihedral calculations require AtomGroups with'
-                                 'only 4 atoms, %s selected' % len(group))
-                    raise SelectionError
+                    msg = ''''Dihedral calculations require AtomGroups with
+                              only 4 atoms, %s selected''' % len(group)
+                    logger.error(msg)
+                    raise SelectionError(msg)
 
     def _prepare_ensemble(self):
         self._col = ['selection', 'solvent', 'interaction',
