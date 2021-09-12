@@ -23,13 +23,25 @@ class DihedralAnalysis(EnsembleAnalysis):
 
     :keywords:
 
-    *dihedral_groups
+    *dihedral_groups*
         list of :class:`~mdpow.analysis.ensemble.EnsembleAtomGroup`
         with four atoms selected on each. All selections must be from the same
         :class:`~mdpow.analysis.ensemble.Ensemble` .
 
     Data is returned in a :class:`pandas.DataFrame` with observations sorted by
     selection, solvent, interaction, lambda, time.
+
+    .. ruberic:: Example
+
+    Typical Workflow::
+
+        ens = Ensemble(dirname='Mol')
+
+        dihedral1 = Ens.select_atoms('name C1 or name C2 or name C3 or name C4')
+        dihedral2 = Ens.select_atoms('name C5 or name C8 or name C10 or name C12')
+
+        dih_run = DihedralAnalysis([dihedral1, dihedral2]).run(start=0, stop=10, step=1)
+
     """
 
     def __init__(self, dihedral_groups: List[EnsembleAtomGroup]):
