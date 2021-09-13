@@ -17,6 +17,7 @@ from MDAnalysis.exceptions import NoDataError, SelectionError
 from gromacs.utilities import in_dir
 
 from ..analysis.ensemble import Ensemble, EnsembleAnalysis, EnsembleAtomGroup
+from ..analysis.dihedral import DihedralAnalysis
 
 from pkg_resources import resource_filename
 
@@ -147,3 +148,16 @@ class TestEnsemble(object):
         Sim = Ensemble(dirname=self.tmpdir.name, solvents=['water'])
         TestRun = TestAnalysis(Sim).run(start=0, step=1, stop=10)
         assert Sim.keys() == TestRun.key_list
+
+    def test_value_error(self):
+        ens = Ensemble(dirname=self.tmpdir.name, solvents=['water'])
+        copy_ens = Ensemble()
+        copy_ens._ensemble_dir = self.tmpdir.name
+        for k in ens.keys():
+            copy_ens.add_system(k, ens[k])
+        dh1 = ens.select_atoms('name C4 or name C17 or name S2 or name N3')
+        dh2 = copy_ens.select_atoms('name C4 or name C17 or name S2 or name N3')
+        dh3 = ens.select_atoms('name C4 or name C17 or name S2 or name N3')
+        dh4 = ens.select_atoms('name C4 or name C17 or name S2 or name N3')
+        with pytest.raises(ValueError):
+            dh_run = DihedralAnalysis([dh1, dh2, dh4, dh3]).run(start=0, stop=4, step=1)
