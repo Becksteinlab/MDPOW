@@ -22,7 +22,7 @@ class SolvationAnalysis(EnsembleAnalysis):
         The :class:`~mdpow.analysis.ensemble.Ensemble` used in the analysis.
 
     *distances*
-        The cutoff distances around the solute measured in Angstroms
+        The cutoff distances around the solute measured in Angstroms.
 
     The data is returned in a :class:`pandas.DataFrame` with observations sorted by
     distance, solvent, interaction, lambda, time.
