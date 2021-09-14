@@ -49,7 +49,7 @@ class SolvationAnalysis(EnsembleAnalysis):
 
     def _single_frame(self):
         for d in self._dists:
-            solvs = len(self._system.select_atoms(f'around {d} not resname SOL'))
+            solvs = len(self._system.select_atoms(f'around {d} not resname SOL').residues)
             result = [d, self._key[0], self._key[1], self._key[2], self._ts.time, solvs]
             for i in range(len(result)):
                 self._res_dict[self._col[i]].append(result[i])
