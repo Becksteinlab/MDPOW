@@ -99,7 +99,8 @@ class DihedralAnalysis(EnsembleAnalysis):
         cord2 = np.concatenate(tuple([cord_dict2[k] for k in key_list]))
         cord3 = np.concatenate(tuple([cord_dict3[k] for k in key_list]))
         cord4 = np.concatenate(tuple([cord_dict4[k] for k in key_list]))
-        angle = calc_dihedrals(cord1, cord2, cord3, cord4)
+        angle = calc_dihedrals(cord1, cord2, cord3, cord4,
+                               box=self.g1[key_list[0]].dimensions)
         angle = np.rad2deg(angle)
         for i in range(len(self.names)):
             result = list(key_list[i]) + [self._ts.time, angle[i]]
