@@ -3,9 +3,11 @@
 
 from typing import List
 
+import numpy as np
 import pandas as pd
 
 import MDAnalysis as mda
+from MDAnalysis.lib.distances import capped_distance
 
 from .ensemble import EnsembleAnalysis, Ensemble, EnsembleAtomGroup
 
@@ -20,8 +22,15 @@ class SolvationAnalysis(EnsembleAnalysis):
 
     :keyword:
 
-    *ensemble*
-        The :class:`~mdpow.analysis.ensemble.Ensemble` used in the analysis.
+    *solute*
+        An :class:`~mdpow.analysis.ensemble.EnsembleAtom` containing the solute
+        used to measure distance.
+
+    *solvent*
+        An :class:`~mdpow.analysis.ensemble.EnsembleAtom` containing the solvents
+        counted in by the distance measurement. Each solvent atom is counted by the
+        distance calculation.
+
 
     *distances*
         The cutoff distances around the solute measured in Angstroms.
@@ -34,35 +43,41 @@ class SolvationAnalysis(EnsembleAnalysis):
     Typical Workflow::
 
         ens = Ensemble(dirname='Mol')
+        solvent = ens.select_atoms('resname SOL and name OW')
+        solute = ens.select_atoms('not resname SOL')
 
-        solv = SolvationAnalysis(ens, [1.2, 2.4]).run(start=0, stop=10, step=1)
+        solv_dist = SolvationAnalysis(solute, solvent, [1.2, 2.4]).run(start=0, stop=10, step=1)
 
     """
     def __init__(self, solute: EnsembleAtomGroup, solvent: EnsembleAtomGroup, distances: List[float]):
         self.check_groups_from_common_ensemble([solute, solvent])
         super(SolvationAnalysis, self).__init__(solute.ensemble)
-        self._solu = solute
-        self._solv = solvent
+        self._solute = solute
+        self._solvent = solvent
         self._dists = distances
 
     def _prepare_ensemble(self):
         self._sel = 'name '
-        keys = [k for k in self._solu.keys()]
-        for n in self._solu[keys[0]].names:
+        keys = [k for k in self._solute.keys()]
+        for n in self._solute[keys[0]].names:
             self._sel += f' {n}'
         self._col = ['distance', 'solvent', 'interaction',
-                     'lambda', 'time', 'quantity']
+                     'lambda', 'time', 'N_solvent']
         self.results = pd.DataFrame(columns=self._col)
         self._res_dict = {key: [] for key in self._col}
 
-    def _single_universe(self):
-        self._temp_sys = self._solv[self._key] + self._solu[self._key]
-
     def _single_frame(self):
-        for d in self._dists:
-            solvs = len(self._temp_sys.select_atoms(f'around {d} ({self._sel})').residues)
-            result = [d, self._key[0], self._key[1], self._key[2], self._ts.time, solvs]
-            for i in range(len(result)):
+        solute = self._solute[self._key]
+        solvent = self._solvent[self._key]
+        pairs, distaces = capped_distance(solute.positions, solvent.positions,
+                                          max(self._dists), box=self._ts.dimensions)
+        solute_i, solvent_j = np.transpose(pairs)
+        for d in range(len(self._dists)):
+            close_solv_atoms = solvent[solvent_j[distaces < self._dists[d]]]
+            n = len(close_solv_atoms)
+            result = [self._dists[d], self._key[0], self._key[1],
+                      self._key[2], self._ts.time, n]
+            for i in range(len(self._col)):
                 self._res_dict[self._col[i]].append(result[i])
 
     def _conclude_ensemble(self):

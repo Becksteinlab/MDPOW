@@ -22,9 +22,9 @@ RESOURCES = py.path.local(resource_filename(__name__, 'testing_resources'))
 MANIFEST = RESOURCES.join("manifest.yml")
 
 
-class TestDihedral(object):
-    mean = 181.71428571428572
-    var = 0.9960847721325709
+class TestSolvShell(object):
+    mean = 2654.0
+    std = 2654.465059103246
 
     def setup(self):
         self.tmpdir = td.TempDir()
@@ -33,7 +33,6 @@ class TestDihedral(object):
         self.ens = Ensemble(dirname=self.tmpdir.name, solvents=['water'])
         self.solute = self.ens.select_atoms('not resname SOL')
         self.solvent = self.ens.select_atoms('resname SOL and name OW')
-
 
     def teardown(self):
         self.tmpdir.dissolve()
@@ -50,7 +49,7 @@ class TestDihedral(object):
 
     def test_selection(self):
         solv = SolvationAnalysis(self.solute, self.solvent, [2, 10]).run(start=0, stop=4, step=1)
-        mean = np.mean(solv.results['quantity'])
-        var = variation(solv.results['quantity'])
+        mean = np.mean(solv.results['N_solvent'])
+        std = np.std(solv.results['N_solvent'])
         assert_almost_equal(mean, self.mean, 6)
-        assert_almost_equal(var, self.var, 6)
+        assert_almost_equal(std, self.std, 6)
