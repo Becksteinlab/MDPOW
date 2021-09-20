@@ -48,7 +48,8 @@ class TestSolvShell(object):
         self.setup()  # Won't have solute and solvent without this
         return SolvationAnalysis(self.solute, self.solvent, [2, 10]).run(start=0, stop=4, step=1)
 
-    @pytest.mark.parametrize("d,ref_mean,ref_std", [(2, 1.10714285, 2.07604166), (10, 5306.89285714, 129.16720594)])
+    @pytest.mark.parametrize("d,ref_mean,ref_std", [(2, 1.10714285,2.07604166),
+                                                    (10, 5306.89285714, 129.16720594)])
     def test_selection(self, solvation_analysis_list_results, d, ref_mean, ref_std):
         results = solvation_analysis_list_results.results
         mean = np.mean(results.loc[results['distance'] == d]['N_solvent'])

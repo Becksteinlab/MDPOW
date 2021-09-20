@@ -64,7 +64,7 @@ class SolvationAnalysis(EnsembleAnalysis):
     def _single_frame(self):
         solute = self._solute[self._key]
         solvent = self._solvent[self._key]
-        pairs, distaces = capped_distance(solute.positions, solvent.positions,
+        pairs, distances = capped_distance(solute.positions, solvent.positions,
                                           max(self._dists), box=self._ts.dimensions)
         solute_i, solvent_j = np.transpose(pairs)
         for d in self._dists:

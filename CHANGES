@@ -27,6 +27,8 @@ Enhancements
   simulations (issue #168, PR #179)
 * new EnsembleAnalysis framework for collecting data from MDPOW simulations 
   (issue #168, PR #179)
+* new SolvationAnalysis for quantifing the number of solvent molecules
+  within a given distance
 
 
 Fixes
