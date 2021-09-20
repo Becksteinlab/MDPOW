@@ -20,7 +20,7 @@ class SolvationAnalysis(EnsembleAnalysis):
     """Measures the number of solvent molecules withing the given distances
     in an :class:`~mdpow.analysis.ensemble.Ensemble` .
 
-    :keyword:
+    :Parameters:
 
     *solute*
         An :class:`~mdpow.analysis.ensemble.EnsembleAtom` containing the solute
@@ -31,22 +31,21 @@ class SolvationAnalysis(EnsembleAnalysis):
         counted in by the distance measurement. Each solvent atom is counted by the
         distance calculation.
 
-
     *distances*
-        The cutoff distances around the solute measured in Angstroms.
+        Array like of the cutoff distances around the solute measured in Angstroms.
 
     The data is returned in a :class:`pandas.DataFrame` with observations sorted by
     distance, solvent, interaction, lambda, time.
 
-    .. ruberic:: Example
+    .. rubric:: Example
 
     Typical Workflow::
 
         ens = Ensemble(dirname='Mol')
         solvent = ens.select_atoms('resname SOL and name OW')
-        solute = ens.select_atoms('not resname SOL')
+        solute = ens.select_atoms('resname UNK')
 
-        solv_dist = SolvationAnalysis(solute, solvent, [1.2, 2.4]).run(start=0, stop=10, step=1)
+        solv_dist = SolvationAnalysis(solute, solvent, [1.2, 2.4]).run(stop=10)
 
     """
     def __init__(self, solute: EnsembleAtomGroup, solvent: EnsembleAtomGroup, distances: List[float]):
@@ -57,10 +56,6 @@ class SolvationAnalysis(EnsembleAnalysis):
         self._dists = distances
 
     def _prepare_ensemble(self):
-        self._sel = 'name '
-        keys = [k for k in self._solute.keys()]
-        for n in self._solute[keys[0]].names:
-            self._sel += f' {n}'
         self._col = ['distance', 'solvent', 'interaction',
                      'lambda', 'time', 'N_solvent']
         self.results = pd.DataFrame(columns=self._col)
@@ -72,11 +67,10 @@ class SolvationAnalysis(EnsembleAnalysis):
         pairs, distaces = capped_distance(solute.positions, solvent.positions,
                                           max(self._dists), box=self._ts.dimensions)
         solute_i, solvent_j = np.transpose(pairs)
-        for d in range(len(self._dists)):
-            close_solv_atoms = solvent[solvent_j[distaces < self._dists[d]]]
-            n = len(close_solv_atoms)
-            result = [self._dists[d], self._key[0], self._key[1],
-                      self._key[2], self._ts.time, n]
+        for d in self._dists:
+            close_solv_atoms = solvent[solvent_j[distaces < d]]
+            result = [d, self._key[0], self._key[1],self._key[2],
+                      self._ts.time, close_solv_atoms.n_atoms]
             for i in range(len(self._col)):
                 self._res_dict[self._col[i]].append(result[i])
 
