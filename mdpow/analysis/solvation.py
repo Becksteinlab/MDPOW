@@ -68,7 +68,7 @@ class SolvationAnalysis(EnsembleAnalysis):
                                           max(self._dists), box=self._ts.dimensions)
         solute_i, solvent_j = np.transpose(pairs)
         for d in self._dists:
-            close_solv_atoms = solvent[solvent_j[distaces < d]]
+            close_solv_atoms = solvent[solvent_j[distances < d]]
             result = [d, self._key[0], self._key[1],self._key[2],
                       self._ts.time, close_solv_atoms.n_atoms]
             for i in range(len(self._col)):
