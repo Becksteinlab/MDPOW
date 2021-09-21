@@ -17,4 +17,5 @@ are for users who wish to construct their own analyses.
 
    analysis/ensemble
    analysis/ensemble_analysis
+   analysis/solvation
    analysis/dihedral
