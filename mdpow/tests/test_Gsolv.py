@@ -5,16 +5,15 @@ import pybol
 import numpy as np
 from gromacs.utilities import in_dir
 
-from mdpow import fep, equil
+from mdpow import fep, equil, config
+
+from . import RESOURCES
 
 class Test_Gsolv_manual(object):
 
     def setup(self):
         self.tmpdir = td.TempDir()
-        self.old_path = os.getcwd()
-        self.resources = os.path.join(
-            self.old_path, 'mdpow', 'tests', 'testing_resources')
-        self.m = pybol.Manifest(os.path.join(self.resources,'manifest.yml'))
+        self.m = pybol.Manifest(str(RESOURCES / 'manifest.yml'))
         self.m.assemble('md_npt',self.tmpdir.name)
         simulation_filename = os.path.join(self.tmpdir.name,'benzene',
                                   'water.simulation')
@@ -29,9 +28,10 @@ class Test_Gsolv_manual(object):
         self.tmpdir.dissolve()
 
     def _setup(self, **kwargs):
+        mdp = config.get_template("bar_opls.mdp")
         with in_dir(self.tmpdir.name, create=False):
             self.Gsolv = fep.Gsolv(simulation=self.S, molecule='BNZ',
-                    mdp=os.path.join(self.old_path, 'mdpow', 'templates', 'bar_opls.mdp') ,**kwargs)
+                                   mdp=mdp ,**kwargs)
             self.Gsolv.setup(maxwarn=1)
 
     def test_default_setup(self):

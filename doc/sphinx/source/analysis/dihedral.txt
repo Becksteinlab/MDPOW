@@ -1,0 +1,13 @@
+=================
+Dihedral Analysis
+=================
+
+Analyzes selected dihedral angles over a multi-system simulation. Built using the :doc:`analysis/ensemble_analysis`
+Framework to run over a collection of systems contained in an :class:`~mdpow.analysis.ensemble.Ensemble` .
+
+.. versionadded:: 0.8.0
+
+.. autoclass:: mdpow.analysis.dihedral.DihedralAnalysis
+    :members:
+
+    .. automethod:: run

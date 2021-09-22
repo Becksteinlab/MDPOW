@@ -1,0 +1,12 @@
+========================
+Solvation Shell Analysis
+========================
+
+Analyzes the number of solvent molecules within given distances of the solute.
+
+.. versionadded:: 0.8.0
+
+.. autoclass:: mdpow.analysis.solvation.SolvationAnalysis
+    :members:
+
+    .. automethod:: run

@@ -6,12 +6,39 @@ Add summary of changes for each release. Use ISO dates. Reference
 GitHub issues numbers and PR numbers.
 
 2021-??-??    0.8.0
-ALescoulie
+ALescoulie, orbeckst
 
 Changes
 
 * dropped support for Python 2 and <3.6: only Python 3.7--3.9
   are supported (#177)
+* removed unused POWConfigParser.getintarray() (PR #187)
+* removed deprecated mdpow-gyhd script, use mdpow-solvationenergy
+  instead (#183)
+
+Enhancements
+
+* new exception config.NoSectionError to indicate missing section
+  ("protocol") in the YAML run input file (PR #187)
+* new config.NoOptionWarning when undefined options are used (with
+  default None) and POWConfigParser.get() now logs when an option is used
+  at level DEBUG (PR #187)
+* new Ensemble and EnsembleAtomGroup objects for loading set of system
+  simulations (issue #168, PR #179)
+* new EnsembleAnalysis framework for collecting data from MDPOW simulations 
+  (issue #168, PR #179)
+* new SolvationAnalysis for quantifing the number of solvent molecules
+  within a given distance (#195)
+
+
+Fixes
+
+* run.get_mdp_files() finds the full path for an MDP file and raises ValueError
+  when MDP file is not found (PR #187)
+* POWConfigParser.getpath() returns None for empty options instead of raising
+  TypeError (PR #187)
+* POWConfigParser.getlist() and getarray() return empty list or array for
+  empty options instead of raising TypeError (PR #187)
 
 
 2021-08-04    0.7.1

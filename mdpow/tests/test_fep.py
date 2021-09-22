@@ -52,20 +52,21 @@ class TestFEPschedule(object):
          'sc_sigma': 0.3}
     }
 
-    def setup(self):
+    @pytest.fixture
+    def cfg(self):
         # load default bundled configuration
-        self.cfg = mdpow.config.get_configuration()
+        return mdpow.config.get_configuration()
 
-    def test_VDW(self):
-        return self._test_schedule('VDW')
+    def test_VDW(self, cfg):
+        return self._test_schedule(cfg, 'VDW')
 
-    def test_Coulomb(self):
-        return self._test_schedule('Coulomb')
+    def test_Coulomb(self, cfg):
+        return self._test_schedule(cfg, 'Coulomb')
 
     @pytest.mark.parametrize('component', ['VDW', 'Coulomb'])
-    def test_copy(self, component):
+    def test_copy(self, cfg, component):
         section = 'FEP_schedule_{0}'.format(component)
-        schedule = deepcopy(mdpow.fep.FEPschedule.load(self.cfg, section))
+        schedule = deepcopy(mdpow.fep.FEPschedule.load(cfg, section))
         reference = self.reference[component]
 
         for k in schedule:
@@ -83,22 +84,24 @@ class TestFEPschedule(object):
                     "mismatch between loaded FEP schedule entry {0} and reference".format(k)
 
     @pytest.mark.parametrize('component', ['VDW', 'Coulomb'])
-    def test_write(self, component):
-        self.cfg.write('cfg.yaml')
-        new_cfg = mdpow.config.get_configuration('cfg.yaml')
-        assert new_cfg.conf == self.cfg.conf
+    def test_write(self, cfg, component, tmp_path):
+        filename = tmp_path / "cfg.yaml"
+        cfg.write(filename)
+        new_cfg = mdpow.config.get_configuration(filename)
+        assert new_cfg.conf == cfg.conf
 
-    def test_get(self):
-        tmp_cfg = mdpow.config.POWConfigParser()
-        item = tmp_cfg.get('VDW', 'label')
-        assert item is None
+    @pytest.mark.parametrize("x,ref", [
+                            ("test", False),
+                            ([1, 1, 2, 3], True),
+                            ({1, 2, 3}, True),
+                            (None, False),
+                            ])
+    def test_iterable(self, x, ref):
+        assert mdpow.config.iterable(x) == ref
 
-    def test_iterable(self):
-        assert not mdpow.config.iterable('test')
-
-    def _test_schedule(self, component):
+    def _test_schedule(self, cfg, component):
         section = 'FEP_schedule_{0}'.format(component)
-        schedule = mdpow.fep.FEPschedule.load(self.cfg, section)
+        schedule = mdpow.fep.FEPschedule.load(cfg, section)
         reference = self.reference[component]
 
         for k in schedule:
@@ -114,3 +117,15 @@ class TestFEPschedule(object):
             else:
                 assert schedule[k] == reference[k], \
                     "mismatch between loaded FEP schedule entry {0} and reference".format(k)
+
+    def test_skip_empty_entries(self, cfg, section="FEP_schedule_Coulomb"):
+        # remove some entries
+        del cfg.conf[section]['name']     # string
+        del cfg.conf[section]['lambdas']  # array
+        with pytest.warns(mdpow.config.NoOptionWarning):
+            schedule = mdpow.fep.FEPschedule.load(cfg, section)
+
+        assert schedule['label'] == "Coul"
+        assert schedule['sc_power'] == 1
+        assert 'name' not in schedule
+        assert 'lambdas' not in schedule
