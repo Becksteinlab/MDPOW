@@ -3,7 +3,7 @@
 
 import os
 import errno
-from typing import Optional, List
+from typing import Optional, List, Union
 
 import numpy as np
 
@@ -550,3 +550,32 @@ class EnsembleAnalysis(object):
                           from the same Ensemble.'''
                 logger.error(msg)
                 raise ValueError(msg)
+
+
+def ensemble_wrapper(cls):
+    """ A decorator for :class:`mdanalysis.analysis.base.AnalysisBase` based classes modifying them to
+    accept an ensemble.
+    """
+    class EnsembleWrapper:
+        def __init__(self, ensemble: Union[Ensemble, EnsembleAtomGroup], *args, **kwargs):
+            self._ensemble = ensemble
+            self._args = args
+            self._kwargs = kwargs
+            self._Analysis = cls
+
+        def _prepare_ensemble(self):
+            # Defined separately so user can modify behavior
+            self._results_dict = {x: None for x in self._ensemble.keys()}
+
+        def _conclude_system(self):
+            # Defined separately so user can modify behavior
+            self._results_dict[self._key] = self._SystemRun.results
+
+        def run(self, start=0, stop=0, step=1):
+            self._prepare_ensemble()
+            for self._key in self._ensemble.keys():
+                self._SystemRun = self._Analysis(self._ensemble[self._key], *self._args, **self._kwargs)
+                self._SystemRun.run(start=start, step=step, stop=stop)
+                self._conclude_system()
+
+    return EnsembleWrapper

@@ -13,10 +13,11 @@ import numpy as np
 
 import MDAnalysis as mda
 from MDAnalysis.exceptions import NoDataError, SelectionError
+from MDAnalysis.analysis.base import AnalysisBase
 
 from gromacs.utilities import in_dir
 
-from ..analysis.ensemble import Ensemble, EnsembleAnalysis, EnsembleAtomGroup
+from ..analysis.ensemble import Ensemble, EnsembleAnalysis, EnsembleAtomGroup, ensemble_wrapper
 from ..analysis.dihedral import DihedralAnalysis
 
 from pkg_resources import resource_filename
@@ -161,3 +162,27 @@ class TestEnsemble(object):
         dh4 = ens.select_atoms('name C4 or name C17 or name S2 or name N3')
         with pytest.raises(ValueError):
             dh_run = DihedralAnalysis([dh1, dh2, dh4, dh3]).run(start=0, stop=4, step=1)
+
+    def test_ensemble_wrapper(self):
+
+        class BaseTest(AnalysisBase):
+            def __init__(self, system: mda.Universe):
+                super(BaseTest, self).__init__(system.trajectory)
+                self.system = system
+
+            def _prepare(self):
+                self._res_arr = []
+
+            def _single_frame(self):
+                self._res_arr.append(len(self.system.select_atoms('not resname SOL')))
+                assert self._res_arr[-1] == 42
+
+            def _conclude(self):
+                self.results = self._res_arr
+
+        @ensemble_wrapper
+        class EnsembleBaseTest(BaseTest):
+            pass
+
+        Sim = Ensemble(dirname=self.tmpdir.name, solvents=['water'])
+        SolvCount = EnsembleBaseTest(Sim).run(stop=10)
