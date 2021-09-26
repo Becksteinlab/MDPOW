@@ -553,8 +553,19 @@ class EnsembleAnalysis(object):
 
 
 def ensemble_wrapper(cls):
-    """ A decorator for :class:`mdanalysis.analysis.base.AnalysisBase` based classes modifying them to
-    accept an ensemble.
+    """A decorator for :class:`MDAnalysis.Universe <MDAnalysis.analysis.base.AnalysisBase>` subclasses modifying
+    them to accept an :class:`~mdpow.analysis.ensemble.Ensemble` or
+    :class:`~mdpow.analysis.ensemble.EnsembleAtomGroup`.
+
+    .. rubric:: Example Analysis
+
+        @ensemble_wrapper
+        class Example(AnalysisBase):
+            pass
+
+        Ens = Ensemble(dirname='mol_dir)
+        ExRun = Example(Ens)
+
     """
     class EnsembleWrapper:
         def __init__(self, ensemble: Union[Ensemble, EnsembleAtomGroup], *args, **kwargs):

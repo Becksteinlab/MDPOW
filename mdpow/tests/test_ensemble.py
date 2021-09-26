@@ -187,4 +187,4 @@ class TestEnsemble(object):
         Sim = Ensemble(dirname=self.tmpdir.name, solvents=['water'])
         SolvCount = EnsembleTest(Sim).run(stop=10)
         assert isinstance(SolvCount, EnsembleTest)
-
+        assert SolvCount.results[('water', 'VDW', '0000')] == ([42] * 10)
