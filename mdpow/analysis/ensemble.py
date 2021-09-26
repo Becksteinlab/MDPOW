@@ -571,11 +571,16 @@ def ensemble_wrapper(cls):
             # Defined separately so user can modify behavior
             self._results_dict[self._key] = self._SystemRun.results
 
+        def _conclude_ensemble(self):
+            self.results = self._results_dict
+
         def run(self, start=0, stop=0, step=1):
             self._prepare_ensemble()
             for self._key in self._ensemble.keys():
                 self._SystemRun = self._Analysis(self._ensemble[self._key], *self._args, **self._kwargs)
                 self._SystemRun.run(start=start, step=step, stop=stop)
                 self._conclude_system()
+            self._conclude_ensemble()
+            return self
 
     return EnsembleWrapper

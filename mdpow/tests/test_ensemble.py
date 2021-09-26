@@ -163,7 +163,7 @@ class TestEnsemble(object):
         with pytest.raises(ValueError):
             dh_run = DihedralAnalysis([dh1, dh2, dh4, dh3]).run(start=0, stop=4, step=1)
 
-    def test_ensemble_wrapper(self):
+    def test_ensemble_wrapper1(self):
 
         class BaseTest(AnalysisBase):
             def __init__(self, system: mda.Universe):
@@ -181,8 +181,10 @@ class TestEnsemble(object):
                 self.results = self._res_arr
 
         @ensemble_wrapper
-        class EnsembleBaseTest(BaseTest):
+        class EnsembleTest(BaseTest):
             pass
 
         Sim = Ensemble(dirname=self.tmpdir.name, solvents=['water'])
-        SolvCount = EnsembleBaseTest(Sim).run(stop=10)
+        SolvCount = EnsembleTest(Sim).run(stop=10)
+        assert isinstance(SolvCount, EnsembleTest)
+
