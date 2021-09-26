@@ -44,4 +44,8 @@ object when the :meth:`~mdpow.analysis.ensemble.EnsembleAtomGroup.ensemble` is r
 .. autoclass:: mdpow.analysis.ensemble.EnsembleAtomGroup
     :members:
 
-.. autodoc:: mdpow.analysis.ensemble_wrapper
+
+ensemble_wrapper Decorator
+__________________________
+
+.. automethod:: mdpow.analysis.ensemble_wrapper
