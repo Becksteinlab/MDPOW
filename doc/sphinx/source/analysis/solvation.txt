@@ -2,7 +2,8 @@
 Solvation Shell Analysis
 ========================
 
-Analyzes the number of solvent molecules within given distances of the solute.
+Analyzes the number of solvent molecules within given distances of the
+solute. The solvation tool is built with the :ref:`framwework`.
 
 .. versionadded:: 0.8.0
 
