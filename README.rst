@@ -43,7 +43,8 @@ Documentation
 Installation
 ------------
 
-See `INSTALL`_ for detailed instructions. MDPOW currently supports Python 3.7 to 3.9.
+See `INSTALL`_ for detailed instructions. MDPOW currently supports and
+is tested with Python 3.7 to 3.9.
 
 You will also need `Gromacs`_ (currently tested with versions 4.6.5,
 2018, 2020, 2021 but 2016 and 2019 should also work).
