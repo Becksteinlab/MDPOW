@@ -1,21 +1,59 @@
-==================
-Analysis Submodule
-==================
+========
+Analysis
+========
 
 .. versionadded:: 0.8.0
 
-MDPOW module for analyzing simulations. The :doc:`analysis/ensemble` objects
-and :doc:`analysis/ensemble_analysis` allow for the construction the simplified of analyses.
+The :mod:`mdpow.analysis` module contains tools for analyzing whole
+sets (ensembles) of FEP simulations and a framework to write new
+analysis tools [Lescoulie2021]_.
 
-The :doc:`analysis/ensemble` and :doc:`analysis/ensemble_analysis` sections
-assumes a basic understanding of object oriented programming in python and
-are for users who wish to construct their own analyses.
+.. _tools:
 
+Analysis tools
+--------------
+
+MDPOW analysis tools are based on the :ref:`framework`. They generally
+take as an input the top level directory of a complete FEP run and
+then collect individual simulations and run a specific analysis over
+all FEP simulations. They then make data available (typically, as a
+:class:`pandas.DataFrame`).
 
 .. toctree::
    :maxdepth: 1
 
-   analysis/ensemble
-   analysis/ensemble_analysis
    analysis/solvation
    analysis/dihedral
+
+
+.. _framework:   
+
+Ensemble Analysis Framework
+---------------------------
+
+The *Ensemble Analysis framework* [Lescoulie2021]_ allows for the
+construction analysis tools that work with whole sets (ensembles) of
+FEP simulations. They generally follow (and can use) standard
+MDAnalysis analysis classes.
+
+The :ref:`ensemble-objects` and :ref:`ensembleanalysis-base` sections
+assume a basic understanding of object oriented programming in Python
+and are for users who wish to construct their own analyses. The code
+in the :ref:`tools` serves as example implementations and is described
+in more detail in [Lescoulie2021]_.
+
+.. toctree::
+   :maxdepth: 1
+
+   analysis/ensemble_analysis	      
+   analysis/ensemble
+
+
+References
+----------
+.. [Lescoulie2021] A. Lescoulie, "SPIDAL Summer REU 2021: Upgrading MDPOW and
+		   adding analysis functionality," Technical Report, Arizona
+		   State University, Tempe, AZ, 2021. doi:
+		   `10.6084/m9.figshare.17156018`_
+
+.. _`10.6084/m9.figshare.17156018`: https://doi.org/10.6084/m9.figshare.17156018 		   

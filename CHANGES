@@ -5,7 +5,7 @@ CHANGES for MDPOW
 Add summary of changes for each release. Use ISO dates. Reference
 GitHub issues numbers and PR numbers.
 
-2021-??-??    0.8.0
+2021-01-03    0.8.0
 ALescoulie, orbeckst
 
 Changes
@@ -18,18 +18,17 @@ Changes
 
 Enhancements
 
+* new Ensemble and EnsembleAtomGroup objects for loading set of system
+  simulations (issue #168, PR #179)
+* new EnsembleAnalysis framework for collecting data from MDPOW simulations 
+  (issue #168, PR #179)
+* new EnsembleAnalysis: dihedrals (#190, PR #193)    
+* new EnsembleAnalysis: solvation shell (#195, PR #196)  
 * new exception config.NoSectionError to indicate missing section
   ("protocol") in the YAML run input file (PR #187)
 * new config.NoOptionWarning when undefined options are used (with
   default None) and POWConfigParser.get() now logs when an option is used
   at level DEBUG (PR #187)
-* new Ensemble and EnsembleAtomGroup objects for loading set of system
-  simulations (issue #168, PR #179)
-* new EnsembleAnalysis framework for collecting data from MDPOW simulations 
-  (issue #168, PR #179)
-* new SolvationAnalysis for quantifing the number of solvent molecules
-  within a given distance (#195)
-
 
 Fixes
 

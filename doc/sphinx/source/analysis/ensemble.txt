@@ -1,3 +1,5 @@
+.. _ensemble-objects:
+
 ================
 Ensemble Objects
 ================
@@ -5,7 +7,7 @@ Ensemble Objects
 .. versionadded:: 0.8.0
 
 Ensemble
-________
+--------
 
 The :class:`~mdpow.analysis.ensemble.Ensemble` object is a collection
 of :class:`MDAnalysis.Universe <MDAnalysis.core.groups.universe.Universe>` objects.
@@ -30,7 +32,7 @@ can also be built by manually adding and popping universes into an empty instanc
     .. automethod:: _load_universe_from_dir
 
 EnsembleAtomGroup
-_________________
+-----------------
 
 The :class:`~mdpow.analysis.ensemble.EnsembleAtomGroup` is created by running
 the  on an :class:`~mdpow.analysis.ensemble.Ensemble`
