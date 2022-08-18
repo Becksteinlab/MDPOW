@@ -84,8 +84,8 @@ class TestDihedral(object):
 
     def test_ValueError_different_ensemble(self):
         other = Ensemble(dirname=self.tmpdir.name, solvents=['water'])
-        dh1 = self.Ens.select_atoms('name C11', 'name C10', 'name C9', 'name C4')
-        dh2 = other.select_atoms('name C8', 'name C4', 'name C9', 'name C10')
+        dh1 = self.Ens.select_atoms('name C11 or name C10 or name C9 or name C4')
+        dh2 = other.select_atoms('name C8 or name C4 or name C9 or name C10')
         with pytest.raises(ValueError,
                            match='Dihedral selections from different Ensembles, '):
             DihedralAnalysis([dh1, dh2])
