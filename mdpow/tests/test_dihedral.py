@@ -81,3 +81,12 @@ class TestDihedral(object):
         assert_almost_equal(self.DG48910_var, dh1_var, 6)
         assert_almost_equal(self.DG491011_mean, dh2_mean, 6)
         assert_almost_equal(self.DG491011_var, dh2_var, 6)
+
+    def test_ValueError_different_ensemble(self):
+        other = Ensemble(dirname=self.tmpdir.name, solvents=['water'])
+        dh1 = self.Ens.select_atoms('name C11', 'name C10', 'name C9', 'name C4')
+        dh2 = other.select_atoms('name C8', 'name C4', 'name C9', 'name C10')
+        with pytest.raises(ValueError,
+                           match='Dihedral selections from different Ensembles, '):
+            DihedralAnalysis([dh1, dh2])
+
