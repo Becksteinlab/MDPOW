@@ -10,6 +10,7 @@ import numpy as np
 import MDAnalysis as mda
 from MDAnalysis.lib.log import ProgressBar
 from MDAnalysis.exceptions import FileFormatWarning, NoDataError, MissingDataWarning, SelectionError
+#add NotImplementedError?
 
 from gromacs.utilities import in_dir
 
@@ -504,7 +505,7 @@ class EnsembleAnalysis(object):
         """Run after all trajectories in ensemble are finished"""
         pass  # pragma: no cover
 
-    def run(self, start=None, stop=None, step=None):
+    '''def run(self, start=None, stop=None, step=None):
         """Runs _single_universe on each system and _single_frame
         on each frame in the system.
 
@@ -526,6 +527,52 @@ class EnsembleAnalysis(object):
                 self.times[i] = ts.time
                 self._single_frame()
             self._conclude_universe()
+            logger.info("Moving to next universe")
+        logger.info("Finishing up")
+        self._conclude_ensemble()
+        return self
+        '''
+    def run(self, start=None, stop=None, step=None):
+        run.start=start
+        run.stop=stop
+        run.step=step
+        try:
+            self._run_frame(self, start=run.start, stop=run.stop, step=run.step)
+        except NotImplementedError:
+            self._run_universe(self, start=run.start, stop=run.stop, step=run.step)
+            raise
+        return self
+    
+    #having issues with start stop step arguments
+    #possibly fixed issues with ^arguments 9/14/22
+    def _run_universe(self, start=None, stop=None, step=None):
+        logger.info("Setting up systems")
+        self._prepare_ensemble()
+        for self._key in ProgressBar(self._ensemble.keys(), verbose=True):
+            self._setup_system(self._key, start=start, stop=stop, step=step)
+            #self._prepare_universe()
+            self._single_universe()
+            #self._conclude_universe()
+            logger.info("Moving to next universe")
+        logger.info("Finishing up")
+        self._conclude_ensemble()
+        return self
+
+    def _run_frame(self, start=None, stop=None, step=None):
+        logger.info("Setting up systems")
+        self._prepare_ensemble()
+        for self._key in ProgressBar(self._ensemble.keys(), verbose=True):
+            self._setup_system(self._key, start=start, stop=stop, step=step)
+            #self._prepare_universe()
+            #self._single_universe()
+            for i, ts in enumerate(ProgressBar(self._trajectory[self.start:self.stop:self.step], verbose=True,
+                                               postfix=f'running system {self._key}')):
+                self._frame_index = i
+                self._ts = ts
+                self.frames[i] = ts.frame
+                self.times[i] = ts.time
+                self._single_frame()
+            #self._conclude_universe()
             logger.info("Moving to next universe")
         logger.info("Finishing up")
         self._conclude_ensemble()
