@@ -32,16 +32,13 @@ Make a conda environment with the latest packages for Python 3.7 and
 higher with the name *mdpow*; this installs the larger dependencies that are
 pre-requisites for MDPOW::
 
-  conda create -c conda-forge -n mdpow  numpy scipy matplotlib mdanalysis pyyaml 'pandas>1.3.0'
+  conda create -c conda-forge -n mdpow  numpy scipy matplotlib mdanalysis pyyaml alchemlyb pandas gromacswrapper
   conda activate mdpow
-  pip install gromacswrapper
 
 Install MDPOW with ``pip``::
 
   pip install mdpow
 
-(This will install additional dependencies such as alchemlyb, which in turns
-needs pandas > 1.3.0.)
 
 
 Installation from source
