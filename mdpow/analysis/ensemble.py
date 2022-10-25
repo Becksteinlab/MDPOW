@@ -521,12 +521,11 @@ class EnsembleAnalysis(object):
             except NotImplementedError:
                 for i, ts in enumerate(ProgressBar(self._trajectory[self.start:self.stop:self.step], verbose=True,
                                                postfix=f'running system {self._key}')):
-                self._frame_index = i
-                self._ts = ts
-                self.frames[i] = ts.frame
-                self.times[i] = ts.time
-                self._single_frame()
-                raise
+                    self._frame_index = i
+                    self._ts = ts
+                    self.frames[i] = ts.frame
+                    self.times[i] = ts.time
+                    self._single_frame()
             logger.info("Moving to next universe")
         logger.info("Finishing up")
         self._conclude_ensemble()
