@@ -511,6 +511,13 @@ class EnsembleAnalysis(object):
         First iterates through keys of ensemble, then runs _setup_system
         which defines the system and trajectory. Then iterates over
         trajectory frames.
+        
+        NotImplementedError will detect whether _single_universe or _single_frame
+        should be implemented, based on which is defined in the EnsembleAnalysisClass.
+        Only one of the two aforementioned functions should be defined for the respective
+        analysis class. For verbose functionality, the analysis will currently show two
+        iteration bars, where only one of which will actually be iterated, while the other
+        will load to completion instantaneously, showing the system that is being worked on.
         """
         logger.info("Setting up systems")
         self._prepare_ensemble()
