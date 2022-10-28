@@ -1,3 +1,6 @@
+# MDPOW: directory_paths.py
+# 2022 Cade Duckworth
+
 import os
 import re
 import pandas as pd
@@ -6,7 +9,9 @@ def directory_paths(parent_directory=None, csv=None):
     '''Takes a parent directory containing MDPOW simulation project subdirectories,
        or .csv file containing molecule names, resnames, and
        simulation data directory paths as argument and returns
-       a Pandas DataFrame for use with DirectoryIteration.
+       a Pandas DataFrame for use with directory_iteration,
+       which iterates automated analysis over the project directories
+       included in the directory_paths DataFrame.
        
        :keywords:
        
@@ -20,8 +25,19 @@ def directory_paths(parent_directory=None, csv=None):
            .csv file containing the molecule names, resnames,
            and paths, in that order, for the MDPOW simulation
            data to be iterated over
-           must contain header
+           must contain header of the form:
            format: molecule,resname,path
+           
+       Examples:
+       
+           directory_paths = directory_paths(parent_directory='/foo/bar/MDPOW_projects')
+           directory_iteration(directory_paths)
+           
+           or
+           
+           directory_paths = directory_paths(csv='/foo/bar/MDPOW.csv')
+           directory_iteration(directory_paths)
+           
     '''
 
     if parent_directory is not None:
