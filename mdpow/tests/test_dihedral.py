@@ -37,7 +37,8 @@ class TestDihedral(object):
         self.tmpdir.dissolve()
 
     def test_dataframe(self):
-        dh1 = self.Ens.select_atoms('name C4', 'name C17', 'name S2', 'name N3')
+	#original order C4 C17 S2 N3, ask Oliver if this matters
+        dh1 = self.Ens.select_atoms('name S2', 'name N3', 'name C4', 'name C17')
         dh_run = DihedralAnalysis([dh1]).run(start=0, stop=4, step=1)
 
         results = dh_run.results
