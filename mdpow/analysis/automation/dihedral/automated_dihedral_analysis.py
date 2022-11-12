@@ -155,6 +155,49 @@ def dihedral_groups_ensemble(bonds, datadir,
 
     return df
 
+def save_df(df, df_save_dir=None, resname=None, molname=None):
+    '''Takes a Pandas DataFrame of results from DihedralAnalysis
+       as input before padding the angles to optionaly save the raw
+       data before plotting dihedral angle frequencies as KDE violins
+       with dihedral_violins(). Given a parent directory, creates subdirectory
+       for molecule, saves fully sampled csv and per dihedral atom group selection.
+       
+       :arguments:
+       
+       *df : Pandas DataFrame*
+           results DataFrame from DihedralAnalysis
+           
+       :keywords:
+       
+       *df_save_dir : string*
+           path to parent directory to create
+           subdirectory for saving the csv files
+           
+    '''
+    
+    if molname is None:
+        molname = resname
+
+    if df_save_dir is not None:
+        subdir = molname
+        newdir = os.path.join(df_save_dir, subdir)
+        os.mkdir(newdir)
+        
+    df = df.sort_values(by=["selection",
+                            "solvent",
+                            "interaction",
+                            "lambda"]).reset_index(drop=True)
+    
+    section = df.groupby(by='selection')
+
+    if df_save_dir is not None:
+        df.to_csv(f'{newdir}/{molname}_full_df.csv', index=False)
+        for name in section:
+            sliced_df = df.loc[df['selection'] == name[0]]
+            sliced_df.to_csv(f'{newdir}/{molname}_{name[0]}_df.csv', index=False)
+
+    return
+
 def periodic_angle(df, padding=45):
     '''Takes a Pandas DataFrame of results from DihedralAnalysis
        as input and pads the angles to maintain periodicity
@@ -274,7 +317,7 @@ def plot_violins(df, resname, figdir=None, molname=None, width=0.9):
 
     return plot
 
-def automated_dihedral_analysis(datadir=None, figdir=None,
+def automated_dihedral_analysis(datadir=None, df_save_dir=None, figdir=None,
                                 resname=None, molname=None,
                                 dataframe=None, padding=45, width=0.9,
                                 solvents=('water','octanol'),
@@ -291,6 +334,9 @@ def automated_dihedral_analysis(datadir=None, figdir=None,
        
        *datadir : string*
            path to the location of MDPOW project data
+           
+       *df_save_dir : string*
+           path to the location to save results DataFrame
            
        *figdir : string*
            optional, path to an existing directory where plots
@@ -352,6 +398,9 @@ def automated_dihedral_analysis(datadir=None, figdir=None,
     else:
         df = dataframe
 
+    if df_save_dir is not None:
+        save_df(df, df_save_dir=df_save_dir, resname=resname, molname=molname)
+        
     df_aug = periodic_angle(df, padding=padding)
 
     return plot_violins(df_aug, resname=resname, figdir=figdir, molname=molname, width=width)          

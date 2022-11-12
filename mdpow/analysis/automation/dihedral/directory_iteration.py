@@ -7,7 +7,7 @@ import automated_dihedral_analysis as ada
 
 
 
-def directory_iteration(directory_paths, figdir=None, padding=45, width=0.9,
+def directory_iteration(directory_paths, df_save_dir=None, figdir=None, padding=45, width=0.9,
                         solvents=('water','octanol'), interactions=('Coulomb','VDW'),
                         start=None, stop=None, step=None):
     '''Takes a Pandas DataFrame created by directory_paths as input
@@ -23,6 +23,9 @@ def directory_iteration(directory_paths, figdir=None, padding=45, width=0.9,
     *figdir : string*
         optional, path to existing directory where plots
         can be saved for each MDPOW project analyzed
+        
+    *df_save_dir : string*
+           path to the location to save results DataFrame
         
     *padding : int*
         must be in degrees, values for angle padding function
@@ -60,7 +63,7 @@ def directory_iteration(directory_paths, figdir=None, padding=45, width=0.9,
             resname = row.resname
             datadir = row.path
 
-            ada.automated_dihedral_analysis(datadir=datadir, figdir=figdir,
+            ada.automated_dihedral_analysis(datadir=datadir, df_save_dir=df_save_dir, figdir=figdir,
                                             molname=molname, resname=resname,
                                             padding=padding, width=width,
                                             solvents=solvents, interactions=interactions,
