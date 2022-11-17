@@ -8,7 +8,7 @@ GitHub issues numbers and PR numbers.
 
 
 2022-??-??    0.8.1
-cadeduckworth, orbeckst
+cadeduckworth, orbeckst, VOD555
 
 Changes
 
@@ -17,6 +17,7 @@ Changes
 
 Fixes
 
+* fix rcoulomb in CHARMM energy minimization MDP template file (PR #210)
 * fix ensemble.EnsembleAnalysis.check_groups_from_common_ensemble (#212)
 
 
