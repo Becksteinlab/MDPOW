@@ -149,6 +149,21 @@ class TestEnsemble(object):
         TestRun = TestAnalysis(Sim).run(start=0, step=1, stop=10)
         assert Sim.keys() == TestRun.key_list
 
+    def test_ensemble_analysis_run(self):
+        class TestAnalysis(EnsembleAnalysis):
+            def __init__(self, test_ensemble):
+                super(TestAnalysis, self).__init__(test_ensemble)
+
+            def test_single_frame(self):
+                with pytest.raises(NotImplementedError) as excinfo:
+                    TestAnalysis._single_frame(self)
+                assert excinfo.type == 'NotImplementedError'
+
+            def test_single_universe(self):
+                with pytest.raises(NotImplementedError) as excinfo:
+                    TestAnalysis._single_universe(self)
+                assert excinfo.type == 'NotImplementedError'
+
     def test_value_error(self):
         ens = Ensemble(dirname=self.tmpdir.name, solvents=['water'])
         copy_ens = Ensemble()
