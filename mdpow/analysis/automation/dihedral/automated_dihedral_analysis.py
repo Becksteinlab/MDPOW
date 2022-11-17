@@ -160,21 +160,21 @@ def save_df(df, df_save_dir=None, resname=None, molname=None):
        as input before padding the angles to optionaly save the raw
        data before plotting dihedral angle frequencies as KDE violins
        with dihedral_violins(). Given a parent directory, creates subdirectory
-       for molecule, saves fully sampled csv and per dihedral atom group selection.
-       
+       for molecule, saves fully sampled csv.
+
        :arguments:
-       
+
        *df : Pandas DataFrame*
            results DataFrame from DihedralAnalysis
-           
+
        :keywords:
-       
+
        *df_save_dir : string*
            path to parent directory to create
            subdirectory for saving the csv files
-           
+
     '''
-    
+
     if molname is None:
         molname = resname
 
@@ -182,19 +182,14 @@ def save_df(df, df_save_dir=None, resname=None, molname=None):
         subdir = molname
         newdir = os.path.join(df_save_dir, subdir)
         os.mkdir(newdir)
-        
+
     df = df.sort_values(by=["selection",
                             "solvent",
                             "interaction",
                             "lambda"]).reset_index(drop=True)
-    
-    section = df.groupby(by='selection')
 
     if df_save_dir is not None:
         df.to_csv(f'{newdir}/{molname}_full_df.csv', index=False)
-        for name in section:
-            sliced_df = df.loc[df['selection'] == name[0]]
-            sliced_df.to_csv(f'{newdir}/{molname}_{name[0]}_df.csv', index=False)
 
     return
 
