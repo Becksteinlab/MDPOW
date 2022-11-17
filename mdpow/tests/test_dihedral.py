@@ -2,6 +2,8 @@ from __future__ import absolute_import
 
 from . import tempdir as td
 
+import sys
+
 import py.path
 
 import pybol
@@ -63,6 +65,7 @@ class TestDihedral(object):
         for i in range(len(dh_run1.results['dihedral'])):
             assert dh_run1.results['dihedral'][i] == dh_run2.results['dihedral'][i]
 
+    @pytest.mark.skipif(sys.version_info < (3, 8), reason="scipy circvar gives wrong answers")
     def test_results_recursive2(self):
         dh1 = self.Ens.select_atoms('name C11', 'name C10', 'name C9', 'name C4')
         dh2 = self.Ens.select_atoms('name C8', 'name C4', 'name C9', 'name C10')
