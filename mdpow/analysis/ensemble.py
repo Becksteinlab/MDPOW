@@ -505,27 +505,34 @@ class EnsembleAnalysis(object):
         pass  # pragma: no cover
 
     def run(self, start=None, stop=None, step=None):
-        """Runs _single_universe on each system and _single_frame
+        """Runs _single_universe on each system or _single_frame
         on each frame in the system.
 
         First iterates through keys of ensemble, then runs _setup_system
         which defines the system and trajectory. Then iterates over
         trajectory frames.
+        
+        NotImplementedError will detect whether _single_universe or _single_frame
+        should be implemented, based on which is defined in the EnsembleAnalysisClass.
+        Only one of the two aforementioned functions should be defined for the respective
+        analysis class. For verbose functionality, the analysis will currently show two
+        iteration bars, where only one of which will actually be iterated, while the other
+        will load to completion instantaneously, showing the system that is being worked on.
         """
         logger.info("Setting up systems")
         self._prepare_ensemble()
         for self._key in ProgressBar(self._ensemble.keys(), verbose=True):
             self._setup_system(self._key, start=start, stop=stop, step=step)
-            self._prepare_universe()
-            self._single_universe()
-            for i, ts in enumerate(ProgressBar(self._trajectory[self.start:self.stop:self.step], verbose=True,
+            try:
+                self._single_universe()
+            except NotImplementedError:
+                for i, ts in enumerate(ProgressBar(self._trajectory[self.start:self.stop:self.step], verbose=True,
                                                postfix=f'running system {self._key}')):
-                self._frame_index = i
-                self._ts = ts
-                self.frames[i] = ts.frame
-                self.times[i] = ts.time
-                self._single_frame()
-            self._conclude_universe()
+                    self._frame_index = i
+                    self._ts = ts
+                    self.frames[i] = ts.frame
+                    self.times[i] = ts.time
+                    self._single_frame()
             logger.info("Moving to next universe")
         logger.info("Finishing up")
         self._conclude_ensemble()
