@@ -58,8 +58,7 @@ jobs:
       uses: mamba-org/provision-with-micromamba@main
       with:
         environment-file: devtools/conda-envs/test_env.yaml
-        environment-name: test
-        channel-priority: "strict"
+        channel-priority: "flexible"
         cache-downloads: true
         cache-env: true
         extra-specs: |
