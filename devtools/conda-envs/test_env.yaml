@@ -1,0 +1,22 @@
+name: test
+channels:
+- conda-forge
+dependencies:
+- python
+- six
+- numpy
+- scipy
+- matplotlib-base
+- pandas
+- scikit-learn
+- pyyaml
+- mdanalysis >=2
+- numkit
+- gromacswrapper
+- alchemlyb <2
+
+  # Testing
+- pytest
+- pytest-pep8
+- pytest-cov
+- codecov  
