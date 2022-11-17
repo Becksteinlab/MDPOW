@@ -61,7 +61,6 @@ jobs:
         environment-name: test
         channel-priority: "strict"
         cache-downloads: true
-        cache-env: true
         extra-specs: |
            python=${{ matrix.python-version }}
           
