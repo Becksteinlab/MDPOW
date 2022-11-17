@@ -469,14 +469,14 @@ class EnsembleAnalysis(object):
             Run on each universe in the ensemble during when
             self.run in called.
         """
-        pass  # pragma: no cover
+        raise NotImplementedError
 
     def _single_frame(self):
         """Calculate data from a single frame of trajectory
 
         Called on each frame for universes in the Ensemble.
         """
-        pass  # pragma: no cover
+        raise NotImplementedError
 
     def _prepare_ensemble(self):
         """For establishing data structures used in running
