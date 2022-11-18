@@ -44,9 +44,6 @@ jobs:
             python-version: "3.9"
             gromacs-version: "2021.1"
           - os: macos-latest
-            python-version: "3.9"
-            gromacs-version: "2021.1"
-          - os: macos-latest
             python-version: "3.10"
             gromacs-version: "2021.1"
 
@@ -57,38 +54,32 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - uses: conda-incubator/setup-miniconda@v2
+    - name: mamba environment and package installation
+      uses: mamba-org/provision-with-micromamba@main
       with:
-        python-version: ${{ matrix.python-version }}      
-        auto-update-conda: true
-        mamba-version: "*"
-        channels: conda-forge,bioconda,defaults
-        channel-priority: true
-        show-channel-urls: true
+        environment-file: devtools/conda-envs/test_env.yaml
+        channel-priority: "flexible"
+        cache-downloads: true
+        cache-env: true
+        extra-specs: |
+           python=${{ matrix.python-version }}
           
-    - name: Conda info
-      run: |
-         conda info
-         conda list
-         conda config --show-sources
-         conda config --show
-
-    - name: Python version
+    - name: Python version information
       run: |
          python -c "import sys; print(sys.version)"                
 
-    - name: Install package dependencies
+    - name: micromamba environment information
       run: |
-         mamba install six numpy scipy matplotlib-base pandas scikit-learn pyyaml "mdanalysis>=2" numkit gromacswrapper "alchemlyb<2"
- 
-    - name: Install pytest+plugins and pybol
+         micromamba info
+         micromamba list
+
+    - name: Install pybol (fixture staging tool)
       run: |
-         mamba install pytest pytest-pep8 pytest-cov codecov
          python -m pip install pybol
 
     - name: Install GROMACS (${{ matrix.gromacs-version }})
       run: |
-         mamba install 'gromacs==${{ matrix.gromacs-version }}' pocl
+         micromamba install 'gromacs==${{ matrix.gromacs-version }}' pocl
 
     - name: Install package (with no dependencies)
       run: |
