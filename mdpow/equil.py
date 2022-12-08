@@ -658,3 +658,8 @@ class WetOctanolSimulation(Simulation):
         ionkwargs['struct'] = sol['struct']
         params = gromacs.setup.solvate_ion(**ionkwargs)
         return params
+
+class TolueneSimulation(Simulation):
+    """Equilibrium MD of a solute in a box of toluene."""
+    solvent_default = 'toluene'
+    dirname_default = os.path.join(Simulation.topdir_default, solvent_default)
