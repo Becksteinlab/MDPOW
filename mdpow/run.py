@@ -166,6 +166,7 @@ def equilibrium_simulation(cfg, solvent, **kwargs):
         'octanol': equil.OctanolSimulation,
         'wetoctanol': equil.WetOctanolSimulation,
         'cyclohexane':equil.CyclohexaneSimulation,
+        'toluene': equil.TolueneSimulation,
         }
     try:
         Simulation = Simulations[solvent]
@@ -277,13 +278,15 @@ def fep_simulation(cfg, solvent, **kwargs):
         'water': equil.WaterSimulation,
         'octanol': equil.OctanolSimulation,
         'wetoctanol': equil.WetOctanolSimulation,
-        'cyclohexane':equil.CyclohexaneSimulation
+        'cyclohexane': equil.CyclohexaneSimulation,
+        'toluene': equil.TolueneSimulation,
         }
     Simulations = {
         'water': fep.Ghyd,
         'octanol': fep.Goct,
         'wetoctanol': fep.Gwoct,
-        'cyclohexane':fep.Gcyclo
+        'cyclohexane':fep.Gcyclo,
+        'toluene': fep.Gtol,
         }
     try:
         EquilSimulation = EquilSimulations[solvent]

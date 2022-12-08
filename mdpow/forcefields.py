@@ -173,7 +173,9 @@ OPLS_SOLVENT_MODELS = {
         identifier="wetoctanol", itp="1octwet.itp", coordinates="1octwet.gro"),
     'wetoctanolnew': GromacsSolventModel(
         identifier="wetoctanol", itp="1octwetnew.itp", coordinates="1octwet.gro",
-        description=new_octanol)
+        description=new_octanol),
+    'toluene': GromacsSolventModel(
+        identifier="toluene", itp="1tol.itp", coordinates="1tol_oplsaa.gro"),
     }
 
 CHARMM_SOLVENT_MODELS = {
@@ -192,6 +194,8 @@ AMBER_SOLVENT_MODELS = {
         identifier="wetoctanol", itp="1octwet.itp", coordinates="1octwet_amber.gro"),
     'cyclohexane': GromacsSolventModel(
         identifier="cyclohexane", itp="1cyclo.itp", coordinates="1cyclo_amber.gro"),
+    'toluene': GromacsSolventModel(
+        identifier="toluene", itp="1tol.itp", coordinates="1tol_gaff.gro"),
     }
 
 #: Solvents available in GROMACS; the keys of the dictionary
@@ -282,7 +286,8 @@ def get_top_template(identifier):
     """Return the topology file template suitable for the solvent model."""
       
     templates = {'water': 'system.top', 'octanol': 'system.top',
-                 'cyclohexane': 'system.top', 'wetoctanol': 'system_octwet.top'}
+                 'cyclohexane': 'system.top', 'wetoctanol': 'system_octwet.top',
+                 'toluene': 'system.top',}
     try:
         return templates[identifier]
     except KeyError:

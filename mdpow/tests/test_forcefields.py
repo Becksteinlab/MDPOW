@@ -7,7 +7,7 @@ import mdpow.forcefields
 
 # currently supported
 WATERMODELS = ('tip4p', 'tip3p', 'tip5p', 'spc', 'spce', 'm24', 'tip4pd')
-SOLVENTMODELS = ('water', 'cyclohexane', 'octanol')
+SOLVENTMODELS = ('water', 'cyclohexane', 'octanol', 'toluene')
 
 class TestIncludedForcefiels(object):
     @staticmethod
@@ -40,9 +40,13 @@ class TestIncludedSolvents(object):
             '1cyclo.gro': os.path.join('mdpow', 'top', '1cyclo.gro'),
             '1cyclo.itp': os.path.join('mdpow', 'top', 'oplsaa.ff', '1cyclo.itp')
         },
+        'toluene': {
+            '1tol_oplsaa.gro': os.path.join('mdpow', 'top', '1tol_oplsaa.gro'),
+            '1tol.itp': os.path.join('mdpow', 'top', 'oplsaa.ff', '1tol.itp')
+        },
     }
 
-    @pytest.mark.parametrize("solvent_name", ["tip4p", "octanol", "cyclohexane"])
+    @pytest.mark.parametrize("solvent_name", ["tip4p", "octanol", "cyclohexane", "toluene"])
     def test_solvent(self, solvent_name):
         solvent = self.solvents[solvent_name]
         for filename, path in solvent.items():
@@ -120,6 +124,12 @@ class TestSolventModels(object):
     @pytest.mark.parametrize("forcefield", ['OPLS-AA', 'CHARMM', 'AMBER'])
     def test_get_solvent_wetoctanol(self, forcefield):
         model = 'wetoctanol'
+        assert (mdpow.forcefields.get_solvent_model(model, forcefield=forcefield) is
+                mdpow.forcefields.GROMACS_SOLVENT_MODELS[forcefield][model])
+
+    @pytest.mark.parametrize("forcefield", ['OPLS-AA', 'AMBER'])
+    def test_get_solvent_toluene(self, forcefield):
+        model = 'toluene'
         assert (mdpow.forcefields.get_solvent_model(model, forcefield=forcefield) is
                 mdpow.forcefields.GROMACS_SOLVENT_MODELS[forcefield][model])
 
