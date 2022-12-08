@@ -464,10 +464,11 @@ class EnsembleAnalysis(object):
         self.times = np.zeros(self.n_frames)
 
     def _single_universe(self):
-        """Calculations on a single Universe object.
+        """Calculations on a single :class:`MDAnalysis.Universe <MDAnalysis.core.groups.universe.Universe>` object.
 
-           Run on each Universe in the Ensemble during when
-           :meth:`run` in called.
+           Run on each :class:`MDAnalysis.Universe <MDAnalysis.core.groups.universe.Universe>` 
+           in the :class:`~mdpow.analysis.ensemble.Ensemble` 
+           during when :meth:`run` in called.
             
            :exc:`NotImplementedError` will detect whether 
            :meth:`~EnsembleAnalysis._single_universe`
@@ -480,7 +481,9 @@ class EnsembleAnalysis(object):
     def _single_frame(self):
         """Calculate data from a single frame of trajectory.
 
-           Called on each frame for Universes in the Ensemble.
+           Called on each frame for each 
+           :class:`MDAnalysis.Universe <MDAnalysis.core.groups.universe.Universe>` 
+           in the :class:`~mdpow.analysis.ensemble.Ensemble`.
            
            :exc:`NotImplementedError` will detect whether 
            :meth:`~EnsembleAnalysis._single_universe`
