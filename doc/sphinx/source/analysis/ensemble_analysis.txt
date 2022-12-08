@@ -15,9 +15,16 @@ Universes and be analyzed as a group.
 
 :class:`~mdpow.analysis.ensemble.EnsembleAnalysis` is a class inspired by the
 :class:`AnalysisBase <MDAnalysis.analysis.base.AnalysisBase>` from MDAnalysis which
-iterates over the systems in the ensemble and the frames in the systems. It sets up both iterations between
-universes and universe frames allowing for analysis to be run on both whole systems and the frames of those
+iterates over the systems in the ensemble or the frames in the systems. It sets up iterations between
+universes or universe frames allowing for analysis to be run on either whole systems or the frames of those
 systems. This allows for users to easily run analyses on MDPOW simulations.
+
+NotImplementedError will detect whether _single_universe or _single_frame
+should be implemented, based on which is defined in the EnsembleAnalysisClass.
+Only one of the two methods should be defined for an EnsembleAnalysisClass. 
+For verbose functionality, the analysis may show two iteration bars, 
+where only one of which will actually be iterated, while the other will 
+load to completion instantaneously, showing the system that is being worked on.
 
 .. autoclass:: mdpow.analysis.ensemble.EnsembleAnalysis
     :members:

@@ -5,6 +5,27 @@ CHANGES for MDPOW
 Add summary of changes for each release. Use ISO dates. Reference
 GitHub issues numbers and PR numbers.
 
+2022-12-07    0.8.1
+cadeduckworth
+
+Changes
+
+* for ensemble.EnsembleAnalysis._single_frame() 
+  changed 'pass' to 'raise NotImplementedError' (#216)
+* for ensemble.EnsembleAnalysis._single_universe() 
+  changed 'pass' to 'raise NotImplementedError' (#216)
+* for ensemble.EnsembleAnalysis.run() changed to detect 
+  and use _single_frame OR _single_universe (#216)
+* _prepare_universe and _conclude_universe removed from 
+  EnsembleAnalysis.run() method, no longer needed (per comments, #199)
+* defined new test for updated ensemble.EnsembleAnalysis.run() method (#216):
+  - new test, test_ensemble_analysis_run(), uses TestAnalysis class, 
+    is in test_ensemble.py
+  - new test checks that NotImplementedError is raised when _single_frame 
+    or _single_universe are not defined, to implement correct method
+* source and html docs updated for EnsembleAnalysis
+  to reflect changes and describe proper usage
+
 2022-??-??    0.8.1
 cadeduckworth
 

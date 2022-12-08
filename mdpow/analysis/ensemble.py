@@ -466,15 +466,23 @@ class EnsembleAnalysis(object):
     def _single_universe(self):
         """Calculations on a single Universe object.
 
-            Run on each universe in the ensemble during when
-            self.run in called.
+           Run on each universe in the ensemble during when
+           self.run in called.
+            
+           NotImplementedError will detect whether _single_universe
+           or _single_frame should be implemented, based on which 
+           is defined in the EnsembleAnalysisClass.
         """
         raise NotImplementedError
 
     def _single_frame(self):
-        """Calculate data from a single frame of trajectory
+        """Calculate data from a single frame of trajectory.
 
-        Called on each frame for universes in the Ensemble.
+           Called on each frame for universes in the Ensemble.
+           
+           NotImplementedError will detect whether _single_universe
+           or _single_frame should be implemented, based on which 
+           is defined in the EnsembleAnalysisClass.
         """
         raise NotImplementedError
 
@@ -509,15 +517,8 @@ class EnsembleAnalysis(object):
         on each frame in the system.
 
         First iterates through keys of ensemble, then runs _setup_system
-        which defines the system and trajectory. Then iterates over
-        trajectory frames.
-        
-        NotImplementedError will detect whether _single_universe or _single_frame
-        should be implemented, based on which is defined in the EnsembleAnalysisClass.
-        Only one of the two aforementioned functions should be defined for the respective
-        analysis class. For verbose functionality, the analysis will currently show two
-        iteration bars, where only one of which will actually be iterated, while the other
-        will load to completion instantaneously, showing the system that is being worked on.
+        which defines the system and trajectory. Then iterates over each
+        system universe or trajectory frames of each universe as defined.
         """
         logger.info("Setting up systems")
         self._prepare_ensemble()
