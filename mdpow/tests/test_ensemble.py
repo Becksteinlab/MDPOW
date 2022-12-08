@@ -160,10 +160,10 @@ class TestEnsemble(object):
                 pass
 
         Sim = Ensemble(dirname=self.tmpdir.name, solvents=['water'])
+        TestRun = TestAnalysis(Sim)
         
-        with pytest.raises(NotImplementedError) as excinfo:
-            TestAnalysis._single_frame(self)
-        assert excinfo.type is NotImplementedError
+        with pytest.raises(NotImplementedError):
+            TestRun._single_frame()
         
     def test_ensemble_analysis_run_universe(self):
         class TestAnalysis(EnsembleAnalysis):
@@ -176,10 +176,10 @@ class TestEnsemble(object):
                 pass
 
         Sim = Ensemble(dirname=self.tmpdir.name, solvents=['water'])
+        TestRun = TestAnalysis(Sim)
         
-        with pytest.raises(NotImplementedError) as excinfo:
-            TestAnalysis._single_universe(self)
-        assert excinfo.type is NotImplementedError
+        with pytest.raises(NotImplementedError):
+            TestRun._single_universe()
 
     def test_value_error(self):
         ens = Ensemble(dirname=self.tmpdir.name, solvents=['water'])
