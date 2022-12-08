@@ -19,9 +19,10 @@ iterates over the systems in the ensemble or the frames in the systems. It sets 
 universes or universe frames allowing for analysis to be run on either whole systems or the frames of those
 systems. This allows for users to easily run analyses on MDPOW simulations.
 
-NotImplementedError will detect whether _single_universe or _single_frame
-should be implemented, based on which is defined in the EnsembleAnalysisClass.
-Only one of the two methods should be defined for an EnsembleAnalysisClass. 
+:exc:`NotImplementedError` will detect whether :meth:`~EnsembleAnalysis._single_universe` 
+or :meth:`~EnsembleAnalysis._single_frame` should be implemented, based on which 
+is defined in the :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`. Only one of the 
+two methods should be defined for an :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`. 
 For verbose functionality, the analysis may show two iteration bars, 
 where only one of which will actually be iterated, while the other will 
 load to completion instantaneously, showing the system that is being worked on.

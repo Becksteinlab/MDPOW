@@ -466,23 +466,27 @@ class EnsembleAnalysis(object):
     def _single_universe(self):
         """Calculations on a single Universe object.
 
-           Run on each universe in the ensemble during when
-           self.run in called.
+           Run on each Universe in the Ensemble during when
+           :meth:`run` in called.
             
-           NotImplementedError will detect whether _single_universe
-           or _single_frame should be implemented, based on which 
-           is defined in the EnsembleAnalysisClass.
+           :exc:`NotImplementedError` will detect whether 
+           :meth:`~EnsembleAnalysis._single_universe`
+           or :meth:`~EnsembleAnalysis._single_frame` 
+           should be implemented, based on which is defined 
+           in the :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`.
         """
         raise NotImplementedError
 
     def _single_frame(self):
         """Calculate data from a single frame of trajectory.
 
-           Called on each frame for universes in the Ensemble.
+           Called on each frame for Universes in the Ensemble.
            
-           NotImplementedError will detect whether _single_universe
-           or _single_frame should be implemented, based on which 
-           is defined in the EnsembleAnalysisClass.
+           :exc:`NotImplementedError` will detect whether 
+           :meth:`~EnsembleAnalysis._single_universe`
+           or :meth:`~EnsembleAnalysis._single_frame` 
+           should be implemented, based on which is defined 
+           in the :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`.
         """
         raise NotImplementedError
 
@@ -513,12 +517,16 @@ class EnsembleAnalysis(object):
         pass  # pragma: no cover
 
     def run(self, start=None, stop=None, step=None):
-        """Runs _single_universe on each system or _single_frame
+        """Runs :meth:`~EnsembleAnalysis._single_universe` 
+        on each system or :meth:`~EnsembleAnalysis._single_frame`
         on each frame in the system.
 
-        First iterates through keys of ensemble, then runs _setup_system
-        which defines the system and trajectory. Then iterates over each
-        system universe or trajectory frames of each universe as defined.
+        First iterates through keys of ensemble, then runs 
+        :meth:`~EnsembleAnalysis._setup_system`which defines 
+        the system and trajectory. Then iterates over each
+        system universe or trajectory frames of each universe 
+        as defined by :meth:`~EnsembleAnalysis._single_universe` 
+        or :meth:`~EnsembleAnalysis._single_frame`.
         """
         logger.info("Setting up systems")
         self._prepare_ensemble()
