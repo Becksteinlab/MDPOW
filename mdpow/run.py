@@ -292,7 +292,7 @@ def fep_simulation(cfg, solvent, **kwargs):
         EquilSimulation = EquilSimulations[solvent]
         Simulation = Simulations[solvent]
     except KeyError:
-        raise ValueError("solvent must be 'water', 'octanol', 'wetoctanol' or 'cyclohexane'")
+        raise ValueError("solvent must be 'water', 'octanol', 'wetoctanol', 'cyclohexane' or 'toluene'")
     # generate a canonical path under dirname
     topdir = kwargs.get("dirname", None)
     if topdir is None:

@@ -123,7 +123,7 @@ class Simulation(Journalled):
           *forcefield*
               'OPLS-AA' or 'CHARMM' or 'AMBER'
           *solvent*
-              'water' or 'octanol' or 'cyclohexane' or 'wetoctanol'
+              'water' or 'octanol' or 'cyclohexane' or 'wetoctanol' or 'toluene'
           *solventmodel*
               ``None`` chooses the default (e.g, :data:`mdpow.forcefields.DEFAULT_WATER_MODEL`
               for ``solvent == "water"``. Other options are the models defined in

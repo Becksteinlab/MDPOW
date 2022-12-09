@@ -195,7 +195,7 @@ AMBER_SOLVENT_MODELS = {
     'cyclohexane': GromacsSolventModel(
         identifier="cyclohexane", itp="1cyclo.itp", coordinates="1cyclo_amber.gro"),
     'toluene': GromacsSolventModel(
-        identifier="toluene", itp="1tol.itp", coordinates="1tol_gaff.gro"),
+        identifier="toluene", itp="1tol.itp", coordinates="1tol_amber.gro"),
     }
 
 #: Solvents available in GROMACS; the keys of the dictionary

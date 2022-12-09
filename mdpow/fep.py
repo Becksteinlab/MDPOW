@@ -1452,6 +1452,7 @@ def p_transfer(G1, G2, **kwargs):
     # lower case initials, in reverse order of transfer, e.g.
     # water -> octanol:      P_ow
     # water -> cyclohexane:  P_cw
+    # water -> toluene:      P_tw
     coefficient = "P_{0}{1}".format(
         G2.solvent_type.lower()[0], G1.solvent_type.lower()[0])
 
