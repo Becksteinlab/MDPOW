@@ -36,7 +36,7 @@ if __name__ == "__main__":
     parser = OptionParser(usage=__doc__)
     parser.add_option('--solvent', '-S', dest='solvent',
                       metavar="NAME",
-                      help="solvent NAME for compound, 'water' or 'octanol' [%default]")
+                      help="solvent NAME for compound, 'water', 'octanol', 'cyclohexane' or 'toluene' [%default]")
     parser.add_option('--dirname', '-d', dest='dirname',
                       metavar="DIRECTORY",
                       help="generate files and directories in DIRECTORY, which is created "
