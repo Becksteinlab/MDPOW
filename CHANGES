@@ -18,7 +18,6 @@ Changes
   and use _single_frame OR _single_universe (#216)
 * _prepare_universe and _conclude_universe removed from 
   EnsembleAnalysis.run() method, no longer needed (per comments, #199)
-  
 * added support for Python 3.10
 * dropped testing on Python 3.6 
 

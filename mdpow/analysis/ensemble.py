@@ -464,12 +464,13 @@ class EnsembleAnalysis(object):
         self.times = np.zeros(self.n_frames)
 
     def _single_universe(self):
-        """Calculations on a single :class:`MDAnalysis.Universe <MDAnalysis.core.groups.universe.Universe>` object.
+        """Calculations on a single :class:`MDAnalysis.Universe 
+           <MDAnalysis.core.groups.universe.Universe>` object.
 
-           Run on each :class:`MDAnalysis.Universe <MDAnalysis.core.groups.universe.Universe>` 
+           Run on each :class:`MDAnalysis.Universe 
+           <MDAnalysis.core.groups.universe.Universe>` 
            in the :class:`~mdpow.analysis.ensemble.Ensemble` 
            during when :meth:`run` in called.
-            
            :exc:`NotImplementedError` will detect whether 
            :meth:`~EnsembleAnalysis._single_universe`
            or :meth:`~EnsembleAnalysis._single_frame` 
