@@ -464,19 +464,35 @@ class EnsembleAnalysis(object):
         self.times = np.zeros(self.n_frames)
 
     def _single_universe(self):
-        """Calculations on a single Universe object.
+        """Calculations on a single :class:`MDAnalysis.Universe 
+           <MDAnalysis.core.groups.universe.Universe>` object.
 
-            Run on each universe in the ensemble during when
-            self.run in called.
+           Run on each :class:`MDAnalysis.Universe 
+           <MDAnalysis.core.groups.universe.Universe>` 
+           in the :class:`~mdpow.analysis.ensemble.Ensemble` 
+           during when :meth:`run` in called.
+           :exc:`NotImplementedError` will detect whether 
+           :meth:`~EnsembleAnalysis._single_universe`
+           or :meth:`~EnsembleAnalysis._single_frame` 
+           should be implemented, based on which is defined 
+           in the :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`.
         """
-        pass  # pragma: no cover
+        raise NotImplementedError
 
     def _single_frame(self):
-        """Calculate data from a single frame of trajectory
+        """Calculate data from a single frame of trajectory.
 
-        Called on each frame for universes in the Ensemble.
+           Called on each frame for each 
+           :class:`MDAnalysis.Universe <MDAnalysis.core.groups.universe.Universe>` 
+           in the :class:`~mdpow.analysis.ensemble.Ensemble`.
+           
+           :exc:`NotImplementedError` will detect whether 
+           :meth:`~EnsembleAnalysis._single_universe`
+           or :meth:`~EnsembleAnalysis._single_frame` 
+           should be implemented, based on which is defined 
+           in the :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`.
         """
-        pass  # pragma: no cover
+        raise NotImplementedError
 
     def _prepare_ensemble(self):
         """For establishing data structures used in running
@@ -505,27 +521,31 @@ class EnsembleAnalysis(object):
         pass  # pragma: no cover
 
     def run(self, start=None, stop=None, step=None):
-        """Runs _single_universe on each system and _single_frame
+        """Runs :meth:`~EnsembleAnalysis._single_universe` 
+        on each system or :meth:`~EnsembleAnalysis._single_frame`
         on each frame in the system.
 
-        First iterates through keys of ensemble, then runs _setup_system
-        which defines the system and trajectory. Then iterates over
-        trajectory frames.
+        First iterates through keys of ensemble, then runs 
+        :meth:`~EnsembleAnalysis._setup_system`which defines 
+        the system and trajectory. Then iterates over each
+        system universe or trajectory frames of each universe 
+        as defined by :meth:`~EnsembleAnalysis._single_universe` 
+        or :meth:`~EnsembleAnalysis._single_frame`.
         """
         logger.info("Setting up systems")
         self._prepare_ensemble()
         for self._key in ProgressBar(self._ensemble.keys(), verbose=True):
             self._setup_system(self._key, start=start, stop=stop, step=step)
-            self._prepare_universe()
-            self._single_universe()
-            for i, ts in enumerate(ProgressBar(self._trajectory[self.start:self.stop:self.step], verbose=True,
+            try:
+                self._single_universe()
+            except NotImplementedError:
+                for i, ts in enumerate(ProgressBar(self._trajectory[self.start:self.stop:self.step], verbose=True,
                                                postfix=f'running system {self._key}')):
-                self._frame_index = i
-                self._ts = ts
-                self.frames[i] = ts.frame
-                self.times[i] = ts.time
-                self._single_frame()
-            self._conclude_universe()
+                    self._frame_index = i
+                    self._ts = ts
+                    self.frames[i] = ts.frame
+                    self.times[i] = ts.time
+                    self._single_frame()
             logger.info("Moving to next universe")
         logger.info("Finishing up")
         self._conclude_ensemble()
