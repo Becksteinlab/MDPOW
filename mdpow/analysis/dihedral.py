@@ -78,8 +78,8 @@ class DihedralAnalysis(EnsembleAnalysis):
         for group in selections:
             for k in group.keys():
                 if len(group[k]) != 4:
-                    msg = ''''Dihedral calculations require AtomGroups with
-                              only 4 atoms, %s selected''' % len(group)
+                    msg = ("Dihedral calculations require AtomGroups with "
+                           f"only 4 atoms, {len(group)} selected")
                     logger.error(msg)
                     raise SelectionError(msg)
 

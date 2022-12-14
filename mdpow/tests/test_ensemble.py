@@ -149,6 +149,38 @@ class TestEnsemble(object):
         TestRun = TestAnalysis(Sim).run(start=0, step=1, stop=10)
         assert Sim.keys() == TestRun.key_list
 
+    def test_ensemble_analysis_run_frame(self):
+        class TestAnalysis(EnsembleAnalysis):
+            def __init__(self, test_ensemble):
+                super(TestAnalysis, self).__init__(test_ensemble)
+
+                self._ens = test_ensemble
+
+            def _single_universe(self):
+                pass
+
+        Sim = Ensemble(dirname=self.tmpdir.name, solvents=['water'])
+        TestRun = TestAnalysis(Sim)
+        
+        with pytest.raises(NotImplementedError):
+            TestRun._single_frame()
+        
+    def test_ensemble_analysis_run_universe(self):
+        class TestAnalysis(EnsembleAnalysis):
+            def __init__(self, test_ensemble):
+                super(TestAnalysis, self).__init__(test_ensemble)
+
+                self._ens = test_ensemble
+                
+            def _single_frame(self):
+                pass
+
+        Sim = Ensemble(dirname=self.tmpdir.name, solvents=['water'])
+        TestRun = TestAnalysis(Sim)
+        
+        with pytest.raises(NotImplementedError):
+            TestRun._single_universe()
+
     def test_value_error(self):
         ens = Ensemble(dirname=self.tmpdir.name, solvents=['water'])
         copy_ens = Ensemble()
