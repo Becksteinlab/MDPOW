@@ -464,17 +464,33 @@ class EnsembleAnalysis(object):
         self.times = np.zeros(self.n_frames)
 
     def _single_universe(self):
-        """Calculations on a single Universe object.
+        """Calculations on a single :class:`MDAnalysis.Universe 
+           <MDAnalysis.core.groups.universe.Universe>` object.
 
-            Run on each universe in the ensemble during when
-            self.run in called.
+           Run on each :class:`MDAnalysis.Universe 
+           <MDAnalysis.core.groups.universe.Universe>` 
+           in the :class:`~mdpow.analysis.ensemble.Ensemble` 
+           during when :meth:`run` in called.
+           :exc:`NotImplementedError` will detect whether 
+           :meth:`~EnsembleAnalysis._single_universe`
+           or :meth:`~EnsembleAnalysis._single_frame` 
+           should be implemented, based on which is defined 
+           in the :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`.
         """
         raise NotImplementedError
 
     def _single_frame(self):
-        """Calculate data from a single frame of trajectory
+        """Calculate data from a single frame of trajectory.
 
-        Called on each frame for universes in the Ensemble.
+           Called on each frame for each 
+           :class:`MDAnalysis.Universe <MDAnalysis.core.groups.universe.Universe>` 
+           in the :class:`~mdpow.analysis.ensemble.Ensemble`.
+           
+           :exc:`NotImplementedError` will detect whether 
+           :meth:`~EnsembleAnalysis._single_universe`
+           or :meth:`~EnsembleAnalysis._single_frame` 
+           should be implemented, based on which is defined 
+           in the :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`.
         """
         raise NotImplementedError
 
@@ -505,19 +521,16 @@ class EnsembleAnalysis(object):
         pass  # pragma: no cover
 
     def run(self, start=None, stop=None, step=None):
-        """Runs _single_universe on each system or _single_frame
+        """Runs :meth:`~EnsembleAnalysis._single_universe` 
+        on each system or :meth:`~EnsembleAnalysis._single_frame`
         on each frame in the system.
 
-        First iterates through keys of ensemble, then runs _setup_system
-        which defines the system and trajectory. Then iterates over
-        trajectory frames.
-        
-        NotImplementedError will detect whether _single_universe or _single_frame
-        should be implemented, based on which is defined in the EnsembleAnalysisClass.
-        Only one of the two aforementioned functions should be defined for the respective
-        analysis class. For verbose functionality, the analysis will currently show two
-        iteration bars, where only one of which will actually be iterated, while the other
-        will load to completion instantaneously, showing the system that is being worked on.
+        First iterates through keys of ensemble, then runs 
+        :meth:`~EnsembleAnalysis._setup_system`which defines 
+        the system and trajectory. Then iterates over each
+        system universe or trajectory frames of each universe 
+        as defined by :meth:`~EnsembleAnalysis._single_universe` 
+        or :meth:`~EnsembleAnalysis._single_frame`.
         """
         logger.info("Setting up systems")
         self._prepare_ensemble()
