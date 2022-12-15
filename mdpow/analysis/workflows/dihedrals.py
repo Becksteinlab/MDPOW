@@ -17,6 +17,10 @@ from mdpow.analysis.dihedral import DihedralAnalysis
 import MDAnalysis as mda
 from MDAnalysis.topology.guessers import guess_atom_element
 
+import logging
+
+logger = logging.getLogger('mdpow.analysis.workflows.dihedrals')
+
 ''':mod:`~mdpow.analysis.workflows` module with functions
    useful for automated use of
    :class:`~mdpow.analysis.dihedral.DihedralAnalysis`.

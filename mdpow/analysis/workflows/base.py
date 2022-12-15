@@ -9,6 +9,10 @@ import pandas as pd
 #and once the function changes for more general use
 import automated_dihedral_analysis as ada
 
+import logging
+
+logger = logging.getLogger('mdpow.analysis.workflows.base')
+
 def directory_paths(parent_directory=None, csv=None):
     '''Takes a parent directory containing MDPOW simulation project subdirectories,
        or .csv file containing :code:`molname`, :code:`resname`, and
