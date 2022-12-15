@@ -4,7 +4,7 @@ Workflows Base
 
 Base functions for use with all workflow modules.
 
-.. versionadded:: ???
+.. versionadded:: 0.9.1
 
 .. automodule:: mdpow.analysis.workflows.base
     :members:

@@ -53,13 +53,13 @@ in more detail in [Lescoulie2021]_.
 Analysis workflows
 ------------------
 
-.. versionadded:: ???
+.. versionadded:: 0.9.1
 
 MDPOW analysis workflows provide automation functions for use with
 analysis :ref:`tools` based on the :ref:`framework`. Existing workflow
-modules, :module:`~mdpow.analysis.workflows.dihedrals`, include functions
+modules, :mod:`~mdpow.analysis.workflows.dihedrals`, include functions
 for use with :class:`~mdpow.analysis.dihedral.DihedralAnalysis`, and a
-:module:`~mdpow.analysis.workflows.base` module for use with
+:mod:`~mdpow.analysis.workflows.base` module for use with
 existing and future workflows.
 
 .. toctree::
