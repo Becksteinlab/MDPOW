@@ -48,6 +48,25 @@ in more detail in [Lescoulie2021]_.
    analysis/ensemble_analysis	      
    analysis/ensemble
 
+.. _workflows:
+
+Analysis workflows
+------------------
+
+.. versionadded:: ???
+
+MDPOW analysis workflows provide automation functions for use with
+analysis :ref:`tools` based on the :ref:`framework`. Existing workflow
+modules, :module:`~mdpow.analysis.workflows.dihedrals`, include functions
+for use with :class:`~mdpow.analysis.dihedral.DihedralAnalysis`, and a
+:module:`~mdpow.analysis.workflows.base` module for use with
+existing and future workflows.
+
+.. toctree::
+   :maxdepth: 2
+
+   analysis/workflows/base
+   analysis/workflows/dihedrals
 
 References
 ----------

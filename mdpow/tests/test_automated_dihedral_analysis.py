@@ -38,8 +38,8 @@ class TestAutomatedDihedralAnalysis(object):
 
     @pytest.fixture(scope="function")
     def SM25_tmp_dir(self, molname_FEP_directory):
-        datadir = molname_FEP_directory
-        return datadir
+        dirname = molname_FEP_directory
+        return dirname
 
     resname = 'UNK'
 
@@ -75,23 +75,23 @@ class TestAutomatedDihedralAnalysis(object):
     ADG_C13141520_var = 0.8807224235045962
 
     def test_dihedral_indices(self, SM25_tmp_dir):
-        bonds = ada.dihedral_indices(datadir=SM25_tmp_dir, resname=self.resname)
+        bonds = ada.dihedral_indices(dirname=SM25_tmp_dir, resname=self.resname)
         assert bonds == self.check_bonds
 
     '''def test_dihedral_indices_error_exception(self, SM25_tmp_dir):
         with pytest.raises(AttributeError) as excinfo:
-            ada.dihedral_indices(datadir=SM25_tmp_dir, resname=self.resname)
+            ada.dihedral_indices(dirname=SM25_tmp_dir, resname=self.resname)
         assert excinfo.value is AttributeError'''
     # needs an example topology without hydrogen
 
     def test_dihedral_groups(self, SM25_tmp_dir):
-        groups = ada.dihedral_groups(datadir=SM25_tmp_dir, resname=self.resname)
+        groups = ada.dihedral_groups(dirname=SM25_tmp_dir, resname=self.resname)
         assert str(groups) == self.check_groups
 
     @pytest.mark.skipif(sys.version_info < (3, 8), reason="scipy circvar gives wrong answers")
     def test_dihedral_groups_ensemble(self, SM25_tmp_dir):
-        bonds = ada.dihedral_indices(datadir=SM25_tmp_dir, resname=self.resname)
-        df = ada.dihedral_groups_ensemble(bonds=bonds, datadir=SM25_tmp_dir, solvents=('water',))
+        bonds = ada.dihedral_indices(dirname=SM25_tmp_dir, resname=self.resname)
+        df = ada.dihedral_groups_ensemble(bonds=bonds, dirname=SM25_tmp_dir, solvents=('water',))
 
         dh1_result = df.loc[df['selection'] == 'O1-C2-N3-S4']['dihedral']
         dh1_mean = circmean(dh1_result, high=180, low=-180)
@@ -110,8 +110,8 @@ class TestAutomatedDihedralAnalysis(object):
 
     @pytest.mark.skipif(sys.version_info < (3, 8), reason="scipy circvar gives wrong answers") 
     def test_periodic_angle(self, SM25_tmp_dir):
-        bonds = ada.dihedral_indices(datadir=SM25_tmp_dir, resname=self.resname)
-        df = ada.dihedral_groups_ensemble(bonds=bonds, datadir=SM25_tmp_dir, solvents=('water',))
+        bonds = ada.dihedral_indices(dirname=SM25_tmp_dir, resname=self.resname)
+        df = ada.dihedral_groups_ensemble(bonds=bonds, dirname=SM25_tmp_dir, solvents=('water',))
 
         dh2_result = df.loc[df['selection'] == 'C13-C14-C15-C20']['dihedral']
         dh2_mean = circmean(dh2_result, high=180, low=-180)

@@ -1,0 +1,29 @@
+===========================
+Automated Dihedral Analysis
+===========================
+
+Workflows module with functions useful for automated use of
+:class:`~mdpow.analysis.dihedral.DihedralAnalysis`.
+
+.. versionadded:: ???
+
+.. automodule:: mdpow.analysis.workflows.dihedrals
+    :members:
+
+    .. autofunction:: dihedral_indices
+
+    .. autofunction:: dihedral_groups
+
+    .. autofunction:: add_hydrogens
+
+    .. autofunction:: dihedral_groups_ensemble
+
+    .. autofunction:: save_df
+
+    .. autofunction:: periodic_angle
+
+    .. autofunction:: dihedral_violins
+
+    .. autofunction:: plot_violins
+
+    .. autofunction:: automated_dihedral_analysis

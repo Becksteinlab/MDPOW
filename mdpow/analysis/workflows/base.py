@@ -11,11 +11,13 @@ import automated_dihedral_analysis as ada
 
 def directory_paths(parent_directory=None, csv=None):
     '''Takes a parent directory containing MDPOW simulation project subdirectories,
-       or .csv file containing molecule names, resnames, and
-       simulation data directory paths as argument and returns
-       a Pandas DataFrame for use with directory_iteration,
-       which iterates automated analysis over the project directories
-       included in the directory_paths DataFrame.
+       or .csv file containing :code:`molname`, :code:`resname`, and
+       simulation data directory paths as argument and returns a
+       :class:`pandas.DataFrame` for use with
+       :func:`~mdpow.analysis.workflows.base.directory_iteration`, which iterates
+       :func:`~mdpow.analysis.workflows.dihedrals.automated_dihedral_analysis`
+       over the project directories included in the
+       :func:`~mdpow.analysis.workflows.base.directory_paths` :class:`pandas.DataFrame`.
        
        :keywords:
        
@@ -32,7 +34,7 @@ def directory_paths(parent_directory=None, csv=None):
            must contain header of the form:
            format: molecule,resname,path
            
-       Examples:
+       .. rubric:: Examples
        
            directory_paths = directory_paths(parent_directory='/foo/bar/MDPOW_projects')
            directory_iteration(directory_paths)
@@ -79,45 +81,43 @@ def directory_paths(parent_directory=None, csv=None):
 def directory_iteration(directory_paths, df_save_dir=None, figdir=None, padding=45, width=0.9,
                         solvents=('water','octanol'), interactions=('Coulomb','VDW'),
                         start=None, stop=None, step=None):
-    '''Takes a Pandas DataFrame created by directory_paths as input
-    and iterates over the provided projects to implement automated_dihedral_analysis
+    '''Takes a :class:`pandas.DataFrame` created by
+    :func:`~mdpow.analysis.workflows.base.directory_paths`
+    as input and iterates over the provided projects to implement
+    :func:`~mdpow.analysis.workflows.dihedrals.automated_dihedral_analysis`
     for each project directory. Optionally accepts a figure directory for
-    saving plots, and all automated_dihedral_analysis and DihedralAnalysis
-    keyword arguments. Extracts molname, resname, and datadir from 
-    directory_paths Pandas DataFrame for use in obtaining dihedral groups
-    and plotting dihedral angle frequency KDEs.
+    saving plots. Extracts :code:`molname`, :code:`resname`, and :code:`dirname`
+    from :func:`~mdpow.analysis.workflows.base.directory_paths` :class:`pandas.DataFrame`
+    for use in obtaining dihedral groups and plotting dihedral angle frequency KDEs.
     
     :keywords:
     
-    *figdir : string*
-        optional, path to existing directory where plots
-        can be saved for each MDPOW project analyzed
+    *figdir*
+           optional, path to an existing directory where plots
+           can be saved for each dihedral atom group, for each project
         
-    *df_save_dir : string*
-           path to the location to save results DataFrame
+    *df_save_dir*
+           path to the location to save results :class:`pandas.DataFrame`
         
-    *padding : int*
-        must be in degrees, values for angle padding function
-        used for KDE violin plots of dihedral angle frequencies
+    *padding*
+           must be in degrees, values for
+           :func:`~mdpow.analysis.workflows.dihedrals.periodic_angle`
+           used for KDE violin plots of dihedral angle frequencies
         
-    *width : float*
-        used for violin plots
-        width of violins, (>1 overlaps)
-        see automated_dihedral_analysis.dihedral_violins
+    *width*
+           used for violin plots
+           width of violins, (>1 overlaps)
+           see :func:`~mdpow.analysis.workflows.dihedrals.dihedral_violins`
         
-    *solvents : tuple*
-        solvent specifications for use with DihedralAnalysis
-        see automated_dihedral_analysis
+    *solvents*
+           Solvents from directory given to the new instance. Default
+           :code:`solvents=('water', 'octanol')`
         
-    *interactions : tuple*
-        interaction specifications for use with DihedralAnalysis
-        see automated_dihedral_analysis
+    *interactions*
+           Interactions from directory given to the instance. Default
+           :code:`interactions=('Coulomb', 'VDW')`
         
-    *start,stop,step : int*
-        run frame analysis parameters for use with DihedralAnalysis
-        see automated_dihedral_analysis
-        
-    Example:
+    .. rubric:: Examples
        
            directory_paths = directory_paths(parent_directory='/foo/bar/MDPOW_projects')
            directory_iteration(directory_paths, figdir='/foo/bar/figure_directory,
@@ -130,9 +130,9 @@ def directory_iteration(directory_paths, df_save_dir=None, figdir=None, padding=
     for row in dirpaths.itertuples():
             molname = row.molecule
             resname = row.resname
-            datadir = row.path
+            dirname = row.path
 
-            ada.automated_dihedral_analysis(datadir=datadir, df_save_dir=df_save_dir, figdir=figdir,
+            ada.automated_dihedral_analysis(dirname=dirname, df_save_dir=df_save_dir, figdir=figdir,
                                             molname=molname, resname=resname,
                                             padding=padding, width=width,
                                             solvents=solvents, interactions=interactions,

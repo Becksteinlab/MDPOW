@@ -17,31 +17,41 @@ from mdpow.analysis.dihedral import DihedralAnalysis
 import MDAnalysis as mda
 from MDAnalysis.topology.guessers import guess_atom_element
 
-'''Contains an assortment of functions useful for automation
-   of DihedralAnalysis workflow. See each function for
-   requirements, usage, output, or examples. 
-   
-   Most can be used as standalone or in combination for desired purposes.
-   Complete automation encompassed in automated_dihedral_analysis().
+''':mod:`~mdpow.analysis.workflows` module with functions
+   useful for automated use of
+   :class:`~mdpow.analysis.dihedral.DihedralAnalysis`.
+   See each function for usage, output, and examples. 
+
+   Most functions can be used as standalone or in combination
+   depending on the desired results. Complete automation encompassed in
+   :func:`~mdpow.analysis.workflows.dihedrals.automated_dihedral_analysis`.
 '''
 
-def dihedral_indices(datadir, resname):
-    '''Requires an MDPOW project directory and resname 
-       as input. Uses the topology and trajectory from
-       a location that should be present in all MDPOW
-       projects and creates an MDAnalysis Universe object.
-       Uses resname to select the solute for conversion 
-       to RDKit, and will add Hydrogen if not listed
-       in the topology. Uses a SMARTS string to obtain all 
+def dihedral_indices(dirname, resname):
+    '''Requires an MDPOW project directory and :code:`resname` as
+       input. Uses the topology and trajectory from a location that
+       should be present in all MDPOW projects and creates a
+       :class:`MDAnalysis.Universe <MDAnalysis.core.groups.universe.Universe>`
+       object. Uses :code:`resname` to select the solute for conversion 
+       to :mod:`RDKit`, and will add Hydrogen if not listed
+       in the topology. Uses a :class:`~RDKit.Chem.SMARTS` string to obtain all 
        relevant dihedral atom groups and returns their indices
-       for use by dihedral_groups and dihedral_groups_ensemble.
-       
-       :arguments:
-       
-       *datadir : string*
-           path to the location of MDPOW project data
-           
-       *resname : string*
+       for use by :func:`~mdpow.analysis.workflows.dihedrals.dihedral_groups`
+       and :func:`~mdpow.analysis.workflows.dihedrals.dihedral_groups_ensemble`.
+
+       :keywords:
+
+       *dirname*
+           Molecule Simulation directory. Loads simulation files present in
+           lambda directories into the new instance. With this method for
+           generating an :class:`~mdpow.analysis.ensemble.Ensemble` the
+           lambda directories are explored and
+           :meth:`~mdpow.analysis.ensemble.Ensemble._load_universe_from_dir`
+           searches for .gro, .gro.b2z, .gro.gz, and .tpr files for topology,
+           and .xtc files for trajectory. It will default to using the tpr file
+           available.
+
+       *resname*
            resname for the molecule as defined in 
            the topology and trajectory
     '''
@@ -60,9 +70,9 @@ def dihedral_indices(datadir, resname):
         mol = solute.convert_to('RDKIT')
 
     pattern = Chem.MolFromSmarts('[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]')
-    
+
     '''SMARTS string that identifies relevant dihedral atom groups
-    
+
     [!#1] : any atom, not Hydrogen
     ~  : any bond
     [!$(*#*)&!D1] : any atom that is not part of linear triple bond
@@ -72,29 +82,37 @@ def dihedral_indices(datadir, resname):
     [!$(*#*)&!D1]-!@[!$(*#*)&!D1] : the central portion selects two atoms
     that are not involved in a triple bond and are not terminal,
     that are connected by a single, non-ring bond
-    
+
     [!#1] : the first and last portion specify any bond,
     to any atom that is not hydrogen
     '''
-    
+
     bonds = mol.GetSubstructMatches(pattern)
     return bonds
 
-def dihedral_groups(datadir, resname):
-    '''Requires an MDPOW project directory and resname 
-       as input. Expands upon usage of dihedral_indices()
+def dihedral_groups(dirname, resname):
+    '''Requires an MDPOW project directory and :code:`resname` 
+       as input. Expands upon usage of
+       :func:`~mdpow.analysis.workflows.dihedral.dihedral_indices`
        to return an array of the names of each atom within
        its respective dihedral atom group as identified by
-       the SMARTS selection string. Not necessary for automation,
-       useful for verifying all atom groups of interest are
-       properly identified before analysis.
-       
-       :arguments:
-       
-       *datadir : string*
-           path to the location of MDPOW project data
-           
-       *resname : string*
+       the :class:`~RDKit.Chem.SMARTS` selection string. Not necessary
+       for automation, useful for verifying all atom groups of interest
+       are properly identified before analysis.
+
+       :keywords:
+
+       *dirname*
+           Molecule Simulation directory. Loads simulation files present in
+           lambda directories into the new instance. With this method for
+           generating an :class:`~mdpow.analysis.ensemble.Ensemble` the
+           lambda directories are explored and
+           :meth:`~mdpow.analysis.ensemble.Ensemble._load_universe_from_dir`
+           searches for .gro, .gro.b2z, .gro.gz, and .tpr files for topology,
+           and .xtc files for trajectory. It will default to using the tpr file
+           available.
+
+       *resname*
            resname for the molecule as defined in 
            the topology and trajectory
     '''
@@ -106,14 +124,15 @@ def dihedral_groups(datadir, resname):
     u = mda.Universe(str(topology), str(trajectory))
     solute = u.select_atoms(f'resname {resname}')
 
-    bonds = dihedral_indices(datadir, resname)
+    bonds = dihedral_indices(dirname, resname)
     dihedral_groups = [solute.atoms[list(dihedral_indices)].names for dihedral_indices in bonds]
 
     return dihedral_groups
 
 def add_hydrogens(u): 
-    '''Used by dihedral_indices() for proper conversion
-       to RDKit. Adds Hydrogen if not listed in the topology.
+    '''Used by :func:`~mdpow.analysis.workflows.dihedrals.dihedral_indices`
+       for proper conversion to :mod:`RDKit`.
+       Adds Hydrogen if not listed in the topology.
     '''
 
     elements = [guess_atom_element(name) for name in u.atoms.names]
@@ -121,26 +140,35 @@ def add_hydrogens(u):
 
     return u
 
-def dihedral_groups_ensemble(bonds, datadir,
+def dihedral_groups_ensemble(bonds, dirname,
                              solvents=('water','octanol'),
                              interactions=('Coulomb','VDW'),
                              start=None, stop=None, step=None): 
-    '''Creates one ensemble for the MDPOW project and runs
-       DihedralAnalysis for each dihedral atom group identified
-       by the SMARTS selection string. For keyword arguments
-       see automated_dihedral_analysis() or DihedralAnalysis.
-       
-       :arguments:
-       
+    '''Creates one :class:`~mdpow.analysis.ensemble.Ensemble` for the MDPOW
+       project and runs :class:`~mdpow.analysis.dihedral.DihedralAnalysis`
+       for each dihedral atom group identified by the :class:`~RDKit.Chem.SMARTS`
+       selection string. For keyword arguments see
+       :func:`~mdpow.analysis.workflows.dihedrals.automated_dihedral_analysis`
+       or :class:`~mdpow.analysis.dihedral.DihedralAnalysis`.
+
+       :keywords:
+
        *bonds*
            bond indices for dihedral atom groups
-           see dihedral_indices()
-           
-       *datadir : string*
-           path to the location of MDPOW project data
+           see :func:`~mdpow.analysis.workflows.dihedrals.dihedral_indices`
+
+       *dirname*
+           Molecule Simulation directory. Loads simulation files present in
+           lambda directories into the new instance. With this method for
+           generating an :class:`~mdpow.analysis.ensemble.Ensemble` the
+           lambda directories are explored and
+           :meth:`~mdpow.analysis.ensemble.Ensemble._load_universe_from_dir`
+           searches for .gro, .gro.b2z, .gro.gz, and .tpr files for topology,
+           and .xtc files for trajectory. It will default to using the tpr file
+           available.
     '''
-    
-    dih_ens = mdpow.analysis.ensemble.Ensemble(dirname=datadir,
+
+    dih_ens = mdpow.analysis.ensemble.Ensemble(dirname=dirname,
                                                solvents=solvents,
                                                interactions=interactions)
 
@@ -156,23 +184,23 @@ def dihedral_groups_ensemble(bonds, datadir,
     return df
 
 def save_df(df, df_save_dir=None, resname=None, molname=None):
-    '''Takes a Pandas DataFrame of results from DihedralAnalysis
+    '''Takes a :class:`pandas.DataFrame` of results from 
+       :class:`~mdpow.analysis.dihedral.DihedralAnalysis`
        as input before padding the angles to optionaly save the raw
        data before plotting dihedral angle frequencies as KDE violins
-       with dihedral_violins(). Given a parent directory, creates subdirectory
+       with :func:`~mdpow.analysis.workflows.dihedrals.dihedral_violins`.
+       Given a parent directory, creates subdirectory
        for molecule, saves fully sampled csv.
-
-       :arguments:
-
-       *df : Pandas DataFrame*
-           results DataFrame from DihedralAnalysis
 
        :keywords:
 
-       *df_save_dir : string*
-           path to parent directory to create
-           subdirectory for saving the csv files
+       *df*
+           results :class:`pandas.DataFrame` from
+           :class:`~mdpow.analysis.dihedral.DihedralAnalysis`
 
+       *df_save_dir*
+           path to parent directory to create
+           subdirectory for saving the .csv files
     '''
 
     if molname is None:
@@ -194,27 +222,28 @@ def save_df(df, df_save_dir=None, resname=None, molname=None):
     return
 
 def periodic_angle(df, padding=45):
-    '''Takes a Pandas DataFrame of results from DihedralAnalysis
+    '''Takes a :class:`pandas.DataFrame` of results from
+       :class:`~mdpow.analysis.dihedral.DihedralAnalysis`
        as input and pads the angles to maintain periodicity
        for properly plotting dihedral angle frequencies as KDE violins
-       with dihedral_violins(). Creates two new DataFrames based on the 
+       with :func:`~mdpow.analysis.workflows.dihedrals.dihedral_violins`.
+       Creates two new :class:`pandas.DataFrame` based on the 
        cutoff value specified, adds to the angle values, concatenates
-       all three DataFrames, maintaining original data and adding padding,
-       and returns new augmented DataFrame.
-       
-       :arguments:
-       
-       *df : Pandas DataFrame*
-           results DataFrame from DihedralAnalysis
-           
+       all three :class:`pandas.DataFrame`, maintaining original data and
+       adding padding, and returns new augmented :class:`pandas.DataFrame`.
+
        :keywords:
-       
-       *padding : int*
+
+       *df*
+           results :class:`pandas.DataFrame` from
+           :class:`~mdpow.analysis.dihedral.DihedralAnalysis`
+
+       *padding*
            value must be in degrees
-           default set to 45
-           
-       Example:
-       
+           default set to 45 (type:int)
+
+       .. rubric:: Examples
+
            da = DihedralAnalysis(all_dihedrals)
            da.run(start=0, stop=100, step=10)
            df = da.results
@@ -231,23 +260,23 @@ def periodic_angle(df, padding=45):
     return df_aug
 
 def dihedral_violins(df, width=0.9):
-    '''Plots distributions of dihedral angles for 
-       one dihedral atom group as violin plots,
-       using as input the augmented DataFrame from periodic_angle().
-       Returns a figure in the form of seaborn.FacetGrid.
-       See periodic_angle() for example.
+    '''Plots distributions of dihedral angles for one dihedral atom group
+       as violin plots, using as input the augmented :class:`pandas.DataFrame`
+       from :func:`~mdpow.analysis.workflows.dihedrals.periodic_angle`.
+       Returns a figure in the form of :class:`seaborn.FacetGrid`. See
+       :func:`~mdpow.analysis.workflows.dihedrals.periodic_angle` for example.
 
-       :arguments:
-       
-       *df : Pandas DataFrame*
-           augmented DataFrame from periodic_angle()
-           
        :keywords:
-       
-       *width : float*
+
+       *df*
+           augmented :class:`pandas.DataFrame` from
+           :func:`~mdpow.analysis.workflows.dihedrals.periodic_angle`
+
+       *width*
            width of the violin element (>1 overlaps)
+           type: float
     '''
-    
+
     df['lambda'] = df['lambda'].astype('float') / 1000
     df = df.sort_values(by=["selection",
                             "solvent",
@@ -285,11 +314,12 @@ def dihedral_violins(df, width=0.9):
     return g
 
 def plot_violins(df, resname, figdir=None, molname=None, width=0.9):
-    '''Coordinates plotting and optionally saving figures
-       for all dihedral atom groups. Makes a subdirectory within
-       the specified figure directory using rename or molname provided.
-       See automated_dihedral_analysis(), dihedral_violins()
-       Returns figures in the form of seaborn.FacetGrid.
+    '''Coordinates plotting and optionally saving figures for all dihedral
+       atom groups. Makes a subdirectory within the specified
+       :code:`figdir` using :code:`resname` or :code:`molname` provided.
+       See :func:`~mdpow.analysis.workflows.dihedrals.automated_dihedral_analysis`
+       or :func:`~mdpow.analysis.workflows.dihedrals.dihedral_violins`
+       for examples. Returns figures in the form of :class:`seaborn.FacetGrid`.
     '''
 
     if molname is None:
@@ -312,70 +342,74 @@ def plot_violins(df, resname, figdir=None, molname=None, width=0.9):
 
     return plot
 
-def automated_dihedral_analysis(datadir=None, df_save_dir=None, figdir=None,
+def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
                                 resname=None, molname=None,
                                 dataframe=None, padding=45, width=0.9,
                                 solvents=('water','octanol'),
                                 interactions=('Coulomb','VDW'),
                                 start=None, stop=None, step=None):
-    '''For one MDPOW project, automatically determines all relevant
-       dihedral atom groups, conducts DihedralAnalysis for each group,
+    '''For one MDPOW project, automatically determines all relevant dihedral atom groups,
+       conducts :class:`~mdpow.analysis.dihedral.DihedralAnalysis` for each group,
        pads the dihedral angles from analysis results for all groups,
        creates KDE violin plots of dihedral angle frequencies for each group,
-       and optionally saves figure for each group as pdf in provided figure directory.
-       Returns KDE violin plot figure for each atom group as seaborn.FacetGrid.
-       
+       and optionally saves figure for each group as .pdf in provided figure directory.
+       Returns KDE violin plot figure for each atom group as :class:`seaborn.FacetGrid`.
+
        :keywords:
-       
-       *datadir : string*
-           path to the location of MDPOW project data
-           
-       *df_save_dir : string*
-           path to the location to save results DataFrame
-           
-       *figdir : string*
+
+       *dirname*
+           Molecule Simulation directory. Loads simulation files present in
+           lambda directories into the new instance. With this method for
+           generating an :class:`~mdpow.analysis.ensemble.Ensemble` the
+           lambda directories are explored and
+           :meth:`~mdpow.analysis.ensemble.Ensemble._load_universe_from_dir`
+           searches for .gro, .gro.b2z, .gro.gz, and .tpr files for topology,
+           and .xtc files for trajectory. It will default to using the tpr file
+           available.
+
+       *df_save_dir*
+           path to the location to save results :class:`pandas.DataFrame`
+
+       *figdir*
            optional, path to an existing directory where plots
            can be saved for each dihedral atom group
-        
-       *resname : string*
+
+       *resname*
            resname for the molecule as defined in 
            the topology and trajectory
-           
-       *molname : string*
+
+       *molname*
            molecule name to be used for labelling
            plots, if different from resname
-           
+
        *dataframe : Pandas DataFrame*
-           optional, if DihedralAnalysis was done prior,
-           then results DataFrame can be input to utilize
-           angle padding and violin plotting functionality
-        
-       *padding : int*
-           must be in degrees, values for angle padding function
+           optional, if :class:`~mdpow.analysis.dihedral.DihedralAnalysis`
+           was done prior, then results :class:`pandas.DataFrame` can be
+           input to utilize angle padding and violin plotting functionality
+
+       *padding*
+           must be in degrees, values for
+           :func:`~mdpow.analysis.workflows.dihedrals.periodic_angle`
            used for KDE violin plots of dihedral angle frequencies
-        
-       *width : float*
+
+       *width*
            used for violin plots
            width of violins, (>1 overlaps)
-           see automated_dihedral_analysis.dihedral_violins()
-        
-       *solvents : tuple*
-           solvent specifications for use by DihedralAnalysis
-           see DihedralAnalysis
-        
-       *interactions : tuple*
-           interaction specifications for use by DihedralAnalysis
-           see DihedralAnalysis
-        
-       *start,stop,step : int*
-           run _single_frame() analysis parameters for use by DihedralAnalysis
-           see DihedralAnalysis
-       
-       Example:
-       
+           see :func:`~mdpow.analysis.workflows.dihedrals.dihedral_violins`
+
+       *solvents*
+           Solvents from directory given to the new instance. Default
+           :code:`solvents=('water', 'octanol')`
+
+       *interactions*
+           Interactions from directory given to the instance. Default
+           :code:`interactions=('Coulomb', 'VDW')`
+
+       .. rubric:: Examples
+
            import automated_dihedral_analysis as ada
-           
-           ada.automated_dihedral_analysis(datadir='/foo/bar/MDPOW_project_data',
+
+           ada.automated_dihedral_analysis(dirname='/foo/bar/MDPOW_project_data',
                                            figdir='/foo/bar/MDPOW_figure_directory',
                                            resname='UNK', molname='benzene',
                                            padding=45, width=0.9,
@@ -384,10 +418,10 @@ def automated_dihedral_analysis(datadir=None, df_save_dir=None, figdir=None,
                                            start=0, stop=100, step=10)
     '''
 
-    bonds = dihedral_indices(datadir=datadir, resname=resname)
+    bonds = dihedral_indices(dirname=dirname, resname=resname)
 
     if dataframe is None:
-        df = dihedral_groups_ensemble(bonds, datadir=datadir,
+        df = dihedral_groups_ensemble(bonds, dirname=dirname,
                                       solvents=solvents, interactions=interactions,
                                       start=start, stop=stop, step=step)
     else:
@@ -395,7 +429,7 @@ def automated_dihedral_analysis(datadir=None, df_save_dir=None, figdir=None,
 
     if df_save_dir is not None:
         save_df(df, df_save_dir=df_save_dir, resname=resname, molname=molname)
-        
+
     df_aug = periodic_angle(df, padding=padding)
 
     return plot_violins(df_aug, resname=resname, figdir=figdir, molname=molname, width=width)          
