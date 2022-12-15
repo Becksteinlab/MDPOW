@@ -1,4 +1,4 @@
-# MDPOW: automated_dihedral_analysis.py
+# MDPOW: dihedrals.py
 # 2022 Cade Duckworth
 
 import numpy as np
