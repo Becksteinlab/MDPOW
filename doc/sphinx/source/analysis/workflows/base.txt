@@ -6,9 +6,10 @@ Base functions for use with all workflow modules.
 
 .. versionadded:: 0.9.1
 
-.. automodule:: mdpow.analysis.workflows.base
+.. automodule:: mdpow.analysis.workflows
     :members:
+    :undoc-members:
 
-    .. autofunction:: directory_paths
+    .. autofunction:: mdpow.analysis.workflows.base.directory_paths
 
-    .. autofunction:: directory_iteration
+    .. autofunction:: mdpow.analysis.workflows.base.directory_iteration
