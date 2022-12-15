@@ -11,6 +11,9 @@ import scipy
 import numpy as np
 import pandas as pd
 
+import rdkit
+from rdkit import Chem
+
 from numpy.testing import assert_almost_equal
 from scipy.stats import circvar, circmean
 
