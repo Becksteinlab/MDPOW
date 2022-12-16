@@ -1,6 +1,11 @@
 # MDPOW: base.py
 # 2022 Cade Duckworth
 
+r"""
+:mod:`mdpow.analysis.workflows.base`
+====================================
+"""
+
 import os
 import re
 import pandas as pd
