@@ -1,16 +1,13 @@
 # MDPOW: hbond.py
 # 2022 Cade Duckworth
 
-#NEED TO FIX THE WAY IT DETERMINES TIMES FOR RESULTS
 #Review and update old docs
 
 import pandas as pd
-import numpy as np
 
-import MDAnalysis as mda
 from MDAnalysis.analysis.hydrogenbonds.hbond_analysis import HydrogenBondAnalysis as HBA
 
-from .ensemble import Ensemble, EnsembleAtomGroup, EnsembleAnalysis
+from mdpow.analysis.ensemble import Ensemble, EnsembleAtomGroup, EnsembleAnalysis
 
 import logging
 
@@ -61,7 +58,6 @@ class HBondAnalysis(EnsembleAnalysis):
         super(HBondAnalysis, self).__init__(solute.ensemble)
         self._solute = solute
         self.hb_kwargs = kwargs
-        
 
     def _prepare_ensemble(self):
         self._col = ['solvent', 'interaction',
@@ -76,12 +72,11 @@ class HBondAnalysis(EnsembleAnalysis):
         hb = HBA(universe=self._solute.ensemble[self._key], **self.hb_kwargs)
         hb.run(verbose=True, start=self.start, stop=self.stop, step=self.step)
         results = hb.results.hbonds
-        #self._times = np.array([self._trajectory[ts].time for ts in self._trajectory[self.start:self.stop:self.step]])
 
-        
         for h in results:
+            self._time = self._system.trajectory[int(h[0])].time
             result = [self._key[0], self._key[1],self._key[2],
-                      (self._trajectory.dt*h[0]), int(h[0]), int(h[1]),
+                      self._time, int(h[0]), int(h[1]),
                       int(h[2]), int(h[3]), h[4], h[5]]
             for i in range(len(self._col)):
                 self._res_dict[self._col[i]].append(result[i])
