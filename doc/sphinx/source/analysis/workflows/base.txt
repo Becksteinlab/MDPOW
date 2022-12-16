@@ -4,12 +4,5 @@ Workflows Base
 
 Base functions for use with all workflow modules.
 
-.. versionadded:: 0.9.1
+.. automodule:: mdpow.analysis.workflows.base
 
-.. automodule:: mdpow/analysis/workflows/base
-    :members:
-    
-
-    .. autofunction:: directory_paths
-
-    .. autofunction:: directory_iteration
