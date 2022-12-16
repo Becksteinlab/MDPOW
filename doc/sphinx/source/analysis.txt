@@ -63,7 +63,7 @@ for use with :class:`~mdpow.analysis.dihedral.DihedralAnalysis`, and a
 existing and future workflows.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    analysis/workflows/base
    analysis/workflows/dihedrals
