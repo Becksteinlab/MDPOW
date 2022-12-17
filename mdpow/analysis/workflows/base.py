@@ -1,9 +1,9 @@
 # MDPOW: base.py
 # 2022 Cade Duckworth
 
-r"""
-:module:`mdpow.analysis.workflows.base`
-=======================================
+"""
+:mod:`mdpow.analysis.workflows.base` --- Base functions for use with all workflow modules
+==========================================================================================
 """
 
 import os

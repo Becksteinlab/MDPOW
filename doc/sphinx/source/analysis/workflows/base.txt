@@ -6,5 +6,5 @@ Workflows Base
 
 Base functions for use with all workflow modules.
 
-.. autofunction:: base.directory_paths
+.. automodule:: mdpow.analysis.workflows.base
 
