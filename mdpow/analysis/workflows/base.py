@@ -2,8 +2,8 @@
 # 2022 Cade Duckworth
 
 r"""
-:mod:`mdpow.analysis.workflows.base`
-====================================
+:module:`mdpow.analysis.workflows.base`
+=======================================
 """
 
 import os
