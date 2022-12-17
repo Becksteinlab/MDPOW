@@ -67,12 +67,16 @@ class TestAutomatedDihedralAnalysis(object):
                     np.array(['C13', 'C14', 'C15', 'C16'], dtype=object),
                     np.array(['C13', 'C14', 'C15', 'C20'], dtype=object)]
 
+    # pre-padding dihedral group statistics
     DG_O1C2N3S4_mean = -0.13089566578887002
     DG_O1C2N3S4_var = 0.03473127346296412
 
+    # pre-padding dihedral group statistics
     DG_C13141520_mean = 90.04076626959608
     DG_C13141520_var = 0.8814931303534448
 
+    # post-padding dihedral group statistics
+    # 'A' represents 'augmented'
     ADG_C13141520_mean = 93.50126701923381
     ADG_C13141520_var = 0.8815675813248334
 
@@ -106,29 +110,23 @@ class TestAutomatedDihedralAnalysis(object):
         dh2_mean = circmean(dh2_result, high=180, low=-180)
         dh2_var = circvar(dh2_result, high=180, low=-180)
 
+        # default relative tolerance is 1e-6 for pytest.approx
+        dh1_mean == pytest.approx(self.DG_O1C2N3S4_mean)
+        dh1_var == pytest.approx(self.DG_O1C2N3S4_var)
 
-        assert_almost_equal(dh1_mean, self.DG_O1C2N3S4_mean, 6)
-        assert_almost_equal(dh1_var, self.DG_O1C2N3S4_var, 6)
-
-        assert_almost_equal(dh2_mean, self.DG_C13141520_mean, 6)
-        assert_almost_equal(dh2_var, self.DG_C13141520_var, 6)
+        dh2_mean == pytest.approx(self.DG_C13141520_mean)
+        dh2_var == pytest.approx(self.DG_C13141520_var)
 
     @pytest.mark.skipif(sys.version_info < (3, 8), reason="scipy circvar gives wrong answers") 
     def test_periodic_angle(self, SM25_tmp_dir):
         bonds = ada.dihedral_indices(dirname=SM25_tmp_dir, resname=self.resname)
         df = ada.dihedral_groups_ensemble(bonds=bonds, dirname=SM25_tmp_dir, solvents=('water',))
-
-        dh2_result = df.loc[df['selection'] == 'C13-C14-C15-C20']['dihedral']
-        dh2_mean = circmean(dh2_result, high=180, low=-180)
-        dh2_var = circvar(dh2_result, high=180, low=-180)
-
         df_aug = ada.periodic_angle(df)
 
         aug_dh2_result = df_aug.loc[df_aug['selection'] == 'C13-C14-C15-C20']['dihedral']
+        
         aug_dh2_mean = circmean(aug_dh2_result, high=180, low=-180)
         aug_dh2_var = circvar(aug_dh2_result, high=180, low=-180)
 
-        assert_almost_equal(aug_dh2_mean, self.ADG_C13141520_mean, 6)
-        assert_almost_equal(aug_dh2_var, self.ADG_C13141520_var, 6)
-
-        assert dh2_mean != aug_dh2_mean
+        aug_dh2_mean == pytest.approx(self.ADG_C13141520_mean)
+        aug_dh2_var == pytest.approx(self.ADG_C13141520_var)
