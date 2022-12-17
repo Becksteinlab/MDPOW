@@ -67,14 +67,14 @@ class TestAutomatedDihedralAnalysis(object):
                     'array([\'C13\', \'C14\', \'C15\', \'C16\'], dtype=object), '
                     'array([\'C13\', \'C14\', \'C15\', \'C20\'], dtype=object)]')
 
-    DG_O1C2N3S4_mean = -0.17689226523782509
-    DG_O1C2N3S4_var = 0.03409665763502634
+    DG_O1C2N3S4_mean = -0.13089566578887002
+    DG_O1C2N3S4_var = 0.03473127346296412
 
-    DG_C13141520_mean = 90.0308806327842
-    DG_C13141520_var = 0.8807194366657267
+    DG_C13141520_mean = 90.04076626959608
+    DG_C13141520_var = 0.8814931303534448
 
-    ADG_C13141520_mean = 93.22450745932701
-    ADG_C13141520_var = 0.8807224235045962
+    ADG_C13141520_mean = 93.50126701923381
+    ADG_C13141520_var = 0.8815675813248334
 
     def test_dihedral_indices(self, SM25_tmp_dir):
         bonds = ada.dihedral_indices(dirname=SM25_tmp_dir, resname=self.resname)
