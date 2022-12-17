@@ -221,7 +221,7 @@ def save_df(df, df_save_dir=None, resname=None, molname=None):
                             "lambda"]).reset_index(drop=True)
 
     if df_save_dir is not None:
-        df.to_csv(f'{newdir}/{molname}_full_df.csv', index=False)
+        df.to_csv(f'{newdir}/{molname}_full_df.bz2', index=False, compression='bz2')
 
     return
 
