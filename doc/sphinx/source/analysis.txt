@@ -24,6 +24,7 @@ all FEP simulations. They then make data available (typically, as a
 
    analysis/solvation
    analysis/dihedral
+   analysis/hbond
 
 
 .. _framework:   
@@ -53,7 +54,7 @@ in more detail in [Lescoulie2021]_.
 Analysis workflows
 ------------------
 
-.. versionadded:: 0.9.1
+.. versionadded:: ???
 
 MDPOW analysis workflows provide automation functions for use with
 analysis :ref:`tools` based on the :ref:`framework`. Existing workflow
@@ -63,10 +64,11 @@ for use with :class:`~mdpow.analysis.dihedral.DihedralAnalysis`, and a
 existing and future workflows.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
 
    analysis/workflows/base
    analysis/workflows/dihedrals
+   analysis/workflows/hbonds
 
 References
 ----------
