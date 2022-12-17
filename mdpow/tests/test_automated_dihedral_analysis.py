@@ -43,6 +43,13 @@ class TestAutomatedDihedralAnalysis(object):
         dirname = molname_FEP_directory
         return dirname
 
+    @pytest.fixture(scope="function")
+    def gen_data(self, SM25_tmp_dir):
+        bonds = ada.dihedral_indices(dirname=SM25_tmp_dir, resname=self.resname)
+        df = ada.dihedral_groups_ensemble(bonds=bonds, dirname=SM25_tmp_dir, solvents=('water',))
+        df_aug = ada.periodic_angle(df)
+        return bonds, df, df_aug
+
     resname = 'UNK'
 
     check_bonds = ((0, 1, 2, 3),(0, 1, 12, 13),(1, 2, 3, 11),(1, 2, 3, 10),
@@ -80,8 +87,8 @@ class TestAutomatedDihedralAnalysis(object):
     ADG_C13141520_mean = 93.50126701923381
     ADG_C13141520_var = 0.8815675813248334
 
-    def test_dihedral_indices(self, SM25_tmp_dir):
-        bonds = ada.dihedral_indices(dirname=SM25_tmp_dir, resname=self.resname)
+    def test_dihedral_indices(self, gen_data):
+        bonds = gen_data[0]
         assert bonds == self.check_bonds
 
     '''def test_dihedral_indices_error_exception(self, SM25_tmp_dir):
@@ -98,9 +105,9 @@ class TestAutomatedDihedralAnalysis(object):
             i+=1
 
     @pytest.mark.skipif(sys.version_info < (3, 8), reason="scipy circvar gives wrong answers")
-    def test_dihedral_groups_ensemble(self, SM25_tmp_dir):
-        bonds = ada.dihedral_indices(dirname=SM25_tmp_dir, resname=self.resname)
-        df = ada.dihedral_groups_ensemble(bonds=bonds, dirname=SM25_tmp_dir, solvents=('water',))
+    def test_dihedral_groups_ensemble(self, gen_data):
+
+        df = gen_data[1]
 
         dh1_result = df.loc[df['selection'] == 'O1-C2-N3-S4']['dihedral']
         dh1_mean = circmean(dh1_result, high=180, low=-180)
@@ -118,13 +125,12 @@ class TestAutomatedDihedralAnalysis(object):
         dh2_var == pytest.approx(self.DG_C13141520_var)
 
     @pytest.mark.skipif(sys.version_info < (3, 8), reason="scipy circvar gives wrong answers") 
-    def test_periodic_angle(self, SM25_tmp_dir):
-        bonds = ada.dihedral_indices(dirname=SM25_tmp_dir, resname=self.resname)
-        df = ada.dihedral_groups_ensemble(bonds=bonds, dirname=SM25_tmp_dir, solvents=('water',))
-        df_aug = ada.periodic_angle(df)
+    def test_periodic_angle(self, gen_data):
+
+        df_aug = gen_data[2]
 
         aug_dh2_result = df_aug.loc[df_aug['selection'] == 'C13-C14-C15-C20']['dihedral']
-        
+
         aug_dh2_mean = circmean(aug_dh2_result, high=180, low=-180)
         aug_dh2_var = circvar(aug_dh2_result, high=180, low=-180)
 
