@@ -50,22 +50,22 @@ class TestAutomatedDihedralAnalysis(object):
                    (2, 1, 12, 13),(3, 2, 1, 12),(5, 4, 3, 11),(5, 4, 3, 10),
                    (9, 4, 3, 11),(9, 4, 3, 10),(12, 13, 14, 15),(12, 13, 14, 19))
 
-    check_groups = ('[array([\'O1\', \'C2\', \'N3\', \'S4\'], dtype=object), '
-                    'array([\'O1\', \'C2\', \'C13\', \'C14\'], dtype=object), '
-                    'array([\'C2\', \'N3\', \'S4\', \'O12\'], dtype=object), '
-                    'array([\'C2\', \'N3\', \'S4\', \'O11\'], dtype=object), '
-                    'array([\'C2\', \'N3\', \'S4\', \'C5\'], dtype=object), '
-                    'array([\'C2\', \'C13\', \'C14\', \'C15\'], dtype=object), '
-                    'array([\'N3\', \'S4\', \'C5\', \'C6\'], dtype=object), '
-                    'array([\'N3\', \'S4\', \'C5\', \'C10\'], dtype=object), '
-                    'array([\'N3\', \'C2\', \'C13\', \'C14\'], dtype=object), '
-                    'array([\'S4\', \'N3\', \'C2\', \'C13\'], dtype=object), '
-                    'array([\'C6\', \'C5\', \'S4\', \'O12\'], dtype=object), '
-                    'array([\'C6\', \'C5\', \'S4\', \'O11\'], dtype=object), '
-                    'array([\'C10\', \'C5\', \'S4\', \'O12\'], dtype=object), '
-                    'array([\'C10\', \'C5\', \'S4\', \'O11\'], dtype=object), '
-                    'array([\'C13\', \'C14\', \'C15\', \'C16\'], dtype=object), '
-                    'array([\'C13\', \'C14\', \'C15\', \'C20\'], dtype=object)]')
+    check_groups = [np.array(['O1', 'C2', 'N3', 'S4'], dtype=object),
+                    np.array(['O1', 'C2', 'C13', 'C14'], dtype=object),
+                    np.array(['C2', 'N3', 'S4', 'O12'], dtype=object),
+                    np.array(['C2', 'N3', 'S4', 'O11'], dtype=object),
+                    np.array(['C2', 'N3', 'S4', 'C5'], dtype=object),
+                    np.array(['C2', 'C13', 'C14', 'C15'], dtype=object),
+                    np.array(['N3', 'S4', 'C5', 'C6'], dtype=object),
+                    np.array(['N3', 'S4', 'C5', 'C10'], dtype=object),
+                    np.array(['N3', 'C2', 'C13', 'C14'], dtype=object),
+                    np.array(['S4', 'N3', 'C2', 'C13'], dtype=object),
+                    np.array(['C6', 'C5', 'S4', 'O12'], dtype=object),
+                    np.array(['C6', 'C5', 'S4', 'O11'], dtype=object),
+                    np.array(['C10', 'C5', 'S4', 'O12'], dtype=object),
+                    np.array(['C10', 'C5', 'S4', 'O11'], dtype=object),
+                    np.array(['C13', 'C14', 'C15', 'C16'], dtype=object),
+                    np.array(['C13', 'C14', 'C15', 'C20'], dtype=object)]
 
     DG_O1C2N3S4_mean = -0.13089566578887002
     DG_O1C2N3S4_var = 0.03473127346296412
@@ -88,7 +88,10 @@ class TestAutomatedDihedralAnalysis(object):
 
     def test_dihedral_groups(self, SM25_tmp_dir):
         groups = ada.dihedral_groups(dirname=SM25_tmp_dir, resname=self.resname)
-        assert str(groups) == self.check_groups
+        i = 0
+        while i < len(groups):
+            assert groups[i].all() == self.check_groups[i].all()
+            i+=1
 
     @pytest.mark.skipif(sys.version_info < (3, 8), reason="scipy circvar gives wrong answers")
     def test_dihedral_groups_ensemble(self, SM25_tmp_dir):
