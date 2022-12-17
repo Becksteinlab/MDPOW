@@ -27,15 +27,14 @@ from ..analysis.workflows import dihedrals as ada
 
 from pkg_resources import resource_filename
 
-RESOURCES = py.path.local(resource_filename(__name__, 'testing_resources'))
-MANIFEST = RESOURCES.join("manifest.yml")
+RESOURCES = pathlib.PurePath(resource_filename(__name__, 'testing_resources'))
+MANIFEST = RESOURCES / "manifest.yml"
 
 @pytest.fixture(scope="function")
 def molname_FEP_directory(tmp_path, molname='SM25'):
-    tmpdir = tmp_path
     m = pybol.Manifest(str(RESOURCES / 'manifest.yml'))
-    m.assemble('FEP', tmpdir)
-    return tmpdir / molname
+    m.assemble('FEP', tmp_path)
+    return tmp_path / molname
 
 class TestAutomatedDihedralAnalysis(object):
 

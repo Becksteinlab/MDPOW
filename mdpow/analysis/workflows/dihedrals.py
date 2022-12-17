@@ -60,7 +60,7 @@ def dihedral_indices(dirname, resname):
            the topology and trajectory
     '''
 
-    path = pathlib.Path(datadir)
+    path = pathlib.Path(dirname)
     topology = path / 'FEP/water/Coulomb/0000' / 'md.tpr'
     trajectory = path / 'FEP/water/Coulomb/0000' / 'md.xtc'
     u = mda.Universe(str(topology), str(trajectory))
@@ -121,7 +121,7 @@ def dihedral_groups(dirname, resname):
            the topology and trajectory
     '''
 
-    path = pathlib.Path(datadir)
+    path = pathlib.Path(dirname)
     topology = path / 'FEP/water/Coulomb/0000' / 'md.tpr'
     trajectory = path / 'FEP/water/Coulomb/0000' / 'md.xtc'
 
