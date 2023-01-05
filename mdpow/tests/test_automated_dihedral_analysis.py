@@ -136,6 +136,11 @@ class TestAutomatedDihedralAnalysis(object):
 
         dh2_mean == pytest.approx(self.DG_C13141520_mean)
         dh2_var == pytest.approx(self.DG_C13141520_var)
+        
+    def test_save_df(self, gen_data, SM25_tmp_dir):
+        ada.save_df(df=gen_data[2], df_save_dir=SM25_tmp_dir, molname='SM25')
+        assert SM25_tmp_dir / 'SM25' / 'SM25_full_df.bz2'
+                                        
 
     @pytest.mark.skipif(sys.version_info < (3, 8), reason="scipy circvar gives wrong answers") 
     def test_periodic_angle(self, gen_data):
@@ -154,3 +159,9 @@ class TestAutomatedDihedralAnalysis(object):
         # tests directory_paths function and resname-molname conversion
         directory_paths = base.directory_paths(parent_directory=RESOURCES)
         assert (directory_paths['molecule'] == 'SM25').any() == True
+
+    def test_save_fig(self, SM25_tmp_dir):
+        ada.automated_dihedral_analysis(dirname=SM25_tmp_dir, figdir=SM25_tmp_dir,
+                                        resname=self.resname, molname='SM25',
+                                        solvents=('water',))
+        assert SM25_tmp_dir / 'SM25' / 'SM25_C10-C5-S4-O11_violins.pdf'
