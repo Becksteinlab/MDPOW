@@ -24,6 +24,7 @@ import py.path
 #from ..analysis.ensemble import Ensemble, EnsembleAnalysis, EnsembleAtomGroup
 #from ..analysis.dihedral import DihedralAnalysis
 from ..analysis.workflows import dihedrals as ada
+from ..analysis.workflows import base
 
 from pkg_resources import resource_filename
 
@@ -148,3 +149,8 @@ class TestAutomatedDihedralAnalysis(object):
 
         aug_dh2_mean == pytest.approx(self.ADG_C13141520_mean)
         aug_dh2_var == pytest.approx(self.ADG_C13141520_var)
+        
+    def test_base(self, SM25_tmp_dir):
+        # tests directory_paths function and resname-molname conversion
+        directory_paths = base.directory_paths(parent_directory=RESOURCES)
+        assert (directory_paths['molecule'] == 'SM25').any() == True

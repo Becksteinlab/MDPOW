@@ -12,7 +12,7 @@ import pandas as pd
 
 #import will need to change based on new naming convention for ada
 #and once the function changes for more general use
-import automated_dihedral_analysis as ada
+import mdpow.analysis.workflows.dihedrals as ada
 
 import logging
 
@@ -142,7 +142,7 @@ def directory_iteration(directory_paths, df_save_dir=None, figdir=None, padding=
 
     '''
 
-    for row in dirpaths.itertuples():
+    for row in directory_paths.itertuples():
             molname = row.molecule
             resname = row.resname
             dirname = row.path

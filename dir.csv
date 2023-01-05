@@ -1,0 +1,5 @@
+molecule,resname,path
+states,states,/nfs/homes3/cade/Projects/Repositories/MDPOW-ADA/mdpow/tests/testing_resources/states
+benzene,benzene,/nfs/homes3/cade/Projects/Repositories/MDPOW-ADA/mdpow/tests/testing_resources/states/FEP/benzene
+SM25,SM25,/nfs/homes3/cade/Projects/Repositories/MDPOW-ADA/mdpow/tests/testing_resources/states/FEP/SM25
+example_FEP,example_FEP,/nfs/homes3/cade/Projects/Repositories/MDPOW-ADA/mdpow/tests/testing_resources/states/example_FEP
