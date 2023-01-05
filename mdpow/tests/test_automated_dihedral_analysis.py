@@ -165,3 +165,16 @@ class TestAutomatedDihedralAnalysis(object):
                                         resname=self.resname, molname='SM25',
                                         solvents=('water',))
         assert SM25_tmp_dir / 'SM25' / 'SM25_C10-C5-S4-O11_violins.pdf'
+        
+    def test_directory_iteration(self, SM25_tmp_dir):
+        directory_paths = base.directory_paths(parent_directory=RESOURCES)
+        # remove other directories, short term solution
+        # exact slice containing only SM25 and SM26
+        new_df = directory_paths[2:4]
+        # change resname to match topology (every SAMPL7 resname is 'UNK')
+        # only necessary for this dataset, not necessary for normal use
+        for f in new_df:
+            new_df.resname = 'UNK'
+        base.directory_iteration(new_df, df_save_dir=SM25_tmp_dir, solvents=('water',))
+        assert SM25_tmp_dir / 'SM25' / 'SM25_full_df.bz2'
+        assert SM25_tmp_dir / 'SM26' / 'SM26_full_df.bz2'
