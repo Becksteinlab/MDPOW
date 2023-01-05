@@ -46,16 +46,24 @@ class TestAutomatedDihedralAnalysis(object):
     @pytest.fixture(scope="function")
     def gen_data(self, SM25_tmp_dir):
         bonds = ada.dihedral_indices(dirname=SM25_tmp_dir, resname=self.resname)
+        # test user input of SMARTS string, 'user_SMARTS'
+        bonds_alt = ada.dihedral_indices(dirname=SM25_tmp_dir, resname=self.resname,
+                                         user_SMARTS='[!$(*#*)&!D1]-!@[!$(*#*)&!D1]')
         df = ada.dihedral_groups_ensemble(bonds=bonds, dirname=SM25_tmp_dir, solvents=('water',))
         df_aug = ada.periodic_angle(df)
-        return bonds, df, df_aug
+        return bonds, bonds_alt, df, df_aug
+        # gen_data[0]=bonds, gen_data[1]=bonds_alt, gen_data[2]=df, gen_data[3]=df_aug
 
     resname = 'UNK'
 
+    # bond indices with default SMARTS string
     check_bonds = ((0, 1, 2, 3),(0, 1, 12, 13),(1, 2, 3, 11),(1, 2, 3, 10),
                    (1, 2, 3, 4),(1, 12, 13, 14),(2, 3, 4, 5),(2, 3, 4, 9),
                    (2, 1, 12, 13),(3, 2, 1, 12),(5, 4, 3, 11),(5, 4, 3, 10),
                    (9, 4, 3, 11),(9, 4, 3, 10),(12, 13, 14, 15),(12, 13, 14, 19))
+    
+    # bond indices with alternate SMARTS string from user input
+    check_bonds_alt = ((1, 2), (1, 12), (2, 3), (3, 4), (12, 13), (13, 14))
 
     check_groups = [np.array(['O1', 'C2', 'N3', 'S4'], dtype=object),
                     np.array(['O1', 'C2', 'C13', 'C14'], dtype=object),
@@ -90,6 +98,10 @@ class TestAutomatedDihedralAnalysis(object):
     def test_dihedral_indices(self, gen_data):
         bonds = gen_data[0]
         assert bonds == self.check_bonds
+        
+    def test_user_SMARTS(self, gen_data):
+        bonds = gen_data[1]
+        assert bonds == self.check_bonds_alt
 
     '''def test_dihedral_indices_error_exception(self, SM25_tmp_dir):
         with pytest.raises(AttributeError) as excinfo:
@@ -107,7 +119,7 @@ class TestAutomatedDihedralAnalysis(object):
     @pytest.mark.skipif(sys.version_info < (3, 8), reason="scipy circvar gives wrong answers")
     def test_dihedral_groups_ensemble(self, gen_data):
 
-        df = gen_data[1]
+        df = gen_data[2]
 
         dh1_result = df.loc[df['selection'] == 'O1-C2-N3-S4']['dihedral']
         dh1_mean = circmean(dh1_result, high=180, low=-180)
@@ -127,7 +139,7 @@ class TestAutomatedDihedralAnalysis(object):
     @pytest.mark.skipif(sys.version_info < (3, 8), reason="scipy circvar gives wrong answers") 
     def test_periodic_angle(self, gen_data):
 
-        df_aug = gen_data[2]
+        df_aug = gen_data[3]
 
         aug_dh2_result = df_aug.loc[df_aug['selection'] == 'C13-C14-C15-C20']['dihedral']
 

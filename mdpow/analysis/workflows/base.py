@@ -91,7 +91,7 @@ def directory_paths(parent_directory=None, csv=None):
 #needs to be changed for use with other automated workflows
 def directory_iteration(directory_paths, df_save_dir=None, figdir=None, padding=45, width=0.9,
                         solvents=('water','octanol'), interactions=('Coulomb','VDW'),
-                        start=None, stop=None, step=None):
+                        start=None, stop=None, step=None, user_SMARTS=None):
     '''Takes a :class:`pandas.DataFrame` created by
     :func:`~mdpow.analysis.workflows.base.directory_paths`
     as input and iterates over the provided projects to implement
@@ -100,42 +100,46 @@ def directory_iteration(directory_paths, df_save_dir=None, figdir=None, padding=
     saving plots. Extracts :code:`molname`, :code:`resname`, and :code:`dirname`
     from :func:`~mdpow.analysis.workflows.base.directory_paths` :class:`pandas.DataFrame`
     for use in obtaining dihedral groups and plotting dihedral angle frequency KDEs.
-    
+
     :keywords:
-    
+
     *figdir*
            optional, path to an existing directory where plots
            can be saved for each dihedral atom group, for each project
-        
+
     *df_save_dir*
            path to the location to save results :class:`pandas.DataFrame`
-        
+
     *padding*
            must be in degrees, values for
            :func:`~mdpow.analysis.workflows.dihedrals.periodic_angle`
            used for KDE violin plots of dihedral angle frequencies
-        
+
     *width*
            used for violin plots
            width of violins, (>1 overlaps)
            see :func:`~mdpow.analysis.workflows.dihedrals.dihedral_violins`
-        
+
     *solvents*
            Solvents from directory given to the new instance. Default
            :code:`solvents=('water', 'octanol')`
-        
+
     *interactions*
            Interactions from directory given to the instance. Default
            :code:`interactions=('Coulomb', 'VDW')`
-        
+
+    *user_SMARTS*
+           optional user input of different SMARTS string selection, for
+           default see :func:`~mdpow.analysis.workflows.dihedrals.dihedral_indices`
+
     .. rubric:: Examples
-       
+
            directory_paths = directory_paths(parent_directory='/foo/bar/MDPOW_projects')
            directory_iteration(directory_paths, figdir='/foo/bar/figure_directory,
                                padding=45, width=0.9,
                                solvents=('water','octanol'), interactions=('Coulomb','VDW'),
                                start=0, stop=100, step=10)
-           
+
     '''
 
     for row in dirpaths.itertuples():
@@ -144,7 +148,7 @@ def directory_iteration(directory_paths, df_save_dir=None, figdir=None, padding=
             dirname = row.path
 
             ada.automated_dihedral_analysis(dirname=dirname, df_save_dir=df_save_dir, figdir=figdir,
-                                            molname=molname, resname=resname,
+                                            molname=molname, resname=resname, user_SMARTS=user_SMARTS,
                                             padding=padding, width=width,
                                             solvents=solvents, interactions=interactions,
                                             start=start, stop=stop, step=step)

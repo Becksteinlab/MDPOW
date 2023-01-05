@@ -31,7 +31,7 @@ logger = logging.getLogger('mdpow.analysis.workflows.dihedrals')
    :func:`~mdpow.analysis.workflows.dihedrals.automated_dihedral_analysis`.
 '''
 
-def dihedral_indices(dirname, resname):
+def dihedral_indices(dirname, resname, user_SMARTS=None):
     '''Requires an MDPOW project directory and :code:`resname` as
        input. Uses the topology and trajectory from a location that
        should be present in all MDPOW projects and creates a
@@ -73,7 +73,10 @@ def dihedral_indices(dirname, resname):
         solute = u_aug.select_atoms(f'resname {resname}')
         mol = solute.convert_to('RDKIT')
 
-    pattern = Chem.MolFromSmarts('[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]')
+    if user_SMARTS is not None:
+        pattern = Chem.MolFromSmarts(user_SMARTS)
+    else:
+        pattern = Chem.MolFromSmarts('[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]')
 
     '''SMARTS string that identifies relevant dihedral atom groups
 
@@ -170,6 +173,7 @@ def dihedral_groups_ensemble(bonds, dirname,
            searches for .gro, .gro.b2z, .gro.gz, and .tpr files for topology,
            and .xtc files for trajectory. It will default to using the tpr file
            available.
+           - 1/4/23 where did this come from and why is .b2z backwards? - cade
     '''
 
     dih_ens = mdpow.analysis.ensemble.Ensemble(dirname=dirname,
@@ -347,7 +351,7 @@ def plot_violins(df, resname, figdir=None, molname=None, width=0.9):
     return plot
 
 def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
-                                resname=None, molname=None,
+                                resname=None, molname=None, user_SMARTS=None,
                                 dataframe=None, padding=45, width=0.9,
                                 solvents=('water','octanol'),
                                 interactions=('Coulomb','VDW'),
@@ -385,6 +389,10 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
        *molname*
            molecule name to be used for labelling
            plots, if different from resname
+           
+       *user_SMARTS*
+           optional user input of different SMARTS string selection, for
+           default see :func:`~mdpow.analysis.workflows.dihedrals.dihedral_indices`
 
        *dataframe : Pandas DataFrame*
            optional, if :class:`~mdpow.analysis.dihedral.DihedralAnalysis`
@@ -422,7 +430,8 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
                                            start=0, stop=100, step=10)
     '''
 
-    bonds = dihedral_indices(dirname=dirname, resname=resname)
+    bonds = dihedral_indices(dirname=dirname, resname=resname,
+                             user_SMARTS=user_SMARTS)
 
     if dataframe is None:
         df = dihedral_groups_ensemble(bonds, dirname=dirname,
