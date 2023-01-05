@@ -76,6 +76,10 @@ jobs:
     - name: Install pybol (fixture staging tool)
       run: |
          python -m pip install pybol
+         
+    - name: Install rdkit (used in workflows)
+      run: |
+         python -m pip install rdkit
 
     - name: Install GROMACS (${{ matrix.gromacs-version }})
       run: |
