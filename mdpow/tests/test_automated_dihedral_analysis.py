@@ -32,16 +32,16 @@ RESOURCES = pathlib.PurePath(resource_filename(__name__, 'testing_resources'))
 MANIFEST = RESOURCES / "manifest.yml"
 
 @pytest.fixture(scope="function")
-def molname_FEP_directory(tmp_path, molname='SM25'):
+def molname_workflows_directory(tmp_path, molname='SM25'):
     m = pybol.Manifest(str(RESOURCES / 'manifest.yml'))
-    m.assemble('FEP', tmp_path)
+    m.assemble('workflows', tmp_path)
     return tmp_path / molname
 
 class TestAutomatedDihedralAnalysis(object):
 
     @pytest.fixture(scope="function")
-    def SM25_tmp_dir(self, molname_FEP_directory):
-        dirname = molname_FEP_directory
+    def SM25_tmp_dir(self, molname_workflows_directory):
+        dirname = molname_workflows_directory
         return dirname
 
     @pytest.fixture(scope="function")
@@ -155,9 +155,10 @@ class TestAutomatedDihedralAnalysis(object):
         aug_dh2_mean == pytest.approx(self.ADG_C13141520_mean)
         aug_dh2_var == pytest.approx(self.ADG_C13141520_var)
         
-    def test_base(self, SM25_tmp_dir):
+    def test_base(self, molname_workflows_directory, SM25_tmp_dir):
         # tests directory_paths function and resname-molname conversion
-        directory_paths = base.directory_paths(parent_directory=RESOURCES)
+        parent_directory = molname_workflows_directory
+        directory_paths = base.directory_paths(parent_directory=parent_directory)
         assert (directory_paths['molecule'] == 'SM25').any() == True
 
     def test_save_fig(self, SM25_tmp_dir):
@@ -166,15 +167,17 @@ class TestAutomatedDihedralAnalysis(object):
                                         solvents=('water',))
         assert SM25_tmp_dir / 'SM25' / 'SM25_C10-C5-S4-O11_violins.pdf'
         
-    def test_directory_iteration(self, SM25_tmp_dir):
-        directory_paths = base.directory_paths(parent_directory=RESOURCES)
+    def test_directory_iteration(self, molname_workflows_directory, SM25_tmp_dir):
+        parent_directory = molname_workflows_directory
+        directory_paths = base.directory_paths(parent_directory=parent_directory)
+        df = directory_paths
         # remove other directories, short term solution
         # exact slice containing only SM25 and SM26
-        new_df = directory_paths[2:4]
+        # new_df = directory_paths[2:4]
         # change resname to match topology (every SAMPL7 resname is 'UNK')
         # only necessary for this dataset, not necessary for normal use
-        for f in new_df:
-            new_df.resname = 'UNK'
-        base.directory_iteration(new_df, df_save_dir=SM25_tmp_dir, solvents=('water',))
+        for f in df:
+            df.resname = 'UNK'
+        base.directory_iteration(df, df_save_dir=SM25_tmp_dir, solvents=('water',))
         assert SM25_tmp_dir / 'SM25' / 'SM25_full_df.bz2'
         assert SM25_tmp_dir / 'SM26' / 'SM26_full_df.bz2'
