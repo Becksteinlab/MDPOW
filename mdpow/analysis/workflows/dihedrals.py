@@ -31,8 +31,11 @@ logger = logging.getLogger('mdpow.analysis.workflows.dihedrals')
    :func:`~mdpow.analysis.workflows.dihedrals.automated_dihedral_analysis`.
 '''
 
-def dihedral_indices(dirname, resname, user_SMARTS=None):
-    '''Requires an MDPOW project directory and :code:`resname` as
+def dihedral_indices(dirname, resname, SMARTS='[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]'):
+    '''Uses a SMARTS selection string to identify relevant dihedral atom
+       groups and returns their indices.
+       
+       Requires an MDPOW project directory and :code:`resname` as
        input. Uses the topology and trajectory from a location that
        should be present in all MDPOW projects and creates a
        :class:`MDAnalysis.Universe <MDAnalysis.core.groups.universe.Universe>`
@@ -51,13 +54,27 @@ def dihedral_indices(dirname, resname, user_SMARTS=None):
            generating an :class:`~mdpow.analysis.ensemble.Ensemble` the
            lambda directories are explored and
            :meth:`~mdpow.analysis.ensemble.Ensemble._load_universe_from_dir`
-           searches for .gro, .gro.b2z, .gro.gz, and .tpr files for topology,
+           searches for .gro, .gro.bz2, .gro.gz, and .tpr files for topology,
            and .xtc files for trajectory. It will default to using the tpr file
            available.
 
        *resname*
            resname for the molecule as defined in 
            the topology and trajectory
+           
+       *SMARTS*
+           SMARTS string that identifies relevant dihedral atom groups
+
+           [!#1] : any atom, not Hydrogen
+           ~  : any bond
+           [!$(*#*)&!D1] : any atom that is not part of linear triple bond
+           and not atom with 1 explicit bond
+           -!@ : single bond that is not ring bond
+           [!$(*#*)&!D1]-!@[!$(*#*)&!D1] : the central portion selects two atoms
+           that are not involved in a triple bond and are not terminal,
+           that are connected by a single, non-ring bond
+           [!#1] : the first and last portion specify any bond,
+           to any atom that is not hydrogen
     '''
 
     path = pathlib.Path(dirname)
@@ -73,32 +90,19 @@ def dihedral_indices(dirname, resname, user_SMARTS=None):
         solute = u_aug.select_atoms(f'resname {resname}')
         mol = solute.convert_to('RDKIT')
 
-    if user_SMARTS is not None:
-        pattern = Chem.MolFromSmarts(user_SMARTS)
-    else:
-        pattern = Chem.MolFromSmarts('[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]')
+    pattern = Chem.MolFromSmarts(SMARTS)
 
-    '''SMARTS string that identifies relevant dihedral atom groups
-
-    [!#1] : any atom, not Hydrogen
-    ~  : any bond
-    [!$(*#*)&!D1] : any atom that is not part of linear triple bond
-    and not atom with 1 explicit bond
-    -!@ : single bond that is not ring bond
-
-    [!$(*#*)&!D1]-!@[!$(*#*)&!D1] : the central portion selects two atoms
-    that are not involved in a triple bond and are not terminal,
-    that are connected by a single, non-ring bond
-
-    [!#1] : the first and last portion specify any bond,
-    to any atom that is not hydrogen
-    '''
+    
 
     bonds = mol.GetSubstructMatches(pattern)
     return bonds
 
 def dihedral_groups(dirname, resname):
-    '''Requires an MDPOW project directory and :code:`resname` 
+    '''Uses the indices of the relevant dihedral atom groups determined
+       by :func:`~mdpow.analysis.workflows.dihedral.dihedral_indices`
+       and returns the names for each atom in each group.
+       
+       Requires an MDPOW project directory and :code:`resname` 
        as input. Expands upon usage of
        :func:`~mdpow.analysis.workflows.dihedral.dihedral_indices`
        to return an array of the names of each atom within
@@ -115,7 +119,7 @@ def dihedral_groups(dirname, resname):
            generating an :class:`~mdpow.analysis.ensemble.Ensemble` the
            lambda directories are explored and
            :meth:`~mdpow.analysis.ensemble.Ensemble._load_universe_from_dir`
-           searches for .gro, .gro.b2z, .gro.gz, and .tpr files for topology,
+           searches for .gro, .gro.bz2, .gro.gz, and .tpr files for topology,
            and .xtc files for trajectory. It will default to using the tpr file
            available.
 
@@ -170,10 +174,9 @@ def dihedral_groups_ensemble(bonds, dirname,
            generating an :class:`~mdpow.analysis.ensemble.Ensemble` the
            lambda directories are explored and
            :meth:`~mdpow.analysis.ensemble.Ensemble._load_universe_from_dir`
-           searches for .gro, .gro.b2z, .gro.gz, and .tpr files for topology,
+           searches for .gro, .gro.bz2, .gro.gz, and .tpr files for topology,
            and .xtc files for trajectory. It will default to using the tpr file
            available.
-           - 1/4/23 where did this come from and why is .b2z backwards? - cade
     '''
 
     dih_ens = mdpow.analysis.ensemble.Ensemble(dirname=dirname,
@@ -351,7 +354,8 @@ def plot_violins(df, resname, figdir=None, molname=None, width=0.9):
     return plot
 
 def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
-                                resname=None, molname=None, user_SMARTS=None,
+                                resname=None, molname=None,
+                                SMARTS='[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]',
                                 dataframe=None, padding=45, width=0.9,
                                 solvents=('water','octanol'),
                                 interactions=('Coulomb','VDW'),
@@ -390,7 +394,7 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
            molecule name to be used for labelling
            plots, if different from resname
            
-       *user_SMARTS*
+       *SMARTS*
            optional user input of different SMARTS string selection, for
            default see :func:`~mdpow.analysis.workflows.dihedrals.dihedral_indices`
 
@@ -431,7 +435,7 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
     '''
 
     bonds = dihedral_indices(dirname=dirname, resname=resname,
-                             user_SMARTS=user_SMARTS)
+                             SMARTS=SMARTS)
 
     if dataframe is None:
         df = dihedral_groups_ensemble(bonds, dirname=dirname,

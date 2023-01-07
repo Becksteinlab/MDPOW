@@ -91,7 +91,8 @@ def directory_paths(parent_directory=None, csv=None):
 #needs to be changed for use with other automated workflows
 def directory_iteration(directory_paths, df_save_dir=None, figdir=None, padding=45, width=0.9,
                         solvents=('water','octanol'), interactions=('Coulomb','VDW'),
-                        start=None, stop=None, step=None, user_SMARTS=None):
+                        start=None, stop=None, step=None,
+                        SMARTS='[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]'):
     '''Takes a :class:`pandas.DataFrame` created by
     :func:`~mdpow.analysis.workflows.base.directory_paths`
     as input and iterates over the provided projects to implement
@@ -148,7 +149,7 @@ def directory_iteration(directory_paths, df_save_dir=None, figdir=None, padding=
             dirname = row.path
 
             ada.automated_dihedral_analysis(dirname=dirname, df_save_dir=df_save_dir, figdir=figdir,
-                                            molname=molname, resname=resname, user_SMARTS=user_SMARTS,
+                                            molname=molname, resname=resname, SMARTS=SMARTS,
                                             padding=padding, width=width,
                                             solvents=solvents, interactions=interactions,
                                             start=start, stop=stop, step=step)
