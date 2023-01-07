@@ -24,7 +24,6 @@ all FEP simulations. They then make data available (typically, as a
 
    analysis/solvation
    analysis/dihedral
-   analysis/hbond
 
 
 .. _framework:   
@@ -68,7 +67,6 @@ existing and future workflows.
 
    analysis/workflows/base
    analysis/workflows/dihedrals
-   analysis/workflows/hbonds
 
 References
 ----------
