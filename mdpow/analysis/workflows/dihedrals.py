@@ -270,7 +270,7 @@ def periodic_angle(df, padding=45):
 
     return df_aug
 
-def dihedral_violins(df, width=0.9):
+def dihedral_violins(df, width=0.9, solvents=('water','octanol')):
     '''Plots distributions of dihedral angles for one dihedral atom group
        as violin plots, using as input the augmented :class:`pandas.DataFrame`
        from :func:`~mdpow.analysis.workflows.dihedrals.periodic_angle`.
@@ -302,7 +302,10 @@ def dihedral_violins(df, width=0.9):
     g = sns.catplot(data=df, x="lambda", y="dihedral", hue="solvent", col="interaction",
                     kind="violin", split=True, width=width, inner=None, cut=0,
                     linewidth=0.5,
-                    hue_order=[df.solvent.iloc[0], df.solvent.iloc[-1]], col_order=["Coulomb", "VDW"],
+                    hue_order=[solvents[0], solvents[1]], col_order=["Coulomb", "VDW"],
+                    #hue_order=["water", "octanol"], col_order=["Coulomb", "VDW"],
+                    #hue_order=[df.solvent.iloc[0], df.solvent.iloc[-1]], col_order=["Coulomb", "VDW"],
+                    # causes problems and is not a good fix 
                     sharex=False, sharey=True,
                     height=2, aspect=2.5,
                     facet_kws={'ylim': (-180, 180),
@@ -324,7 +327,7 @@ def dihedral_violins(df, width=0.9):
 
     return g
 
-def plot_violins(df, resname, figdir=None, molname=None, width=0.9):
+def plot_violins(df, resname, figdir=None, molname=None, width=0.9, solvents=('water','octanol')):
     '''Coordinates plotting and optionally saving figures for all dihedral
        atom groups. Makes a subdirectory within the specified
        :code:`figdir` using :code:`resname` or :code:`molname` provided.
@@ -449,4 +452,4 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
 
     df_aug = periodic_angle(df, padding=padding)
 
-    return plot_violins(df_aug, resname=resname, figdir=figdir, molname=molname, width=width)          
+    return plot_violins(df_aug, resname=resname, figdir=figdir, molname=molname, width=width, solvents=solvents)          
