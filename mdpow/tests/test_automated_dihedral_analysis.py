@@ -49,7 +49,7 @@ class TestAutomatedDihedralAnalysis(object):
         bonds = ada.dihedral_indices(dirname=SM25_tmp_dir, resname=self.resname)
         # test user input of SMARTS string, 'user_SMARTS'
         bonds_alt = ada.dihedral_indices(dirname=SM25_tmp_dir, resname=self.resname,
-                                         user_SMARTS='[!$(*#*)&!D1]-!@[!$(*#*)&!D1]')
+                                         SMARTS='[!$(*#*)&!D1]-!@[!$(*#*)&!D1]')
         df = ada.dihedral_groups_ensemble(bonds=bonds, dirname=SM25_tmp_dir, solvents=('water',))
         df_aug = ada.periodic_angle(df)
         return bonds, bonds_alt, df, df_aug
