@@ -15,9 +15,10 @@ dependencies:
 - numkit
 - gromacswrapper
 - alchemlyb <2
+- rdkit
 
   # Testing
 - pytest
 - pytest-pep8
 - pytest-cov
-- codecov  
+- codecov
