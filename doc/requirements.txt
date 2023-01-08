@@ -9,4 +9,3 @@ mdanalysis
 rdkit
 seaborn
 matplotlib
-MDAnalysis.topology.guessers.guess_atom_element
