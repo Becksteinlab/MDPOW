@@ -86,11 +86,10 @@ def directory_paths(parent_directory=None, csv=None):
 
     return directory_paths
 
-#needs to be changed for use with other automated workflows
-def directory_iteration(directory_paths, df_save_dir=None, figdir=None, padding=45, width=0.9,
+def directory_iteration(directory_paths, df_save_dir=None, figdir=None,
                         solvents=('water','octanol'), interactions=('Coulomb','VDW'),
-                        start=None, stop=None, step=None,
-                        SMARTS='[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]'):
+                        ensemble_analysis=None, SMARTS=None, padding=None, width=None,
+                        start=None, stop=None, step=None):
     """Takes a :class:`pandas.DataFrame` created by
        :func:`~mdpow.workflows.base.directory_paths`
        as input and iterates over the provided projects to implement
@@ -101,6 +100,10 @@ def directory_iteration(directory_paths, df_save_dir=None, figdir=None, padding=
        for use in obtaining dihedral groups and plotting dihedral angle frequency KDEs.
 
        :keywords:
+       
+       *ensemble_analysis*
+           name of the :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`
+           that corresponds to the desired automation script
 
        *figdir*
            optional, path to an existing directory where plots
@@ -113,23 +116,25 @@ def directory_iteration(directory_paths, df_save_dir=None, figdir=None, padding=
            must be in degrees, values for
            :func:`~mdpow.workflows.dihedrals.periodic_angle`
            used for KDE violin plots of dihedral angle frequencies
+           recommended default = 45
 
        *width*
            used for violin plots
            width of violins, (>1 overlaps)
            see :func:`~mdpow.workflows.dihedrals.dihedral_violins`
+           recommended default = 0.9
 
        *solvents*
-           Solvents from directory given to the new instance. Default
-           :code:`solvents=('water', 'octanol')`
+           Solvents from directory given to the new instance
+           default :code:`solvents=('water', 'octanol')`
 
        *interactions*
-           Interactions from directory given to the instance. Default
-           :code:`interactions=('Coulomb', 'VDW')`
+           Interactions from directory given to the instance
+           default :code:`interactions=('Coulomb', 'VDW')`
 
        *SMARTS*
-           optional user input of different SMARTS string selection, for
-           default see :func:`~mdpow.workflows.dihedrals.dihedral_indices`
+           optional user input of different SMARTS string selection 
+           recommended default = '[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]'
 
        .. rubric:: Examples
 
@@ -140,15 +145,38 @@ def directory_iteration(directory_paths, df_save_dir=None, figdir=None, padding=
        start=0, stop=100, step=10)
     """
 
-    for row in directory_paths.itertuples():
-            molname = row.molecule
-            resname = row.resname
-            dirname = row.path
-
-            ada.automated_dihedral_analysis(dirname=dirname, df_save_dir=df_save_dir, figdir=figdir,
+    analyses = {
+        'DihedralAnalysis' : ada.automated_dihedral_analysis,
+        'SolvationAnalysis' : 0,
+        'HBondAnalysis' : 0
+    }
+    
+    if ensemble_analysis is not None:
+        try:
+            for row in directory_paths.itertuples():
+                molname = row.molecule
+                resname = row.resname
+                dirname = row.path
+                #analyses[ensemble_analysis](dirname, solvents=solvents,
+                #                            interactions=interactions, **kwargs)
+                
+                analyses[ensemble_analysis](dirname=dirname, df_save_dir=df_save_dir, figdir=figdir,
                                             molname=molname, resname=resname, SMARTS=SMARTS,
                                             padding=padding, width=width,
                                             solvents=solvents, interactions=interactions,
                                             start=start, stop=stop, step=step)
+                
+        except NotImplementedError as err:
+            logger.error("invalid EnsembleAnalysis selection", err, msg)
+            msg = ('An EnsembleAnalysis type that corresponds to an existing '
+                   'automated workflow module must be input as a kwarg. '
+                   'ex. ensemble_analysis=DihedralAnalysis')
+            raise NotImplementedError(msg)
+    else:
+        msg = ('Expected keyword argument for ensemble_analysis is '
+               'missing. An EnsembleAnalysis type that corresponds '
+               'to an existing automated workflow module must be '
+               'input as a kwarg. ex. ensemble_analysis=DihedralAnalysis')
+        raise ValueError(msg)
 
     return
