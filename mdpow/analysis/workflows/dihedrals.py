@@ -1,6 +1,20 @@
 # MDPOW: dihedrals.py
 # 2022 Cade Duckworth
 
+"""
+.. module:: mdpow.analysis.workflows.dihedrals
+==============================================
+
+:mod:`~mdpow.analysis.workflows.dihedrals` module with functions
+useful for automated use of
+:class:`~mdpow.analysis.dihedral.DihedralAnalysis`.
+See each function for usage, output, and examples. 
+
+Most functions can be used as standalone or in combination
+depending on the desired results. Complete automation encompassed in
+:func:`~mdpow.analysis.workflows.dihedrals.automated_dihedral_analysis`.
+"""
+
 import numpy as np
 import pandas as pd
 import os
@@ -20,16 +34,6 @@ from MDAnalysis.topology.guessers import guess_atom_element
 import logging
 
 logger = logging.getLogger('mdpow.analysis.workflows.dihedrals')
-
-''':mod:`~mdpow.analysis.workflows` module with functions
-   useful for automated use of
-   :class:`~mdpow.analysis.dihedral.DihedralAnalysis`.
-   See each function for usage, output, and examples. 
-
-   Most functions can be used as standalone or in combination
-   depending on the desired results. Complete automation encompassed in
-   :func:`~mdpow.analysis.workflows.dihedrals.automated_dihedral_analysis`.
-'''
 
 def dihedral_indices(dirname, resname, SMARTS='[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]'):
     '''Uses a SMARTS selection string to identify relevant dihedral atom
