@@ -12,7 +12,7 @@ import pandas as pd
 
 #import will need to change based on new naming convention for ada
 #and once the function changes for more general use
-import mdpow.analysis.workflows.dihedrals as ada
+import .dihedrals as ada
 
 import logging
 
