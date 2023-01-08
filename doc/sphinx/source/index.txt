@@ -140,8 +140,6 @@ For current issues and open feature requests please look through the
    equil
    fep
    analysis
-   analysis/workflows
-   workflows
    utilities
    forcefields
 
