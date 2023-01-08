@@ -3,7 +3,7 @@
 
 """
 .. module:: mdpow.analysis.workflows.base --- Base functions for use with all workflow modules
-===============================================================================================
+==============================================================================================
 """
 
 import os
@@ -20,7 +20,8 @@ logger = logging.getLogger('mdpow.analysis.workflows.base')
 
 def directory_paths(parent_directory=None, csv=None):
     '''
-       .. function:: directory_paths
+       .. function:: base.directory_paths(parent_directory=None, csv=None)
+       
        Takes a parent directory containing MDPOW simulation project subdirectories,
        or .csv file containing :code:`molname`, :code:`resname`, and
        simulation data directory paths as argument and returns a
