@@ -232,7 +232,7 @@ latex_documents = [
 #latex_appendices = []
 
 # If false, no module index is generated.
-#latex_use_modindex = True
+latex_use_modindex = True
 
 
 
@@ -255,8 +255,3 @@ intersphinx_mapping = {'https://docs.python.org/': None,
 # This value selects what content will be inserted into the main body of an autoclass directive.
 # "class", "init", "both"
 autoclass_content = "both"
-
-# testing if this works the same as it does for classes
-automodule_content = "both"
-
-
