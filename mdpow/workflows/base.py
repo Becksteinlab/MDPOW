@@ -13,23 +13,21 @@ import os
 import re
 import pandas as pd
 
-#import will need to change based on new naming convention for ada
-#and once the function changes for more general use
-import mdpow.workflows.dihedrals as ada
+import .dihedrals as ada
 
 import logging
 
 logger = logging.getLogger('mdpow.workflows.base')
 
 def directory_paths(parent_directory=None, csv=None):
-    """Takes a parent directory containing MDPOW simulation project subdirectories,
+    """Takes a parent directory containing MDPOW project subdirectories,
        or .csv file containing :code:`molname`, :code:`resname`, and
        simulation data directory paths as argument and returns a
        :class:`pandas.DataFrame` for use with
-       :func:`~mdpow.analysis.workflows.base.directory_iteration`, which iterates
-       :func:`~mdpow.analysis.workflows.dihedrals.automated_dihedral_analysis`
+       :func:`~mdpow.workflows.base.directory_iteration`, which iterates
+       :func:`~mdpow.workflows.dihedrals.automated_dihedral_analysis`
        over the project directories included in the
-       :func:`~mdpow.analysis.workflows.base.directory_paths` :class:`pandas.DataFrame`.
+       :func:`~mdpow.workflows.base.directory_paths` :class:`pandas.DataFrame`.
        
        :keywords:
        
@@ -94,12 +92,12 @@ def directory_iteration(directory_paths, df_save_dir=None, figdir=None, padding=
                         start=None, stop=None, step=None,
                         SMARTS='[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]'):
     """Takes a :class:`pandas.DataFrame` created by
-       :func:`~mdpow.analysis.workflows.base.directory_paths`
+       :func:`~mdpow.workflows.base.directory_paths`
        as input and iterates over the provided projects to implement
-       :func:`~mdpow.analysis.workflows.dihedrals.automated_dihedral_analysis`
+       :func:`~mdpow.workflows.dihedrals.automated_dihedral_analysis`
        for each project directory. Optionally accepts a figure directory for
        saving plots. Extracts :code:`molname`, :code:`resname`, and :code:`dirname`
-       from :func:`~mdpow.analysis.workflows.base.directory_paths` :class:`pandas.DataFrame`
+       from :func:`~mdpow.workflows.base.directory_paths` :class:`pandas.DataFrame`
        for use in obtaining dihedral groups and plotting dihedral angle frequency KDEs.
 
        :keywords:
@@ -113,13 +111,13 @@ def directory_iteration(directory_paths, df_save_dir=None, figdir=None, padding=
 
        *padding*
            must be in degrees, values for
-           :func:`~mdpow.analysis.workflows.dihedrals.periodic_angle`
+           :func:`~mdpow.workflows.dihedrals.periodic_angle`
            used for KDE violin plots of dihedral angle frequencies
 
        *width*
            used for violin plots
            width of violins, (>1 overlaps)
-           see :func:`~mdpow.analysis.workflows.dihedrals.dihedral_violins`
+           see :func:`~mdpow.workflows.dihedrals.dihedral_violins`
 
        *solvents*
            Solvents from directory given to the new instance. Default
@@ -131,7 +129,7 @@ def directory_iteration(directory_paths, df_save_dir=None, figdir=None, padding=
 
        *SMARTS*
            optional user input of different SMARTS string selection, for
-           default see :func:`~mdpow.analysis.workflows.dihedrals.dihedral_indices`
+           default see :func:`~mdpow.workflows.dihedrals.dihedral_indices`
 
        .. rubric:: Examples
 
