@@ -5,9 +5,9 @@
 .. module:: mdpow.analysis.workflows.base
 =========================================
 
-.. autofunction:: directory_paths
+.. autofunction:: mdpow.analysis.workflows.base.directory_paths
 
-.. autofunction:: directory_iteration
+.. autofunction:: mdpow.analysis.workflows.base.directory_iteration
 """
 
 import os
