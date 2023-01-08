@@ -66,8 +66,8 @@ existing and future workflows.
 .. toctree::
    :maxdepth: 4
 
-   analysis/workflows/base
-   analysis/workflows/dihedrals
+   analysis/base
+   analysis/dihedrals
 
 References
 ----------

@@ -7,7 +7,7 @@ Workflows module with functions useful for automated use of
 
 .. versionadded:: 0.9.1
 
-.. automodule:: mdpow.analysis.workflows
+.. automodule:: mdpow.analysis.workflows.dihedrals
     :members:
     :undoc-members:
 
