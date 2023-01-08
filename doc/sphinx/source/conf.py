@@ -232,7 +232,7 @@ latex_documents = [
 #latex_appendices = []
 
 # If false, no module index is generated.
-latex_use_modindex = True
+#latex_use_modindex = True
 
 
 

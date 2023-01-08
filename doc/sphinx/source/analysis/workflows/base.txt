@@ -10,4 +10,4 @@ Base functions for use with all workflow modules.
 
 .. automodule:: mdpow.analysis.workflows.base
    
-   .. autofunction:: directory_paths
+.. autofunction:: mdpow.analysis.workflows.base.directory_paths
