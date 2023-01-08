@@ -24,8 +24,6 @@ all FEP simulations. They then make data available (typically, as a
 
    analysis/solvation
    analysis/dihedral
-   analysis/workflows/
-
 
 .. _framework:   
 

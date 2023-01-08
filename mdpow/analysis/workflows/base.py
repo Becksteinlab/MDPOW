@@ -3,6 +3,7 @@
 
 """
 .. module:: mdpow.analysis.workflows.base --- Base functions for use with all workflow modules
+   :members:
 ===============================================================================================
 """
 

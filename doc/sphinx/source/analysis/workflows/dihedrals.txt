@@ -1,3 +1,5 @@
+.. _dihedrals:
+
 ===========================
 Automated Dihedral Analysis
 ===========================
