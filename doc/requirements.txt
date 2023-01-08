@@ -6,3 +6,6 @@ pyyaml
 GromacsWrapper>=0.5.1
 alchemlyb
 mdanalysis
+rdkit
+seaborn
+matplotlib
