@@ -24,7 +24,7 @@ all FEP simulations. They then make data available (typically, as a
 
    analysis/solvation
    analysis/dihedral
-   analysis/workflows
+   analysis/workflows/
 
 
 .. _framework:   
@@ -66,8 +66,8 @@ existing and future workflows.
 .. toctree::
    :maxdepth: 4
 
-   analysis/base
-   analysis/dihedrals
+   analysis/workflows/base
+   analysis/workflows/dihedrals
 
 References
 ----------

@@ -5,9 +5,9 @@ Automated Dihedral Analysis
 Workflows module with functions useful for automated use of
 :class:`~mdpow.analysis.dihedral.DihedralAnalysis`.
 
-.. versionadded:: 0.9.0
+.. versionadded:: 0.9.1
 
-.. automodule:: dihedrals
+.. automodule:: mdpow.analysis.workflows.dihedrals
     :members:
     :undoc-members:
 
