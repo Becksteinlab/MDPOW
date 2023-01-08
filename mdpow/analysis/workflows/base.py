@@ -2,10 +2,44 @@
 # 2022 Cade Duckworth
 
 """
-:mod: `mdpow.analysis.workflows.base`
-=====================================
+:mod: `mdpow.analysis.workflows.base` --- Base functions for use with all workflow modules.
+===========================================================================================
 
-.. autofunction:: directory_paths
+.. function:: directory_paths
+
+   Takes a parent directory containing MDPOW simulation project subdirectories,
+   or .csv file containing :code:`molname`, :code:`resname`, and
+   simulation data directory paths as argument and returns a
+   :class:`pandas.DataFrame` for use with
+   :func:`~mdpow.analysis.workflows.base.directory_iteration`, which iterates
+   :func:`~mdpow.analysis.workflows.dihedrals.automated_dihedral_analysis`
+   over the project directories included in the
+   :func:`~mdpow.analysis.workflows.base.directory_paths` :class:`pandas.DataFrame`.
+       
+   :keywords:
+       
+   *parent_directory*
+       the path for the location of the top directory 
+       under which the subdirectories of MDPOW simulation
+       data exist, additionally creates a 'dir.csv' file
+       for user manipulation of metadata and future reference
+           
+   *csv*
+       .csv file containing the molecule names, resnames,
+       and paths, in that order, for the MDPOW simulation
+       data to be iterated over
+       must contain header of the form:
+       format: molecule,resname,path
+
+   .. rubric:: Examples
+
+   directory_paths = directory_paths(parent_directory='/foo/bar/MDPOW_projects')
+   directory_iteration(directory_paths)
+
+   or
+
+   directory_paths = directory_paths(csv='/foo/bar/MDPOW.csv')
+   directory_iteration(directory_paths)
 
 .. autofunction:: directory_iteration
 """
