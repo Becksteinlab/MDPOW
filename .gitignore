@@ -12,3 +12,5 @@ dist
 doc/examples/benzene/Equilibrium/
 .coverage
 coverage.xml
+*.lock
+*.npz

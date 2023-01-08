@@ -1,7 +1,0 @@
-===========================
-Automated Dihedral Analysis
-===========================
-
-.. versionadded:: 0.9.0
-
-.. automodule:: mdpow.workflows.dihedrals
