@@ -2,17 +2,30 @@
 # 2022 Cade Duckworth
 
 """
-:mod: `mdpow.analysis.workflows.dihedrals` --- automated use of :class:`~mdpow.analysis.dihedral.DihedralAnalysis`.
-===================================================================================================================
+:mod: `mdpow.workflows.dihedrals` --- Automation for :class:`DihedralAnalysis`
+==============================================================================
 
-:mod:`~mdpow.analysis.workflows.dihedrals` module with functions
+:mod:`~mdpow.workflows.dihedrals` module with functions
 useful for automated use of
 :class:`~mdpow.analysis.dihedral.DihedralAnalysis`.
 See each function for usage, output, and examples. 
 
 Most functions can be used as standalone or in combination
 depending on the desired results. Complete automation encompassed in
-:func:`~mdpow.analysis.workflows.dihedrals.automated_dihedral_analysis`.
+:func:`~mdpow.workflows.dihedrals.automated_dihedral_analysis`.
+
+Internal Functions
+------------------
+
+.. autofunction:: dihedral_indices
+.. autofunction:: dihedral_groups
+.. autofunction:: add_hydrogens
+.. autofunction:: dihedral_groups_ensemble
+.. autofunction:: save_df
+.. autofunction:: periodic_angle
+.. autofunction:: dihedral_violins
+.. autofunction:: plot_violins
+.. autofunction:: automated_dihedral_analysis
 """
 
 import numpy as np
@@ -33,7 +46,7 @@ from MDAnalysis.topology.guessers import guess_atom_element
 
 import logging
 
-logger = logging.getLogger('mdpow.analysis.workflows.dihedrals')
+logger = logging.getLogger('mdpow.workflows.dihedrals')
 
 def dihedral_indices(dirname, resname, SMARTS='[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]'):
     '''Uses a SMARTS selection string to identify relevant dihedral atom
@@ -432,13 +445,13 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
 
        import automated_dihedral_analysis as ada
 
-       ada.automated_dihedral_analysis(dirname='/foo/bar/MDPOW_project_data',
-       figdir='/foo/bar/MDPOW_figure_directory',
-       resname='UNK', molname='benzene',
-       padding=45, width=0.9,
-       solvents=('water','octanol'),
-       interactions=('Coulomb','VDW'),
-       start=0, stop=100, step=10)
+       ada.automated_dihedral_analysis(dirname='/foo/bar/MDPOW_project_data', \
+                                       figdir='/foo/bar/MDPOW_figure_directory', \
+                                       resname='UNK', molname='benzene', \
+                                       padding=45, width=0.9, \
+                                       solvents=('water','octanol'), \
+                                       interactions=('Coulomb','VDW'), \
+                                       start=0, stop=100, step=10)
     '''
 
     bonds = dihedral_indices(dirname=dirname, resname=resname,

@@ -4,5 +4,4 @@ Workflows Base
 
 .. versionadded:: 0.9.0
 
-.. automodule:: mdpow.analysis.workflows.base
-   :members:
+.. automodule:: mdpow.workflows.base

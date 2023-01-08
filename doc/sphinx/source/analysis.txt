@@ -47,26 +47,6 @@ in more detail in [Lescoulie2021]_.
    analysis/ensemble_analysis
    analysis/ensemble
 
-.. _workflows:
-
-Analysis workflows
-------------------
-
-.. versionadded:: 0.9.0
-
-MDPOW analysis workflows provide automation functions for use with
-analysis :ref:`tools` based on the :ref:`framework`. Existing workflow
-modules, :mod:`~mdpow.analysis.workflows.dihedrals`, include functions
-for use with :class:`~mdpow.analysis.dihedral.DihedralAnalysis`, and a
-:mod:`~mdpow.analysis.workflows.base` module for use with
-existing and future workflows.
-
-.. toctree::
-   :maxdepth: 4
-
-   analysis/workflows/base
-   analysis/workflows/dihedrals
-
 References
 ----------
 .. [Lescoulie2021] A. Lescoulie, "SPIDAL Summer REU 2021: Upgrading MDPOW and
