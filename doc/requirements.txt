@@ -8,5 +8,5 @@ alchemlyb
 mdanalysis
 rdkit
 seaborn
-matplotlib.pyplot
+matplotlib
 MDAnalysis.topology.guessers.guess_atom_element
