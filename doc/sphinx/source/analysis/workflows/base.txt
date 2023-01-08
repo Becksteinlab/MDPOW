@@ -6,5 +6,5 @@ Workflows Base
 
 Base functions for use with all workflow modules.
 
-.. automodule:: mdpow.base
+.. automodule:: mdpow.analysis.workflows.base
 

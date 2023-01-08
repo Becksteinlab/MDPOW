@@ -20,10 +20,11 @@ all FEP simulations. They then make data available (typically, as a
 :class:`pandas.DataFrame`).
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    analysis/solvation
    analysis/dihedral
+   analysis/workflows
 
 
 .. _framework:   
@@ -45,7 +46,7 @@ in more detail in [Lescoulie2021]_.
 .. toctree::
    :maxdepth: 1
 
-   analysis/ensemble_analysis	      
+   analysis/ensemble_analysis
    analysis/ensemble
 
 .. _workflows:
@@ -53,7 +54,7 @@ in more detail in [Lescoulie2021]_.
 Analysis workflows
 ------------------
 
-.. versionadded:: ???
+.. versionadded:: 0.9.0
 
 MDPOW analysis workflows provide automation functions for use with
 analysis :ref:`tools` based on the :ref:`framework`. Existing workflow

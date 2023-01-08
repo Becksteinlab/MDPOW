@@ -256,4 +256,7 @@ intersphinx_mapping = {'https://docs.python.org/': None,
 # "class", "init", "both"
 autoclass_content = "both"
 
+# testing if this works the same as it does for classes
+automodule_content = "both"
+
 
