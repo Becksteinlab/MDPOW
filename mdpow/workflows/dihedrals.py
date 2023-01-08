@@ -2,7 +2,7 @@
 # 2022 Cade Duckworth
 
 """
-:mod: `mdpow.workflows.dihedrals` --- Automation for :class:`DihedralAnalysis`
+:mod:`mdpow.workflows.dihedrals` --- Automation for :class:`DihedralAnalysis`
 ==============================================================================
 
 .. module:: mdpow.workflows.dihedrals
