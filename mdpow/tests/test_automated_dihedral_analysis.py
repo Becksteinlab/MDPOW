@@ -100,7 +100,7 @@ class TestAutomatedDihedralAnalysis(object):
         bonds = gen_data[0]
         assert bonds == self.check_bonds
         
-    def test_user_SMARTS(self, gen_data):
+    def test_SMARTS(self, gen_data):
         bonds = gen_data[1]
         assert bonds == self.check_bonds_alt
 
@@ -171,9 +171,6 @@ class TestAutomatedDihedralAnalysis(object):
         parent_directory = molname_workflows_directory
         directory_paths = base.directory_paths(parent_directory=parent_directory)
         df = directory_paths
-        # remove other directories, short term solution
-        # exact slice containing only SM25 and SM26
-        # new_df = directory_paths[2:4]
         # change resname to match topology (every SAMPL7 resname is 'UNK')
         # only necessary for this dataset, not necessary for normal use
         for f in df:
