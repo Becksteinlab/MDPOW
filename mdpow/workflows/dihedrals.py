@@ -5,27 +5,29 @@
 :mod: `mdpow.workflows.dihedrals` --- Automation for :class:`DihedralAnalysis`
 ==============================================================================
 
-:mod:`~mdpow.workflows.dihedrals` module with functions
-useful for automated use of
-:class:`~mdpow.analysis.dihedral.DihedralAnalysis`.
-See each function for usage, output, and examples. 
+.. module:: mdpow.workflows.dihedrals
 
-Most functions can be used as standalone or in combination
-depending on the desired results. Complete automation encompassed in
-:func:`~mdpow.workflows.dihedrals.automated_dihedral_analysis`.
+   :mod:`~mdpow.workflows.dihedrals` module with functions
+   useful for automated use of
+   :class:`~mdpow.analysis.dihedral.DihedralAnalysis`.
+   See each function for usage, output, and examples. 
 
-Internal Functions
-------------------
+   Most functions can be used as standalone or in combination
+   depending on the desired results. Complete automation encompassed in
+   :func:`~mdpow.workflows.dihedrals.automated_dihedral_analysis`.
 
-.. autofunction:: dihedral_indices
-.. autofunction:: dihedral_groups
-.. autofunction:: add_hydrogens
-.. autofunction:: dihedral_groups_ensemble
-.. autofunction:: save_df
-.. autofunction:: periodic_angle
-.. autofunction:: dihedral_violins
-.. autofunction:: plot_violins
-.. autofunction:: automated_dihedral_analysis
+   Internal Functions
+   ------------------
+
+   .. autofunction:: dihedral_indices
+   .. autofunction:: dihedral_groups
+   .. autofunction:: add_hydrogens
+   .. autofunction:: dihedral_groups_ensemble
+   .. autofunction:: save_df
+   .. autofunction:: periodic_angle
+   .. autofunction:: dihedral_violins
+   .. autofunction:: plot_violins
+   .. autofunction:: automated_dihedral_analysis
 """
 
 import numpy as np
