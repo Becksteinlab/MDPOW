@@ -7,5 +7,7 @@ GromacsWrapper>=0.5.1
 alchemlyb
 mdanalysis
 rdkit
+rdkit.Chem
 seaborn
-matplotlib
+matplotlib.pyplot
+MDAnalysis.topology.guessers.guess_atom_element
