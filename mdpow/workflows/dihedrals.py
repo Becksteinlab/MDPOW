@@ -35,6 +35,7 @@ from rdkit import Chem
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+import mdpow
 from ..analysis.dihedral import DihedralAnalysis
 
 import MDAnalysis as mda
