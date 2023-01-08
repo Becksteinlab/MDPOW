@@ -2,8 +2,8 @@
 # 2022 Cade Duckworth
 
 """
-.. module:: mdpow.analysis.workflows.dihedrals
-==============================================
+:mod: `mdpow.analysis.workflows.dihedrals` --- automated use of :class:`~mdpow.analysis.dihedral.DihedralAnalysis`.
+===================================================================================================================
 
 :mod:`~mdpow.analysis.workflows.dihedrals` module with functions
 useful for automated use of
