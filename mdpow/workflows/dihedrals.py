@@ -36,7 +36,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 import mdpow
-from ..analysis.dihedral import DihedralAnalysis
+from mdpow.analysis.dihedral import DihedralAnalysis
 
 import MDAnalysis as mda
 from MDAnalysis.topology.guessers import guess_atom_element

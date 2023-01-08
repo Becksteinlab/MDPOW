@@ -13,7 +13,7 @@ import os
 import re
 import pandas as pd
 
-from . import dihedrals as ada
+import dihedrals as ada
 
 import logging
 
