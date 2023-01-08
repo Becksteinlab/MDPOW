@@ -23,8 +23,8 @@ import py.path
 
 #from ..analysis.ensemble import Ensemble, EnsembleAnalysis, EnsembleAtomGroup
 #from ..analysis.dihedral import DihedralAnalysis
-from ..analysis.workflows import dihedrals as ada
-from ..analysis.workflows import base
+from ..workflows import dihedrals as ada
+from ..workflows import base
 
 from pkg_resources import resource_filename
 
