@@ -4,9 +4,6 @@
 """
 :mod:`mdpow.workflows.base` --- Automated workflow base functions
 =================================================================
-   
-Iterative Functions
--------------------
 
 .. autofunction:: directory_paths
 .. autofunction:: directory_iteration

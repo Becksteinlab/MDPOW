@@ -4,9 +4,6 @@ Workflows
 
 .. _workflows:
 
-Analysis Workflows
-------------------
-
 .. versionadded:: 0.9.0
 
 MDPOW analysis workflows provide automation functions for use with

@@ -14,9 +14,6 @@ Most functions can be used as standalone or in combination
 depending on the desired results. Complete automation encompassed in
 :func:`~mdpow.workflows.dihedrals.automated_dihedral_analysis`.
 
-Internal Functions
-------------------
-
 .. autofunction:: dihedral_indices
 .. autofunction:: dihedral_groups
 .. autofunction:: add_hydrogens
