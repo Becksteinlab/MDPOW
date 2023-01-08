@@ -255,11 +255,11 @@ def periodic_angle(df, padding=45):
 
        .. rubric:: Examples
 
-           da = DihedralAnalysis(all_dihedrals)
-           da.run(start=0, stop=100, step=10)
-           df = da.results
-           df_aug = periodic_angle(df, padding=45)
-           plot = dihedral_violins(df_aug, width=0.9)
+       da = DihedralAnalysis(all_dihedrals)
+       da.run(start=0, stop=100, step=10)
+       df = da.results
+       df_aug = periodic_angle(df, padding=45)
+       plot = dihedral_violins(df_aug, width=0.9)
     '''
 
     df1 = df[df.dihedral > 180 - padding]
@@ -426,15 +426,15 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
 
        .. rubric:: Examples
 
-           import automated_dihedral_analysis as ada
+       import automated_dihedral_analysis as ada
 
-           ada.automated_dihedral_analysis(dirname='/foo/bar/MDPOW_project_data',
-                                           figdir='/foo/bar/MDPOW_figure_directory',
-                                           resname='UNK', molname='benzene',
-                                           padding=45, width=0.9,
-                                           solvents=('water','octanol'),
-                                           interactions=('Coulomb','VDW'),
-                                           start=0, stop=100, step=10)
+       ada.automated_dihedral_analysis(dirname='/foo/bar/MDPOW_project_data',
+       figdir='/foo/bar/MDPOW_figure_directory',
+       resname='UNK', molname='benzene',
+       padding=45, width=0.9,
+       solvents=('water','octanol'),
+       interactions=('Coulomb','VDW'),
+       start=0, stop=100, step=10)
     '''
 
     bonds = dihedral_indices(dirname=dirname, resname=resname,
@@ -452,4 +452,4 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
 
     df_aug = periodic_angle(df, padding=padding)
 
-    return plot_violins(df_aug, resname=resname, figdir=figdir, molname=molname, width=width, solvents=solvents)          
+    return plot_violins(df_aug, resname=resname, figdir=figdir, molname=molname, width=width, solvents=solvents)

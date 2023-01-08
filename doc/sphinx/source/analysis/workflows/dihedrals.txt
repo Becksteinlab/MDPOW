@@ -9,24 +9,5 @@ Workflows module with functions useful for automated use of
 
 .. versionadded:: 0.9.0
 
-.. automodule:: workflows.dihedrals
+.. automodule:: mdpow.analysis.workflows.dihedrals
    :members:
-   :undoc-members:
-
-   .. autofunction:: mdpow.analysis.workflows.dihedrals.dihedral_indices
-
-   .. autofunction:: mdpow.analysis.workflows.dihedrals.dihedral_groups
-
-   .. autofunction:: mdpow.analysis.workflows.dihedrals.add_hydrogens
-
-   .. autofunction:: mdpow.analysis.workflows.dihedrals.dihedral_groups_ensemble
-
-   .. autofunction:: mdpow.analysis.workflows.dihedrals.save_df
-
-   .. autofunction:: mdpow.analysis.workflows.dihedrals.periodic_angle
-
-   .. autofunction:: mdpow.analysis.workflows.dihedrals.dihedral_violins
-
-   .. autofunction:: mdpow.analysis.workflows.dihedrals.plot_violins
-
-   .. autofunction:: mdpow.analysis.workflows.dihedrals.automated_dihedral_analysis

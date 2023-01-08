@@ -2,8 +2,8 @@
 # 2022 Cade Duckworth
 
 """
-.. module:: mdpow.analysis.workflows.base --- Base functions for use with all workflow modules
-==============================================================================================
+.. module:: mdpow.analysis.workflows.base
+=========================================
 """
 
 import os
@@ -12,50 +12,46 @@ import pandas as pd
 
 #import will need to change based on new naming convention for ada
 #and once the function changes for more general use
-import .dihedrals as ada
+import mdpow.analysis.workflows.dihedrals as ada
 
 import logging
 
 logger = logging.getLogger('mdpow.analysis.workflows.base')
 
 def directory_paths(parent_directory=None, csv=None):
-    '''
-       .. function:: base.directory_paths(parent_directory=None, csv=None)
+    '''Takes a parent directory containing MDPOW simulation project subdirectories,
+    or .csv file containing :code:`molname`, :code:`resname`, and
+    simulation data directory paths as argument and returns a
+    :class:`pandas.DataFrame` for use with
+    :func:`~mdpow.analysis.workflows.base.directory_iteration`, which iterates
+    :func:`~mdpow.analysis.workflows.dihedrals.automated_dihedral_analysis`
+    over the project directories included in the
+    :func:`~mdpow.analysis.workflows.base.directory_paths` :class:`pandas.DataFrame`.
        
-       Takes a parent directory containing MDPOW simulation project subdirectories,
-       or .csv file containing :code:`molname`, :code:`resname`, and
-       simulation data directory paths as argument and returns a
-       :class:`pandas.DataFrame` for use with
-       :func:`~mdpow.analysis.workflows.base.directory_iteration`, which iterates
-       :func:`~mdpow.analysis.workflows.dihedrals.automated_dihedral_analysis`
-       over the project directories included in the
-       :func:`~mdpow.analysis.workflows.base.directory_paths` :class:`pandas.DataFrame`.
+    :keywords:
        
-       :keywords:
-       
-       *parent_directory*
-           the path for the location of the top directory 
-           under which the subdirectories of MDPOW simulation
-           data exist, additionally creates a 'dir.csv' file
-           for user manipulation of metadata and future reference
+    *parent_directory*
+        the path for the location of the top directory 
+        under which the subdirectories of MDPOW simulation
+        data exist, additionally creates a 'dir.csv' file
+        for user manipulation of metadata and future reference
            
-       *csv*
-           .csv file containing the molecule names, resnames,
-           and paths, in that order, for the MDPOW simulation
-           data to be iterated over
-           must contain header of the form:
-           format: molecule,resname,path
-           
-       .. rubric:: Examples
-       
-           directory_paths = directory_paths(parent_directory='/foo/bar/MDPOW_projects')
-           directory_iteration(directory_paths)
-           
-           or
-           
-           directory_paths = directory_paths(csv='/foo/bar/MDPOW.csv')
-           directory_iteration(directory_paths)
-           
+    *csv*
+        .csv file containing the molecule names, resnames,
+        and paths, in that order, for the MDPOW simulation
+        data to be iterated over
+        must contain header of the form:
+        format: molecule,resname,path
+
+    .. rubric:: Examples
+
+    directory_paths = directory_paths(parent_directory='/foo/bar/MDPOW_projects')
+    directory_iteration(directory_paths)
+
+    or
+
+    directory_paths = directory_paths(csv='/foo/bar/MDPOW.csv')
+    directory_iteration(directory_paths)
     '''
 
     if parent_directory is not None:
@@ -106,42 +102,41 @@ def directory_iteration(directory_paths, df_save_dir=None, figdir=None, padding=
     :keywords:
 
     *figdir*
-           optional, path to an existing directory where plots
-           can be saved for each dihedral atom group, for each project
+        optional, path to an existing directory where plots
+        can be saved for each dihedral atom group, for each project
 
     *df_save_dir*
-           path to the location to save results :class:`pandas.DataFrame`
+        path to the location to save results :class:`pandas.DataFrame`
 
     *padding*
-           must be in degrees, values for
-           :func:`~mdpow.analysis.workflows.dihedrals.periodic_angle`
-           used for KDE violin plots of dihedral angle frequencies
+        must be in degrees, values for
+        :func:`~mdpow.analysis.workflows.dihedrals.periodic_angle`
+        used for KDE violin plots of dihedral angle frequencies
 
     *width*
-           used for violin plots
-           width of violins, (>1 overlaps)
-           see :func:`~mdpow.analysis.workflows.dihedrals.dihedral_violins`
+        used for violin plots
+        width of violins, (>1 overlaps)
+        see :func:`~mdpow.analysis.workflows.dihedrals.dihedral_violins`
 
     *solvents*
-           Solvents from directory given to the new instance. Default
-           :code:`solvents=('water', 'octanol')`
+        Solvents from directory given to the new instance. Default
+        :code:`solvents=('water', 'octanol')`
 
     *interactions*
-           Interactions from directory given to the instance. Default
-           :code:`interactions=('Coulomb', 'VDW')`
+        Interactions from directory given to the instance. Default
+        :code:`interactions=('Coulomb', 'VDW')`
 
-    *user_SMARTS*
-           optional user input of different SMARTS string selection, for
-           default see :func:`~mdpow.analysis.workflows.dihedrals.dihedral_indices`
+    *SMARTS*
+        optional user input of different SMARTS string selection, for
+        default see :func:`~mdpow.analysis.workflows.dihedrals.dihedral_indices`
 
     .. rubric:: Examples
 
-           directory_paths = directory_paths(parent_directory='/foo/bar/MDPOW_projects')
-           directory_iteration(directory_paths, figdir='/foo/bar/figure_directory,
-                               padding=45, width=0.9,
-                               solvents=('water','octanol'), interactions=('Coulomb','VDW'),
-                               start=0, stop=100, step=10)
-
+    directory_paths = directory_paths(parent_directory='/foo/bar/MDPOW_projects')
+    directory_iteration(directory_paths, figdir='/foo/bar/figure_directory,
+    padding=45, width=0.9,
+    solvents=('water','octanol'), interactions=('Coulomb','VDW'),
+    start=0, stop=100, step=10)
     '''
 
     for row in directory_paths.itertuples():
