@@ -2,12 +2,12 @@
 # 2022 Cade Duckworth
 
 """
-.. module:: mdpow.analysis.workflows.base
-=========================================
+:mod: `mdpow.analysis.workflows.base`
+=====================================
 
-.. autofunction:: mdpow.analysis.workflows.base.directory_paths
+.. autofunction:: directory_paths
 
-.. autofunction:: mdpow.analysis.workflows.base.directory_iteration
+.. autofunction:: directory_iteration
 """
 
 import os
