@@ -255,3 +255,4 @@ intersphinx_mapping = {'https://docs.python.org/': None,
 # This value selects what content will be inserted into the main body of an autoclass directive.
 # "class", "init", "both"
 autoclass_content = "both"
+automodule_content = "both"

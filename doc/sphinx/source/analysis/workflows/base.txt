@@ -6,5 +6,3 @@ Workflows Base
 
 .. automodule:: mdpow.analysis.workflows.base
    :members:
-
-.. autofunction:: mdpow.analysis.workflows.base.directory_paths
