@@ -1,0 +1,7 @@
+==================================
+Automated Solvation Shell Analysis
+==================================
+
+.. versionadded:: 0.9.0
+
+.. automodule:: mdpow.workflows.solvations

@@ -18,3 +18,4 @@ existing and upcoming workflows.
 
    workflows/base
    workflows/dihedrals
+   workflows/solvations
