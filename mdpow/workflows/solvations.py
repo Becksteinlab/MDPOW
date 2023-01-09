@@ -4,16 +4,17 @@
 """
 :mod:`mdpow.workflows.solvations` --- Automation for :class:`SolvationAnalysis`
 ==============================================================================
-:mod:`~mdpow.workflows.solvationss` module with functions
+:mod:`~mdpow.workflows.solvations` module with functions
 useful for automated use of
 :class:`~mdpow.analysis.solvation.SolvationAnalysis`.
 See each function for usage, output, and examples. 
 Most functions can be used as standalone or in combination
 depending on the desired results. Complete automation encompassed in
 :func:`~mdpow.workflows.solvations.automated_solvation_analysis`.
+
 .. autofunction:: solvation_ensemble
 .. autofunction:: solvation_analysis
-.. autofunction:: save_df
+.. autofunction:: asa_save_df
 .. autofunction:: automated_solvation_analysis
 """
 
@@ -46,7 +47,7 @@ def solvation_analysis(solute=None, solvent=None, distances=None,
     df = solv.results
     return df
 
-def save_df(df, df_save_dir=None, resname=None, molname=None):
+def asa_save_df(df, df_save_dir=None, resname=None, molname=None):
     '''Takes a :class:`pandas.DataFrame` of results from 
        :class:`~mdpow.analysis.solvation.SolvationAnalysis`
        as input to optionaly save the data.
@@ -109,6 +110,6 @@ def automated_solvation_analysis(dirname, df_save_dir=None, resname=None, molnam
     df = solvation_analysis(solute=components[0], solvent=components[1],
                             distances=distances, start=start, stop=stop, step=step)
     if df_save_dir is not None:
-         save_df(df, df_save_dir=df_save_dir, resname=resname, molname=molname)
+         asa_save_df(df, df_save_dir=df_save_dir, resname=resname, molname=molname)
                               
     return df
