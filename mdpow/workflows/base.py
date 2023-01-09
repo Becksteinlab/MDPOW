@@ -13,7 +13,8 @@ import os
 import re
 import pandas as pd
 
-import dihedrals as ada
+#import dihedrals as ada
+import solvations as asa
 
 import logging
 
@@ -89,7 +90,7 @@ def directory_paths(parent_directory=None, csv=None):
 def directory_iteration(directory_paths, df_save_dir=None, figdir=None,
                         solvents=('water','octanol'), interactions=('Coulomb','VDW'),
                         ensemble_analysis=None, SMARTS=None, padding=None, width=None,
-                        start=None, stop=None, step=None):
+                        start=None, stop=None, step=None, distances=None):
     """Takes a :class:`pandas.DataFrame` created by
        :func:`~mdpow.workflows.base.directory_paths`
        as input and iterates over the provided projects to implement
@@ -135,6 +136,9 @@ def directory_iteration(directory_paths, df_save_dir=None, figdir=None,
        *SMARTS*
            optional user input of different SMARTS string selection 
            recommended default = '[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]'
+           
+       *distances*
+           Array like of the cutoff distances around the solute measured in Angstroms.
 
        .. rubric:: Examples
 
@@ -146,8 +150,8 @@ def directory_iteration(directory_paths, df_save_dir=None, figdir=None,
     """
 
     analyses = {
-        'DihedralAnalysis' : ada.automated_dihedral_analysis,
-        'SolvationAnalysis' : 0,
+        'DihedralAnalysis' : 0,
+        'SolvationAnalysis' : asa.automated_solvation_analysis,
         'HBondAnalysis' : 0
     }
     
@@ -162,7 +166,7 @@ def directory_iteration(directory_paths, df_save_dir=None, figdir=None,
                 
                 analyses[ensemble_analysis](dirname=dirname, df_save_dir=df_save_dir, figdir=figdir,
                                             molname=molname, resname=resname, SMARTS=SMARTS,
-                                            padding=padding, width=width,
+                                            padding=padding, width=width, distances=distances,
                                             solvents=solvents, interactions=interactions,
                                             start=start, stop=stop, step=step)
                 
