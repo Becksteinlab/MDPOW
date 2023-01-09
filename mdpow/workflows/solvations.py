@@ -35,13 +35,13 @@ def solvation_ensemble(dirname, resname, solvents=('water', 'octanol'),
                                            interactions=interactions,
                                            solvents=solvents)
     solute = ens.select_atoms(f'resname {resname}')
-    solvent = ens.select_atoms(f'not resname {resname} and name *W* and name *{solvents[-1][0].upper()}*')
+    solvent = ens.select_atoms(f'not resname {resname}')
     return solute, solvent
                               
 def solvation_analysis(solute=None, solvent=None, distances=None,
                        start=None, stop=None, step=None):
     
-    solv = SolvationAnalysis(solute, solvent, distances)
+    solv = SolvationAnalysis(solute=solute, solvent=solvent, distances=distances)
     ds = solv.run(start=start, stop=stop, step=step)
     df = solv.results
     return df
