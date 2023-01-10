@@ -13,7 +13,7 @@ import os
 import re
 import pandas as pd
 
-import dihedrals as ada
+from .workflows import dihedrals
 
 import logging
 
@@ -149,7 +149,7 @@ def directory_iteration(directory_paths, df_save_dir=None, figdir=None,
     """
 
     analyses = {
-        'DihedralAnalysis' : ada.automated_dihedral_analysis,
+        'DihedralAnalysis' : dihedrals.automated_dihedral_analysis,
         'SolvationAnalysis' : None,
         'HBondAnalysis' : None
     }
@@ -160,8 +160,6 @@ def directory_iteration(directory_paths, df_save_dir=None, figdir=None,
                 molname = row.molecule
                 resname = row.resname
                 dirname = row.path
-                #analyses[ensemble_analysis](dirname, solvents=solvents,
-                #                            interactions=interactions, **kwargs)
 
                 analyses[ensemble_analysis](dirname=dirname, df_save_dir=df_save_dir, figdir=figdir,
                                             molname=molname, resname=resname, SMARTS=SMARTS,
