@@ -28,15 +28,15 @@ def directory_paths(parent_directory=None, csv=None):
        :func:`~mdpow.workflows.dihedrals.automated_dihedral_analysis`
        over the project directories included in the
        :func:`~mdpow.workflows.base.directory_paths` :class:`pandas.DataFrame`.
-       
+
        :keywords:
-       
+
        *parent_directory*
            the path for the location of the top directory 
            under which the subdirectories of MDPOW simulation
            data exist, additionally creates a 'dir.csv' file
            for user manipulation of metadata and future reference
-           
+
        *csv*
            .csv file containing the molecule names, resnames,
            and paths, in that order, for the MDPOW simulation
@@ -59,7 +59,7 @@ def directory_paths(parent_directory=None, csv=None):
 
         locations = []
 
-        reg_compile = re.compile('FEP')              
+        reg_compile = re.compile('FEP')
         for dirpath, dirnames, filenames in os.walk(parent_directory):
             result = [dirpath.strip() for dirname in dirnames if  reg_compile.match(dirname)]
             if result:
@@ -89,7 +89,7 @@ def directory_paths(parent_directory=None, csv=None):
 def directory_iteration(directory_paths, df_save_dir=None, figdir=None,
                         solvents=('water','octanol'), interactions=('Coulomb','VDW'),
                         ensemble_analysis=None, SMARTS=None, padding=None, width=None,
-                        start=None, stop=None, step=None):
+                        start=None, stop=None, step=None, distances=None):
     """Takes a :class:`pandas.DataFrame` created by
        :func:`~mdpow.workflows.base.directory_paths`
        as input and iterates over the provided projects to implement
@@ -100,7 +100,7 @@ def directory_iteration(directory_paths, df_save_dir=None, figdir=None,
        for use in obtaining dihedral groups and plotting dihedral angle frequency KDEs.
 
        :keywords:
-       
+
        *ensemble_analysis*
            name of the :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`
            that corresponds to the desired automation script
@@ -133,8 +133,11 @@ def directory_iteration(directory_paths, df_save_dir=None, figdir=None,
            default :code:`interactions=('Coulomb', 'VDW')`
 
        *SMARTS*
-           optional user input of different SMARTS string selection 
+           optional user input of different SMARTS string selection
            recommended default = '[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]'
+
+       *distances*
+           Array like of the cutoff distances around the solute measured in Angstroms.
 
        .. rubric:: Examples
 
@@ -147,10 +150,10 @@ def directory_iteration(directory_paths, df_save_dir=None, figdir=None,
 
     analyses = {
         'DihedralAnalysis' : ada.automated_dihedral_analysis,
-        'SolvationAnalysis' : 0,
-        'HBondAnalysis' : 0
+        'SolvationAnalysis' : None,
+        'HBondAnalysis' : None
     }
-    
+
     if ensemble_analysis is not None:
         try:
             for row in directory_paths.itertuples():
@@ -159,13 +162,13 @@ def directory_iteration(directory_paths, df_save_dir=None, figdir=None,
                 dirname = row.path
                 #analyses[ensemble_analysis](dirname, solvents=solvents,
                 #                            interactions=interactions, **kwargs)
-                
+
                 analyses[ensemble_analysis](dirname=dirname, df_save_dir=df_save_dir, figdir=figdir,
                                             molname=molname, resname=resname, SMARTS=SMARTS,
-                                            padding=padding, width=width,
+                                            padding=padding, width=width, distances=distances,
                                             solvents=solvents, interactions=interactions,
                                             start=start, stop=stop, step=step)
-                
+
         except NotImplementedError as err:
             logger.error("invalid EnsembleAnalysis selection", err, msg)
             msg = ('An EnsembleAnalysis type that corresponds to an existing '
