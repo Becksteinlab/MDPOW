@@ -15,17 +15,17 @@ None).
 
 Results are *appended* to a data file with **Output file format**::
 
- molecule  DeltaG0(kJ/mol) ErrorDeltaG0  "logPtw"  log P_TW  Error logPcw   directory
+ molecule  DeltaG0(kJ/mol) ErrorDeltaG0  "logPtw"  log P_TW  Error logPtw   directory
 
 molecule
     molecule name as used in the itp
 DeltaG0, ErrorDeltaG0
     transfer free energy water --> toluene, in kJ/mol; error from correlation time
     and error propagation through Simpson's rule (see :meth:`mdpow.fep.Gsolv`)
-log P_CW
+log P_TW
     base-10 logarithm of the toluene-water partition coefficient; >0: partitions into
     toluene, <0: partitions preferrably into water
-wat_ok, cyc_ok
+wat_ok, tol_ok
     "OK": input data was clean; "BAD": some input data xvg files contained
     unparseable lines that were skipped; this can mean that the data became
     corrupted and caution should be used.
@@ -81,14 +81,14 @@ def run_ptw(directory, **kwargs):
         molecule   DeltaG0(kJ/mol)    log P_TW    directory
 
     Removed from output (>0.2.1):
-     * wat_ok and cyc_ok are "OK" if no lines were skipped in the input data files due to
+     * wat_ok and tol_ok are "OK" if no lines were skipped in the input data files due to
        file corruption, and "BAD" otherwise.
 
     """
     import gc
 
-    fmt_result = "%-8s %+8.2f %8.2f  logPcw %+8.2f %8.2f   %s\n"
-    fmt_energy = "%s  %+8.2f %8.2f   logPcw %+8.2f %8.2f  %s\n"
+    fmt_result = "%-8s %+8.2f %8.2f  logPtw %+8.2f %8.2f   %s\n"
+    fmt_energy = "%s  %+8.2f %8.2f   logPtw %+8.2f %8.2f  %s\n"
     _datastatus = {True: 'BAD',  # suspect file corruption
                    False: 'OK'}
 
@@ -141,7 +141,7 @@ def run_ptw(directory, **kwargs):
         title(r"[%s] $\Delta A^0 = %.2f\pm%.2f$ kJ/mol" % \
                   (gtol.molecule, transferFE.value, transferFE.error))
         activate_subplot(2)
-        title(r"$\log P_{CW} = %.2f\pm%.2f$" % logPcw.astuple())
+        title(r"$\log P_{CW} = %.2f\pm%.2f$" % logPtw.astuple())
         savefig(plotfile)
         logger.info("Wrote graph to %(plotfile)r", vars())
 
@@ -152,7 +152,7 @@ def run_ptw(directory, **kwargs):
 
 def auto_plotfile(directory, gsolv):
     return os.path.join(directory,
-                        "dVdl_{0}_pcw.pdf".format(gsolv.molecule))
+                        "dVdl_{0}_ptw.pdf".format(gsolv.molecule))
 
 
 def activate_subplot(numPlot):
@@ -193,7 +193,7 @@ if __name__ == "__main__":
     parser.add_argument('--plotfile', dest="plotfile", default='none',
                         help="plot dV/dlambda to FILE; use png or pdf suffix to "
                         "determine the file type. 'auto' generates a pdf file "
-                        "DIRECTORY/dVdl_<molname>_pcw.pdf and 'none' disables it "
+                        "DIRECTORY/dVdl_<molname>_ptw.pdf and 'none' disables it "
                         "The plot function is only available for mdpow estimator,"
                         "and is disabled when using alchemlyb estimators.",
                         metavar="FILE")
@@ -255,7 +255,7 @@ if __name__ == "__main__":
         opts.plotfile = parse_filename_option(opts.plotfile)
 
         try:
-            run_pcw(directory, plotfile=opts.plotfile,
+            run_ptw(directory, plotfile=opts.plotfile,
                     outfile=realpath_or_none(opts.outfile),
                     energyfile=realpath_or_none(opts.energyfile),
                     force=opts.force, stride=opts.stride, start=opts.start,
