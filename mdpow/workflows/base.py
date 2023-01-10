@@ -13,7 +13,7 @@ import os
 import re
 import pandas as pd
 
-from .workflows import dihedrals
+from . import dihedrals
 
 import logging
 
@@ -161,6 +161,7 @@ def directory_iteration(directory_paths, df_save_dir=None, figdir=None,
                 resname = row.resname
                 dirname = row.path
 
+                # move to registry and call with analysis specific kwargs
                 analyses[ensemble_analysis](dirname=dirname, df_save_dir=df_save_dir, figdir=figdir,
                                             molname=molname, resname=resname, SMARTS=SMARTS,
                                             padding=padding, width=width, distances=distances,

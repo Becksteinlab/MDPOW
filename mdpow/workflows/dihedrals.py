@@ -445,7 +445,7 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
                                 dataframe=None, padding=45, width=0.9,
                                 solvents=('water','octanol'),
                                 interactions=('Coulomb','VDW'),
-                                start=None, stop=None, step=None):
+                                start=None, stop=None, step=None, distances=None):
     '''For one MDPOW project, automatically determines all relevant dihedral atom groups,
        conducts :class:`~mdpow.analysis.dihedral.DihedralAnalysis` for each group,
        pads the dihedral angles from analysis results for all groups,
@@ -532,6 +532,6 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
     if df_save_dir is not None:
         save_df(df=df, df_save_dir=df_save_dir, resname=resname, molname=molname)
 
-    df_aug = periodic_angle(df=df, padding=padding)
+    df_aug = periodic_angle(df, padding=padding)
 
-    return plot_violins(df=df_aug, resname=resname, figdir=figdir, molname=molname, width=width, solvents=solvents)
+    return plot_violins(df_aug, resname=resname, figdir=figdir, molname=molname, width=width, solvents=solvents)
