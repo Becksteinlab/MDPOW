@@ -14,9 +14,11 @@ Most functions can be used as standalone or in combination
 depending on the desired results. Complete automation encompassed in
 :func:`~mdpow.workflows.dihedrals.automated_dihedral_analysis`.
 
+.. autofunction:: build_universe
+.. autofunction:: rdkit_conversion
+.. autofunction:: add_hydrogens
 .. autofunction:: dihedral_indices
 .. autofunction:: dihedral_groups
-.. autofunction:: add_hydrogens
 .. autofunction:: dihedral_groups_ensemble
 .. autofunction:: save_df
 .. autofunction:: periodic_angle
@@ -45,17 +47,96 @@ import logging
 
 logger = logging.getLogger('mdpow.workflows.dihedrals')
 
+def build_universe(dirname):
+    """Builds a universe from the :code:`water/Coulomb/0000` project
+       topology and trajectory.
+       
+       Used for RDKit conversion by :func:`~mdpow.workflows.dihedrals.rdkit_conversion`
+       and :func:`~mdpow.workflows.dihedrals.dihedral_indices` to obtain indices for
+       the dihedral atom groups. Returns an MDAnalysis Universe object.
+       
+       :keywords:
+
+       *dirname*
+           Molecule Simulation directory. Loads simulation files present in
+           lambda directories into the new instance. With this method for
+           generating an :class:`~mdpow.analysis.ensemble.Ensemble` the
+           lambda directories are explored and
+           :meth:`~mdpow.analysis.ensemble.Ensemble._load_universe_from_dir`
+           searches for .gro, .gro.bz2, .gro.gz, and .tpr files for topology,
+           and .xtc files for trajectory. It will default to using the tpr file
+           available.
+    """
+    
+    path = pathlib.Path(dirname)
+    topology = path / 'FEP/water/Coulomb/0000' / 'md.tpr'
+    trajectory = path / 'FEP/water/Coulomb/0000' / 'md.xtc'
+    u = mda.Universe(str(topology), str(trajectory))
+
+    return u
+
+def rdkit_conversion(u, resname):
+    """Converts the solute (:code:`resname`) of an MDAnalysis Universe object to
+       RDKit for use with a SMARTS selection string to identify dihedral atom groups.
+       
+       Accepts an MDAnalysis Universe object made with
+       :func:`~mdpow.workflows.dihedrals.build_universe` and a :code:`resname` as input
+       and returns a :code:`mol` RDKit object for use with 
+       :func:`~mdpow.workflows.dihedrals.dihedral_indices` to obtain indices for
+       the dihedral atom groups. Uses :code:`resname` to select the solute for conversion 
+       to :mod:`RDKit`, and will add Hydrogen if not listed in the topology, via
+       :func:`~mdpow.workflows.dihedrals.add_hydrogens`. Returns RDKit mol object and
+       solute atom selection from MDAnalysis Universe object.
+       
+       :keywords:
+       
+       *u*
+           An MDAnalysis Universe object obtained using
+           :func:`~mdpow.workflows.dihedrals.build_universe`
+           
+       *resname*
+           resname for the molecule as defined in 
+           the topology and trajectory
+    """
+
+    try:
+        solute = u.select_atoms(f'resname {resname}')
+        mol = solute.convert_to('RDKIT')
+    except AttributeError:
+        u_aug = add_hydrogens(u)
+        solute = u_aug.select_atoms(f'resname {resname}')
+        mol = solute.convert_to('RDKIT')
+
+    return mol, solute
+
+def add_hydrogens(u): 
+    '''Adds Hydrogen if not listed in the trajectory and topology.
+
+       Used by :func:`~mdpow.workflows.dihedrals.rdkit_conversion`
+       for proper conversion to :mod:`RDKit`.
+
+       :keywords:
+
+       *u*
+           An MDAnalysis Universe object obtained using
+           :func:`~mdpow.workflows.dihedrals.build_universe`
+    '''
+
+    elements = [guess_atom_element(name) for name in u.atoms.names]
+    u.add_TopologyAttr("elements", elements)
+
+    return u
+
 def dihedral_indices(dirname, resname, SMARTS='[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]'):
     '''Uses a SMARTS selection string to identify relevant dihedral atom
        groups and returns their indices.
        
-       Requires an MDPOW project directory and :code:`resname` as
-       input. Uses the topology and trajectory from a location that
-       should be present in all MDPOW projects and creates a
-       :class:`MDAnalysis.Universe <MDAnalysis.core.groups.universe.Universe>`
-       object. Uses :code:`resname` to select the solute for conversion 
-       to :mod:`RDKit`, and will add Hydrogen if not listed
-       in the topology. Uses a :class:`~RDKit.Chem.SMARTS` string to obtain all 
+       Requires an MDPOW project directory and :code:`resname` 
+       as input. Per :func:`~mdpow.workflows.dihedrals.build_universe` and
+       :func:`~mdpow.workflows.dihedrals.rdkit_conversion`, uses the topology
+       and trajectory from a location that should be present in all MDPOW projects
+       and creates a :class:`MDAnalysis.Universe <MDAnalysis.core.groups.universe.Universe>`
+       object.  Uses a :class:`~RDKit.Chem.SMARTS` string to obtain all 
        relevant dihedral atom groups and returns their indices
        for use by :func:`~mdpow.workflows.dihedrals.dihedral_groups`
        and :func:`~mdpow.workflows.dihedrals.dihedral_groups_ensemble`.
@@ -71,11 +152,11 @@ def dihedral_indices(dirname, resname, SMARTS='[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D
            searches for .gro, .gro.bz2, .gro.gz, and .tpr files for topology,
            and .xtc files for trajectory. It will default to using the tpr file
            available.
-
+           
        *resname*
            resname for the molecule as defined in 
            the topology and trajectory
-           
+
        *SMARTS*
            SMARTS string that identifies relevant dihedral atom groups
 
@@ -91,27 +172,14 @@ def dihedral_indices(dirname, resname, SMARTS='[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D
            to any atom that is not hydrogen
     '''
 
-    path = pathlib.Path(dirname)
-    topology = path / 'FEP/water/Coulomb/0000' / 'md.tpr'
-    trajectory = path / 'FEP/water/Coulomb/0000' / 'md.xtc'
-    u = mda.Universe(str(topology), str(trajectory))
-
-    try:
-        solute = u.select_atoms(f'resname {resname}')
-        mol = solute.convert_to('RDKIT')
-    except AttributeError:
-        u_aug = add_hydrogens(u)
-        solute = u_aug.select_atoms(f'resname {resname}')
-        mol = solute.convert_to('RDKIT')
-
+    u = build_universe(dirname=dirname)
+    mol = rdkit_conversion(u=u, resname=resname)[0]
     pattern = Chem.MolFromSmarts(SMARTS)
-
+    atom_group_indices = mol.GetSubstructMatches(pattern)
     
+    return atom_group_indices
 
-    bonds = mol.GetSubstructMatches(pattern)
-    return bonds
-
-def dihedral_groups(dirname, resname):
+def dihedral_groups(dirname, resname, SMARTS='[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]'):
     '''Uses the indices of the relevant dihedral atom groups determined
        by :func:`~mdpow.workflows.dihedral.dihedral_indices`
        and returns the names for each atom in each group.
@@ -140,47 +208,44 @@ def dihedral_groups(dirname, resname):
        *resname*
            resname for the molecule as defined in 
            the topology and trajectory
+
+       *SMARTS*
+           SMARTS string that identifies relevant dihedral atom groups
+
+           [!#1] : any atom, not Hydrogen
+           ~  : any bond
+           [!$(*#*)&!D1] : any atom that is not part of linear triple bond
+           and not atom with 1 explicit bond
+           -!@ : single bond that is not ring bond
+           [!$(*#*)&!D1]-!@[!$(*#*)&!D1] : the central portion selects two atoms
+           that are not involved in a triple bond and are not terminal,
+           that are connected by a single, non-ring bond
+           [!#1] : the first and last portion specify any bond,
+           to any atom that is not hydrogen
     '''
 
-    path = pathlib.Path(dirname)
-    topology = path / 'FEP/water/Coulomb/0000' / 'md.tpr'
-    trajectory = path / 'FEP/water/Coulomb/0000' / 'md.xtc'
-
-    u = mda.Universe(str(topology), str(trajectory))
-    solute = u.select_atoms(f'resname {resname}')
-
-    bonds = dihedral_indices(dirname, resname)
-    dihedral_groups = [solute.atoms[list(dihedral_indices)].names for dihedral_indices in bonds]
+    # temporary fix for current indexing method (solute.atoms...)
+    u = build_universe(dirname=dirname)
+    solute = rdkit_conversion(u=u, resname=resname)[1]
+    atom_group_indices = dihedral_indices(dirname=dirname, resname=resname, SMARTS=SMARTS)
+    dihedral_groups = [solute.atoms[list(dihedral_indices)].names for dihedral_indices
+                       in atom_group_indices]
 
     return dihedral_groups
 
-def add_hydrogens(u): 
-    '''Used by :func:`~mdpow.workflows.dihedrals.dihedral_indices`
-       for proper conversion to :mod:`RDKit`.
-       Adds Hydrogen if not listed in the topology.
-    '''
-
-    elements = [guess_atom_element(name) for name in u.atoms.names]
-    u.add_TopologyAttr("elements", elements)
-
-    return u
-
-def dihedral_groups_ensemble(bonds, dirname,
+def dihedral_groups_ensemble(dirname, atom_group_indices,
                              solvents=('water','octanol'),
                              interactions=('Coulomb','VDW'),
                              start=None, stop=None, step=None): 
     '''Creates one :class:`~mdpow.analysis.ensemble.Ensemble` for the MDPOW
        project and runs :class:`~mdpow.analysis.dihedral.DihedralAnalysis`
        for each dihedral atom group identified by the :class:`~RDKit.Chem.SMARTS`
-       selection string. For keyword arguments see
-       :func:`~mdpow.workflows.dihedrals.automated_dihedral_analysis`
+       selection string.
+       
+       For keyword arguments see :func:`~mdpow.workflows.dihedrals.automated_dihedral_analysis`
        or :class:`~mdpow.analysis.dihedral.DihedralAnalysis`.
 
        :keywords:
-
-       *bonds*
-           bond indices for dihedral atom groups
-           see :func:`~mdpow.workflows.dihedrals.dihedral_indices`
 
        *dirname*
            Molecule Simulation directory. Loads simulation files present in
@@ -191,16 +256,20 @@ def dihedral_groups_ensemble(bonds, dirname,
            searches for .gro, .gro.bz2, .gro.gz, and .tpr files for topology,
            and .xtc files for trajectory. It will default to using the tpr file
            available.
+
+       *atom_group_indices*
+           tuples of atom indices for dihedral atom groups
+           see :func:`~mdpow.workflows.dihedrals.dihedral_indices`
     '''
 
     dih_ens = mdpow.analysis.ensemble.Ensemble(dirname=dirname,
                                                solvents=solvents,
                                                interactions=interactions)
-
-    all_dihedrals = [dih_ens.select_atoms(f'index {b[0]}',
-                                          f'index {b[1]}',
-                                          f'index {b[2]}',
-                                          f'index {b[3]}' ) for b in bonds]
+    indices = atom_group_indices
+    all_dihedrals = [dih_ens.select_atoms(f'index {i[0]}',
+                                          f'index {i[1]}',
+                                          f'index {i[2]}',
+                                          f'index {i[3]}' ) for i in indices]
 
     da = DihedralAnalysis(all_dihedrals)
     da.run(start=start, stop=stop, step=step)
@@ -451,19 +520,18 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
                                        start=0, stop=100, step=10)
     '''
 
-    bonds = dihedral_indices(dirname=dirname, resname=resname,
-                             SMARTS=SMARTS)
+    atom_group_indices = dihedral_indices(dirname=dirname, resname=resname, SMARTS=SMARTS)
 
     if dataframe is None:
-        df = dihedral_groups_ensemble(bonds, dirname=dirname,
+        df = dihedral_groups_ensemble(atom_group_indices=atom_group_indices, dirname=dirname,
                                       solvents=solvents, interactions=interactions,
                                       start=start, stop=stop, step=step)
     else:
         df = dataframe
 
     if df_save_dir is not None:
-        save_df(df, df_save_dir=df_save_dir, resname=resname, molname=molname)
+        save_df(df=df, df_save_dir=df_save_dir, resname=resname, molname=molname)
 
-    df_aug = periodic_angle(df, padding=padding)
+    df_aug = periodic_angle(df=df, padding=padding)
 
-    return plot_violins(df_aug, resname=resname, figdir=figdir, molname=molname, width=width, solvents=solvents)
+    return plot_violins(df=df_aug, resname=resname, figdir=figdir, molname=molname, width=width, solvents=solvents)
