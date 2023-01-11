@@ -14,6 +14,7 @@ sims = {"water" : equil.WaterSimulation,
         "octanol" : equil.OctanolSimulation,
         "cyclohexane" : equil.CyclohexaneSimulation,
         "wetoctanol" : equil.WetOctanolSimulation,
+        "toluene": equil.TolueneSimulation,
         }
 
 test_file = {"OPLS-AA": 'benzene.itp',
@@ -51,6 +52,10 @@ def test_solvation_octanol(setup, ff):
 
 def test_solvation_cyclohexane(setup):
     solvation(setup, "cyclohexane")
+
+@pytest.mark.parametrize("ff", ['OPLS-AA', 'AMBER'])
+def test_solvation_toluene(setup, ff):
+    solvation(setup, "toluene", ff)
 
 @pytest.mark.xfail(gromacs.release.startswith('4')
                    or gromacs.release.startswith('5')
