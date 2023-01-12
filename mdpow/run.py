@@ -166,6 +166,7 @@ def equilibrium_simulation(cfg, solvent, **kwargs):
         'octanol': equil.OctanolSimulation,
         'wetoctanol': equil.WetOctanolSimulation,
         'cyclohexane':equil.CyclohexaneSimulation,
+        'toluene': equil.TolueneSimulation,
         }
     try:
         Simulation = Simulations[solvent]
@@ -277,19 +278,21 @@ def fep_simulation(cfg, solvent, **kwargs):
         'water': equil.WaterSimulation,
         'octanol': equil.OctanolSimulation,
         'wetoctanol': equil.WetOctanolSimulation,
-        'cyclohexane':equil.CyclohexaneSimulation
+        'cyclohexane': equil.CyclohexaneSimulation,
+        'toluene': equil.TolueneSimulation,
         }
     Simulations = {
         'water': fep.Ghyd,
         'octanol': fep.Goct,
         'wetoctanol': fep.Gwoct,
-        'cyclohexane':fep.Gcyclo
+        'cyclohexane':fep.Gcyclo,
+        'toluene': fep.Gtol,
         }
     try:
         EquilSimulation = EquilSimulations[solvent]
         Simulation = Simulations[solvent]
     except KeyError:
-        raise ValueError("solvent must be 'water', 'octanol', 'wetoctanol' or 'cyclohexane'")
+        raise ValueError("solvent must be 'water', 'octanol', 'wetoctanol', 'cyclohexane' or 'toluene'")
     # generate a canonical path under dirname
     topdir = kwargs.get("dirname", None)
     if topdir is None:

@@ -1,0 +1,8 @@
+[ atomtypes ]
+; name      at.num  mass     charge ptype  sigma      epsilon
+; CT2, HC2, CA2 and HA2 are the GAFF2 equivalents of CT, HC, CA and HA from GAFF, respectively.
+ CT2      0          0.0000  0.0000  A   3.39771e-01   4.51035e-01 ; 1.91  0.1078
+ HC2      0          0.0000  0.0000  A   2.60018e-01   8.70272e-02 ; 1.46  0.0208
+ CA2      0          0.0000  0.0000  A   3.31521e-01   4.13379e-01 ; 1.86  0.0988
+ HA2      0          0.0000  0.0000  A   2.62548e-01   6.73624e-02 ; 1.47  0.0161
+ 

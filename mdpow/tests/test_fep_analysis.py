@@ -76,3 +76,7 @@ def test_pOW_error(Ghyd, Ghyd_other):
 def test_pCW_error(Ghyd, Ghyd_other):
     with pytest.raises(ValueError):
         mdpow.fep.pCW(Ghyd, Ghyd_other)
+
+def test_pTW_error(Ghyd, Ghyd_other):
+    with pytest.raises(ValueError):
+        mdpow.fep.pTW(Ghyd, Ghyd_other)
