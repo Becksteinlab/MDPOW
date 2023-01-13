@@ -285,7 +285,7 @@ def fep_simulation(cfg, solvent, **kwargs):
         'water': fep.Ghyd,
         'octanol': fep.Goct,
         'wetoctanol': fep.Gwoct,
-        'cyclohexane':fep.Gcyclo,
+        'cyclohexane': fep.Gcyclo,
         'toluene': fep.Gtol,
         }
     try:

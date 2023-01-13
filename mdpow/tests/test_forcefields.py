@@ -127,7 +127,7 @@ class TestSolventModels(object):
         assert (mdpow.forcefields.get_solvent_model(model, forcefield=forcefield) is
                 mdpow.forcefields.GROMACS_SOLVENT_MODELS[forcefield][model])
 
-    @pytest.mark.parametrize("forcefield", ['OPLS-AA', 'AMBER'])
+    @pytest.mark.parametrize("forcefield", ['OPLS-AA', 'CHARMM', 'AMBER'])
     def test_get_solvent_toluene(self, forcefield):
         model = 'toluene'
         assert (mdpow.forcefields.get_solvent_model(model, forcefield=forcefield) is
