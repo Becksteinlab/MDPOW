@@ -1,0 +1,7 @@
+==============
+Workflows Base
+==============
+
+.. versionadded:: 0.9.0
+
+.. automodule:: mdpow.workflows.base
