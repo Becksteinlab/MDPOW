@@ -21,10 +21,7 @@ from . import RESOURCES
 
 import py.path
 
-#from ..analysis.ensemble import Ensemble, EnsembleAnalysis, EnsembleAtomGroup
-#from ..analysis.dihedral import DihedralAnalysis
 from ..workflows import dihedrals
-from ..workflows import base
 
 from pkg_resources import resource_filename
 
@@ -189,4 +186,3 @@ class TestAutomatedDihedralAnalysis(object):
                                               resname=self.resname, molname='SM25',
                                               solvents=('water',))
         assert SM25_tmp_dir / 'SM25' / 'SM25_C10-C5-S4-O11_violins.pdf'
-
