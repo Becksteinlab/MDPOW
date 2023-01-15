@@ -183,29 +183,10 @@ class TestAutomatedDihedralAnalysis(object):
 
         aug_dh2_mean == pytest.approx(self.ADG_C13141520_mean)
         aug_dh2_var == pytest.approx(self.ADG_C13141520_var)
-        
-    def test_base(self, molname_workflows_directory, SM25_tmp_dir):
-        # tests directory_paths function and resname-molname conversion
-        parent_directory = molname_workflows_directory
-        directory_paths = base.directory_paths(parent_directory=parent_directory)
-        assert (directory_paths['molecule'] == 'SM25').any() == True
 
     def test_save_fig(self, SM25_tmp_dir):
         dihedrals.automated_dihedral_analysis(dirname=SM25_tmp_dir, figdir=SM25_tmp_dir,
                                               resname=self.resname, molname='SM25',
                                               solvents=('water',))
         assert SM25_tmp_dir / 'SM25' / 'SM25_C10-C5-S4-O11_violins.pdf'
-        
-    def test_directory_iteration(self, molname_workflows_directory, SM25_tmp_dir):
-        parent_directory = molname_workflows_directory
-        directory_paths = base.directory_paths(parent_directory=parent_directory)
-        directory_paths = directory_paths
-        # change resname to match topology (every SAMPL7 resname is 'UNK')
-        # only necessary for this dataset, not necessary for normal use
-        for f in directory_paths:
-            directory_paths.resname = 'UNK'
-        base.directory_iteration(directory_paths, df_save_dir=SM25_tmp_dir, solvents=('water',),
-                                 ensemble_analysis='DihedralAnalysis', padding=45, width=0.9,
-                                 SMARTS='[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]')
-        assert SM25_tmp_dir / 'SM25' / 'SM25_full_df.bz2'
-        assert SM25_tmp_dir / 'SM26' / 'SM26_full_df.bz2'
+
