@@ -56,7 +56,7 @@ logger = logging.getLogger('mdpow.equil')
 # TODO: change to water distance 1.2 in the future (1.0 for
 #       compatibility with our SAMPL5 runs)
 #: minimum distance between solute and box surface (in nm)
-DIST = {'water': 1.0, 'octanol': 1.5, 'cyclohexane': 1.5, 'wetoctanol': 1.5}
+DIST = {'water': 1.0, 'octanol': 1.5, 'cyclohexane': 1.5, 'wetoctanol': 1.5, 'toluene': 1.5}
 
 class Simulation(Journalled):
     """Simple MD simulation of a single compound molecule in water.
@@ -123,7 +123,7 @@ class Simulation(Journalled):
           *forcefield*
               'OPLS-AA' or 'CHARMM' or 'AMBER'
           *solvent*
-              'water' or 'octanol' or 'cyclohexane' or 'wetoctanol'
+              'water' or 'octanol' or 'cyclohexane' or 'wetoctanol' or 'toluene'
           *solventmodel*
               ``None`` chooses the default (e.g, :data:`mdpow.forcefields.DEFAULT_WATER_MODEL`
               for ``solvent == "water"``. Other options are the models defined in
@@ -658,3 +658,8 @@ class WetOctanolSimulation(Simulation):
         ionkwargs['struct'] = sol['struct']
         params = gromacs.setup.solvate_ion(**ionkwargs)
         return params
+
+class TolueneSimulation(Simulation):
+    """Equilibrium MD of a solute in a box of toluene."""
+    solvent_default = 'toluene'
+    dirname_default = os.path.join(Simulation.topdir_default, solvent_default)
