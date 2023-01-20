@@ -298,9 +298,13 @@ def save_df(df, df_save_dir=None, resname=None, molname=None):
                             "lambda"]).reset_index(drop=True)
 
     if df_save_dir is not None:
-        df.to_csv(f'{newdir}/{molname}_full_df.csv', index=False, compression='bz2')
+        compression_opts = dict(method='bz2',
+                                archive_name=f'{newdir}/{molname}_full_df.csv')
+        # time and compress level can be adjusted as kwargs
+        df.to_csv(f'{newdir}/{molname}_full_df.bz2',
+                  index=False, compression=compression_opts)
 
-    return
+    return print(f'{newdir}/{molname}_full_df.bz2')
 
 def periodic_angle(df, padding=45):
     '''Takes a :class:`pandas.DataFrame` of results from
