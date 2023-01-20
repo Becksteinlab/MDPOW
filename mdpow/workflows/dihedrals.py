@@ -16,7 +16,6 @@ depending on the desired results. Complete automation encompassed in
 
 .. autofunction:: build_universe
 .. autofunction:: rdkit_conversion
-.. autofunction:: add_hydrogens
 .. autofunction:: dihedral_indices
 .. autofunction:: dihedral_groups
 .. autofunction:: dihedral_groups_ensemble
@@ -88,6 +87,8 @@ def rdkit_conversion(u, resname):
        :func:`~mdpow.workflows.dihedrals.add_hydrogens`. Returns RDKit mol object and
        solute atom selection from MDAnalysis Universe object.
        
+       Adds Hydrogen if not listed in the trajectory and topology.
+       
        :keywords:
        
        *u*
@@ -103,29 +104,12 @@ def rdkit_conversion(u, resname):
         solute = u.select_atoms(f'resname {resname}')
         mol = solute.convert_to('RDKIT')
     except AttributeError:
-        u_aug = add_hydrogens(u)
-        solute = u_aug.select_atoms(f'resname {resname}')
+        elements = [guess_atom_element(name) for name in u.atoms.names]
+        u.add_TopologyAttr("elements", elements)
+        solute = u.select_atoms(f'resname {resname}')
         mol = solute.convert_to('RDKIT')
 
     return mol, solute
-
-def add_hydrogens(u): 
-    '''Adds Hydrogen if not listed in the trajectory and topology.
-
-       Used by :func:`~mdpow.workflows.dihedrals.rdkit_conversion`
-       for proper conversion to :mod:`RDKit`.
-
-       :keywords:
-
-       *u*
-           An MDAnalysis Universe object obtained using
-           :func:`~mdpow.workflows.dihedrals.build_universe`
-    '''
-
-    elements = [guess_atom_element(name) for name in u.atoms.names]
-    u.add_TopologyAttr("elements", elements)
-
-    return u
 
 def dihedral_indices(dirname, resname, SMARTS='[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]'):
     '''Uses a SMARTS selection string to identify relevant dihedral atom
