@@ -46,6 +46,9 @@ import logging
 
 logger = logging.getLogger('mdpow.workflows.dihedrals')
 
+SMARTS_DEFAULT = '[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]'
+# docs will follow 
+
 def build_universe(dirname):
     """Builds a universe from the :code:`water/Coulomb/0000` project
        topology and trajectory.
@@ -111,7 +114,7 @@ def rdkit_conversion(u, resname):
 
     return mol, solute
 
-def dihedral_indices(dirname, resname, SMARTS='[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]'):
+def dihedral_indices(dirname, resname, SMARTS=SMARTS_DEFAULT):
     '''Uses a SMARTS selection string to identify relevant dihedral atom
        groups and returns their indices.
        
@@ -163,7 +166,7 @@ def dihedral_indices(dirname, resname, SMARTS='[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D
     
     return atom_group_indices
 
-def dihedral_groups(dirname, resname, SMARTS='[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]'):
+def dihedral_groups(dirname, resname, SMARTS=SMARTS_DEFAULT):
     '''Uses the indices of the relevant dihedral atom groups determined
        by :func:`~mdpow.workflows.dihedral.dihedral_indices`
        and returns the names for each atom in each group.
@@ -295,7 +298,7 @@ def save_df(df, df_save_dir=None, resname=None, molname=None):
                             "lambda"]).reset_index(drop=True)
 
     if df_save_dir is not None:
-        df.to_csv(f'{newdir}/{molname}_full_df.bz2', index=False, compression='bz2')
+        df.to_csv(f'{newdir}/{molname}_full_df.csv', index=False, compression='bz2')
 
     return
 
@@ -425,7 +428,7 @@ def plot_violins(df, resname, figdir=None, molname=None, width=0.9, solvents=('w
 
 def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
                                 resname=None, molname=None,
-                                SMARTS='[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]',
+                                SMARTS=SMARTS_DEFAULT,
                                 dataframe=None, padding=45, width=0.9,
                                 solvents=('water','octanol'),
                                 interactions=('Coulomb','VDW'),
