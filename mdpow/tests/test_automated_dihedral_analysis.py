@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 
 import os
 import sys
@@ -30,7 +29,7 @@ MANIFEST = RESOURCES / "manifest.yml"
 
 @pytest.fixture(scope="function")
 def molname_workflows_directory(tmp_path, molname='SM25'):
-    m = pybol.Manifest(str(RESOURCES / 'manifest.yml'))
+    m = pybol.Manifest(str(MANIFEST))
     m.assemble('workflows', tmp_path)
     return tmp_path / molname
 
