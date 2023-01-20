@@ -298,11 +298,11 @@ def save_df(df, df_save_dir=None, resname=None, molname=None):
                             "lambda"]).reset_index(drop=True)
 
     if df_save_dir is not None:
-        compression_opts = dict(method='bz2',
-                                archive_name=f'{newdir}/{molname}_full_df.csv')
+        #compression_opts = dict(method='bz2',
+         #                       archive_name=f'{newdir}/{molname}_full_df.csv')
         # time and compress level can be adjusted as kwargs
-        df.to_csv(f'{newdir}/{molname}_full_df.bz2',
-                  index=False, compression=compression_opts)
+        df.to_csv(f'{newdir}/{molname}_full_df.csv.bz2',
+                  index=False, compression='bz2')
 
     return print(f'{newdir}/{molname}_full_df.bz2')
 
@@ -373,10 +373,17 @@ def dihedral_violins(df, width=0.9, solvents=('water','octanol')):
     width_ratios = [len(df[df['interaction'] == "Coulomb"]["lambda"].unique()) + 1,
                     len(df[df['interaction'] == "VDW"]["lambda"].unique())]
 
+    solvs = np.asarray(solvents)
+    solv2 = 'octanol'
+    if solvs.size > 1:
+        solv2 = solvs[1]
+    # ^necessary when plotting only water
+    # there is likely a better solution
+    
     g = sns.catplot(data=df, x="lambda", y="dihedral", hue="solvent", col="interaction",
                     kind="violin", split=True, width=width, inner=None, cut=0,
                     linewidth=0.5,
-                    hue_order=[solvents[0], solvents[1]], col_order=["Coulomb", "VDW"],
+                    hue_order=[solvs[0], solv2], col_order=["Coulomb", "VDW"],
                     #hue_order=["water", "octanol"], col_order=["Coulomb", "VDW"],
                     #hue_order=[df.solvent.iloc[0], df.solvent.iloc[-1]], col_order=["Coulomb", "VDW"],
                     # causes problems and is not a good fix 
@@ -421,7 +428,7 @@ def plot_violins(df, resname, figdir=None, molname=None, width=0.9, solvents=('w
     section = df.groupby(by='selection')
 
     for name in section:
-        plot = dihedral_violins(name[1], width=width)
+        plot = dihedral_violins(name[1], width=width, solvents=solvents)
         plot.set_titles(f'{molname},{name[0]}, ''{col_name}')
 
         if figdir is not None:
@@ -436,7 +443,7 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
                                 dataframe=None, padding=45, width=0.9,
                                 solvents=('water','octanol'),
                                 interactions=('Coulomb','VDW'),
-                                start=None, stop=None, step=None, distances=None):
+                                start=None, stop=None, step=None):
     '''For one MDPOW project, automatically determines all relevant dihedral atom groups,
        conducts :class:`~mdpow.analysis.dihedral.DihedralAnalysis` for each group,
        pads the dihedral angles from analysis results for all groups,
