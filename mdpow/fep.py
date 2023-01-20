@@ -157,7 +157,8 @@ import numkit.timeseries
 from numkit.observables import QuantityWithError
 
 from alchemlyb.parsing.gmx import extract_dHdl, extract_u_nk
-from alchemlyb.estimators import TI, BAR, MBAR
+from alchemlyb.estimators import TI, BAR
+from alchemlyb.estimators import AutoMBAR as MBAR
 from alchemlyb.parsing.gmx import _extract_dataframe
 from pymbar.timeseries import (statisticalInefficiency,
                                subsampleCorrelatedData, )
