@@ -87,7 +87,7 @@ def build_universe(dirname):
        :returns:
 
        *u*
-           MDAnalysis :class:`~MDAnalysis.core.groups.universe.Universe` object
+           :class:`MDAnalysis.Universe` object
            
     """
     
@@ -126,10 +126,10 @@ def rdkit_conversion(u, resname):
        :returns:
        
        *mol*
-           :class:`rdkit.Chem.Mol` object
+           :class:`RDKit.Mol` object
            
        *solute*
-           :class:`mdanalysis.universe.atom_group` object
+           :class:`mdanalysis.Universe.atom_group` object
 
     """
 
@@ -227,7 +227,7 @@ def dihedral_groups(dirname, resname, SMARTS=SMARTS_DEFAULT):
        :returns:
        
        *dihedral_groups*
-           List of `numpy.array` for atom names of each dihedral atom group.
+           List of :func:`numpy.array` for atom names of each dihedral atom group.
 
     '''
 
@@ -271,7 +271,7 @@ def dihedral_groups_ensemble(dirname, atom_group_indices,
        :returns:
        
        *df*
-           :class:`pandas.DataFrame` of :class:`~mdpow.analysis.DihedralAnalysis`
+           :class:`pandas.DataFrame` of :class:`~mdpow.analysis.dihedral.DihedralAnalysis`
            results, including all dihedral atom groups for current molecule.
 
     '''
@@ -309,6 +309,12 @@ def save_df(df, df_save_dir=None, resname=None, molname=None):
        *df_save_dir*
            path to parent directory to create
            subdirectory for saving the .csv files
+           
+       :returns:
+       
+       *.csv.bz2*
+           Saves the results :class:`pandas.DataFrame` as a compressed
+           csv file (bz2).
     '''
 
     if molname is None:
@@ -353,14 +359,21 @@ def periodic_angle(df, padding=45):
        *padding*
            value must be in degrees
            default set to 45 (type:int)
+           
+       :returns:
+       
+       *df_aug*
+           Augmented results :class:`pandas.DataFrame` containing
+           padded dihedral angles as specified by :code:`padding`.
 
        .. rubric:: Examples
 
-       da = DihedralAnalysis(all_dihedrals)
-       da.run(start=0, stop=100, step=10)
-       df = da.results
-       df_aug = periodic_angle(df, padding=45)
-       plot = dihedral_violins(df_aug, width=0.9)
+           da = DihedralAnalysis(all_dihedrals)
+           da.run(start=0, stop=100, step=10)
+           df = da.results
+           df_aug = periodic_angle(df, padding=45)
+           plot = dihedral_violins(df_aug, width=0.9)
+
     '''
 
     df1 = df[df.dihedral > 180 - padding]
@@ -387,6 +400,12 @@ def dihedral_violins(df, width=0.9, solvents=('water','octanol')):
        *width*
            width of the violin element (>1 overlaps)
            type: float
+           
+       :returns:
+       
+       *g*
+           Violin plot (:code:`sns.catplot`) figure as :class:`seaborn.FacetGrid` object.
+
     '''
 
     df['lambda'] = df['lambda'].astype('float') / 1000
@@ -533,15 +552,15 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
 
        .. rubric:: Examples
 
-       import automated_dihedral_analysis as ada
+           import automated_dihedral_analysis as ada
 
-       ada.automated_dihedral_analysis(dirname='/foo/bar/MDPOW_project_data', \
-                                       figdir='/foo/bar/MDPOW_figure_directory', \
-                                       resname='UNK', molname='benzene', \
-                                       padding=45, width=0.9, \
-                                       solvents=('water','octanol'), \
-                                       interactions=('Coulomb','VDW'), \
-                                       start=0, stop=100, step=10)
+           ada.automated_dihedral_analysis(dirname='/foo/bar/MDPOW_project_data',
+                                           figdir='/foo/bar/MDPOW_figure_directory',
+                                           resname='UNK', molname='benzene',
+                                           padding=45, width=0.9,
+                                           solvents=('water','octanol'),
+                                           interactions=('Coulomb','VDW'),
+                                           start=0, stop=100, step=10)
     '''
 
     atom_group_indices = dihedral_indices(dirname=dirname, resname=resname, SMARTS=SMARTS)
