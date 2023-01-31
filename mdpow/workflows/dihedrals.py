@@ -61,6 +61,7 @@ SMARTS_DEFAULT = '[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]'
        that are connected by a single, non-ring bond
      * `[!#1]~` or `~[!#1]` : the first and last portion specify any bond,
        to any atom that is not hydrogen
+
 """
 
 def build_universe(dirname):
@@ -87,6 +88,7 @@ def build_universe(dirname):
 
        *u*
            MDAnalysis :class:`~MDAnalysis.core.groups.universe.Universe` object
+           
     """
     
     path = pathlib.Path(dirname)
@@ -120,6 +122,15 @@ def rdkit_conversion(u, resname):
        *resname*
            resname for the molecule as defined in 
            the topology and trajectory
+           
+       :returns:
+       
+       *mol*
+           :class:`rdkit.Chem.Mol` object
+           
+       *solute*
+           :class:`mdanalysis.universe.atom_group` object
+
     """
 
     try:
@@ -165,6 +176,12 @@ def dihedral_indices(dirname, resname, SMARTS=SMARTS_DEFAULT):
 
        *SMARTS*
            The default SMARTS string is described in detail under :data:`SMARTS_DEFAULT`.
+           
+       :returns:
+       
+       *atom_group_indices*
+           Tuple of four-tuples of indices for each dihedral atom group.
+
     '''
 
     u = build_universe(dirname=dirname)
@@ -206,6 +223,12 @@ def dihedral_groups(dirname, resname, SMARTS=SMARTS_DEFAULT):
 
        *SMARTS*
            The default SMARTS string is described in detail under :data:`SMARTS_DEFAULT`.
+           
+       :returns:
+       
+       *dihedral_groups*
+           List of `numpy.array` for atom names of each dihedral atom group.
+
     '''
 
     # temporary fix for current indexing method (solute.atoms...)
@@ -244,6 +267,13 @@ def dihedral_groups_ensemble(dirname, atom_group_indices,
        *atom_group_indices*
            tuples of atom indices for dihedral atom groups
            see :func:`~mdpow.workflows.dihedrals.dihedral_indices`
+           
+       :returns:
+       
+       *df*
+           :class:`pandas.DataFrame` of :class:`~mdpow.analysis.DihedralAnalysis`
+           results, including all dihedral atom groups for current molecule.
+
     '''
 
     dih_ens = mdpow.analysis.ensemble.Ensemble(dirname=dirname,
