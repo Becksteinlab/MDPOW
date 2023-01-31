@@ -14,6 +14,8 @@ Most functions can be used as standalone or in combination
 depending on the desired results. Complete automation encompassed in
 :func:`~mdpow.workflows.dihedrals.automated_dihedral_analysis`.
 
+.. autodata:: SMARTS_DEFAULT
+    :annotation: = [!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]
 .. autofunction:: build_universe
 .. autofunction:: rdkit_conversion
 .. autofunction:: dihedral_indices
@@ -47,7 +49,14 @@ import logging
 logger = logging.getLogger('mdpow.workflows.dihedrals')
 
 SMARTS_DEFAULT = '[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]'
-# docs will follow 
+    """Default SMARTS string to identify relevant dihedral atom groups."""
+
+   #: - `[!#1]` : any atom, not Hydrogen
+   #: - `~`  : any bond
+   #: - `[!$(*#*)&!D1]` : any atom that is not part of linear triple bond and not atom with 1 explicit bond
+   #: - `-!@` : single bond that is not ring bond
+   #: - `[!$(*#*)&!D1]-!@[!$(*#*)&!D1]` : the central portion selects two atoms that are not involved in a triple bond and are not terminal, that are connected by a single, non-ring bond
+   #: - `[!#1]~` or `~[!#1]` : the first and last portion specify any bond, to any atom that is not hydrogen
 
 def build_universe(dirname):
     """Builds a universe from the :code:`water/Coulomb/0000` project
@@ -145,18 +154,7 @@ def dihedral_indices(dirname, resname, SMARTS=SMARTS_DEFAULT):
            the topology and trajectory
 
        *SMARTS*
-           SMARTS string that identifies relevant dihedral atom groups
-
-           [!#1] : any atom, not Hydrogen
-           ~  : any bond
-           [!$(*#*)&!D1] : any atom that is not part of linear triple bond
-           and not atom with 1 explicit bond
-           -!@ : single bond that is not ring bond
-           [!$(*#*)&!D1]-!@[!$(*#*)&!D1] : the central portion selects two atoms
-           that are not involved in a triple bond and are not terminal,
-           that are connected by a single, non-ring bond
-           [!#1] : the first and last portion specify any bond,
-           to any atom that is not hydrogen
+           The default SMARTS string is described in detail under :data:`SMARTS_DEFAULT`.
     '''
 
     u = build_universe(dirname=dirname)
