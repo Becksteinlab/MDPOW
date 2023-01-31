@@ -357,8 +357,8 @@ def periodic_angle(df, padding=45):
            :class:`~mdpow.analysis.dihedral.DihedralAnalysis`
 
        *padding*
-           value must be in degrees
-           default set to 45 (type:int)
+           value in degrees
+           default: 45
            
        :returns:
        
@@ -401,7 +401,7 @@ def dihedral_violins(df, width=0.9, solvents=('water','octanol')):
 
        *width*
            width of the violin element (>1 overlaps)
-           type: float
+           default: 0.9
            
        :returns:
        
@@ -535,13 +535,13 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
            input to utilize angle padding and violin plotting functionality
 
        *padding*
-           must be in degrees, values for
-           :func:`~mdpow.workflows.dihedrals.periodic_angle`
-           used for KDE violin plots of dihedral angle frequencies
+           value in degrees
+           default: 45
+           see :func:`~mdpow.workflows.dihedrals.periodic_angle`
 
        *width*
-           used for violin plots
-           width of violins, (>1 overlaps)
+           width of the violin element (>1 overlaps)
+           default: 0.9
            see :func:`~mdpow.workflows.dihedrals.dihedral_violins`
 
        *solvents*
