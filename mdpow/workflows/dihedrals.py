@@ -304,7 +304,7 @@ def save_df(df, df_save_dir=None, resname=None, molname=None):
         df.to_csv(f'{newdir}/{molname}_full_df.csv.bz2',
                   index=False, compression='bz2')
 
-    return print(f'{newdir}/{molname}_full_df.bz2')
+    return print(f'{newdir}/{molname}_full_df.csv.bz2')
 
 def periodic_angle(df, padding=45):
     '''Takes a :class:`pandas.DataFrame` of results from
