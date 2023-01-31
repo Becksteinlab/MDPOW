@@ -50,15 +50,15 @@ logger = logging.getLogger('mdpow.workflows.dihedrals')
 
 SMARTS_DEFAULT = '[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]'
     """Default SMARTS string to identify relevant dihedral atom groups.
-           * `[!#1]` : any atom, not Hydrogen
-           * `~`  : any bond
-           * `[!$(*#*)&!D1]` : any atom that is not part of linear triple
-             bond and not atom with 1 explicit bond
-           * `-!@` : single bond that is not ring bond
-           * `[!$(*#*)&!D1]-!@[!$(*#*)&!D1]` : the central portion selects
-             two atoms that are not involved in a triple bond and are not terminal,
-             that are connected by a single, non-ring bond
-           * `[!#1]~` or `~[!#1]` : the first and last portion specify any bond, to any atom that is not hydrogen
+       * `[!#1]` : any atom, not Hydrogen
+       * `~`  : any bond
+       * `[!$(*#*)&!D1]` : any atom that is not part of linear triple
+         bond and not atom with 1 explicit bond
+       * `-!@` : single bond that is not ring bond
+       * `[!$(*#*)&!D1]-!@[!$(*#*)&!D1]` : the central portion selects
+         two atoms that are not involved in a triple bond and are not terminal,
+         that are connected by a single, non-ring bond
+       * `[!#1]~` or `~[!#1]` : the first and last portion specify any bond, to any atom that is not hydrogen
     """
 
 def build_universe(dirname):
