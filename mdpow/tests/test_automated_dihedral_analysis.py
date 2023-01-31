@@ -1,4 +1,3 @@
-
 import os
 import sys
 import yaml
@@ -23,6 +22,12 @@ import py.path
 from ..workflows import dihedrals
 
 from pkg_resources import resource_filename
+
+# NEW TESTING DATA NEEDS TO BE GENERATED AFTER
+# REDUCING TESTING DATASET
+
+# Are any additional tests needed?
+# Top level?
 
 RESOURCES = pathlib.PurePath(resource_filename(__name__, 'testing_resources'))
 MANIFEST = RESOURCES / "manifest.yml"
@@ -108,22 +113,6 @@ class TestAutomatedDihedralAnalysis(object):
         solute = u.select_atoms('resname UNK')
         solute_names = solute.atoms.names
         assert solute_names.all() == self.universe_solute_atom_names.all()
-
-    '''def test_add_hydrogens(self, SM25_tmp_dir):
-        # need to finish building test dataset with no H for completion
-        # this test is correct once H removed from top and traj
-        # tests RDKit and add_hydrogens
-        u = dihedrals.build_universe(dirname=SM25_tmp_dir)
-        solute = dihedrals.rdkit_conversion(u, resname='UNK')[1]
-        solute_hydrogens = solute.select_atoms('name *H*').atoms.names
-        assert solute_hydrogens.all() == self.check_hydrogens.all()
-    '''
-
-    '''def test_dihedral_indices_error_exception(self, SM25_tmp_dir):
-        with pytest.raises(AttributeError) as excinfo:
-            ada.dihedral_indices(dirname=SM25_tmp_dir, resname=self.resname)
-        assert excinfo.value is AttributeError'''
-    # needs an example topology without hydrogen
 
     @pytest.mark.skipif(sys.version_info < (3, 8), reason="pytest=7.2.0, build=py37h89c1867_0 gives wrong answers")
     def test_dihedral_indices(self, gen_data):
