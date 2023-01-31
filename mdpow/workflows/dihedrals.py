@@ -48,6 +48,10 @@ import logging
 
 logger = logging.getLogger('mdpow.workflows.dihedrals')
 
+# FINAL To-Do (1/30/23):
+# split up big doc blocks based on Oliver's request
+# handle all in-line comments
+
 SMARTS_DEFAULT = '[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]'
 """Default SMARTS string to identify relevant dihedral atom groups.
 
@@ -90,7 +94,7 @@ def build_universe(dirname):
            :class:`MDAnalysis.Universe` object
            
     """
-    
+
     path = pathlib.Path(dirname)
     topology = path / 'FEP/water/Coulomb/0000' / 'md.tpr'
     trajectory = path / 'FEP/water/Coulomb/0000' / 'md.xtc'
@@ -124,6 +128,9 @@ def rdkit_conversion(u, resname):
            the topology and trajectory
            
        :returns:
+       
+       *tuple(mol, solute)*
+           function call returns tuple, see below
        
        *mol*
            :class:`RDKit.Mol` object
@@ -231,6 +238,7 @@ def dihedral_groups(dirname, resname, SMARTS=SMARTS_DEFAULT):
 
     '''
 
+    # revisit this (reminder 1/30/23)
     # temporary fix for current indexing method (solute.atoms...)
     u = build_universe(dirname=dirname)
     solute = rdkit_conversion(u=u, resname=resname)[1]
@@ -331,12 +339,11 @@ def save_df(df, df_save_dir=None, resname=None, molname=None):
                             "lambda"]).reset_index(drop=True)
 
     if df_save_dir is not None:
-        #compression_opts = dict(method='bz2',
-         #                       archive_name=f'{newdir}/{molname}_full_df.csv')
         # time and compress level can be adjusted as kwargs
         df.to_csv(f'{newdir}/{molname}_full_df.csv.bz2',
                   index=False, compression='bz2')
 
+    # is print the correct method for returning the location of this file?
     return print(f'{newdir}/{molname}_full_df.csv.bz2')
 
 def periodic_angle(df, padding=45):
@@ -378,6 +385,10 @@ def periodic_angle(df, padding=45):
 
     '''
 
+    # To-Do
+    # warning for trying to set a value on a copy
+    # of a slice of a DataFrame needs to be suppressed
+    # is not relevant
     df1 = df[df.dihedral > 180 - padding]
     df1.dihedral -= 360
     df2 = df[df.dihedral < -180 + padding]
@@ -410,6 +421,9 @@ def dihedral_violins(df, width=0.9, solvents=('water','octanol')):
 
     '''
 
+    # To-Do
+    # make sure value sorting and index dropping/resetting
+    # is consistent and makes sense throughout
     df['lambda'] = df['lambda'].astype('float') / 1000
     df = df.sort_values(by=["selection",
                             "solvent",
@@ -425,8 +439,11 @@ def dihedral_violins(df, width=0.9, solvents=('water','octanol')):
     solv2 = 'octanol'
     if solvs.size > 1:
         solv2 = solvs[1]
+    # To-Do
     # ^necessary when plotting only water
     # there is likely a better solution
+    # review this before merge (1/30/23)
+    # see lines 440-450
     
     g = sns.catplot(data=df, x="lambda", y="dihedral", hue="solvent", col="interaction",
                     kind="violin", split=True, width=width, inner=None, cut=0,
@@ -477,6 +494,8 @@ def plot_violins(df, resname, figdir=None, molname=None, width=0.9, solvents=('w
 
     for name in section:
         plot = dihedral_violins(name[1], width=width, solvents=solvents)
+        # decide if 'set_titles' belongs here or in dihedral_violins
+        # appears twice in new modified plots that add Mol image to plots
         plot.set_titles(f'{molname},{name[0]}, ''{col_name}')
 
         if figdir is not None:
@@ -581,4 +600,7 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
 
     df_aug = periodic_angle(df, padding=padding)
 
+    # double check all kwargs for consistency/redundancy
+    # create dictionary input option for downstream use
+    # in workflows.base and workflows.registry
     return plot_violins(df_aug, resname=resname, figdir=figdir, molname=molname, width=width, solvents=solvents)
