@@ -49,8 +49,7 @@ import logging
 logger = logging.getLogger('mdpow.workflows.dihedrals')
 
 SMARTS_DEFAULT = '[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]'
-"""Default SMARTS string to identify relevant dihedral atom groups."""
-
+#: Default SMARTS string to identify relevant dihedral atom groups.
 #: - `[!#1]` : any atom, not Hydrogen
 #: - `~`  : any bond
 #: - `[!$(*#*)&!D1]` : any atom that is not part of linear triple bond and not atom with 1 explicit bond
