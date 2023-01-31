@@ -82,6 +82,11 @@ def build_universe(dirname):
            searches for .gro, .gro.bz2, .gro.gz, and .tpr files for topology,
            and .xtc files for trajectory. It will default to using the tpr file
            available.
+           
+       :returns:
+
+       *u*
+           MDAnalysis :class:`~MDAnalysis.core.groups.universe.Universe` object
     """
     
     path = pathlib.Path(dirname)
