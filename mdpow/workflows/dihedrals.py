@@ -200,18 +200,7 @@ def dihedral_groups(dirname, resname, SMARTS=SMARTS_DEFAULT):
            the topology and trajectory
 
        *SMARTS*
-           SMARTS string that identifies relevant dihedral atom groups
-
-           [!#1] : any atom, not Hydrogen
-           ~  : any bond
-           [!$(*#*)&!D1] : any atom that is not part of linear triple bond
-           and not atom with 1 explicit bond
-           -!@ : single bond that is not ring bond
-           [!$(*#*)&!D1]-!@[!$(*#*)&!D1] : the central portion selects two atoms
-           that are not involved in a triple bond and are not terminal,
-           that are connected by a single, non-ring bond
-           [!#1] : the first and last portion specify any bond,
-           to any atom that is not hydrogen
+           The default SMARTS string is described in detail under :data:`SMARTS_DEFAULT`.
     '''
 
     # temporary fix for current indexing method (solute.atoms...)
@@ -482,8 +471,7 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
            plots, if different from resname
            
        *SMARTS*
-           optional user input of different SMARTS string selection, for
-           default see :func:`~mdpow.workflows.dihedrals.dihedral_indices`
+           The default SMARTS string is described in detail under :data:`SMARTS_DEFAULT`.
 
        *dataframe : Pandas DataFrame*
            optional, if :class:`~mdpow.analysis.dihedral.DihedralAnalysis`
