@@ -366,7 +366,9 @@ def periodic_angle(df, padding=45):
            Augmented results :class:`pandas.DataFrame` containing
            padded dihedral angles as specified by :code:`padding`.
 
-       .. rubric:: Examples
+       .. rubric:: Example
+       
+       Typical Workflow::
 
            da = DihedralAnalysis(all_dihedrals)
            da.run(start=0, stop=100, step=10)
@@ -550,7 +552,9 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
            Interactions from directory given to the instance. Default
            :code:`interactions=('Coulomb', 'VDW')`
 
-       .. rubric:: Examples
+       .. rubric:: Example
+       
+       Typical Workflow::
 
            import automated_dihedral_analysis as ada
 
