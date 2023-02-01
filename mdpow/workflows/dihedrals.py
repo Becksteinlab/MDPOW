@@ -14,9 +14,13 @@ Most functions can be used as standalone or in combination
 depending on the desired results. Complete automation encompassed in
 :func:`~mdpow.workflows.dihedrals.automated_dihedral_analysis`.
 
-.. autofunction:: automated_dihedral_analysis
+.. autodata:: solvents_default
+    :annotation: = ('water', 'octanol')
+.. autodata:: interactions_default
+    :annotation: = ('Coulomb', 'VDW')
 .. autodata:: SMARTS_DEFAULT
     :annotation: = [!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]
+.. autofunction:: automated_dihedral_analysis
 .. autofunction:: build_universe
 .. autofunction:: rdkit_conversion
 .. autofunction:: dihedral_indices
@@ -52,6 +56,24 @@ logger = logging.getLogger('mdpow.workflows.dihedrals')
 # FINAL To-Do (1/30/23):
 # split up big doc blocks based on Oliver's request
 # handle all in-line comments
+
+solvents_default = ('water', 'octanol')
+"""Default solvents are water and octanol.
+
+    * Must match solvents used in project directory.
+    * One or two solvents can be specified.
+    * Current solvents supported,
+      .. SeeAlso:: :mod:`mdpow.forcefields`
+
+"""
+
+interactions_default = ('Coulomb', 'VDW')
+"""Default interactions set to Coulomb and VDW.
+
+    * Default values should not be changed
+    * Order should not be changed
+
+"""
 
 SMARTS_DEFAULT = '[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]'
 """Default SMARTS string to identify relevant dihedral atom groups.
@@ -250,8 +272,8 @@ def dihedral_groups(dirname, resname, SMARTS=SMARTS_DEFAULT):
     return dihedral_groups
 
 def dihedral_groups_ensemble(dirname, atom_group_indices,
-                             solvents=('water','octanol'),
-                             interactions=('Coulomb','VDW'),
+                             solvents=solvents_default,
+                             interactions=interactions_default,
                              start=None, stop=None, step=None): 
     '''Creates one :class:`~mdpow.analysis.ensemble.Ensemble` for the MDPOW
        project and runs :class:`~mdpow.analysis.dihedral.DihedralAnalysis`
@@ -276,6 +298,9 @@ def dihedral_groups_ensemble(dirname, atom_group_indices,
        *atom_group_indices*
            tuples of atom indices for dihedral atom groups
            see :func:`~mdpow.workflows.dihedrals.dihedral_indices`
+
+       *solvents*
+           The default solvents are documented under :data:`solvents_default`
            
        :returns:
        
@@ -326,6 +351,11 @@ def save_df(df, df_save_dir=None, resname=None, molname=None):
            csv file (bz2).
     '''
 
+    df = df.sort_values(by=["selection",
+                            "solvent",
+                            "interaction",
+                            "lambda"]).reset_index(drop=True)
+
     if molname is None:
         molname = resname
 
@@ -334,18 +364,20 @@ def save_df(df, df_save_dir=None, resname=None, molname=None):
         newdir = os.path.join(df_save_dir, subdir)
         os.mkdir(newdir)
 
-    df = df.sort_values(by=["selection",
-                            "solvent",
-                            "interaction",
-                            "lambda"]).reset_index(drop=True)
-
-    if df_save_dir is not None:
         # time and compress level can be adjusted as kwargs
         df.to_csv(f'{newdir}/{molname}_full_df.csv.bz2',
                   index=False, compression='bz2')
 
-    # is print the correct method for returning the location of this file?
-    return print(f'{newdir}/{molname}_full_df.csv.bz2')
+        logger.info(f'Results DataFrame saved as \
+                      {newdir}/{molname}_full_df.csv.bz2')
+
+    else:
+
+        logger.warning('Top directory for saving results is required as \
+                        df_save_dir kwarg, otherwise, continue without saving.')
+        continue
+
+    return
 
 def periodic_angle(df, padding=45):
     '''Takes a :class:`pandas.DataFrame` of results from
@@ -389,7 +421,7 @@ def periodic_angle(df, padding=45):
     # To-Do
     # warning for trying to set a value on a copy
     # of a slice of a DataFrame needs to be suppressed
-    # is not relevant
+    # is not relevant, double check again
     df1 = df[df.dihedral > 180 - padding]
     df1.dihedral -= 360
     df2 = df[df.dihedral < -180 + padding]
@@ -398,7 +430,7 @@ def periodic_angle(df, padding=45):
 
     return df_aug
 
-def dihedral_violins(df, width=0.9, solvents=('water','octanol')):
+def dihedral_violins(df, width=0.9, solvents=solvents_default):
     '''Plots distributions of dihedral angles for one dihedral atom group
        as violin plots, using as input the augmented :class:`pandas.DataFrame`
        from :func:`~mdpow.workflows.dihedrals.periodic_angle`.
@@ -474,13 +506,19 @@ def dihedral_violins(df, width=0.9, solvents=('water','octanol')):
 
     return g
 
-def plot_violins(df, resname, figdir=None, molname=None, width=0.9, solvents=('water','octanol')):
+def plot_violins(df, resname, figdir=None, molname=None, width=0.9, solvents=solvents_default):
     '''Coordinates plotting and optionally saving figures for all dihedral
        atom groups. Makes a subdirectory within the specified
        :code:`figdir` using :code:`resname` or :code:`molname` provided.
        See :func:`~mdpow.workflows.dihedrals.automated_dihedral_analysis`
        or :func:`~mdpow.workflows.dihedrals.dihedral_violins`
        for examples. Returns figures in the form of :class:`seaborn.FacetGrid`.
+       
+       :keywords:
+       
+       *solvents*
+           The default solvents are documented under :data:`solvents_default`
+
     '''
 
     if molname is None:
@@ -491,6 +529,11 @@ def plot_violins(df, resname, figdir=None, molname=None, width=0.9, solvents=('w
         newdir = os.path.join(figdir, subdir)
         os.mkdir(newdir)
 
+    else:
+        logger.warning('Figures will not be saved unless figdir kwarg \
+                        is specified, otherwise, continue without saving.')
+        continue
+
     section = df.groupby(by='selection')
 
     for name in section:
@@ -498,10 +541,12 @@ def plot_violins(df, resname, figdir=None, molname=None, width=0.9, solvents=('w
         # decide if 'set_titles' belongs here or in dihedral_violins
         # appears twice in new modified plots that add Mol image to plots
         plot.set_titles(f'{molname},{name[0]}, ''{col_name}')
+        # ^belongs here bc of naming convention for iteration (1/30/23)
 
         if figdir is not None:
             figfile = pathlib.Path(newdir) / f"{molname}_{name[0]}_violins.pdf"
             plot.savefig(figfile)
+            logger.info(f'Figure saved as {figfile}')
 
     return plot
 
@@ -509,8 +554,8 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
                                 resname=None, molname=None,
                                 SMARTS=SMARTS_DEFAULT,
                                 dataframe=None, padding=45, width=0.9,
-                                solvents=('water','octanol'),
-                                interactions=('Coulomb','VDW'),
+                                solvents=solvents_default,
+                                interactions=interactions_default,
                                 start=None, stop=None, step=None):
     '''For one MDPOW project, automatically determines all relevant dihedral atom groups,
        conducts :class:`~mdpow.analysis.dihedral.DihedralAnalysis` for each group,
@@ -565,12 +610,10 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
            see :func:`~mdpow.workflows.dihedrals.dihedral_violins`
 
        *solvents*
-           Solvents from directory given to the new instance. Default
-           :code:`solvents=('water', 'octanol')`
+           The default solvents are documented under :data:`solvents_default`
 
        *interactions*
-           Interactions from directory given to the instance. Default
-           :code:`interactions=('Coulomb', 'VDW')`
+           The default interactions are documented under :data:`interactions_default`
 
        .. rubric:: Example
        
@@ -595,6 +638,7 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
                                       start=start, stop=stop, step=step)
     else:
         df = dataframe
+        logger.info(f'Proceeding with results DataFrame provided as {dataframe}.')
 
     if df_save_dir is not None:
         save_df(df=df, df_save_dir=df_save_dir, resname=resname, molname=molname)
