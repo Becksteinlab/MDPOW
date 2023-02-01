@@ -375,7 +375,6 @@ def save_df(df, df_save_dir=None, resname=None, molname=None):
 
         logger.warning('Top directory for saving results is required as \
                         df_save_dir kwarg, otherwise, continue without saving.')
-        continue
 
     return
 
@@ -532,7 +531,6 @@ def plot_violins(df, resname, figdir=None, molname=None, width=0.9, solvents=sol
     else:
         logger.warning('Figures will not be saved unless figdir kwarg \
                         is specified, otherwise, continue without saving.')
-        continue
 
     section = df.groupby(by='selection')
 
