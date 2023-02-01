@@ -175,3 +175,39 @@ class TestAutomatedDihedralAnalysis(object):
                                               resname=self.resname, molname='SM25',
                                               solvents=('water',))
         assert SM25_tmp_dir / 'SM25' / 'SM25_C10-C5-S4-O11_violins.pdf'
+
+    def test_DataFrame_input(self, SM25_tmp_dir):
+        test_df = pd.DataFrame([['C1-C2-C3-C4', 'water', 'Coulomb', 0, 0, 60.0],
+                                ['C1-C2-C3-C5', 'water', 'Coulomb', 0, 0, 60.0]],
+                                [1,2],['selection', 'solvent', 'interaction', 'lambda', 'time', 'dihedral'])
+        dihedrals.automated_dihedral_analysis(dirname=SM25_tmp_dir, figdir=SM25_tmp_dir,
+                                              resname=self.resname,
+                                              solvents=('water',), dataframe=test_df)
+
+        with open('mdpow.log', 'r') as file:
+            log_content = file.read()
+            return_value = log_content.find('Proceeding with results DataFrame provided.')
+
+        assert return_value != -1
+
+    def test_figdir_warning(self, SM25_tmp_dir):
+        dihedrals.automated_dihedral_analysis(dirname=SM25_tmp_dir, figdir=None,
+                                              resname=self.resname, molname='SM25',
+                                              solvents=('water',))
+
+        with open('mdpow.log', 'r') as file:
+            log_content = file.read()
+            return_value = log_content.find('Figures will not be saved')
+
+        assert return_value != -1
+
+    def test_save_results_warning(self, SM25_tmp_dir):
+        dihedrals.automated_dihedral_analysis(dirname=SM25_tmp_dir, df_save_dir=None,
+                                              resname=self.resname, molname='SM25',
+                                              solvents=('water',))
+
+        with open('mdpow.log', 'r') as file:
+            log_content = file.read()
+            return_value = log_content.find('kwarg required for saving results')
+
+        assert return_value != -1
