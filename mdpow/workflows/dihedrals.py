@@ -373,8 +373,8 @@ def save_df(df, df_save_dir=None, resname=None, molname=None):
 
     else:
 
-        logger.warning('Top directory for saving results is required as \
-                        df_save_dir kwarg, otherwise, continue without saving.')
+        logger.warning('df_save_dir kwarg required for saving results, \
+                        otherwise, continue without saving.')
 
     return
 
@@ -628,15 +628,19 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
                                            start=0, stop=100, step=10)
     '''
 
-    atom_group_indices = dihedral_indices(dirname=dirname, resname=resname, SMARTS=SMARTS)
+    if dataframe is not None:
 
-    if dataframe is None:
+        df = dataframe
+        logger.info(f'Proceeding with results DataFrame provided.')
+
+    else:
+        # new arrangement (1/31), temporary
+        # this will need to change or the indices will need
+        # to be saved in results DF for future changes
+        atom_group_indices = dihedral_indices(dirname=dirname, resname=resname, SMARTS=SMARTS)
         df = dihedral_groups_ensemble(atom_group_indices=atom_group_indices, dirname=dirname,
                                       solvents=solvents, interactions=interactions,
                                       start=start, stop=stop, step=step)
-    else:
-        df = dataframe
-        logger.info(f'Proceeding with results DataFrame provided as {dataframe}.')
 
     if df_save_dir is not None:
         save_df(df=df, df_save_dir=df_save_dir, resname=resname, molname=molname)
