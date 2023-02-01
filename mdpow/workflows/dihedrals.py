@@ -14,6 +14,7 @@ Most functions can be used as standalone or in combination
 depending on the desired results. Complete automation encompassed in
 :func:`~mdpow.workflows.dihedrals.automated_dihedral_analysis`.
 
+.. autofunction:: automated_dihedral_analysis
 .. autodata:: SMARTS_DEFAULT
     :annotation: = [!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]
 .. autofunction:: build_universe
@@ -25,7 +26,7 @@ depending on the desired results. Complete automation encompassed in
 .. autofunction:: periodic_angle
 .. autofunction:: dihedral_violins
 .. autofunction:: plot_violins
-.. autofunction:: automated_dihedral_analysis
+
 """
 
 import os
@@ -69,12 +70,12 @@ SMARTS_DEFAULT = '[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]'
 """
 
 def build_universe(dirname):
-    """Builds a universe from the :code:`water/Coulomb/0000` project
-       topology and trajectory.
+    """Builds :class:`~MDAnalysis.core.universe.Universe` from :code:`water/Coulomb/0000`
+       project topology and trajectory.
        
-       Used for RDKit conversion by :func:`~mdpow.workflows.dihedrals.rdkit_conversion`
+       Used by :func:`~mdpow.workflows.dihedrals.rdkit_conversion`
        and :func:`~mdpow.workflows.dihedrals.dihedral_indices` to obtain indices for
-       the dihedral atom groups. Returns an MDAnalysis Universe object.
+       the dihedral atom groups.
        
        :keywords:
 
@@ -91,7 +92,7 @@ def build_universe(dirname):
        :returns:
 
        *u*
-           :class:`MDAnalysis.Universe` object
+           :class:`~MDAnalysis.core.universe.Universe` object
            
     """
 
@@ -103,8 +104,8 @@ def build_universe(dirname):
     return u
 
 def rdkit_conversion(u, resname):
-    """Converts the solute (:code:`resname`) of an MDAnalysis Universe object to
-       RDKit for use with a SMARTS selection string to identify dihedral atom groups.
+    """Converts the solute, :code:`resname`, of :class:`~MDAnalysis.core.universe.Universe` to
+       :mod:`RDKit` for use with a SMARTS selection string to identify dihedral atom groups.
        
        Accepts an MDAnalysis Universe object made with
        :func:`~mdpow.workflows.dihedrals.build_universe` and a :code:`resname` as input
