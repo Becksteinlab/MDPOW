@@ -366,13 +366,13 @@ def save_df(df, df_save_dir=None, resname=None, molname=None):
         df.to_csv(f'{newdir}/{molname}_full_df.csv.bz2',
                   index=False, compression='bz2')
 
-        logger.info(f'Results DataFrame saved as \
-                      {newdir}/{molname}_full_df.csv.bz2')
+        logger.info(f'Results DataFrame saved as '
+                     '{newdir}/{molname}_full_df.csv.bz2')
 
     else:
 
-        logger.warning('df_save_dir kwarg required for saving results, \
-                        otherwise, continue without saving.')
+        logger.warning('df_save_dir kwarg required for saving results, '
+                       'otherwise, continue without saving.')
 
     return
 
@@ -527,8 +527,8 @@ def plot_violins(df, resname, figdir=None, molname=None, width=0.9, solvents=sol
         os.mkdir(newdir)
 
     else:
-        logger.warning('Figures will not be saved unless figdir kwarg \
-                        is specified, otherwise, continue without saving.')
+        logger.warning('Figures will not be saved unless figdir kwarg '
+                       'is specified, otherwise, continue without saving.')
 
     section = df.groupby(by='selection')
 
@@ -642,6 +642,10 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
 
     if df_save_dir is not None:
         save_df(df=df, df_save_dir=df_save_dir, resname=resname, molname=molname)
+
+    else:
+        logger.warning('df_save_dir kwarg required for saving results, '
+                       'otherwise, continue without saving.')
 
     df_aug = periodic_angle(df, padding=padding)
 
