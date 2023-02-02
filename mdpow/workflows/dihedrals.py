@@ -92,12 +92,12 @@ SMARTS_DEFAULT = '[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]'
 """
 
 def build_universe(dirname):
-    """Builds :class:`MDAnalysis Universe <MDAnalysis.core.universe.Universe>` from :code:`water/Coulomb/0000`
-       project topology and trajectory.
+    """Builds :class:`MDAnalysis Universe <MDAnalysis.core.universe.Universe>` from
+       :code:`water/Coulomb/0000` topology and trajectory for the specified project.
        
        Used by :func:`~mdpow.workflows.dihedrals.rdkit_conversion`
-       and :func:`~mdpow.workflows.dihedrals.dihedral_indices` to obtain indices for
-       the dihedral atom groups.
+       and :func:`~mdpow.workflows.dihedrals.dihedral_indices` to obtain atom indices
+       for each dihedral atom group.
        
        :keywords:
 
@@ -126,19 +126,15 @@ def build_universe(dirname):
     return u
 
 def rdkit_conversion(u, resname):
-    """Converts the solute, :code:`resname`, of :class:`~MDAnalysis.core.universe.Universe` to
-       :mod:`RDKit` for use with a SMARTS selection string to identify dihedral atom groups.
+    """Converts the solute, :code:`resname`, of :class:`~MDAnalysis.core.universe.Universe`
+       to :class:`RDKit.Mol` object for use with a :code:`SMARTS` selection string to
+       identify dihedral atom groups.
        
-       Accepts an MDAnalysis Universe object made with
-       :func:`~mdpow.workflows.dihedrals.build_universe` and a :code:`resname` as input
-       and returns a :code:`mol` RDKit object for use with 
-       :func:`~mdpow.workflows.dihedrals.dihedral_indices` to obtain indices for
-       the dihedral atom groups. Uses :code:`resname` to select the solute for conversion 
-       to :mod:`RDKit`, and will add Hydrogen if not listed in the topology, via
-       :func:`~mdpow.workflows.dihedrals.add_hydrogens`. Returns RDKit mol object and
-       solute atom selection from MDAnalysis Universe object.
-       
-       Adds Hydrogen if not listed in the trajectory and topology.
+       Accepts :class:`MDAnalysis Universe <MDAnalysis.core.universe.Universe` object made with
+       :func:`~mdpow.workflows.dihedrals.build_universe` and a :code:`resname` as input.
+       Uses :code:`resname` to select the solute for conversion 
+       to :class:`RDKit.Mol`, and will add Hydrogen element attributesif not listed in the topology, via
+       :func:`~mdpow.workflows.dihedrals.add_hydrogens`.
        
        :keywords:
        
@@ -156,7 +152,9 @@ def rdkit_conversion(u, resname):
            function call returns tuple, see below
        
        *mol*
-           :class:`RDKit.Mol` object
+           :class:`RDKit.Mol` object for use with 
+       :func:`~mdpow.workflows.dihedrals.dihedral_indices` to obtain
+       indices for the dihedral atom groups
            
        *solute*
            :class:`mdanalysis.Universe.atom_group` object
@@ -575,7 +573,7 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
            available.
 
        *df_save_dir*
-           path to the location to save results :class:`pandas.DataFrame`
+           path to the location to save results :class:`pandas.DataFrame <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html>`
 
        *figdir*
            optional, path to an existing directory where plots
