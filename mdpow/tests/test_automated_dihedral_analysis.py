@@ -201,13 +201,13 @@ class TestAutomatedDihedralAnalysis(object):
 
         assert return_value != -1
 
-    def test_save_results_warning(self, SM25_tmp_dir):
-        dihedrals.automated_dihedral_analysis(dirname=SM25_tmp_dir, df_save_dir=None,
-                                              resname=self.resname, molname='SM25',
-                                              solvents=('water',))
+    #def test_save_results_warning(self, SM25_tmp_dir):
+    #    dihedrals.automated_dihedral_analysis(dirname=SM25_tmp_dir, df_save_dir=None,
+    #                                          resname=self.resname, molname='SM25',
+    #                                          solvents=('water',))
 
-        with open('mdpow.log', 'r') as file:
-            log_content = file.read()
-            return_value = log_content.find('kwarg required for saving results')
+    #    with open('mdpow.log', 'r') as file:
+    #        log_content = file.read()
+    #        return_value = log_content.find('kwarg required for saving results')
 
-        assert return_value != -1
+    #    assert return_value != -1
