@@ -92,7 +92,7 @@ SMARTS_DEFAULT = '[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]'
 """
 
 def build_universe(dirname):
-    """Builds :class:`~MDAnalysis.core.universe.Universe` from :code:`water/Coulomb/0000`
+    """Builds :class:`MDAnalysis Universe <MDAnalysis.core.universe.Universe>` from :code:`water/Coulomb/0000`
        project topology and trajectory.
        
        Used by :func:`~mdpow.workflows.dihedrals.rdkit_conversion`
