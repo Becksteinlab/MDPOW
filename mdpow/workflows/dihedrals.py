@@ -573,7 +573,7 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
            available.
 
        *df_save_dir*
-           path to the location to save results :class:`pandas.DataFrame <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html>`
+           path to the location to save results :ref:`pandas.DataFrame <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html>`
 
        *figdir*
            optional, path to an existing directory where plots
