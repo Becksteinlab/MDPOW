@@ -198,7 +198,6 @@ class TestAutomatedDihedralAnalysis(object):
                          {SM25_tmp_dir}/SM25/SM25_C10-C5-S4-O11_violins.pdf')]:
                 assert SM25_tmp_dir / 'SM25' / 'SM25_C10-C5-S4-O11_violins.pdf'
 
-    #@pytest.fixture(scope="function")
     def test_save_fig_warning(self, SM25_tmp_dir, caplog):
         caplog.set_level(logging.WARNING, logger='mdpow.workflows.dihedrals')
         dihedrals.automated_dihedral_analysis(dirname=SM25_tmp_dir, figdir=None,
