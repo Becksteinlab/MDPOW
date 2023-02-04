@@ -4,6 +4,7 @@ import yaml
 import pybol
 import pytest
 import pathlib
+import logging
 
 import scipy
 import numpy as np
@@ -26,9 +27,6 @@ from pkg_resources import resource_filename
 # NEW TESTING DATA NEEDS TO BE GENERATED AFTER
 # REDUCING TESTING DATASET
 
-# Are any additional tests needed?
-# Top level?
-
 RESOURCES = pathlib.PurePath(resource_filename(__name__, 'testing_resources'))
 MANIFEST = RESOURCES / "manifest.yml"
 
@@ -46,17 +44,24 @@ class TestAutomatedDihedralAnalysis(object):
         return dirname
 
     @pytest.fixture(scope="function")
-    def gen_data(self, SM25_tmp_dir):
+    def atom_indices(self, SM25_tmp_dir):
         atom_group_indices = dihedrals.dihedral_indices(dirname=SM25_tmp_dir, resname=self.resname)
-        # test user input of SMARTS string
+
+        # test user input of alternate SMARTS string
         atom_group_indices_alt = dihedrals.dihedral_indices(dirname=SM25_tmp_dir, resname=self.resname,
                                                             SMARTS='[!$(*#*)&!D1]-!@[!$(*#*)&!D1]')
-        df = dihedrals.dihedral_groups_ensemble(atom_group_indices=atom_group_indices, dirname=SM25_tmp_dir,
+        return atom_group_indices, atom_group_indices_alt
+        # atom_indices[0]=atom_group_indices, atom_indices[1]=atom_group_indices_alt,
+
+    @pytest.fixture(scope="function")
+    def dihedral_data(self, SM25_tmp_dir, atom_indices):
+        atom_group_indices = atom_indices
+        df = dihedrals.dihedral_groups_ensemble(atom_group_indices=atom_group_indices[0], # default values
+                                                dirname=SM25_tmp_dir,
                                                 solvents=('water',))
         df_aug = dihedrals.periodic_angle(df)
-        return atom_group_indices, atom_group_indices_alt, df, df_aug
-        # gen_data[0]=atom_group_indices, gen_data[1]=atom_group_indices_alt,
-        # gen_data[2]=df, gen_data[3]=df_aug
+        return df, df_aug
+        # dihedral_data[0]=df, dihedral_data[1]=df_aug
 
     resname = 'UNK'
 
@@ -115,13 +120,13 @@ class TestAutomatedDihedralAnalysis(object):
         assert solute_names.all() == self.universe_solute_atom_names.all()
 
     @pytest.mark.skipif(sys.version_info < (3, 8), reason="pytest=7.2.0, build=py37h89c1867_0 gives wrong answers")
-    def test_dihedral_indices(self, gen_data):
-        atom_group_indices = gen_data[0]
+    def test_dihedral_indices(self, atom_indices):
+        atom_group_indices = atom_indices[0]
         assert atom_group_indices == self.check_atom_group_indices
 
     @pytest.mark.skipif(sys.version_info < (3, 8), reason="pytest=7.2.0, build=py37h89c1867_0 gives wrong answers")
-    def test_SMARTS(self, gen_data):
-        atom_group_indices_alt = gen_data[1]
+    def test_SMARTS(self, atom_indices):
+        atom_group_indices_alt = atom_indices[1]
         assert atom_group_indices_alt == self.check_atom_group_indices_alt
 
     @pytest.mark.skipif(sys.version_info < (3, 8), reason="pytest=7.2.0, build=py37h89c1867_0 gives wrong answers")
@@ -133,9 +138,9 @@ class TestAutomatedDihedralAnalysis(object):
             i+=1
 
     @pytest.mark.skipif(sys.version_info < (3, 8), reason="scipy circvar gives wrong answers")
-    def test_dihedral_groups_ensemble(self, gen_data):
+    def test_dihedral_groups_ensemble(self, dihedral_data):
 
-        df = gen_data[2]
+        df = dihedral_data[0]
 
         dh1_result = df.loc[df['selection'] == 'O1-C2-N3-S4']['dihedral']
         dh1_mean = circmean(dh1_result, high=180, low=-180)
@@ -152,15 +157,28 @@ class TestAutomatedDihedralAnalysis(object):
         dh2_mean == pytest.approx(self.DG_C13141520_mean)
         dh2_var == pytest.approx(self.DG_C13141520_var)
         
-    def test_save_df(self, gen_data, SM25_tmp_dir):
-        dihedrals.save_df(df=gen_data[2], df_save_dir=SM25_tmp_dir, molname='SM25')
-        assert SM25_tmp_dir / 'SM25' / 'SM25_full_df.bz2'
-                                        
+    def test_save_df(self, dihedral_data, SM25_tmp_dir, caplog):
+        caplog.set_level(logging.INFO, logger='mdpow.workflows.dihedrals')
+        dihedrals.save_df(df=dihedral_data[0], df_save_dir=SM25_tmp_dir, molname='SM25')
+        for item in caplog.record_tuples:
+            if item == [('mdpow.workflows.dihedrals', logging.INFO, f'Results DataFrame saved \
+                          as {SM25_tmp_dir}/SM25_full_df.csv.bz2')]:
+                assert SM25_tmp_dir / 'SM25' / 'SM25_full_df.bz2'
+
+    def test_save_df_warning(self, SM25_tmp_dir, caplog):
+        caplog.set_level(logging.WARNING, logger='mdpow.workflows.dihedrals')
+        dihedrals.automated_dihedral_analysis(dirname=SM25_tmp_dir, df_save_dir=None,
+                                              resname=self.resname, molname='SM25',
+                                              solvents=('water',))
+        for item in caplog.record_tuples:
+            if item == [('mdpow.workflows.dihedrals', logging.WARNING, 'df_save_dir kwarg \
+                          required for saving results, otherwise, continue without saving.')]:
+                pass
 
     @pytest.mark.skipif(sys.version_info < (3, 8), reason="scipy circvar gives wrong answers") 
-    def test_periodic_angle(self, gen_data):
+    def test_periodic_angle(self, dihedral_data):
 
-        df_aug = gen_data[3]
+        df_aug = dihedral_data[1]
 
         aug_dh2_result = df_aug.loc[df_aug['selection'] == 'C13-C14-C15-C20']['dihedral']
 
@@ -170,46 +188,36 @@ class TestAutomatedDihedralAnalysis(object):
         aug_dh2_mean == pytest.approx(self.ADG_C13141520_mean)
         aug_dh2_var == pytest.approx(self.ADG_C13141520_var)
 
-    def test_save_fig(self, SM25_tmp_dir):
+    def test_save_fig(self, SM25_tmp_dir, caplog):
+        caplog.set_level(logging.INFO, logger='mdpow.workflows.dihedrals')
         dihedrals.automated_dihedral_analysis(dirname=SM25_tmp_dir, figdir=SM25_tmp_dir,
                                               resname=self.resname, molname='SM25',
                                               solvents=('water',))
-        assert SM25_tmp_dir / 'SM25' / 'SM25_C10-C5-S4-O11_violins.pdf'
+        for item in caplog.record_tuples:
+            if item == [('mdpow.workflows.dihedrals', logging.INFO, f'Figure saved as \
+                         {SM25_tmp_dir}/SM25/SM25_C10-C5-S4-O11_violins.pdf')]:
+                assert SM25_tmp_dir / 'SM25' / 'SM25_C10-C5-S4-O11_violins.pdf'
 
-    def test_DataFrame_input(self, SM25_tmp_dir):
+    #@pytest.fixture(scope="function")
+    def test_save_fig_warning(self, SM25_tmp_dir, caplog):
+        caplog.set_level(logging.WARNING, logger='mdpow.workflows.dihedrals')
+        dihedrals.automated_dihedral_analysis(dirname=SM25_tmp_dir, figdir=None,
+                                              resname=self.resname, molname='SM25',
+                                              solvents=('water',))
+        for item in caplog.record_tuples:
+            if item == [('mdpow.workflows.dihedrals', logging.WARNING, 'Figures will \
+                          not be saved unless figdir kwarg is specified, otherwise, \
+                          continue without saving.')]:
+                pass
+
+    def test_DataFrame_input(self, SM25_tmp_dir, caplog):
+        caplog.set_level(logging.INFO, logger='mdpow.workflows.dihedrals')
         test_df = pd.DataFrame([['C1-C2-C3-C4', 'water', 'Coulomb', 0, 0, 60.0],
                                 ['C1-C2-C3-C5', 'water', 'Coulomb', 0, 0, 60.0]],
                                 [1,2],['selection', 'solvent', 'interaction', 'lambda', 'time', 'dihedral'])
         dihedrals.automated_dihedral_analysis(dirname=SM25_tmp_dir, figdir=SM25_tmp_dir,
                                               resname=self.resname,
                                               solvents=('water',), dataframe=test_df)
-
-        with open('mdpow.log', 'r') as file:
-            log_content = file.read()
-            return_value = log_content.find('Proceeding with results DataFrame provided.')
-
-        assert return_value != -1
-
-    def test_figdir_warning(self, SM25_tmp_dir):
-        dihedrals.automated_dihedral_analysis(dirname=SM25_tmp_dir, figdir=None,
-                                              resname=self.resname, molname='SM25',
-                                              solvents=('water',))
-
-        with open('mdpow.log', 'r') as file:
-            log_content = file.read()
-            return_value = log_content.find('Figures will not be saved unless figdir kwarg '
-                                            'is specified, otherwise, continue without saving.')
-
-        assert return_value != -1
-
-    def test_save_results_warning(self, SM25_tmp_dir):
-        dihedrals.automated_dihedral_analysis(dirname=SM25_tmp_dir, df_save_dir=None,
-                                              resname=self.resname, molname='SM25',
-                                              solvents=('water',))
-
-        with open('mdpow.log', 'r') as file:
-            log_content = file.read()
-            return_value = log_content.find('df_save_dir kwarg required for saving results, '
-                                            'otherwise, continue without saving.')
-
-        assert return_value != -1
+        for item in caplog.record_tuples:
+            if item == [('mdpow.workflows.dihedrals', logging.INFO, 'Proceeding with results DataFrame provided.')]:
+                pass
