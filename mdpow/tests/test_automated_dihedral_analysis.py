@@ -101,17 +101,33 @@ class TestAutomatedDihedralAnalysis(object):
                                 'H29', 'H30', 'H31', 'H32', 'H33', 'H34', 'H35'], dtype=object)
 
     # pre-padding dihedral group statistics
-    DG_O1C2N3S4_mean = -0.13089566578887002
-    DG_O1C2N3S4_var = 0.03473127346296412
+    #DG_O1C2N3S4_mean = -0.13089566578887002
+    #DG_O1C2N3S4_var = 0.03473127346296412
+
+    # new 2-6-23
+    # pre-padding dihedral group statistics
+    DG_O1C2N3S4_mean = -0.5933808752787115
+    DG_O1C2N3S4_var = 0.031351024457919485
 
     # pre-padding dihedral group statistics
-    DG_C13141520_mean = 90.04076626959608
-    DG_C13141520_var = 0.8814931303534448
+    #DG_C13141520_mean = 90.04076626959608
+    #DG_C13141520_var = 0.8814931303534448
+
+    # new 2-6-23
+    # pre-padding dihedral group statistics
+    DG_C13141520_mean = 89.22382649857468
+    DG_C13141520_var = 0.8753980937068645
 
     # post-padding dihedral group statistics
     # 'A' represents 'augmented'
-    ADG_C13141520_mean = 93.50126701923381
-    ADG_C13141520_var = 0.8815675813248334
+    #ADG_C13141520_mean = 93.50126701923381
+    #ADG_C13141520_var = 0.8815675813248334
+
+    # new 2-6-23
+    # post-padding dihedral group statistics
+    # 'A' represents 'augmented'
+    ADG_C13141520_mean = 91.71943996962284
+    ADG_C13141520_var = 0.8773028474908289
     
     def test_build_universe(self, SM25_tmp_dir):
         u = dihedrals.build_universe(dirname=SM25_tmp_dir)
