@@ -130,7 +130,8 @@ def rdkit_conversion(u, resname):
        
        Accepts :class:`~MDAnalysis.core.universe.Universe` object made with
        :func:`~mdpow.workflows.dihedrals.build_universe` and a `resname` as input.
-       Uses `resname` to select the solute for conversion to :class:`rdkit.Chem.rdchem.Mol`,
+       Uses `resname` to select the solute for conversion by
+       :class:`~MDAnalysis.converters.RDKit.RDKitConverter` to :class:`rdkit.Chem.rdchem.Mol`,
        and will add element attributes for Hydrogen if not listed in the topology.
        
        :keywords:
@@ -151,7 +152,7 @@ def rdkit_conversion(u, resname):
            :class:`rdkit.Chem.rdchem.Mol` object converted from `solute`
            
        *solute*
-           molecule specified by :func:`~MDAnalysis.core.groups.AtomGroup.select_atoms`
+           molecule specified by :func:`~MDAnalysis.core.groups.select_atoms`
            for :class:`~MDAnalysis.core.universe.Universe` object
 
     """
@@ -296,7 +297,7 @@ def dihedral_groups_ensemble(dirname, atom_group_indices,
            The default interactions are documented under :data:`INTERACTIONS_DEFAULT`
 
        *start, stop, step*
-           .. seealso:: :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`
+       .. seealso:: :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`
 
        :returns:
        
