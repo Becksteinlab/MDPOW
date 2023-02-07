@@ -19,6 +19,12 @@ import logging
 
 logger = logging.getLogger('mdpow.workflows.base')
 
+
+
+# DONT FORGET UPDATES FROM SAMPL9 REPO
+
+SMARTS_DEFAULT = '[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]'
+
 def directory_paths(parent_directory=None, csv=None):
     """Takes a parent directory containing MDPOW project subdirectories,
        or .csv file containing :code:`molname`, :code:`resname`, and
@@ -86,10 +92,10 @@ def directory_paths(parent_directory=None, csv=None):
 
     return directory_paths
 
+# create kwargs dictionary with registry
 def directory_iteration(directory_paths, df_save_dir=None, figdir=None,
                         solvents=('water','octanol'), interactions=('Coulomb','VDW'),
-                        ensemble_analysis=None, SMARTS=None, padding=None, width=None,
-                        start=None, stop=None, step=None, distances=None):
+                        SMARTS=SMARTS_DEFAULT, start=None, stop=None, step=None):
     """Takes a :class:`pandas.DataFrame` created by
        :func:`~mdpow.workflows.base.directory_paths`
        as input and iterates over the provided projects to implement
@@ -148,12 +154,6 @@ def directory_iteration(directory_paths, df_save_dir=None, figdir=None,
        start=0, stop=100, step=10)
     """
 
-    analyses = {
-        'DihedralAnalysis' : None,
-        'SolvationAnalysis' : None,
-        'HBondAnalysis' : None
-    }
-
     if ensemble_analysis is not None:
         try:
             for row in directory_paths.itertuples():
@@ -161,12 +161,16 @@ def directory_iteration(directory_paths, df_save_dir=None, figdir=None,
                 resname = row.resname
                 dirname = row.path
 
+                logger.INFO(f'starting {molname}')
+
                 # move to registry and call with analysis specific kwargs
                 analyses[ensemble_analysis](dirname=dirname, df_save_dir=df_save_dir, figdir=figdir,
                                             molname=molname, resname=resname, SMARTS=SMARTS,
                                             padding=padding, width=width, distances=distances,
                                             solvents=solvents, interactions=interactions,
                                             start=start, stop=stop, step=step)
+
+                logger.INFO(f'{molname} completed')
 
         except NotImplementedError as err:
             logger.error("invalid EnsembleAnalysis selection", err, msg)
