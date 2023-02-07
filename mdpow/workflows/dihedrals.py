@@ -54,7 +54,7 @@ logger = logging.getLogger('mdpow.workflows.dihedrals')
 
 
 
-solvents_default = ('water', 'octanol')
+SOLVENTS_DEFAULT = ('water', 'octanol')
 """Default solvents are water and octanol.
 
     * Must match solvents used in project directory.
@@ -64,7 +64,7 @@ solvents_default = ('water', 'octanol')
 
 """
 
-interactions_default = ('Coulomb', 'VDW')
+INTERACTIONS_DEFAULT = ('Coulomb', 'VDW')
 """Default interactions set to Coulomb and VDW.
 
     * Default values should not be changed
@@ -261,8 +261,8 @@ def dihedral_groups(dirname, resname, SMARTS=SMARTS_DEFAULT):
     return dihedral_groups
 
 def dihedral_groups_ensemble(dirname, atom_group_indices,
-                             solvents=solvents_default,
-                             interactions=interactions_default,
+                             solvents=SOLVENTS_DEFAULT,
+                             interactions=INTERACTIONS_DEFAULT,
                              start=None, stop=None, step=None): 
     '''Creates one :class:`~mdpow.analysis.ensemble.Ensemble` for the MDPOW
        project and runs :class:`~mdpow.analysis.dihedral.DihedralAnalysis`
@@ -289,10 +289,10 @@ def dihedral_groups_ensemble(dirname, atom_group_indices,
            .. seealso:: :func:`~mdpow.workflows.dihedrals.dihedral_indices`
 
        *solvents*
-           The default solvents are documented under :data:`solvents_default`
+           The default solvents are documented under :data:`SOLVENTS_DEFAULT`
 
        *interactions*
-           The default interactions are documented under :data:`interactions_default`
+           The default interactions are documented under :data:`INTERACTIONS_DEFAULT`
 
        *start, stop, step*
            .. seealso:: :class:`mdpow.analysis.ensemble.EnsembleAnalysis`
@@ -431,7 +431,7 @@ def periodic_angle(df, padding=45):
 
     return df_aug
 
-def dihedral_violins(df, width=0.9, solvents=solvents_default):
+def dihedral_violins(df, width=0.9, solvents=SOLVENTS_DEFAULT):
     '''Plots distributions of dihedral angles for one dihedral atom group
        as violin plots, using as input the augmented :class:`pandas.DataFrame`
        from :func:`~mdpow.workflows.dihedrals.periodic_angle`.
@@ -447,7 +447,7 @@ def dihedral_violins(df, width=0.9, solvents=solvents_default):
            default: 0.9
 
        *solvents*
-           The default solvents are documented under :data:`solvents_default`
+           The default solvents are documented under :data:`SOLVENTS_DEFAULT`
        
        :returns:
 
@@ -510,7 +510,7 @@ def dihedral_violins(df, width=0.9, solvents=solvents_default):
 
     return g
 
-def plot_violins(df, resname, figdir=None, molname=None, width=0.9, solvents=solvents_default):
+def plot_violins(df, resname, figdir=None, molname=None, width=0.9, solvents=SOLVENTS_DEFAULT):
     '''Coordinates plotting and optionally saving figures for all dihedral
        atom groups. Makes a subdirectory within the specified
        :code:`figdir` using :code:`resname` or :code:`molname` provided.
@@ -541,7 +541,7 @@ def plot_violins(df, resname, figdir=None, molname=None, width=0.9, solvents=sol
            .. seealso:: :func:`~mdpow.workflows.dihedrals.dihedral_violins`
 
        *solvents*
-           The default solvents are documented under :data:`solvents_default`
+           The default solvents are documented under :data:`SOLVENTS_DEFAULT`
 
        :returns:
 
@@ -584,8 +584,8 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
                                 resname=None, molname=None,
                                 SMARTS=SMARTS_DEFAULT,
                                 dataframe=None, padding=45, width=0.9,
-                                solvents=solvents_default,
-                                interactions=interactions_default,
+                                solvents=SOLVENTS_DEFAULT,
+                                interactions=INTERACTIONS_DEFAULT,
                                 start=None, stop=None, step=None):
     '''Runs :class:`~mdpow.analysis.dihedral.DihedralAnalysis` for a single MDPOW
        project and creates violin plots of dihedral angle frequencies for each
@@ -646,10 +646,10 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
            .. seealso:: :func:`~mdpow.workflows.dihedrals.dihedral_violins`
 
        *solvents*
-           The default solvents are documented under :data:`solvents_default`
+           The default solvents are documented under :data:`SOLVENTS_DEFAULT`
 
        *interactions*
-           The default interactions are documented under :data:`interactions_default`
+           The default interactions are documented under :data:`INTERACTIONS_DEFAULT`
 
        *start, stop, step*
            .. seealso:: :class:`mdpow.analysis.ensemble.EnsembleAnalysis`
