@@ -75,22 +75,22 @@ INTERACTIONS_DEFAULT = ('Coulomb', 'VDW')
 SMARTS_DEFAULT = '[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]'
 """Default SMARTS string to identify relevant dihedral atom groups.
 
-     * `[!#1]` : any atom, not Hydrogen
-     * `~`  : any bond
-     * `[!$(*#*)&!D1]` : any atom that is not part of linear triple
+     * ``[!#1]`` : any atom, not Hydrogen
+     * ``~``  : any bond
+     * ``[!$(*#*)&!D1]`` : any atom that is not part of linear triple
        bond and not atom with 1 explicit bond
-     * `-!@` : single bond that is not ring bond
-     * `[!$(*#*)&!D1]-!@[!$(*#*)&!D1]` : the central portion selects
+     * ``-!@`` : single bond that is not ring bond
+     * ``[!$(*#*)&!D1]-!@[!$(*#*)&!D1]`` : the central portion selects
        two atoms that are not involved in a triple bond and are not terminal,
        that are connected by a single, non-ring bond
-     * `[!#1]~` or `~[!#1]` : the first and last portion specify any bond,
+     * ``[!#1]~` or `~[!#1]`` : the first and last portion specify any bond,
        to any atom that is not hydrogen
 
 """
 
 def build_universe(dirname):
-    """Builds :class:`MDAnalysis.core.universe.Universe` from
-       :code:`water/Coulomb/0000` topology and trajectory for the specified project.
+    """Builds :class:`~MDAnalysis.core.universe.Universe` from
+       ``water/Coulomb/0000`` topology and trajectory for the specified project.
        
        Used by :func:`~mdpow.workflows.dihedrals.rdkit_conversion`
        and :func:`~mdpow.workflows.dihedrals.dihedral_indices` to obtain atom indices
@@ -123,13 +123,13 @@ def build_universe(dirname):
     return u
 
 def rdkit_conversion(u, resname):
-    """Converts the solute, :code:`resname`, of the
-       :class:`MDAnalysis.core.universe.Universe` to :class:`RDKit.Mol` object
-       for use with a :code:`SMARTS` selection string to identify dihedral atom groups.
+    """Converts the solute, ``resname``, of the
+       :class:`~MDAnalysis.core.universe.Universe` to :class:`RDKit.Mol` object
+       for use with a ``SMARTS`` selection string to identify dihedral atom groups.
        
-       Accepts :class:`MDAnalysis.core.universe.Universe` object made with
-       :func:`~mdpow.workflows.dihedrals.build_universe` and a :code:`resname` as input.
-       Uses :code:`resname` to select the solute for conversion to :class:`RDKit.Mol`,
+       Accepts :class:`~MDAnalysis.core.universe.Universe` object made with
+       :func:`~mdpow.workflows.dihedrals.build_universe` and a ``resname`` as input.
+       Uses ``resname`` to select the solute for conversion to :class:`RDKit.Mol`,
        and will add element attributes for Hydrogen if not listed in the topology.
        
        :keywords:
@@ -138,7 +138,7 @@ def rdkit_conversion(u, resname):
            :class:`~MDAnalysis.core.universe.Universe` object
            
        *resname*
-           :code:`resname` for the molecule as defined in 
+           ``resname`` for the molecule as defined in 
            the topology and trajectory
            
        :returns:
@@ -150,7 +150,7 @@ def rdkit_conversion(u, resname):
            :class:`RDKit.Mol` object converted from :code:`solute`
            
        *solute*
-           molecule specified by :func:`MDAnalysis.core.universe.Universe.select_atoms`
+           molecule specified by :func:`~MDAnalysis.core.universe.Universe.select_atoms`
            for :class:`~MDAnalysis.core.universe.Universe` object
 
     """
@@ -167,7 +167,7 @@ def rdkit_conversion(u, resname):
     return mol, solute
 
 def dihedral_indices(dirname, resname, SMARTS=SMARTS_DEFAULT):
-    '''Uses a :code:`SMARTS` selection string to identify indices for
+    '''Uses a `SMARTS` selection string to identify indices for
        relevant dihedral atom groups.
        
        Requires an MDPOW project directory and :code:`resname` 
