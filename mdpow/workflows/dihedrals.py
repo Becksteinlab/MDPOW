@@ -60,7 +60,8 @@ SOLVENTS_DEFAULT = ('water', 'octanol')
     * Must match solvents used in project directory.
     * One or two solvents can be specified.
     * Current solvents supported,
-      .. seealso:: :mod:`mdpow.forcefields`
+
+   .. seealso:: :mod:`mdpow.forcefields`
 
 """
 
@@ -150,7 +151,7 @@ def rdkit_conversion(u, resname):
            :class:`rdkit.Chem.rdchem.Mol` object converted from `solute`
            
        *solute*
-           molecule specified by :func:`~MDAnalysis.core.universe.Universe.select_atoms`
+           molecule specified by :func:`~MDAnalysis.core.groups.AtomGroup.select_atoms`
            for :class:`~MDAnalysis.core.universe.Universe` object
 
     """
@@ -215,7 +216,7 @@ def dihedral_groups(dirname, resname, SMARTS=SMARTS_DEFAULT):
        by :func:`~mdpow.workflows.dihedral.dihedral_indices`
        and returns the names for each atom in each group.
        
-       Requires an MDPOW project directory and :code:`resname` 
+       Requires an MDPOW project directory and `resname` 
        as input. Expands upon usage of
        :func:`~mdpow.workflows.dihedral.dihedral_indices`
        to return an array of the names of each atom within
@@ -541,7 +542,7 @@ def plot_violins(df, resname, figdir=None, molname=None, width=0.9, solvents=SOL
        *width*
            width of the violin element (>1 overlaps)
            default: 0.9
-           .. seealso:: :func:`~mdpow.workflows.dihedrals.dihedral_violins`
+       .. seealso:: :func:`~mdpow.workflows.dihedrals.dihedral_violins`
 
        *solvents*
            The default solvents are documented under :data:`SOLVENTS_DEFAULT`
@@ -637,12 +638,12 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
        *padding*
            value in degrees
            default: 45
-           .. seealso:: :func:`~mdpow.workflows.dihedrals.periodic_angle`
+       .. seealso:: :func:`~mdpow.workflows.dihedrals.periodic_angle`
 
        *width*
            width of the violin element (>1 overlaps)
            default: 0.9
-           .. seealso:: :func:`~mdpow.workflows.dihedrals.dihedral_violins`
+       .. seealso:: :func:`~mdpow.workflows.dihedrals.dihedral_violins`
 
        *solvents*
            The default solvents are documented under :data:`SOLVENTS_DEFAULT`
