@@ -138,6 +138,7 @@ class TestAutomatedDihedralAnalysis(object):
             i+=1
 
     @pytest.mark.skipif(sys.version_info < (3, 8), reason="scipy circvar gives wrong answers")
+    # separate issue raised to address nature of this problem^
     def test_dihedral_groups_ensemble(self, dihedral_data):
 
         df = dihedral_data[0]
@@ -157,25 +158,18 @@ class TestAutomatedDihedralAnalysis(object):
         dh2_mean == pytest.approx(self.DG_C13141520_mean)
         dh2_var == pytest.approx(self.DG_C13141520_var)
         
-    def test_save_df(self, dihedral_data, SM25_tmp_dir, caplog):
+    def test_save_df(self, dihedral_data, SM25_tmp_dir):
+        dihedrals.save_df(df=dihedral_data[0], df_save_dir=SM25_tmp_dir, molname='SM25')
+        assert (SM25_tmp_dir / 'SM25' / 'SM25_full_df.csv.bz2').exists(), 'Compressed csv file not saved'
+
+    def test_save_df_info(self, dihedral_data, SM25_tmp_dir, caplog):
+        caplog.clear()
         caplog.set_level(logging.INFO, logger='mdpow.workflows.dihedrals')
         dihedrals.save_df(df=dihedral_data[0], df_save_dir=SM25_tmp_dir, molname='SM25')
-        for item in caplog.record_tuples:
-            if item == [('mdpow.workflows.dihedrals', logging.INFO, f'Results DataFrame saved \
-                          as {SM25_tmp_dir}/SM25_full_df.csv.bz2')]:
-                assert SM25_tmp_dir / 'SM25' / 'SM25_full_df.bz2'
+        assert f'Results DataFrame saved as {SM25_tmp_dir}/SM25/SM25_full_df.csv.bz2', 'Save location not logged or returned'
 
-    def test_save_df_warning(self, SM25_tmp_dir, caplog):
-        caplog.set_level(logging.WARNING, logger='mdpow.workflows.dihedrals')
-        dihedrals.automated_dihedral_analysis(dirname=SM25_tmp_dir, df_save_dir=None,
-                                              resname=self.resname, molname='SM25',
-                                              solvents=('water',))
-        for item in caplog.record_tuples:
-            if item == [('mdpow.workflows.dihedrals', logging.WARNING, 'df_save_dir kwarg \
-                          required for saving results, otherwise, continue without saving.')]:
-                pass
-
-    @pytest.mark.skipif(sys.version_info < (3, 8), reason="scipy circvar gives wrong answers") 
+    @pytest.mark.skipif(sys.version_info < (3, 8), reason="scipy circvar gives wrong answers")
+    # separate issue raised to address nature of this problem^
     def test_periodic_angle(self, dihedral_data):
 
         df_aug = dihedral_data[1]
@@ -188,28 +182,31 @@ class TestAutomatedDihedralAnalysis(object):
         aug_dh2_mean == pytest.approx(self.ADG_C13141520_mean)
         aug_dh2_var == pytest.approx(self.ADG_C13141520_var)
 
-    def test_save_fig(self, SM25_tmp_dir, caplog):
+    def test_save_fig(self, SM25_tmp_dir):
+        dihedrals.automated_dihedral_analysis(dirname=SM25_tmp_dir, figdir=SM25_tmp_dir,
+                                              resname=self.resname, molname='SM25',
+                                              solvents=('water',))
+        assert (SM25_tmp_dir / 'SM25' / 'SM25_C10-C5-S4-O11_violins.pdf').exists(), 'PDF file not generated'
+
+    def test_save_fig_info(self, SM25_tmp_dir, caplog):
+        caplog.clear()
         caplog.set_level(logging.INFO, logger='mdpow.workflows.dihedrals')
         dihedrals.automated_dihedral_analysis(dirname=SM25_tmp_dir, figdir=SM25_tmp_dir,
                                               resname=self.resname, molname='SM25',
                                               solvents=('water',))
-        for item in caplog.record_tuples:
-            if item == [('mdpow.workflows.dihedrals', logging.INFO, f'Figure saved as \
-                         {SM25_tmp_dir}/SM25/SM25_C10-C5-S4-O11_violins.pdf')]:
-                assert SM25_tmp_dir / 'SM25' / 'SM25_C10-C5-S4-O11_violins.pdf'
+        assert f'Figure saved as {SM25_tmp_dir}/SM25/SM25_C10-C5-S4-O11_violins.pdf' in caplog.text, 'PDF file not saved'
 
-    def test_save_fig_warning(self, SM25_tmp_dir, caplog):
-        caplog.set_level(logging.WARNING, logger='mdpow.workflows.dihedrals')
-        dihedrals.automated_dihedral_analysis(dirname=SM25_tmp_dir, figdir=None,
-                                              resname=self.resname, molname='SM25',
-                                              solvents=('water',))
-        for item in caplog.record_tuples:
-            if item == [('mdpow.workflows.dihedrals', logging.WARNING, 'Figures will \
-                          not be saved unless figdir kwarg is specified, otherwise, \
-                          continue without saving.')]:
-                pass
+    def test_DataFrame_input(self, SM25_tmp_dir):
+        test_df = pd.DataFrame([['C1-C2-C3-C4', 'water', 'Coulomb', 0, 0, 60.0],
+                                ['C1-C2-C3-C5', 'water', 'Coulomb', 0, 0, 60.0]],
+                                [1,2],['selection', 'solvent', 'interaction', 'lambda', 'time', 'dihedral'])
+        plot = dihedrals.automated_dihedral_analysis(dirname=SM25_tmp_dir, figdir=SM25_tmp_dir,
+                                                     resname=self.resname,
+                                                     solvents=('water',), dataframe=test_df)
+        assert plot # get exact object ID
 
-    def test_DataFrame_input(self, SM25_tmp_dir, caplog):
+    def test_DataFrame_input_info(self, SM25_tmp_dir, caplog):
+        caplog.clear()
         caplog.set_level(logging.INFO, logger='mdpow.workflows.dihedrals')
         test_df = pd.DataFrame([['C1-C2-C3-C4', 'water', 'Coulomb', 0, 0, 60.0],
                                 ['C1-C2-C3-C5', 'water', 'Coulomb', 0, 0, 60.0]],
@@ -217,6 +214,4 @@ class TestAutomatedDihedralAnalysis(object):
         dihedrals.automated_dihedral_analysis(dirname=SM25_tmp_dir, figdir=SM25_tmp_dir,
                                               resname=self.resname,
                                               solvents=('water',), dataframe=test_df)
-        for item in caplog.record_tuples:
-            if item == [('mdpow.workflows.dihedrals', logging.INFO, 'Proceeding with results DataFrame provided.')]:
-                pass
+        assert 'Proceeding with results DataFrame provided.' in caplog.text, 'No dataframe provided or dataframe not recognized'

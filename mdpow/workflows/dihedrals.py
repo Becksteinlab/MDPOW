@@ -560,10 +560,6 @@ def plot_violins(df, resname, figdir=None, molname=None, width=0.9, solvents=SOL
         newdir = os.path.join(figdir, subdir)
         os.mkdir(newdir)
 
-    else:
-        logger.warning('Figures will not be saved unless figdir kwarg '
-                       'is specified, otherwise, continue without saving.')
-
     section = df.groupby(by='selection')
 
     for name in section:
