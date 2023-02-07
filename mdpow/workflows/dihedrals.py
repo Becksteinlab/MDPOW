@@ -320,7 +320,7 @@ def dihedral_groups_ensemble(dirname, atom_group_indices,
 
     return df
 
-def save_df(df, df_save_dir=None, resname=None, molname=None):
+def save_df(df, df_save_dir, resname=None, molname=None):
     '''Takes a :class:`~pandas.DataFrame` of results from 
        :class:`~mdpow.analysis.dihedral.DihedralAnalysis`
        as input before padding the angles to optionaly save the raw
@@ -364,24 +364,18 @@ def save_df(df, df_save_dir=None, resname=None, molname=None):
     if molname is None:
         molname = resname
 
-    if df_save_dir is not None:
-        subdir = molname
-        newdir = os.path.join(df_save_dir, subdir)
-        os.mkdir(newdir)
+    subdir = molname
+    newdir = os.path.join(df_save_dir, subdir)
+    os.mkdir(newdir)
 
-        # time and compress level can be adjusted as kwargs
-        df.to_csv(f'{newdir}/{molname}_full_df.csv.bz2',
-                  index=False, compression='bz2')
+    # time and compress level can be adjusted as kwargs
+    df.to_csv(f'{newdir}/{molname}_full_df.csv.bz2',
+              index=False, compression='bz2')
 
-        logger.info(f'Results DataFrame saved as '
-                     '{newdir}/{molname}_full_df.csv.bz2')
+    logger.info(f'Results DataFrame saved as '
+                 '{newdir}/{molname}_full_df.csv.bz2')
 
-    else:
-
-        logger.warning('df_save_dir kwarg required for saving results, '
-                       'otherwise, continue without saving.')
-
-    return
+    #return
 
 def periodic_angle(df, padding=45):
     '''Pads the angles from the results :class:`~pandas.DataFrame`
