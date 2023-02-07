@@ -24,8 +24,8 @@ from ..workflows import dihedrals
 
 from pkg_resources import resource_filename
 
-# NEW TESTING DATA NEEDS TO BE GENERATED AFTER
-# REDUCING TESTING DATASET
+# NEW TESTING DATA NEEDS TO BE GENERATED FOR circstats
+# FROM REDUCING TESTING DATASET
 
 RESOURCES = pathlib.PurePath(resource_filename(__name__, 'testing_resources'))
 MANIFEST = RESOURCES / "manifest.yml"
@@ -137,8 +137,8 @@ class TestAutomatedDihedralAnalysis(object):
             assert groups[i].all() == self.check_groups[i].all()
             i+=1
 
+    # separate issue raised to address nature of this problem
     @pytest.mark.skipif(sys.version_info < (3, 8), reason="scipy circvar gives wrong answers")
-    # separate issue raised to address nature of this problem^
     def test_dihedral_groups_ensemble(self, dihedral_data):
 
         df = dihedral_data[0]
@@ -168,8 +168,8 @@ class TestAutomatedDihedralAnalysis(object):
         dihedrals.save_df(df=dihedral_data[0], df_save_dir=SM25_tmp_dir, molname='SM25')
         assert f'Results DataFrame saved as {SM25_tmp_dir}/SM25/SM25_full_df.csv.bz2', 'Save location not logged or returned'
 
+    # separate issue raised to address nature of this problem
     @pytest.mark.skipif(sys.version_info < (3, 8), reason="scipy circvar gives wrong answers")
-    # separate issue raised to address nature of this problem^
     def test_periodic_angle(self, dihedral_data):
 
         df_aug = dihedral_data[1]
