@@ -693,10 +693,6 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
     if df_save_dir is not None:
         save_df(df=df, df_save_dir=df_save_dir, resname=resname, molname=molname)
 
-    else:
-        logger.warning('df_save_dir kwarg required for saving results, '
-                       'otherwise, continue without saving.')
-
     df_aug = periodic_angle(df, padding=padding)
 
     # double check all kwargs for consistency/redundancy
