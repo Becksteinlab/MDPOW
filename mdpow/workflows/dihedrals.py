@@ -270,6 +270,7 @@ def dihedral_groups_ensemble(dirname, atom_group_indices,
        selection string.
        
        .. seealso::
+
           :func:`~mdpow.workflows.dihedrals.automated_dihedral_analysis`,
           :class:`~mdpow.analysis.dihedral.DihedralAnalysis`
 
@@ -287,6 +288,7 @@ def dihedral_groups_ensemble(dirname, atom_group_indices,
 
        *atom_group_indices*
            tuples of atom indices for dihedral atom groups
+
            .. seealso:: :func:`~mdpow.workflows.dihedrals.dihedral_indices`
 
        *solvents*
@@ -298,6 +300,7 @@ def dihedral_groups_ensemble(dirname, atom_group_indices,
        *start, stop, step*
            arguments passed to :func:`~mdpow.analysis.ensemble.EnsembleAnalysis.run`,
            as parameters for iterating through the trajectories of the current ensemble
+
            .. seealso:: :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`
 
        :returns:
@@ -499,6 +502,7 @@ def plot_violins(df, resname, figdir=None, molname=None, width=0.9, solvents=SOL
        figur for each dihedral atom group separately.
 
        .. seealso:
+
           :func:`~mdpow.workflows.dihedrals.automated_dihedral_analysis`,
           :func:`~mdpow.workflows.dihedrals.dihedral_violins`
        
@@ -522,6 +526,7 @@ def plot_violins(df, resname, figdir=None, molname=None, width=0.9, solvents=SOL
        *width*
            width of the violin element (>1 overlaps)
            default: 0.9
+
            .. seealso:: :func:`~mdpow.workflows.dihedrals.dihedral_violins`
 
        *solvents*
@@ -618,11 +623,13 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
        *padding*
            value in degrees
            default: 45
+
            .. seealso:: :func:`~mdpow.workflows.dihedrals.periodic_angle`
 
        *width*
            width of the violin element (>1 overlaps)
            default: 0.9
+
            .. seealso:: :func:`~mdpow.workflows.dihedrals.dihedral_violins`
 
        *solvents*
@@ -634,7 +641,7 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
        *start, stop, step*
            arguments passed to :func:`~mdpow.analysis.ensemble.EnsembleAnalysis.run`,
            as parameters for iterating through the trajectories of the current ensemble
-           
+
            .. seealso:: :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`
 
        :returns:
