@@ -634,6 +634,7 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
        *start, stop, step*
            arguments passed to :func:`~mdpow.analysis.ensemble.EnsembleAnalysis.run`,
            as parameters for iterating through the trajectories of the current ensemble
+           
            .. seealso:: :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`
 
        :returns:
