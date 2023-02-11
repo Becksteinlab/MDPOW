@@ -13,6 +13,8 @@ import pandas as pd
 import rdkit
 from rdkit import Chem
 
+import seaborn
+
 from numpy.testing import assert_almost_equal
 from scipy.stats import circvar, circmean
 
@@ -241,7 +243,7 @@ class TestAutomatedDihedralAnalysis(object):
         plot = dihedrals.automated_dihedral_analysis(dirname=SM25_tmp_dir, figdir=SM25_tmp_dir,
                                                      resname=self.resname,
                                                      solvents=('water',), dataframe=test_df)
-        assert plot # get exact object ID
+        assert isinstance(plot, seaborn.axisgrid.FacetGrid)
 
     def test_DataFrame_input_info(self, SM25_tmp_dir, caplog):
         caplog.clear()
