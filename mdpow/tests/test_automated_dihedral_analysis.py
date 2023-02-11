@@ -191,7 +191,7 @@ class TestAutomatedDihedralAnalysis(object):
         caplog.clear()
         caplog.set_level(logging.INFO, logger='mdpow.workflows.dihedrals')
         dihedrals.save_df(df=dihedral_data[0], df_save_dir=SM25_tmp_dir, molname='SM25')
-        assert f'Results DataFrame saved as {SM25_tmp_dir}/SM25/SM25_full_df.csv.bz2', 'Save location not logged or returned'
+        assert f'Results DataFrame saved as {SM25_tmp_dir}/SM25/SM25_full_df.csv.bz2' in caplog.text, 'Save location not logged or returned'
 
     # the following 'reason' affects every downstream function that relies
     # on the atom indices returned for dihedral atom group selections

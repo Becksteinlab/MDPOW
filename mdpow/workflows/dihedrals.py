@@ -374,8 +374,7 @@ def save_df(df, df_save_dir, resname=None, molname=None):
     df.to_csv(f'{newdir}/{molname}_full_df.csv.bz2',
               index=False, compression='bz2')
 
-    logger.info(f'Results DataFrame saved as '
-                 '{newdir}/{molname}_full_df.csv.bz2')
+    logger.info(f'Results DataFrame saved as {newdir}/{molname}_full_df.csv.bz2')
 
     #return
 
