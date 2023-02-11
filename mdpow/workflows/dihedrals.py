@@ -55,26 +55,26 @@ logger = logging.getLogger('mdpow.workflows.dihedrals')
 
 
 SOLVENTS_DEFAULT = ('water', 'octanol')
-"""Default solvents are water and octanol.
+"""Default solvents are water and octanol:
 
-    * Must match solvents used in project directory.
-    * One or two solvents can be specified.
-    * Current solvents supported,
+    * must match solvents used in project directory
+    * one or two solvents can be specified
+    * current solvents supported,
 
    .. seealso:: :mod:`mdpow.forcefields`
 
 """
 
 INTERACTIONS_DEFAULT = ('Coulomb', 'VDW')
-"""Default interactions set to Coulomb and VDW.
+"""Default interactions set to Coulomb and VDW:
 
-    * Default values should not be changed
-    * Order should not be changed
+    * default values should not be changed
+    * order should not be changed
 
 """
 
 SMARTS_DEFAULT = '[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]'
-"""Default SMARTS string to identify relevant dihedral atom groups.
+"""Default SMARTS string to identify relevant dihedral atom groups:
 
      * ``[!#1]`` : any atom, not Hydrogen
      * ``~``  : any bond
@@ -201,7 +201,7 @@ def dihedral_indices(dirname, resname, SMARTS=SMARTS_DEFAULT):
        :returns:
        
        *atom_group_indices*
-           Tuple of tuples of indices for each dihedral atom group.
+           tuple of tuples of indices for each dihedral atom group
 
     '''
 
@@ -248,12 +248,10 @@ def dihedral_groups(dirname, resname, SMARTS=SMARTS_DEFAULT):
        :returns:
        
        *dihedral_groups*
-           List of :func:`numpy.array` for atom names in each dihedral atom group.
+           list of :func:`numpy.array` for atom names in each dihedral atom group
 
     '''
 
-    # revisit this (reminder 1/30/23)
-    # temporary fix for current indexing method (solute.atoms...)
     u = build_universe(dirname=dirname)
     solute = rdkit_conversion(u=u, resname=resname)[1]
     atom_group_indices = dihedral_indices(dirname=dirname, resname=resname, SMARTS=SMARTS)
@@ -271,8 +269,9 @@ def dihedral_groups_ensemble(dirname, atom_group_indices,
        for each dihedral atom group identified by the SMARTS
        selection string.
        
-       .. seealso:: :func:`~mdpow.workflows.dihedrals.automated_dihedral_analysis`,
-                    :class:`~mdpow.analysis.dihedral.DihedralAnalysis`
+       .. seealso::
+          :func:`~mdpow.workflows.dihedrals.automated_dihedral_analysis`,
+          :class:`~mdpow.analysis.dihedral.DihedralAnalysis`
 
        :keywords:
 
@@ -291,13 +290,15 @@ def dihedral_groups_ensemble(dirname, atom_group_indices,
            .. seealso:: :func:`~mdpow.workflows.dihedrals.dihedral_indices`
 
        *solvents*
-           The default solvents are documented under :data:`SOLVENTS_DEFAULT`
+           The default solvents are documented under :data:`SOLVENTS_DEFAULT`.
 
        *interactions*
-           The default interactions are documented under :data:`INTERACTIONS_DEFAULT`
+           The default interactions are documented under :data:`INTERACTIONS_DEFAULT`.
 
        *start, stop, step*
-       .. seealso:: :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`
+           arguments passed to :func:`~mdpow.analysis.ensemble.EnsembleAnalysis.run`,
+           as parameters for iterating through the trajectories of the current ensemble
+           .. seealso:: :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`
 
        :returns:
        
@@ -332,11 +333,12 @@ def save_df(df, df_save_dir, resname=None, molname=None):
        and plotting dihedral angle frequencies as KDE violins
        with :func:`~mdpow.workflows.dihedrals.dihedral_violins`.
        Given a parent directory, creates subdirectory for molecule,
-       saves fully sampled, unpadded results as compressed csv.
+       saves fully sampled, unpadded results :class:`pandas.DataFrame`
+       as a compressed csv file, default: .csv.bz2.
 
        :keywords:
 
-        *df*
+       *df*
            :class:`pandas.DataFrame` of :class:`~mdpow.analysis.dihedral.DihedralAnalysis`
            results, including all dihedral atom groups for molecule of current project
 
@@ -350,12 +352,7 @@ def save_df(df, df_save_dir, resname=None, molname=None):
        *molname*
            molecule name to be used for labelling
            plots, if different from `resname`
-
-       :returns:
-       
-       *.csv.bz2*
-           saves the results :class:`pandas.DataFrame` as a compressed
-           csv file, default: .bz2
+           
     '''
 
     df = df.sort_values(by=["selection",
@@ -375,8 +372,6 @@ def save_df(df, df_save_dir, resname=None, molname=None):
               index=False, compression='bz2')
 
     logger.info(f'Results DataFrame saved as {newdir}/{molname}_full_df.csv.bz2')
-
-    #return
 
 def periodic_angle(df, padding=45):
     '''Pads the angles from the results :class:`~pandas.DataFrame`
@@ -420,10 +415,6 @@ def periodic_angle(df, padding=45):
 
     '''
 
-    # To-Do
-    # warning for trying to set a value on a copy
-    # of a slice of a DataFrame needs to be suppressed
-    # is not relevant, double check again
     df1 = df[df.dihedral > 180 - padding]
     df1.dihedral -= 360
     df2 = df[df.dihedral < -180 + padding]
@@ -448,20 +439,17 @@ def dihedral_violins(df, width=0.9, solvents=SOLVENTS_DEFAULT):
            default: 0.9
 
        *solvents*
-           The default solvents are documented under :data:`SOLVENTS_DEFAULT`
+           The default solvents are documented under :data:`SOLVENTS_DEFAULT`.
        
        :returns:
 
        *violin plot*
-           Returns a :class:`seaborn.FacetGrid` object containing a violin plot of the
+           returns a :class:`seaborn.FacetGrid` object containing a violin plot of the
            kernel density estimations (KDE) of the dihedral angle frequencies for each
            relevant dihedral atom group in the molecule from the current MDPOW project
 
     '''
 
-    # To-Do
-    # make sure value sorting and index dropping/resetting
-    # is consistent and makes sense throughout
     df['lambda'] = df['lambda'].astype('float') / 1000
     df = df.sort_values(by=["selection",
                             "solvent",
@@ -477,24 +465,15 @@ def dihedral_violins(df, width=0.9, solvents=SOLVENTS_DEFAULT):
     solv2 = 'octanol'
     if solvs.size > 1:
         solv2 = solvs[1]
-    # To-Do
-    # ^necessary when plotting only water
-    # there is likely a better solution
-    # review this before merge (1/30/23)
-    # see lines 440-450
     
     g = sns.catplot(data=df, x="lambda", y="dihedral", hue="solvent", col="interaction",
                     kind="violin", split=True, width=width, inner=None, cut=0,
                     linewidth=0.5,
                     hue_order=[solvs[0], solv2], col_order=["Coulomb", "VDW"],
-                    #hue_order=["water", "octanol"], col_order=["Coulomb", "VDW"],
-                    #hue_order=[df.solvent.iloc[0], df.solvent.iloc[-1]], col_order=["Coulomb", "VDW"],
-                    # causes problems and is not a good fix 
                     sharex=False, sharey=True,
                     height=2, aspect=2.5,
                     facet_kws={'ylim': (-180, 180),
                                'gridspec_kws': {'width_ratios': width_ratios,
-                                                # 'wspace': 0.03
                                                 }})
     g.set_xlabels(r"$\lambda$")
     g.set_ylabels(r"dihedral angle $\phi$")
@@ -519,8 +498,9 @@ def plot_violins(df, resname, figdir=None, molname=None, width=0.9, solvents=SOL
        `figdir` using `resname` or `molname` provided and saves violin plot
        figur for each dihedral atom group separately.
 
-       .. seealso: :func:`~mdpow.workflows.dihedrals.automated_dihedral_analysis`,
-                   :func:`~mdpow.workflows.dihedrals.dihedral_violins`
+       .. seealso:
+          :func:`~mdpow.workflows.dihedrals.automated_dihedral_analysis`,
+          :func:`~mdpow.workflows.dihedrals.dihedral_violins`
        
        :keywords:
        
@@ -542,15 +522,15 @@ def plot_violins(df, resname, figdir=None, molname=None, width=0.9, solvents=SOL
        *width*
            width of the violin element (>1 overlaps)
            default: 0.9
-       .. seealso:: :func:`~mdpow.workflows.dihedrals.dihedral_violins`
+           .. seealso:: :func:`~mdpow.workflows.dihedrals.dihedral_violins`
 
        *solvents*
-           The default solvents are documented under :data:`SOLVENTS_DEFAULT`
+           The default solvents are documented under :data:`SOLVENTS_DEFAULT`.
 
        :returns:
 
        *violin plot*
-           Returns a :class:`seaborn.FacetGrid` object containing a violin plot of the
+           returns a :class:`seaborn.FacetGrid` object containing a violin plot of the
            kernel density estimations (KDE) of the dihedral angle frequencies for each
            relevant dihedral atom group in the molecule from the current MDPOW project
 
@@ -568,10 +548,10 @@ def plot_violins(df, resname, figdir=None, molname=None, width=0.9, solvents=SOL
 
     for name in section:
         plot = dihedral_violins(name[1], width=width, solvents=solvents)
-        # decide if 'set_titles' belongs here or in dihedral_violins
-        # appears twice in new modified plots that add Mol image to plots
         plot.set_titles(f'{molname},{name[0]}, ''{col_name}')
-        # ^belongs here bc of naming convention for iteration (1/30/23)
+        # plot.set_titles needs to stay here during future development
+        # this locale ensures that plots are properly named,
+        # especially when generated for a projecct iteratively
 
         if figdir is not None:
             figfile = pathlib.Path(newdir) / f"{molname}_{name[0]}_violins.pdf"
@@ -638,26 +618,28 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
        *padding*
            value in degrees
            default: 45
-       .. seealso:: :func:`~mdpow.workflows.dihedrals.periodic_angle`
+           .. seealso:: :func:`~mdpow.workflows.dihedrals.periodic_angle`
 
        *width*
            width of the violin element (>1 overlaps)
            default: 0.9
-       .. seealso:: :func:`~mdpow.workflows.dihedrals.dihedral_violins`
+           .. seealso:: :func:`~mdpow.workflows.dihedrals.dihedral_violins`
 
        *solvents*
-           The default solvents are documented under :data:`SOLVENTS_DEFAULT`
+           The default solvents are documented under :data:`SOLVENTS_DEFAULT`.
 
        *interactions*
-           The default interactions are documented under :data:`INTERACTIONS_DEFAULT`
+           The default interactions are documented under :data:`INTERACTIONS_DEFAULT`.
 
        *start, stop, step*
+           arguments passed to :func:`~mdpow.analysis.ensemble.EnsembleAnalysis.run`,
+           as parameters for iterating through the trajectories of the current ensemble
            .. seealso:: :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`
 
        :returns:
 
        *violin plot*
-           Returns a :class:`seaborn.FacetGrid` object containing a violin plot of the
+           returns a :class:`seaborn.FacetGrid` object containing a violin plot of the
            kernel density estimations (KDE) of the dihedral angle frequencies for each
            relevant dihedral atom group in the molecule from the current MDPOW project
 
@@ -682,9 +664,7 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
         logger.info(f'Proceeding with results DataFrame provided.')
 
     else:
-        # new arrangement (1/31), temporary
-        # this will need to change or the indices will need
-        # to be saved in results DF for future changes
+
         atom_group_indices = dihedral_indices(dirname=dirname, resname=resname, SMARTS=SMARTS)
         df = dihedral_groups_ensemble(atom_group_indices=atom_group_indices, dirname=dirname,
                                       solvents=solvents, interactions=interactions,
