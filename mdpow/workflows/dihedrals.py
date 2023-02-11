@@ -501,7 +501,7 @@ def plot_violins(df, resname, figdir=None, molname=None, width=0.9, solvents=SOL
        `figdir` using `resname` or `molname` provided and saves violin plot
        figur for each dihedral atom group separately.
 
-       .. seealso:
+       .. seealso::
 
           :func:`~mdpow.workflows.dihedrals.automated_dihedral_analysis`,
           :func:`~mdpow.workflows.dihedrals.dihedral_violins`
