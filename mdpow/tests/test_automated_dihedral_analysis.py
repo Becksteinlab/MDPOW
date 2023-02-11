@@ -24,9 +24,6 @@ from ..workflows import dihedrals
 
 from pkg_resources import resource_filename
 
-# NEW TESTING DATA NEEDS TO BE GENERATED FOR circstats
-# FROM REDUCING TESTING DATASET
-
 RESOURCES = pathlib.PurePath(resource_filename(__name__, 'testing_resources'))
 MANIFEST = RESOURCES / "manifest.yml"
 
@@ -100,32 +97,20 @@ class TestAutomatedDihedralAnalysis(object):
     check_hydrogens = np.array(['H21', 'H22', 'H23', 'H24', 'H25', 'H26', 'H27', 'H28',
                                 'H29', 'H30', 'H31', 'H32', 'H33', 'H34', 'H35'], dtype=object)
 
-    # pre-padding dihedral group statistics
-    #DG_O1C2N3S4_mean = -0.13089566578887002
-    #DG_O1C2N3S4_var = 0.03473127346296412
-
-    # new 2-6-23
-    # pre-padding dihedral group statistics
+    # pre 'angle padding' - scipy.stats for
+    # dihedral atom group: O1-C2-N3-S4
     DG_O1C2N3S4_mean = -0.5933808752787115
     DG_O1C2N3S4_var = 0.031351024457919485
 
-    # pre-padding dihedral group statistics
-    #DG_C13141520_mean = 90.04076626959608
-    #DG_C13141520_var = 0.8814931303534448
-
-    # new 2-6-23
-    # pre-padding dihedral group statistics
+    # pre 'angle padding' - scipy.stats for
+    # dihedral atom group: C13-C14-C15-C20
     DG_C13141520_mean = 89.22382649857468
     DG_C13141520_var = 0.8753980937068645
 
-    # post-padding dihedral group statistics
-    # 'A' represents 'augmented'
-    #ADG_C13141520_mean = 93.50126701923381
-    #ADG_C13141520_var = 0.8815675813248334
-
-    # new 2-6-23
-    # post-padding dihedral group statistics
-    # 'A' represents 'augmented'
+    # post 'angle padding' - scipy.stats for
+    # dihedral atom group: C13-C14-C15-C20
+    # 'A' = 'augmented', referencing those
+    # results included in 'df_aug'
     ADG_C13141520_mean = 91.71943996962284
     ADG_C13141520_var = 0.8773028474908289
     
