@@ -76,7 +76,6 @@ jobs:
     - name: Install pybol (fixture staging tool)
       run: |
          python -m pip install pybol
-
     - name: Install GROMACS (${{ matrix.gromacs-version }})
       run: |
          micromamba install 'gromacs==${{ matrix.gromacs-version }}' pocl

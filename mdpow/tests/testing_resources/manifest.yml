@@ -45,3 +45,9 @@ example_FEP:
         - full_transfer
     files:
         - []
+
+workflows:
+    options:
+        - full_transfer
+    files:
+        - []

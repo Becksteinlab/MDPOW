@@ -96,5 +96,5 @@ class TestDihedral(object):
     def test_single_universe(self):
         dh = self.Ens.select_atoms('name C4', 'name C17', 'name S2', 'name N3')
         with pytest.raises(NotImplementedError):
-            DihedralAnalysis([dh])._single_universe()
 
+            DihedralAnalysis([dh])._single_universe()

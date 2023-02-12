@@ -5,7 +5,7 @@ CHANGES for MDPOW
 Add summary of changes for each release. Use ISO 8061 dates. Reference
 GitHub issues numbers and PR numbers.
 
-2022-??-??    0.9.0
+2023-??-??    0.9.0
 cadeduckworth, orbeckst, VOD555
 
 Changes
@@ -19,7 +19,14 @@ Changes
 * _prepare_universe and _conclude_universe removed from 
   EnsembleAnalysis.run() method, no longer needed (per comments, #199)
 * added support for Python 3.10
-* dropped testing on Python 3.6 
+* dropped testing on Python 3.6
+
+Enhancements
+
+* new workflows module (PR #217)
+* new automated dihedral analysis workflow (detect dihedrals with SMARTS,
+  analyze with EnsembleAnalysis, and generate seaborn violinplots)
+  PR #217)
 
 Fixes
 

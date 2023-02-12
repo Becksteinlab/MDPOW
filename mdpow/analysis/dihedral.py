@@ -31,7 +31,7 @@ class DihedralAnalysis(EnsembleAnalysis):
     Data is returned in a :class:`pandas.DataFrame` with observations sorted by
     selection, solvent, interaction, lambda, time.
 
-    .. ruberic:: Example
+    .. rubric:: Example
 
     Typical Workflow::
 
