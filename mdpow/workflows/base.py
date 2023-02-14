@@ -34,7 +34,7 @@ def directory_paths(parent_directory=None, csv=None, csv_save_dir=None):
        *parent_directory*
            the path for the location of the top directory 
            under which the subdirectories of MDPOW simulation
-           data exist, additionally creates a '*.csv' file
+           data exist, additionally creates a 'dir_paths.csv' file
            for user manipulation of metadata and for future reference
 
        *csv*
