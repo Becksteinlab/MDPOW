@@ -7,6 +7,7 @@
 
 .. autofunction:: directory_paths
 .. autofunction:: directory_iteration
+
 """
 
 import os
@@ -33,8 +34,8 @@ def directory_paths(parent_directory=None, csv=None):
        *parent_directory*
            the path for the location of the top directory 
            under which the subdirectories of MDPOW simulation
-           data exist, additionally creates a 'dir.csv' file
-           for user manipulation of metadata and future reference
+           data exist, additionally creates a '*.csv' file
+           for user manipulation of metadata and for future reference
 
        *csv*
            .csv file containing the molecule names, resnames,
@@ -112,7 +113,9 @@ def directory_iteration(directory_paths, ensemble_analysis, **kwargs):
            that corresponds to the desired automated workflow module
 
        *kwargs*
-       .. autodata:: mdpow.workflows.dihedrals.automated_dihedral_analysis
+           keyword arguments from :func:`~mdpow.workflows.dihedrals.automated_dihedral_analysis`
+
+           .. autodata:: mdpow.workflows.dihedrals.automated_dihedral_analysis
 
        .. rubric:: Example
 
