@@ -56,7 +56,8 @@ logger = logging.getLogger('mdpow')
 
 suffix = {'water':'hyd',
           'octanol':'oct',
-          'cyclohexane':'cyclo'
+          'cyclohexane':'cyclo',
+          'toluene':'tol',
       }
 
 def load_gsolv(solvent, directory, **kwargs):
@@ -228,7 +229,7 @@ if __name__ == "__main__":
                         "and is disabled when using alchemlyb estimators.",
                         metavar="FILE")
     parser.add_argument('--solvent', '-S', dest='solvent', default='water',
-                        choices=['water', 'octanol', 'cyclohexane'], metavar="NAME",
+                        choices=['water', 'octanol', 'cyclohexane', 'toluene'], metavar="NAME",
                         help="solvent NAME for compound, 'water', 'octanol', or 'cyclohexane' ")
     parser.add_argument('-o', '--outfile', dest="outfile", default="gsolv.txt",
                         help="append one-line results summary to FILE ",

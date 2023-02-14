@@ -15,3 +15,4 @@ for use with :class:`~mdpow.analysis.dihedral.DihedralAnalysis`.
    :maxdepth: 1
 
    workflows/base
+   workflows/dihedrals
