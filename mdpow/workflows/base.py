@@ -22,7 +22,7 @@ logger = logging.getLogger('mdpow.workflows.base')
 
 # DONT FORGET UPDATES FROM SAMPL9 REPO
 
-def directory_paths(parent_directory=None, csv=None):
+def directory_paths(parent_directory=None, csv=None, csv_save_dir=None):
     """Takes a top directory containing MDPOW projects and determines
        the molname, resname, and path, of each MDPOW project within.
 
@@ -43,6 +43,10 @@ def directory_paths(parent_directory=None, csv=None):
            data to be iterated over
            must contain header of the form:
            format: molecule,resname,path
+
+       *csv_save_dir*
+           optionally provided directory to save .csv file, otherwise,
+           data will be saved in current working directory
 
        :returns:
 
@@ -86,7 +90,15 @@ def directory_paths(parent_directory=None, csv=None):
             "path": locations
         }
     )
-        directory_paths.to_csv('dir.csv', index=False)
+        if csv_save_dir is not None:
+            
+            directory_paths.to_csv(f'{csv_save_dir}/dir_paths.csv', index=False)
+            logger.info(f'dir_paths saved under {csv_save_dir}')
+
+        else:
+            current_directory = os.system('pwd')
+            directory_paths.to_csv(f'{current_directory}/dir_paths.csv', index=False)
+            logger.info(f'dir_paths saved under {current_directory}')
 
     elif csv is not None:
         locations = pd.read_csv(csv)
