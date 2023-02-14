@@ -16,6 +16,7 @@ dependencies:
 - gromacswrapper
 - alchemlyb <2
 - rdkit
+- seaborn
 
   # Testing
 - pytest
