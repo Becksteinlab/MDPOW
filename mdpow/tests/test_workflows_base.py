@@ -31,37 +31,43 @@ RESOURCES = pathlib.PurePath(resource_filename(__name__, 'testing_resources'))
 MANIFEST = RESOURCES / "manifest.yml"
 
 @pytest.fixture(scope="function")
-def molname_workflows_directory(tmp_path, molname='SM25'):
+def molname_workflows_directory(tmp_path):
     m = pybol.Manifest(str(MANIFEST))
     m.assemble('workflows', tmp_path)
-    return tmp_path / molname
+    return tmp_path
+
+@pytest.fixture(scope="function")
+def csv_tmp_dir(tmp_path, csv='tmp_csv'):
+    m = pybol.Manifest(str(MANIFEST))
+    m.assemble('workflows', tmp_path)
+    return tmp_path
 
 class TestAutomatedDihedralAnalysis(object):
 
     @pytest.fixture(scope="function")
-    def SM25_tmp_dir(self, molname_workflows_directory):
+    def SM_tmp_dir(self, molname_workflows_directory):
         dirname = molname_workflows_directory
         return dirname
 
     resname = 'UNK'
         
-    def test_base(self, molname_workflows_directory, SM25_tmp_dir):
+    def test_base(self, molname_workflows_directory, SM_tmp_dir, csv_tmp_dir):
         # tests directory_paths function and resname-molname conversion
         parent_directory = molname_workflows_directory
-        directory_paths = base.directory_paths(parent_directory=parent_directory)
-        assert (directory_paths['molecule'] == 'SM25').any() == True
-        assert (directory_paths['molecule'] == 'SM26').any() == True
+        directory_paths = base.directory_paths(parent_directory=parent_directory, csv_save_dir=csv_tmp_dir)
+        assert directory_paths['molecule'][0] == 'SM25'
+        assert directory_paths['molecule'][1] == 'SM26'
         
-    def test_directory_iteration(self, molname_workflows_directory, SM25_tmp_dir):
+    def test_directory_iteration(self, molname_workflows_directory, SM_tmp_dir, csv_tmp_dir):
         parent_directory = molname_workflows_directory
-        directory_paths = base.directory_paths(parent_directory=parent_directory)
+        directory_paths = base.directory_paths(csv=f'{csv_tmp_dir}/dir_paths.csv')
 
         # change resname to match topology (every SAMPL7 resname is 'UNK')
         # only necessary for this dataset, not necessary for normal use
         directory_paths['resname'] = 'UNK'
 
-        base.directory_iteration(directory_paths, df_save_dir=SM25_tmp_dir, solvents=('water',),
+        base.directory_iteration(directory_paths, df_save_dir=SM_tmp_dir, solvents=('water',),
                                  ensemble_analysis='DihedralAnalysis')
 
-        assert SM25_tmp_dir / 'SM25' / 'SM25_full_df.csv.bz2'
-        assert SM25_tmp_dir / 'SM26' / 'SM26_full_df.csv.bz2'
+        assert (SM_tmp_dir / 'SM25' / 'SM25_full_df.csv.bz2').exists()
+        assert (SM_tmp_dir / 'SM26' / 'SM26_full_df.csv.bz2').exists()
