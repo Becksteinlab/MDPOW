@@ -2,7 +2,7 @@
 # 2023 Cade Duckworth
 
 # import analysis
-from mdpow.workflows import dihedrals_217 as dihedrals
+from mdpow.workflows import dihedrals
  
 registry = {
     'DihedralAnalysis' : dihedrals.automated_dihedral_analysis,
