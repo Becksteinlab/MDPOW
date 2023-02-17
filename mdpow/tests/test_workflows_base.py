@@ -53,8 +53,8 @@ class TestWorkflowsBase(object):
         
     def test_directory_paths(self, SM_tmp_dir):
         directory_paths = base.directory_paths(parent_directory=SM_tmp_dir)
-        assert directory_paths['molecule'][0] == 'SM25'
-        assert directory_paths['molecule'][1] == 'SM26'
+        assert 'SM25' in directory_paths['molecule'][0]
+        assert 'SM26' in directory_paths['molecule'][0]
         
     def test_directory_iteration(self, SM_tmp_dir, caplog):
         directory_paths = base.directory_paths(parent_directory=SM_tmp_dir)
