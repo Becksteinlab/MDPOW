@@ -59,7 +59,7 @@ class TestWorkflowsBase(object):
         assert directory_paths['molecule'][0] == 'SM25'
         assert directory_paths['molecule'][1] == 'SM26'
         
-    def test_csv_ directory_iteration(self, molname_workflows_directory, SM_tmp_dir, csv_tmp_dir):
+    def test_csv_directory_iteration(self, molname_workflows_directory, SM_tmp_dir, csv_tmp_dir):
         parent_directory = molname_workflows_directory
         csv_save_dir=csv_tmp_dir
         directory_paths = base.directory_paths(csv=f'{csv_save_dir}/dir_paths.csv')
