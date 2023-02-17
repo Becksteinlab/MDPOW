@@ -40,9 +40,9 @@ def molname_workflows_directory(tmp_path):
 def csv_tmp_dir(tmp_path, csv='tmp_csv'):
     m = pybol.Manifest(str(MANIFEST))
     m.assemble('workflows', tmp_path)
-    return tmp_path
+    return tmp_path / csv
 
-class TestAutomatedDihedralAnalysis(object):
+class TestWorkflowsBase(object):
 
     @pytest.fixture(scope="function")
     def SM_tmp_dir(self, molname_workflows_directory):
@@ -51,16 +51,18 @@ class TestAutomatedDihedralAnalysis(object):
 
     resname = 'UNK'
         
-    def test_base(self, molname_workflows_directory, SM_tmp_dir, csv_tmp_dir):
-        # tests directory_paths function and resname-molname conversion
+    def test_directory_paths(self, molname_workflows_directory, SM_tmp_dir, csv_tmp_dir):
+        # tests directory_paths function and resname-molname conversion/substitution
         parent_directory = molname_workflows_directory
-        directory_paths = base.directory_paths(parent_directory=parent_directory, csv_save_dir=csv_tmp_dir)
+        csv_save_dir=csv_tmp_dir
+        directory_paths = base.directory_paths(parent_directory=parent_directory, csv_save_dir=csv_save_dir)
         assert directory_paths['molecule'][0] == 'SM25'
         assert directory_paths['molecule'][1] == 'SM26'
         
-    def test_directory_iteration(self, molname_workflows_directory, SM_tmp_dir, csv_tmp_dir):
+    def test_csv_ directory_iteration(self, molname_workflows_directory, SM_tmp_dir, csv_tmp_dir):
         parent_directory = molname_workflows_directory
-        directory_paths = base.directory_paths(csv=f'{csv_tmp_dir}/dir_paths.csv')
+        csv_save_dir=csv_tmp_dir
+        directory_paths = base.directory_paths(csv=f'{csv_save_dir}/dir_paths.csv')
 
         # change resname to match topology (every SAMPL7 resname is 'UNK')
         # only necessary for this dataset, not necessary for normal use
