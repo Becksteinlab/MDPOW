@@ -97,7 +97,7 @@ def directory_paths(parent_directory=None, csv=None, csv_save_dir=None):
 
         else:
             current_directory = os.system('pwd')
-            directory_paths.to_csv(f'{current_directory}/dir_paths.csv', index=False)
+            directory_paths.to_csv('dir_paths.csv', index=False)
             logger.info(f'dir_paths saved under {current_directory}')
 
     elif csv is not None:

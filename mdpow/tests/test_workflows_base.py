@@ -36,11 +36,11 @@ def molname_workflows_directory(tmp_path):
     m.assemble('workflows', tmp_path)
     return tmp_path
 
-@pytest.fixture(scope="function")
-def csv_tmp_dir(tmp_path, csv='tmp_csv'):
-    m = pybol.Manifest(str(MANIFEST))
-    m.assemble('workflows', tmp_path)
-    return tmp_path / csv
+#@pytest.fixture(scope="function")
+#def csv_tmp_dir(tmp_path, csv='tmp_csv'):
+#    m = pybol.Manifest(str(MANIFEST))
+#    m.assemble('workflows', tmp_path)
+#    return tmp_path / csv
 
 class TestWorkflowsBase(object):
 
@@ -51,25 +51,18 @@ class TestWorkflowsBase(object):
 
     resname = 'UNK'
         
-    def test_directory_paths(self, molname_workflows_directory, SM_tmp_dir, csv_tmp_dir):
-        # tests directory_paths function and resname-molname conversion/substitution
-        parent_directory = molname_workflows_directory
-        csv_save_dir=csv_tmp_dir
-        directory_paths = base.directory_paths(parent_directory=parent_directory, csv_save_dir=csv_save_dir)
+    def test_directory_paths(self, SM_tmp_dir):
+        directory_paths = base.directory_paths(parent_directory=SM_tmp_dir)
         assert directory_paths['molecule'][0] == 'SM25'
         assert directory_paths['molecule'][1] == 'SM26'
         
-    def test_csv_directory_iteration(self, molname_workflows_directory, SM_tmp_dir, csv_tmp_dir):
-        parent_directory = molname_workflows_directory
-        csv_save_dir=csv_tmp_dir
-        directory_paths = base.directory_paths(csv=f'{csv_save_dir}/dir_paths.csv')
-
+    def test_directory_iteration(self, SM_tmp_dir, caplog):
+        directory_paths = base.directory_paths(parent_directory=SM_tmp_dir)
         # change resname to match topology (every SAMPL7 resname is 'UNK')
         # only necessary for this dataset, not necessary for normal use
         directory_paths['resname'] = 'UNK'
 
-        base.directory_iteration(directory_paths, df_save_dir=SM_tmp_dir, solvents=('water',),
+        base.directory_iteration(directory_paths, solvents=('water',),
                                  ensemble_analysis='DihedralAnalysis')
 
-        assert (SM_tmp_dir / 'SM25' / 'SM25_full_df.csv.bz2').exists()
-        assert (SM_tmp_dir / 'SM26' / 'SM26_full_df.csv.bz2').exists()
+        assert 'all analyses completed' in caplog.text, 'automated_dihedral_analysis did not iteratively run to completion for the provided project'
