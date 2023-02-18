@@ -1,3 +1,4 @@
+import re
 import os
 import sys
 import yaml
@@ -6,23 +7,12 @@ import pytest
 import pathlib
 import logging
 
-import scipy
-import numpy as np
 import pandas as pd
-
-import rdkit
-from rdkit import Chem
-
-import seaborn
-
-from numpy.testing import assert_almost_equal
-from scipy.stats import circvar, circmean
 
 from . import RESOURCES
 
 import py.path
 
-#from ..workflows import dihedrals
 from ..workflows import base
 
 from pkg_resources import resource_filename
@@ -36,12 +26,6 @@ def molname_workflows_directory(tmp_path):
     m.assemble('workflows', tmp_path)
     return tmp_path
 
-#@pytest.fixture(scope="function")
-#def csv_tmp_dir(tmp_path, csv='tmp_csv'):
-#    m = pybol.Manifest(str(MANIFEST))
-#    m.assemble('workflows', tmp_path)
-#    return tmp_path / csv
-
 class TestWorkflowsBase(object):
 
     @pytest.fixture(scope="function")
@@ -49,13 +33,23 @@ class TestWorkflowsBase(object):
         dirname = molname_workflows_directory
         return dirname
 
-    resname = 'UNK'
+    test_dict = {'molecule' : ['SM25', 'SM26'],
+                    'resname' : ['SM25', 'SM26']
+                   }
+
+    test_df = pd.DataFrame(test_dict).reset_index(drop=True)
         
     def test_directory_paths(self, SM_tmp_dir):
         directory_paths = base.directory_paths(parent_directory=SM_tmp_dir)
-        assert 'SM25' in directory_paths['molecule'][0]
-        assert 'SM26' in directory_paths['molecule'][0]
-        
+
+        assert directory_paths['molecule'][0] == self.test_df['molecule'][0]
+        assert directory_paths['molecule'][1] == self.test_df['molecule'][1]
+        assert directory_paths['resname'][0] == self.test_df['resname'][0]
+        assert directory_paths['resname'][1] == self.test_df['resname'][1]
+
+    #def test_csv_input(self):
+     #   directory_paths = base.directory_paths(parent_directory=self.top_dir)
+
     def test_directory_iteration(self, SM_tmp_dir, caplog):
         directory_paths = base.directory_paths(parent_directory=SM_tmp_dir)
         # change resname to match topology (every SAMPL7 resname is 'UNK')
