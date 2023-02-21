@@ -59,7 +59,7 @@ class TestAutomatedDihedralAnalysis(object):
     @pytest.fixture(scope="function")
     def dihedral_data(self, SM25_tmp_dir, atom_indices):
         atom_group_indices, _ = atom_indices
-        df = dihedrals.dihedral_groups_ensemble(atom_group_indices=atom_group_indices,
+        df = dihedrals.dihedral_groups_ensemble(atom_indices=atom_group_indices,
                                                 dirname=SM25_tmp_dir,
                                                 solvents=('water',))
         df_aug = dihedrals.periodic_angle(df)
