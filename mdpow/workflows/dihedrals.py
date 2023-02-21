@@ -40,6 +40,11 @@ import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import rdCoordGen
 
+# for SVG test
+from rdkit.Chem.Draw import IPythonConsole
+from IPython.display import SVG
+from rdkit.Chem.Draw import rdMolDraw2D
+
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -513,7 +518,7 @@ def dihedral_violins(df, im, width=0.9, solvents=SOLVENTS_DEFAULT):
     # (+1 for additional space with axes)
     width_ratios = [len(df[df['interaction'] == "Coulomb"]["lambda"].unique()) + 1,
                     len(df[df['interaction'] == "VDW"]["lambda"].unique()),
-                    len(df[df['interaction'] == "Coulomb"]["lambda"].unique()) - 1]
+                    len(df[df['interaction'] == "Coulomb"]["lambda"].unique()) - 1] # was - 1
 
     solvs = np.asarray(solvents)
     solv2 = 'octanol'
@@ -525,7 +530,7 @@ def dihedral_violins(df, im, width=0.9, solvents=SOLVENTS_DEFAULT):
                     linewidth=0.5,
                     hue_order=[solvs[0], solv2], col_order=["Coulomb", "VDW", "Structure"],
                     sharex=False, sharey=True,
-                    height=3.0, aspect=2.0,
+                    height=3.0, aspect=2.0, # height was 3.0, aspect was 2.0
                     facet_kws={'ylim': (-180, 180),
                                'gridspec_kws': {'width_ratios': width_ratios,
                                                 }})
@@ -542,8 +547,10 @@ def dihedral_violins(df, im, width=0.9, solvents=SOLVENTS_DEFAULT):
     axV.yaxis.set_visible(False)
     axV.spines["left"].set_visible(False)
 
-    axIM = g.axes_dict['Structure']
-    axIM.imshow(im, aspect='equal', origin='upper', extent=(-50.0, 349.5, -180.0, 180.0))
+    axIM = g.axes_dict['Structure']                       # -50, 349.5
+    #axIM.imshow(im, aspect='equal', origin='upper', extent=(-30.0, 329.5, -180.0, 180.0))
+    axIM.imshow(im, aspect='equal', origin='upper', extent=(-80.5, 379.5, -222.0, 222.0))
+    #axIM.imshow(im, aspect='equal', origin='upper', extent=(-0.5, 299.5, -180.0, 180.0))
     axIM.axis('off')
 
     return g
@@ -609,7 +616,15 @@ def plot_violins(df, resname, mol, ab_pairs, figdir=None, molname=None, width=0.
     for name in section:
         a = list(ab_pairs[name[0]][0])
         b = list(ab_pairs[name[0]][1])
-        im = Chem.Draw.MolToImage(mol=mol, highlightAtoms=a, highlightBonds=b)
+
+        #drawer = rdMolDraw2D.MolDraw2DSVG(300, 300)
+        #drawer.DrawMolecule(mol=mol, highlightAtoms=a, highlightBonds=b)
+        #drawer.FinishDrawing()
+        #svg = drawer.GetDrawingText().replace('svg:','')
+
+        #im = SVG(svg)
+                                           # default x300
+        im = Chem.Draw.MolToImage(mol=mol, size=(400,400), highlightAtoms=a, highlightBonds=b)
         plot = dihedral_violins(name[1], im=im, width=width, solvents=solvents)
         plot.set_titles(f'{molname}, {name[0]} {list(ab_pairs[name[0]][0])} | ''{col_name}')
         # plot.set_titles needs to stay here during future development
