@@ -419,10 +419,14 @@ def periodic_angle(df, padding=45):
     '''
 
     df1 = df[df.dihedral > 180 - padding]
-    df1.dihedral -= 360
+    for row in df1.index:
+        df1.loc[row, 'dihedral'] -= 360
+
     df2 = df[df.dihedral < -180 + padding]
-    df2.dihedral += 360
-    df_aug = pd.concat([df1, df, df2]).reset_index()
+    for row in df2.index:
+        df2.loc[row, 'dihedral'] += 360
+
+    df_aug = pd.concat([df1, df, df2]).reset_index(drop=True)
 
     return df_aug
 
