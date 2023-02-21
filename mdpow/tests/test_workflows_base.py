@@ -66,3 +66,36 @@ class TestWorkflowsBase(object):
                                  ensemble_analysis='DihedralAnalysis')
 
         assert 'all analyses completed' in caplog.text, 'automated_dihedral_analysis did not iteratively run to completion for the provided project'
+
+    def test_directory_iteration_KeyError(self, SM_tmp_dir, caplog):
+        caplog.clear()
+        caplog.set_level(logging.ERROR, logger='mdpow.workflows.base')
+
+        directory_paths = base.directory_paths(parent_directory=SM_tmp_dir)
+        directory_paths['resname'] = 'UNK'
+
+        # test error output when raised
+        with pytest.raises(KeyError, match='Invalid ensemble_analysis \'DarthVaderAnalysis\'. An EnsembleAnalysis type that corresponds to an existing automated workflow module must be input as a kwarg. ex: ensemble_analysis=\'DihedralAnalysis\''):
+            base.directory_iteration(directory_paths, ensemble_analysis='DarthVaderAnalysis', solvents=('water',))
+
+        # test logger error recording
+        assert '\'DarthVaderAnalysis\' is an invalid selection' in caplog.text, 'did not catch incorrect key specification for workflows.registry that results in KeyError'
+
+    def test_directory_iteration_TypeError(self, SM_tmp_dir, caplog):
+        # this will currently test for input of analysis type
+        # that does not have a corresponding automation module
+        # this test and the corresponding error catcher might
+        # not be necessary once all automation workflows
+        # modules in the registry are completed
+        caplog.clear()
+        caplog.set_level(logging.ERROR, logger='mdpow.workflows.base')
+
+        directory_paths = base.directory_paths(parent_directory=SM_tmp_dir)
+        directory_paths['resname'] = 'UNK'
+
+        # test error output when raised
+        with pytest.raises(TypeError, match='Invalid ensemble_analysis SolvationAnalysis. An EnsembleAnalysis type that corresponds to an existing automated workflow module must be input as a kwarg. ex: ensemble_analysis=\'DihedralAnalysis\''):
+            base.directory_iteration(directory_paths, ensemble_analysis='SolvationAnalysis', solvents=('water',))
+
+        # test logger error recording
+        assert 'workflow module for SolvationAnalysis does not exist yet' in caplog.text, 'did not catch incorrect key specification for workflows.registry that results in TypeError (NoneType)'
