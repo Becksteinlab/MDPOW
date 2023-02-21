@@ -52,7 +52,7 @@ import logging
 
 logger = logging.getLogger('mdpow.workflows.dihedrals')
 
-
+# init new Mol plot PR
 
 SOLVENTS_DEFAULT = ('water', 'octanol')
 """Default solvents are water and octanol:
