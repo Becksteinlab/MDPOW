@@ -224,6 +224,23 @@ def get_atom_indices(dirname, resname, SMARTS=SMARTS_DEFAULT):
     
     return atom_indices
 
+def get_bond_indices(mol, atom_indices):
+    
+    bonds = []
+
+    for aix in atom_indices:
+
+        x = mol.GetBondBetweenAtoms(aix[0], aix[1]).GetIdx()
+        y = mol.GetBondBetweenAtoms(aix[1], aix[2]).GetIdx()
+        z = mol.GetBondBetweenAtoms(aix[2], aix[3]).GetIdx()
+        bix = (x, y, z)
+
+        bonds.append(bix)
+
+    bond_indices = tuple(bonds)
+
+    return bond_indices
+
 def dihedral_groups(dirname, resname, SMARTS=SMARTS_DEFAULT):
     '''Uses the indices of the relevant dihedral atom groups determined
        by :func:`~mdpow.workflows.dihedral.get_atom_indices`
