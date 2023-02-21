@@ -44,11 +44,11 @@ class TestAutomatedDihedralAnalysis(object):
 
     @pytest.fixture(scope="function")
     def atom_indices(self, SM25_tmp_dir):
-        atom_group_indices = dihedrals.dihedral_indices(dirname=SM25_tmp_dir, resname=self.resname)
+        atom_group_indices = dihedrals.get_atom_indices(dirname=SM25_tmp_dir, resname=self.resname)
 
         # testing optional user input of alternate SMARTS string
         # for automated dihedral atom group selection
-        atom_group_indices_alt = dihedrals.dihedral_indices(dirname=SM25_tmp_dir,
+        atom_group_indices_alt = dihedrals.get_atom_indices(dirname=SM25_tmp_dir,
                                                             resname=self.resname,
                                                             SMARTS='[!$(*#*)&!D1]-!@[!$(*#*)&!D1]')
         return atom_group_indices, atom_group_indices_alt
