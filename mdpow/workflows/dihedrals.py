@@ -177,6 +177,10 @@ def rdkit_conversion(u, resname):
 
     mol = solute.convert_to('RDKIT')
     rdCoordGen.AddCoords(mol)
+    #rdDepictor.Compute2DCoords(mol), not sure how this is different from above^
+
+    for atom in mol.GetAtoms():
+        atom.SetProp("atomNote", str(atom.GetIdx()))
 
     return mol, solute
 
