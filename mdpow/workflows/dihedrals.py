@@ -22,7 +22,7 @@ are discussed under :func:`~mdpow.workflows.dihedrals.automated_dihedral_analysi
 .. autofunction:: automated_dihedral_analysis
 .. autofunction:: build_universe
 .. autofunction:: rdkit_conversion
-.. autofunction:: dihedral_indices
+.. autofunction:: get_atom_indices
 .. autofunction:: dihedral_groups
 .. autofunction:: dihedral_groups_ensemble
 .. autofunction:: save_df
@@ -38,6 +38,7 @@ import numpy as np
 import pandas as pd
 
 from rdkit import Chem
+from rdkit.Chem import rdCoordGen
 
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -51,8 +52,6 @@ from MDAnalysis.topology.guessers import guess_atom_element
 import logging
 
 logger = logging.getLogger('mdpow.workflows.dihedrals')
-
-# init new Mol plot PR
 
 SOLVENTS_DEFAULT = ('water', 'octanol')
 """Default solvents are water and octanol:
@@ -94,7 +93,7 @@ def build_universe(dirname):
        ``water/Coulomb/0000`` topology and trajectory for the specified project.
        
        Used by :func:`~mdpow.workflows.dihedrals.rdkit_conversion`
-       and :func:`~mdpow.workflows.dihedrals.dihedral_indices` to obtain atom indices
+       and :func:`~mdpow.workflows.dihedrals.get_atom_indices` to obtain atom indices
        for each dihedral atom group.
        
        :keywords:
@@ -157,18 +156,31 @@ def rdkit_conversion(u, resname):
 
     """
 
-    try:
-        solute = u.select_atoms(f'resname {resname}')
-        mol = solute.convert_to('RDKIT')
-    except AttributeError:
-        elements = [guess_atom_element(name) for name in u.atoms.names]
-        u.add_TopologyAttr("elements", elements)
-        solute = u.select_atoms(f'resname {resname}')
-        mol = solute.convert_to('RDKIT')
+    # i think somewhere we decided to ditch try/except method, will check notes
+    # notes pertaining to testing topology attributes for explicit Hs
+    
+    #try:
+    #    solute = u.select_atoms(f'resname {resname}')
+    #    mol = solute.convert_to('RDKIT')
+    #except AttributeError:
+    #    elements = [guess_atom_element(name) for name in u.atoms.names]
+    #    u.add_TopologyAttr("elements", elements)
+    #    solute = u.select_atoms(f'resname {resname}')
+    #    mol = solute.convert_to('RDKIT')
+
+    elements = [guess_atom_element(name) for name in u.atoms.names]
+    u.add_TopologyAttr("elements", elements)
+
+    # com or cog?
+    solute = u.select_atoms(f'resname {resname}')
+    solute.unwrap(compound='residues', reference='com')
+
+    mol = solute.convert_to('RDKIT')
+    rdCoordGen.AddCoords(mol)
 
     return mol, solute
 
-def dihedral_indices(dirname, resname, SMARTS=SMARTS_DEFAULT):
+def get_atom_indices(dirname, resname, SMARTS=SMARTS_DEFAULT):
     '''Uses a SMARTS selection string to identify indices for
        relevant dihedral atom groups.
        
@@ -200,7 +212,7 @@ def dihedral_indices(dirname, resname, SMARTS=SMARTS_DEFAULT):
            
        :returns:
        
-       *atom_group_indices*
+       *atom_indices*
            tuple of tuples of indices for each dihedral atom group
 
     '''
@@ -208,18 +220,18 @@ def dihedral_indices(dirname, resname, SMARTS=SMARTS_DEFAULT):
     u = build_universe(dirname=dirname)
     mol = rdkit_conversion(u=u, resname=resname)[0]
     pattern = Chem.MolFromSmarts(SMARTS)
-    atom_group_indices = mol.GetSubstructMatches(pattern)
+    atom_indices = mol.GetSubstructMatches(pattern)
     
-    return atom_group_indices
+    return atom_indices
 
 def dihedral_groups(dirname, resname, SMARTS=SMARTS_DEFAULT):
     '''Uses the indices of the relevant dihedral atom groups determined
-       by :func:`~mdpow.workflows.dihedral.dihedral_indices`
+       by :func:`~mdpow.workflows.dihedral.get_atom_indices`
        and returns the names for each atom in each group.
        
        Requires an MDPOW project directory and `resname` 
        as input. Expands upon usage of
-       :func:`~mdpow.workflows.dihedral.dihedral_indices`
+       :func:`~mdpow.workflows.dihedral.get_atom_indices`
        to return an array of the names of each atom within
        its respective dihedral atom group as identified by
        the SMARTS selection string. Not necessary
@@ -253,14 +265,14 @@ def dihedral_groups(dirname, resname, SMARTS=SMARTS_DEFAULT):
     '''
 
     u = build_universe(dirname=dirname)
-    solute = rdkit_conversion(u=u, resname=resname)[1]
-    atom_group_indices = dihedral_indices(dirname=dirname, resname=resname, SMARTS=SMARTS)
-    dihedral_groups = [solute.atoms[list(dihedral_indices)].names for dihedral_indices
-                       in atom_group_indices]
+    _, solute = rdkit_conversion(u=u, resname=resname)
+    atom_indices = get_atom_indices(dirname=dirname, resname=resname, SMARTS=SMARTS)
+    dihedral_groups = [solute.atoms[list(a_ind)].names for a_ind
+                       in atom_indices]
 
     return dihedral_groups
 
-def dihedral_groups_ensemble(dirname, atom_group_indices,
+def dihedral_groups_ensemble(dirname, atom_indices,
                              solvents=SOLVENTS_DEFAULT,
                              interactions=INTERACTIONS_DEFAULT,
                              start=None, stop=None, step=None): 
@@ -286,10 +298,10 @@ def dihedral_groups_ensemble(dirname, atom_group_indices,
            and .xtc files for trajectory. It will default to using the tpr file
            available.
 
-       *atom_group_indices*
+       *atom_indices*
            tuples of atom indices for dihedral atom groups
 
-           .. seealso:: :func:`~mdpow.workflows.dihedrals.dihedral_indices`
+           .. seealso:: :func:`~mdpow.workflows.dihedrals.get_atom_indices`
 
        *solvents*
            The default solvents are documented under :data:`SOLVENTS_DEFAULT`.
@@ -314,7 +326,7 @@ def dihedral_groups_ensemble(dirname, atom_group_indices,
     dih_ens = mdpow.analysis.ensemble.Ensemble(dirname=dirname,
                                                solvents=solvents,
                                                interactions=interactions)
-    indices = atom_group_indices
+    indices = atom_indices
     all_dihedrals = [dih_ens.select_atoms(f'index {i[0]}',
                                           f'index {i[1]}',
                                           f'index {i[2]}',
@@ -673,8 +685,8 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
 
     else:
 
-        atom_group_indices = dihedral_indices(dirname=dirname, resname=resname, SMARTS=SMARTS)
-        df = dihedral_groups_ensemble(atom_group_indices=atom_group_indices, dirname=dirname,
+        atom_indices = get_atom_indices(dirname=dirname, resname=resname, SMARTS=SMARTS)
+        df = dihedral_groups_ensemble(atom_indices=atom_indices, dirname=dirname,
                                       solvents=solvents, interactions=interactions,
                                       start=start, stop=stop, step=step)
 
