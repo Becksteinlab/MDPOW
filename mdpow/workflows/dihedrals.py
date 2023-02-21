@@ -180,7 +180,7 @@ def rdkit_conversion(u, resname):
 
     return mol, solute
 
-def get_atom_indices(dirname, resname, SMARTS=SMARTS_DEFAULT):
+def get_atom_indices(dirname, mol, SMARTS=SMARTS_DEFAULT):
     '''Uses a SMARTS selection string to identify indices for
        relevant dihedral atom groups.
        
@@ -217,8 +217,8 @@ def get_atom_indices(dirname, resname, SMARTS=SMARTS_DEFAULT):
 
     '''
 
-    u = build_universe(dirname=dirname)
-    mol = rdkit_conversion(u=u, resname=resname)[0]
+    #u = build_universe(dirname=dirname)
+    #mol = rdkit_conversion(u=u, resname=resname)[0]
     pattern = Chem.MolFromSmarts(SMARTS)
     atom_indices = mol.GetSubstructMatches(pattern)
     
@@ -241,7 +241,7 @@ def get_bond_indices(mol, atom_indices):
 
     return bond_indices
 
-def dihedral_groups(dirname, resname, SMARTS=SMARTS_DEFAULT):
+def get_dihedral_groups(solute, atom_indices):
     '''Uses the indices of the relevant dihedral atom groups determined
        by :func:`~mdpow.workflows.dihedral.get_atom_indices`
        and returns the names for each atom in each group.
@@ -281,13 +281,30 @@ def dihedral_groups(dirname, resname, SMARTS=SMARTS_DEFAULT):
 
     '''
 
-    u = build_universe(dirname=dirname)
-    _, solute = rdkit_conversion(u=u, resname=resname)
-    atom_indices = get_atom_indices(dirname=dirname, resname=resname, SMARTS=SMARTS)
+    #u = build_universe(dirname=dirname)
+    #_, solute = rdkit_conversion(u=u, resname=resname)
+    #atom_indices = get_atom_indices(dirname=dirname, resname=resname, SMARTS=SMARTS)
     dihedral_groups = [solute.atoms[list(a_ind)].names for a_ind
                        in atom_indices]
 
     return dihedral_groups
+
+def get_paired_indices(atom_indices, bond_indices, dihedral_groups):
+
+    dg_list = []
+    for dg in dihedral_groups:
+        group = (f'{dg[0]}-{dg[1]}-{dg[2]}-{dg[3]}')
+        dg_list.append(group)
+    all_dgs = tuple(dg_list)
+
+    if (len(atom_indices) == len(bond_indices) == len(all_dgs)):
+        ab_pairs = {}
+        i = 0
+        while i < len(all_dgs):
+            ab_pairs[f'{all_dgs[i]}'] = (atom_indices[i], bond_indices[i])
+            i += 1
+
+    return ab_pairs
 
 def dihedral_groups_ensemble(dirname, atom_indices,
                              solvents=SOLVENTS_DEFAULT,
@@ -455,7 +472,7 @@ def periodic_angle(df, padding=45):
 
     return df_aug
 
-def dihedral_violins(df, width=0.9, solvents=SOLVENTS_DEFAULT):
+def dihedral_violins(df, im, width=0.9, solvents=SOLVENTS_DEFAULT):
     '''Plots distributions of dihedral angles for one dihedral atom group
        as violin plots, using as input the augmented :class:`pandas.DataFrame`
        from :func:`~mdpow.workflows.dihedrals.periodic_angle`.
@@ -491,7 +508,8 @@ def dihedral_violins(df, width=0.9, solvents=SOLVENTS_DEFAULT):
     # number of Coul windows + 1 / number of VDW windows
     # (+1 for additional space with axes)
     width_ratios = [len(df[df['interaction'] == "Coulomb"]["lambda"].unique()) + 1,
-                    len(df[df['interaction'] == "VDW"]["lambda"].unique())]
+                    len(df[df['interaction'] == "VDW"]["lambda"].unique()),
+                    len(df[df['interaction'] == "Coulomb"]["lambda"].unique()) - 1]
 
     solvs = np.asarray(solvents)
     solv2 = 'octanol'
@@ -501,9 +519,9 @@ def dihedral_violins(df, width=0.9, solvents=SOLVENTS_DEFAULT):
     g = sns.catplot(data=df, x="lambda", y="dihedral", hue="solvent", col="interaction",
                     kind="violin", split=True, width=width, inner=None, cut=0,
                     linewidth=0.5,
-                    hue_order=[solvs[0], solv2], col_order=["Coulomb", "VDW"],
+                    hue_order=[solvs[0], solv2], col_order=["Coulomb", "VDW", "Structure"],
                     sharex=False, sharey=True,
-                    height=2, aspect=2.5,
+                    height=3.0, aspect=2.0,
                     facet_kws={'ylim': (-180, 180),
                                'gridspec_kws': {'width_ratios': width_ratios,
                                                 }})
@@ -520,9 +538,13 @@ def dihedral_violins(df, width=0.9, solvents=SOLVENTS_DEFAULT):
     axV.yaxis.set_visible(False)
     axV.spines["left"].set_visible(False)
 
+    axIM = g.axes_dict['Structure']
+    axIM.imshow(im, aspect='equal', origin='upper', extent=(-50.0, 349.5, -180.0, 180.0))
+    axIM.axis('off')
+
     return g
 
-def plot_violins(df, resname, figdir=None, molname=None, width=0.9, solvents=SOLVENTS_DEFAULT):
+def plot_violins(df, resname, mol, ab_pairs, figdir=None, molname=None, width=0.9, solvents=SOLVENTS_DEFAULT):
     '''Coordinates plotting and optionally saving figures for all dihedral
        atom groups.
        
@@ -581,7 +603,10 @@ def plot_violins(df, resname, figdir=None, molname=None, width=0.9, solvents=SOL
     section = df.groupby(by='selection')
 
     for name in section:
-        plot = dihedral_violins(name[1], width=width, solvents=solvents)
+        a = list(ab_pairs[name[0]][0])
+        b = list(ab_pairs[name[0]][1])
+        im = Chem.Draw.MolToImage(mol=mol, highlightAtoms=a, highlightBonds=b)
+        plot = dihedral_violins(name[1], im=im, width=width, solvents=solvents)
         plot.set_titles(f'{molname},{name[0]}, ''{col_name}')
         # plot.set_titles needs to stay here during future development
         # this locale ensures that plots are properly named,
@@ -695,7 +720,7 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
                                            start=0, stop=100, step=10)
     '''
 
-    if dataframe is not None:
+    '''if dataframe is not None:
 
         df = dataframe
         logger.info(f'Proceeding with results DataFrame provided.')
@@ -706,10 +731,25 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
         df = dihedral_groups_ensemble(atom_indices=atom_indices, dirname=dirname,
                                       solvents=solvents, interactions=interactions,
                                       start=start, stop=stop, step=step)
+    '''
+    # ^reincorporate this option once plots are done
+    # maybe add ab_pairs dict info in saved DF?
+
+    u = build_universe(dirname=dirname)
+    mol, solute = rdkit_conversion(u=u, resname=resname)
+    atom_indices = get_atom_indices(dirname=dirname, mol=mol, SMARTS=SMARTS)
+    bond_indices = get_bond_indices(mol=mol, atom_indices=atom_indices)
+    dihedral_groups = get_dihedral_groups(solute=solute, atom_indices=atom_indices)
+    ab_pairs = get_paired_indices(atom_indices=atom_indices, bond_indices=bond_indices, dihedral_groups=dihedral_groups)
+
+    df = dihedral_groups_ensemble(atom_indices=atom_indices, dirname=dirname,
+                                  solvents=solvents, interactions=interactions,
+                                  start=start, stop=stop, step=step)
+    
 
     if df_save_dir is not None:
         save_df(df=df, df_save_dir=df_save_dir, resname=resname, molname=molname)
 
     df_aug = periodic_angle(df, padding=padding)
 
-    return plot_violins(df_aug, resname=resname, figdir=figdir, molname=molname, width=width, solvents=solvents)
+    return plot_violins(df_aug, resname=resname, molname=molname, mol=mol, ab_pairs=ab_pairs, figdir=figdir, width=width, solvents=solvents)
