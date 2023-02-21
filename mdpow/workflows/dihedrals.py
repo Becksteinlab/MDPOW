@@ -607,7 +607,7 @@ def plot_violins(df, resname, mol, ab_pairs, figdir=None, molname=None, width=0.
         b = list(ab_pairs[name[0]][1])
         im = Chem.Draw.MolToImage(mol=mol, highlightAtoms=a, highlightBonds=b)
         plot = dihedral_violins(name[1], im=im, width=width, solvents=solvents)
-        plot.set_titles(f'{molname},{name[0]}, ''{col_name}')
+        plot.set_titles(f'{molname},{list(ab_pairs[name[0]][0])},{name[0]}, ''{col_name}')
         # plot.set_titles needs to stay here during future development
         # this locale ensures that plots are properly named,
         # especially when generated for a projecct iteratively
