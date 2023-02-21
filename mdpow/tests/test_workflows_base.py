@@ -38,6 +38,9 @@ class TestWorkflowsBase(object):
                    }
 
     test_df = pd.DataFrame(test_dict).reset_index(drop=True)
+
+    csv_path = 'mdpow/tests/testing_resources/states/workflows/dir_paths.csv'
+    csv_df = pd.read_csv(csv_path).reset_index(drop=True)
         
     def test_directory_paths(self, SM_tmp_dir):
         directory_paths = base.directory_paths(parent_directory=SM_tmp_dir)
@@ -47,8 +50,11 @@ class TestWorkflowsBase(object):
         assert directory_paths['resname'][0] == self.test_df['resname'][0]
         assert directory_paths['resname'][1] == self.test_df['resname'][1]
 
-    #def test_csv_input(self):
-     #   directory_paths = base.directory_paths(parent_directory=self.top_dir)
+    def test_directory_paths_csv_input(self):
+        directory_paths = base.directory_paths(csv=self.csv_path)
+        
+        pd.testing.assert_frame_equal(directory_paths, self.csv_df)
+        # is additional assertion required here? can this ever fail?
 
     def test_directory_iteration(self, SM_tmp_dir, caplog):
         directory_paths = base.directory_paths(parent_directory=SM_tmp_dir)
