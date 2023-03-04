@@ -37,6 +37,12 @@ import pathlib
 import numpy as np
 import pandas as pd
 
+# add to dependencies for install and tests
+import cairosvg
+import svgutils
+import svgutils.compose as sc
+import svgutils.transform as sg
+
 from rdkit import Chem
 from rdkit.Chem import rdCoordGen
 
@@ -473,6 +479,7 @@ def periodic_angle(df, padding=45):
 
     '''
 
+    # this method is changed in PR242
     df1 = df[df.dihedral > 180 - padding]
     df1.dihedral -= 360
     df2 = df[df.dihedral < -180 + padding]
@@ -481,7 +488,7 @@ def periodic_angle(df, padding=45):
 
     return df_aug
 
-def dihedral_violins(df, im, width=0.9, solvents=SOLVENTS_DEFAULT):
+def dihedral_violins(df, width=0.9, solvents=SOLVENTS_DEFAULT):
     '''Plots distributions of dihedral angles for one dihedral atom group
        as violin plots, using as input the augmented :class:`pandas.DataFrame`
        from :func:`~mdpow.workflows.dihedrals.periodic_angle`.
@@ -520,6 +527,10 @@ def dihedral_violins(df, im, width=0.9, solvents=SOLVENTS_DEFAULT):
                     len(df[df['interaction'] == "VDW"]["lambda"].unique()),
                     len(df[df['interaction'] == "Coulomb"]["lambda"].unique()) - 1] # was - 1
 
+    # this method allows for one solvent
+    # to be plotted correctly
+    # needs to be corrected to fix legend
+    # for when only one solvent is plotted
     solvs = np.asarray(solvents)
     solv2 = 'octanol'
     if solvs.size > 1:
@@ -534,28 +545,28 @@ def dihedral_violins(df, im, width=0.9, solvents=SOLVENTS_DEFAULT):
                     facet_kws={'ylim': (-180, 180),
                                'gridspec_kws': {'width_ratios': width_ratios,
                                                 }})
-    g.set_xlabels(r"$\lambda$")
-    g.set_ylabels(r"dihedral angle $\phi$")
-    g.despine(offset=5)
+
+    _ = g.set_xlabels(r"$\lambda$")
+    _ = g.set_ylabels(r"dihedral angle $\phi$")
+    _ = g.despine(offset=5)
 
     axC = g.axes_dict['Coulomb']
-    axC.yaxis.set_major_locator(plt.matplotlib.ticker.MultipleLocator(60))
-    axC.yaxis.set_minor_locator(plt.matplotlib.ticker.MultipleLocator(30))
-    axC.yaxis.set_major_formatter(plt.matplotlib.ticker.FormatStrFormatter(r"$%g^\circ$"))
+    _ = axC.yaxis.set_major_locator(plt.matplotlib.ticker.MultipleLocator(60))
+    _ = axC.yaxis.set_minor_locator(plt.matplotlib.ticker.MultipleLocator(30))
+    _ = axC.yaxis.set_major_formatter(plt.matplotlib.ticker.FormatStrFormatter(r"$%g^\circ$"))
 
     axV = g.axes_dict['VDW']
-    axV.yaxis.set_visible(False)
-    axV.spines["left"].set_visible(False)
+    _ = axV.yaxis.set_visible(False)
+    _ = axV.spines["left"].set_visible(False)
 
-    axIM = g.axes_dict['Structure']                       # -50, 349.5
-    #axIM.imshow(im, aspect='equal', origin='upper', extent=(-30.0, 329.5, -180.0, 180.0))
-    axIM.imshow(im, aspect='equal', origin='upper', extent=(-80.5, 379.5, -222.0, 222.0))
-    #axIM.imshow(im, aspect='equal', origin='upper', extent=(-0.5, 299.5, -180.0, 180.0))
-    axIM.axis('off')
+    axIM = g.axes_dict['Structure']                     
+    #axIM.imshow(im, aspect='equal', origin='upper', extent=(-80.5, 379.5, -222.0, 222.0))
+    _ = axIM.axis('off')
 
     return g
 
-def plot_violins(df, resname, mol, ab_pairs, figdir=None, molname=None, width=0.9, solvents=SOLVENTS_DEFAULT):
+def plot_violins(df, resname, mol, ab_pairs, figdir=None, molname=None,
+                 width=0.9, plot_pdf_width=190, solvents=SOLVENTS_DEFAULT):
     '''Coordinates plotting and optionally saving figures for all dihedral
        atom groups.
        
@@ -611,36 +622,58 @@ def plot_violins(df, resname, mol, ab_pairs, figdir=None, molname=None, width=0.
         newdir = os.path.join(figdir, subdir)
         os.mkdir(newdir)
 
-    section = df.groupby(by='selection')
+    section = df.groupby(by="selection")
 
+    # conversion factor: 1 mm = 3.7795275591 px
+    plot_pdf_width = plot_pdf_width * 3.7795275591
+    # DEFAULT: 190 mm = 718.110236229 pixels
+
+    # put this into separate function
     for name in section:
         a = list(ab_pairs[name[0]][0])
         b = list(ab_pairs[name[0]][1])
 
-        #drawer = rdMolDraw2D.MolDraw2DSVG(300, 300)
-        #drawer.DrawMolecule(mol=mol, highlightAtoms=a, highlightBonds=b)
-        #drawer.FinishDrawing()
-        #svg = drawer.GetDrawingText().replace('svg:','')
+        drawer = rdMolDraw2D.MolDraw2DSVG(250, 250)
+        drawer.DrawMolecule(mol=mol, highlightAtoms=a, highlightBonds=b)
+        drawer.FinishDrawing()
 
-        #im = SVG(svg)
-                                           # default x300
-        im = Chem.Draw.MolToImage(mol=mol, size=(400,400), highlightAtoms=a, highlightBonds=b)
-        plot = dihedral_violins(name[1], im=im, width=width, solvents=solvents)
-        plot.set_titles(f'{molname}, {name[0]} {list(ab_pairs[name[0]][0])} | ''{col_name}')
+        svg = drawer.GetDrawingText().replace('svg:','')
+        mol_svg = sg.fromstring(svg)
+        mol_svg.save("mol_svg.svg")
+
+        plot = dihedral_violins(name[1], width=width, solvents=solvents)
+        _ = plot.set_titles(f'{molname}, {name[0]} {list(ab_pairs[name[0]][0])} | ''{col_name}')
         # plot.set_titles needs to stay here during future development
         # this locale ensures that plots are properly named,
-        # especially when generated for a projecct iteratively
+        # especially when generated for a project iteratively
+        _ = plot.savefig("tmp_plot.svg")
 
-        if figdir is not None:
-            figfile = pathlib.Path(newdir) / f"{molname}_{name[0]}_violins.pdf"
-            plot.savefig(figfile)
-            logger.info(f'Figure saved as {figfile}')
+        # 28cm leaves room for lengthier solvent names
+        # in the legend on the rightmost side
+        sc.Figure("28cm", "4.2cm", # width and height for SVG render, previously 30, 5
+                  sc.SVG("tmp_plot.svg").scale(0.02),
+                  sc.SVG("mol_svg.svg").scale(0.0125).move(21.8,0.35) # previously 21.5,0.5
+                 ).save("plot_svg.svg")
+                 # best pre-pdf size and ratio so far
 
-    return plot
+        # figdir is now necessary and plots are not returned with molecule graphic
+        figfile = pathlib.Path(newdir) / f"{molname}_{name[0]}_violins.pdf"
+        plot_pdf = cairosvg.svg2pdf(url="plot_svg.svg", write_to=str(figfile),
+                                    output_width=plot_pdf_width)
+
+        logger.info(f"Figure saved as {figfile}")
+
+        # remove temp svg files
+        os.system("rm mol_svg.svg")
+        os.system("rm tmp_plot.svg")
+        os.system("rm plot_svg.svg")
+
+    return logger.info(f"All figures generated and saved in {figdir}")
+        
 
 def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
                                 resname=None, molname=None,
-                                SMARTS=SMARTS_DEFAULT,
+                                SMARTS=SMARTS_DEFAULT, plot_pdf_width=190,
                                 dataframe=None, padding=45, width=0.9,
                                 solvents=SOLVENTS_DEFAULT,
                                 interactions=INTERACTIONS_DEFAULT,
@@ -759,7 +792,8 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
     atom_indices = get_atom_indices(dirname=dirname, mol=mol, SMARTS=SMARTS)
     bond_indices = get_bond_indices(mol=mol, atom_indices=atom_indices)
     dihedral_groups = get_dihedral_groups(solute=solute, atom_indices=atom_indices)
-    ab_pairs = get_paired_indices(atom_indices=atom_indices, bond_indices=bond_indices, dihedral_groups=dihedral_groups)
+    ab_pairs = get_paired_indices(atom_indices=atom_indices, bond_indices=bond_indices,
+                                  dihedral_groups=dihedral_groups)
 
     df = dihedral_groups_ensemble(atom_indices=atom_indices, dirname=dirname,
                                   solvents=solvents, interactions=interactions,
@@ -771,4 +805,7 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
 
     df_aug = periodic_angle(df, padding=padding)
 
-    return plot_violins(df_aug, resname=resname, molname=molname, mol=mol, ab_pairs=ab_pairs, figdir=figdir, width=width, solvents=solvents)
+    plot_violins(df_aug, resname=resname, molname=molname, mol=mol, plot_pdf_width=plot_pdf_width,
+                 ab_pairs=ab_pairs, figdir=figdir, width=width, solvents=solvents)
+
+    return logger.info(f"DihedralAnalysis completed for all projects in {dirname}")
