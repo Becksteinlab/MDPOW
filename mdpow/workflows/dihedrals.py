@@ -772,21 +772,6 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
                                            start=0, stop=100, step=10)
     '''
 
-    '''if dataframe is not None:
-
-        df = dataframe
-        logger.info(f'Proceeding with results DataFrame provided.')
-
-    else:
-
-        atom_indices = get_atom_indices(dirname=dirname, resname=resname, SMARTS=SMARTS)
-        df = dihedral_groups_ensemble(atom_indices=atom_indices, dirname=dirname,
-                                      solvents=solvents, interactions=interactions,
-                                      start=start, stop=stop, step=step)
-    '''
-    # ^reincorporate this option once plots are done
-    # maybe add ab_pairs dict info in saved DF?
-
     u = build_universe(dirname=dirname)
     mol, solute = rdkit_conversion(u=u, resname=resname)
     atom_indices = get_atom_indices(dirname=dirname, mol=mol, SMARTS=SMARTS)
@@ -795,10 +780,16 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
     ab_pairs = get_paired_indices(atom_indices=atom_indices, bond_indices=bond_indices,
                                   dihedral_groups=dihedral_groups)
 
-    df = dihedral_groups_ensemble(atom_indices=atom_indices, dirname=dirname,
-                                  solvents=solvents, interactions=interactions,
-                                  start=start, stop=stop, step=step)
-    
+    if dataframe is not None:
+
+        df = dataframe
+        logger.info(f'Proceeding with results DataFrame provided.')
+
+    else:
+
+        df = dihedral_groups_ensemble(atom_indices=atom_indices, dirname=dirname,
+                                      solvents=solvents, interactions=interactions,
+                                      start=start, stop=stop, step=step)
 
     if df_save_dir is not None:
         save_df(df=df, df_save_dir=df_save_dir, resname=resname, molname=molname)

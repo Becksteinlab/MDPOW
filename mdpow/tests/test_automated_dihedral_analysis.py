@@ -29,6 +29,8 @@ from pkg_resources import resource_filename
 RESOURCES = pathlib.PurePath(resource_filename(__name__, 'testing_resources'))
 MANIFEST = RESOURCES / "manifest.yml"
 
+resname = "UNK"
+
 @pytest.fixture(scope="function")
 def molname_workflows_directory(tmp_path, molname='SM25'):
     m = pybol.Manifest(str(MANIFEST))
@@ -43,13 +45,19 @@ class TestAutomatedDihedralAnalysis(object):
         return dirname
 
     @pytest.fixture(scope="function")
-    def atom_indices(self, SM25_tmp_dir):
-        atom_group_indices = dihedrals.get_atom_indices(dirname=SM25_tmp_dir, resname=self.resname)
+    def mol_sol_data(self, SM25_tmp_dir):
+        u = dihedrals.build_universe(dirname=SM25_tmp_dir)
+        mol, solute = dihedrals.rdkit_conversion(u=u, resname=resname)
+        return mol, solute
+
+    @pytest.fixture(scope="function")
+    def atom_indices(self, SM25_tmp_dir, mol_sol_data):
+        mol, _ = mol_sol_data
+        atom_group_indices = dihedrals.get_atom_indices(dirname=SM25_tmp_dir, mol=mol)
 
         # testing optional user input of alternate SMARTS string
         # for automated dihedral atom group selection
-        atom_group_indices_alt = dihedrals.get_atom_indices(dirname=SM25_tmp_dir,
-                                                            resname=self.resname,
+        atom_group_indices_alt = dihedrals.get_atom_indices(dirname=SM25_tmp_dir, mol=mol,
                                                             SMARTS='[!$(*#*)&!D1]-!@[!$(*#*)&!D1]')
         return atom_group_indices, atom_group_indices_alt
         # fixture output, tuple:
@@ -67,8 +75,6 @@ class TestAutomatedDihedralAnalysis(object):
         # fixture output, tuple:
         # dihedral_data[0]=df
         # dihedral_data[1]=df_aug
-
-    resname = 'UNK'
 
     # tuple-tuples of dihedral atom group indices
     # collected using mdpow.workflows.dihedrals.SMARTS_DEFAULT
@@ -130,6 +136,7 @@ class TestAutomatedDihedralAnalysis(object):
         solute = u.select_atoms('resname UNK')
         solute_names = solute.atoms.names
         assert solute_names.all() == self.universe_solute_atom_names.all()
+        #change this method
 
     # the following 'reason' affects every downstream function that relies
     # on the atom indices returned for dihedral atom group selections
@@ -137,7 +144,7 @@ class TestAutomatedDihedralAnalysis(object):
     @pytest.mark.skipif(sys.version_info < (3, 8), reason='pytest=7.2.0, build=py37h89c1867_0, '
                        'returns incorrect atom_indices for dihedral atom group selections')
     def test_dihedral_indices(self, atom_indices):
-        atom_group_indices = atom_indices[0]
+        atom_group_indices, _ = atom_indices
         assert atom_group_indices == self.check_atom_group_indices
 
     # the following 'reason' affects every downstream function that relies
@@ -146,7 +153,7 @@ class TestAutomatedDihedralAnalysis(object):
     @pytest.mark.skipif(sys.version_info < (3, 8), reason='pytest=7.2.0, build=py37h89c1867_0, '
                        'returns incorrect atom_indices for dihedral atom group selections')
     def test_SMARTS(self, atom_indices):
-        atom_group_indices_alt = atom_indices[1]
+        _, atom_group_indices_alt = atom_indices
         assert atom_group_indices_alt == self.check_atom_group_indices_alt
 
     # the following 'reason' affects every downstream function that relies
@@ -154,8 +161,10 @@ class TestAutomatedDihedralAnalysis(object):
     # issue raised (#239) to identify and resolve exact package/version responsible
     @pytest.mark.skipif(sys.version_info < (3, 8), reason='pytest=7.2.0, build=py37h89c1867_0, '
                        'returns incorrect atom_indices for dihedral atom group selections')
-    def test_dihedral_groups(self, SM25_tmp_dir):
-        groups = dihedrals.dihedral_groups(dirname=SM25_tmp_dir, resname=self.resname)
+    def test_dihedral_groups(self, SM25_tmp_dir, mol_sol_data, atom_indices):
+        _, solute = mol_sol_data
+        atom_group_indices, _ = atom_indices
+        groups = dihedrals.get_dihedral_groups(solute=solute, atom_indices=atom_group_indices)
         i = 0
         while i < len(groups):
             assert groups[i].all() == self.check_groups[i].all()
@@ -168,7 +177,7 @@ class TestAutomatedDihedralAnalysis(object):
                        'returns incorrect atom_indices for dihedral atom group selections')
     def test_dihedral_groups_ensemble(self, dihedral_data):
 
-        df = dihedral_data[0]
+        df, _ = dihedral_data
 
         dh1_result = df.loc[df['selection'] == 'O1-C2-N3-S4']['dihedral']
         dh1_mean = circmean(dh1_result, high=180, low=-180)
@@ -186,13 +195,15 @@ class TestAutomatedDihedralAnalysis(object):
         dh2_var == pytest.approx(self.DG_C13141520_var)
 
     def test_save_df(self, dihedral_data, SM25_tmp_dir):
-        dihedrals.save_df(df=dihedral_data[0], df_save_dir=SM25_tmp_dir, molname='SM25')
+        df, _ = dihedral_data
+        dihedrals.save_df(df=df, df_save_dir=SM25_tmp_dir, molname='SM25')
         assert (SM25_tmp_dir / 'SM25' / 'SM25_full_df.csv.bz2').exists(), 'Compressed csv file not saved'
 
     def test_save_df_info(self, dihedral_data, SM25_tmp_dir, caplog):
+        df, _ = dihedral_data
         caplog.clear()
         caplog.set_level(logging.INFO, logger='mdpow.workflows.dihedrals')
-        dihedrals.save_df(df=dihedral_data[0], df_save_dir=SM25_tmp_dir, molname='SM25')
+        dihedrals.save_df(df=df, df_save_dir=SM25_tmp_dir, molname='SM25')
         assert f'Results DataFrame saved as {SM25_tmp_dir}/SM25/SM25_full_df.csv.bz2' in caplog.text, 'Save location not logged or returned'
 
     # the following 'reason' affects every downstream function that relies
@@ -202,7 +213,7 @@ class TestAutomatedDihedralAnalysis(object):
                        'returns incorrect atom_indices for dihedral atom group selections')
     def test_periodic_angle(self, dihedral_data):
 
-        df_aug = dihedral_data[1]
+        _, df_aug = dihedral_data
 
         aug_dh2_result = df_aug.loc[df_aug['selection'] == 'C13-C14-C15-C20']['dihedral']
 
@@ -219,7 +230,7 @@ class TestAutomatedDihedralAnalysis(object):
                        'returns incorrect atom_indices for dihedral atom group selections')
     def test_save_fig(self, SM25_tmp_dir):
         dihedrals.automated_dihedral_analysis(dirname=SM25_tmp_dir, figdir=SM25_tmp_dir,
-                                              resname=self.resname, molname='SM25',
+                                              resname=resname, molname='SM25',
                                               solvents=('water',))
         assert (SM25_tmp_dir / 'SM25' / 'SM25_C10-C5-S4-O11_violins.pdf').exists(), 'PDF file not generated'
 
@@ -232,26 +243,20 @@ class TestAutomatedDihedralAnalysis(object):
         caplog.clear()
         caplog.set_level(logging.INFO, logger='mdpow.workflows.dihedrals')
         dihedrals.automated_dihedral_analysis(dirname=SM25_tmp_dir, figdir=SM25_tmp_dir,
-                                              resname=self.resname, molname='SM25',
+                                              resname=resname, molname='SM25',
                                               solvents=('water',))
         assert f'Figure saved as {SM25_tmp_dir}/SM25/SM25_C10-C5-S4-O11_violins.pdf' in caplog.text, 'PDF file not saved'
 
-    def test_DataFrame_input(self, SM25_tmp_dir):
-        test_df = pd.DataFrame([['C1-C2-C3-C4', 'water', 'Coulomb', 0, 0, 60.0],
-                                ['C1-C2-C3-C5', 'water', 'Coulomb', 0, 0, 60.0]],
-                                [1,2],['selection', 'solvent', 'interaction', 'lambda', 'time', 'dihedral'])
-        plot = dihedrals.automated_dihedral_analysis(dirname=SM25_tmp_dir, figdir=SM25_tmp_dir,
-                                                     resname=self.resname,
-                                                     solvents=('water',), dataframe=test_df)
-        assert isinstance(plot, seaborn.axisgrid.FacetGrid)
+    def test_DataFrame_input(self, SM25_tmp_dir, dihedral_data):
+        df, _ = dihedral_data
+        dihedrals.automated_dihedral_analysis(dirname=SM25_tmp_dir, figdir=SM25_tmp_dir,
+                                              resname=resname, solvents=('water',), dataframe=df)
+        assert (SM25_tmp_dir / 'SM25' / 'SM25_C10-C5-S4-O11_violins.pdf').exists(), 'PDF file not generated'
 
-    def test_DataFrame_input_info(self, SM25_tmp_dir, caplog):
+    def test_DataFrame_input_info(self, SM25_tmp_dir, dihedral_data, caplog):
         caplog.clear()
         caplog.set_level(logging.INFO, logger='mdpow.workflows.dihedrals')
-        test_df = pd.DataFrame([['C1-C2-C3-C4', 'water', 'Coulomb', 0, 0, 60.0],
-                                ['C1-C2-C3-C5', 'water', 'Coulomb', 0, 0, 60.0]],
-                                [1,2],['selection', 'solvent', 'interaction', 'lambda', 'time', 'dihedral'])
+        df, _ = dihedral_data
         dihedrals.automated_dihedral_analysis(dirname=SM25_tmp_dir, figdir=SM25_tmp_dir,
-                                              resname=self.resname,
-                                              solvents=('water',), dataframe=test_df)
+                                              resname=resname, solvents=('water',), dataframe=df)
         assert 'Proceeding with results DataFrame provided.' in caplog.text, 'No dataframe provided or dataframe not recognized'
