@@ -47,7 +47,7 @@ from rdkit import Chem
 from rdkit.Chem import rdCoordGen
 
 # for SVG test
-from rdkit.Chem.Draw import IPythonConsole
+#from rdkit.Chem.Draw import IPythonConsole
 #from IPython.display import SVG
 from rdkit.Chem.Draw import rdMolDraw2D
 
