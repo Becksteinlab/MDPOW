@@ -20,8 +20,6 @@ import logging
 
 logger = logging.getLogger('mdpow.workflows.base')
 
-# DONT FORGET UPDATES FROM SAMPL9 REPO
-
 def directory_paths(parent_directory=None, csv=None, csv_save_dir=None):
     """Takes a top directory containing MDPOW projects and determines
        the molname, resname, and path, of each MDPOW project within.

@@ -10,6 +10,7 @@ import logging
 import pandas as pd
 
 from . import RESOURCES
+from . import STATES
 
 import py.path
 
@@ -33,31 +34,42 @@ class TestWorkflowsBase(object):
         dirname = molname_workflows_directory
         return dirname
 
-    test_dict = {'molecule' : ['SM25', 'SM26'],
-                    'resname' : ['SM25', 'SM26']
-                   }
+    @pytest.fixture(scope="function")
+    def csv_input_data(self):
+        csv_path = STATES["workflows"] / "dir_paths.csv"
+        csv_df = pd.read_csv(csv_path).reset_index(drop=True)
+        return csv_path, csv_df
 
-    test_df = pd.DataFrame(test_dict).reset_index(drop=True)
+    @pytest.fixture(scope="function")
+    def test_df_data(self):
+        test_dict = {'molecule' : ['SM25', 'SM26'],
+                    'resname' : ['SM25', 'SM26']}
+        test_df = pd.DataFrame(test_dict).reset_index(drop=True)
+        return test_df
 
-    csv_path = 'mdpow/tests/testing_resources/states/workflows/dir_paths.csv'
-    csv_df = pd.read_csv(csv_path).reset_index(drop=True)
-        
-    def test_directory_paths(self, SM_tmp_dir):
+    @pytest.fixture(scope="function")
+    def dir_paths_data(self, SM_tmp_dir):
         directory_paths = base.directory_paths(parent_directory=SM_tmp_dir)
+        return directory_paths
 
-        assert directory_paths['molecule'][0] == self.test_df['molecule'][0]
-        assert directory_paths['molecule'][1] == self.test_df['molecule'][1]
-        assert directory_paths['resname'][0] == self.test_df['resname'][0]
-        assert directory_paths['resname'][1] == self.test_df['resname'][1]
+    def test_directory_paths(self, test_df_data, dir_paths_data):
+        test_df = test_df_data
+        directory_paths = dir_paths_data
 
-    def test_directory_paths_csv_input(self):
-        directory_paths = base.directory_paths(csv=self.csv_path)
+        assert directory_paths['molecule'][0] == test_df['molecule'][0]
+        assert directory_paths['molecule'][1] == test_df['molecule'][1]
+        assert directory_paths['resname'][0] == test_df['resname'][0]
+        assert directory_paths['resname'][1] == test_df['resname'][1]
+
+    def test_directory_paths_csv_input(self, csv_input_data):
+        csv_path, csv_df = csv_input_data
+        directory_paths = base.directory_paths(csv=csv_path)
         
-        pd.testing.assert_frame_equal(directory_paths, self.csv_df)
+        pd.testing.assert_frame_equal(directory_paths, csv_df)
         # is additional assertion required here? can this ever fail?
 
-    def test_directory_iteration(self, SM_tmp_dir, caplog):
-        directory_paths = base.directory_paths(parent_directory=SM_tmp_dir)
+    def test_directory_iteration(self, dir_paths_data, caplog):
+        directory_paths = dir_paths_data
         # change resname to match topology (every SAMPL7 resname is 'UNK')
         # only necessary for this dataset, not necessary for normal use
         directory_paths['resname'] = 'UNK'
@@ -67,11 +79,13 @@ class TestWorkflowsBase(object):
 
         assert 'all analyses completed' in caplog.text, 'automated_dihedral_analysis did not iteratively run to completion for the provided project'
 
-    def test_directory_iteration_KeyError(self, SM_tmp_dir, caplog):
+    def test_directory_iteration_KeyError(self, dir_paths_data, caplog):
         caplog.clear()
         caplog.set_level(logging.ERROR, logger='mdpow.workflows.base')
 
-        directory_paths = base.directory_paths(parent_directory=SM_tmp_dir)
+        directory_paths = dir_paths_data
+        # change resname to match topology (every SAMPL7 resname is 'UNK')
+        # only necessary for this dataset, not necessary for normal use
         directory_paths['resname'] = 'UNK'
 
         # test error output when raised
@@ -81,7 +95,7 @@ class TestWorkflowsBase(object):
         # test logger error recording
         assert '\'DarthVaderAnalysis\' is an invalid selection' in caplog.text, 'did not catch incorrect key specification for workflows.registry that results in KeyError'
 
-    def test_directory_iteration_TypeError(self, SM_tmp_dir, caplog):
+    def test_directory_iteration_TypeError(self, dir_paths_data, caplog):
         # this will currently test for input of analysis type
         # that does not have a corresponding automation module
         # this test and the corresponding error catcher might
@@ -90,7 +104,9 @@ class TestWorkflowsBase(object):
         caplog.clear()
         caplog.set_level(logging.ERROR, logger='mdpow.workflows.base')
 
-        directory_paths = base.directory_paths(parent_directory=SM_tmp_dir)
+        directory_paths = dir_paths_data
+        # change resname to match topology (every SAMPL7 resname is 'UNK')
+        # only necessary for this dataset, not necessary for normal use
         directory_paths['resname'] = 'UNK'
 
         # test error output when raised
