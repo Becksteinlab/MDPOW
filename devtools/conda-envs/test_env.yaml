@@ -17,6 +17,8 @@ dependencies:
 - alchemlyb <2
 - rdkit
 - seaborn
+- svgutils
+- cairosvg
 
   # Testing
 - pytest

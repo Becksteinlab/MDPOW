@@ -31,7 +31,7 @@ are discussed under :func:`~mdpow.workflows.dihedrals.automated_dihedral_analysi
 .. autofunction:: plot_violins
 
 """
-
+#^need to update function list
 import os
 import pathlib
 import numpy as np

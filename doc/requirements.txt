@@ -9,3 +9,5 @@ mdanalysis
 rdkit
 seaborn
 matplotlib
+svgutils
+cairosvg
