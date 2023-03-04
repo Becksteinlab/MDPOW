@@ -13,5 +13,6 @@ STATES = {
     "FEP": RESOURCES.join("states", "FEP"),
     "base": RESOURCES.join("states", "base"),
     "md_npt": RESOURCES.join("states", "FEP"),
+    "workflows": RESOURCES.join("states", "workflows"),
 }
 CONFIGURATIONS = RESOURCES.join("test_configurations")
