@@ -617,6 +617,7 @@ def plot_violins(df, resname, mol, ab_pairs, figdir=None, molname=None,
     if molname is None:
         molname = resname
 
+        # figdir is now necessary??
     if figdir is not None:
         subdir = molname
         newdir = os.path.join(figdir, subdir)
@@ -636,37 +637,38 @@ def plot_violins(df, resname, mol, ab_pairs, figdir=None, molname=None,
         drawer = rdMolDraw2D.MolDraw2DSVG(250, 250)
         drawer.DrawMolecule(mol=mol, highlightAtoms=a, highlightBonds=b)
         drawer.FinishDrawing()
-
         svg = drawer.GetDrawingText().replace('svg:','')
+
         mol_svg = sg.fromstring(svg)
-        mol_svg.save("mol_svg.svg")
+        m = mol_svg.getroot()
+        m.scale(0.0125).moveto(21.8, 0.35)
 
         plot = dihedral_violins(name[1], width=width, solvents=solvents)
         _ = plot.set_titles(f'{molname}, {name[0]} {list(ab_pairs[name[0]][0])} | ''{col_name}')
         # plot.set_titles needs to stay here during future development
         # this locale ensures that plots are properly named,
         # especially when generated for a project iteratively
-        _ = plot.savefig("tmp_plot.svg")
+
+        plot_svg = sg.from_mpl(plot)
+        p = plot_svg.getroot()
+        p.scale(0.02)
+
+        mol_svg = sg.fromstring(svg)
+        m = mol_svg.getroot()
+        m.scale(0.0125).moveto(21.8, 0.35)
 
         # 28cm leaves room for lengthier solvent names
         # in the legend on the rightmost side
-        sc.Figure("28cm", "4.2cm", # width and height for SVG render, previously 30, 5
-                  sc.SVG("tmp_plot.svg").scale(0.02),
-                  sc.SVG("mol_svg.svg").scale(0.0125).move(21.8,0.35) # previously 21.5,0.5
-                 ).save("plot_svg.svg")
-                 # best pre-pdf size and ratio so far
+        # width and height for SVG render, previously 30, 5
+        # the order matters here, plot down first, mol on top
+        fig = sc.Figure("28cm", "4.2cm", p, m)
 
         # figdir is now necessary and plots are not returned with molecule graphic
         figfile = pathlib.Path(newdir) / f"{molname}_{name[0]}_violins.pdf"
-        plot_pdf = cairosvg.svg2pdf(url="plot_svg.svg", write_to=str(figfile),
+        plot_pdf = cairosvg.svg2pdf(bytestring=fig.tostr(), write_to=str(figfile),
                                     output_width=plot_pdf_width)
 
         logger.info(f"Figure saved as {figfile}")
-
-        # remove temp svg files
-        os.system("rm mol_svg.svg")
-        os.system("rm tmp_plot.svg")
-        os.system("rm plot_svg.svg")
 
     return logger.info(f"All figures generated and saved in {figdir}")
         
