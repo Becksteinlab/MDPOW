@@ -83,9 +83,9 @@ def directory_paths(parent_directory=None, csv=None, csv_save_dir=None):
 
         directory_paths = pd.DataFrame(
         {
-            "molecule": resnames,
-            "resname": resnames,
-            "path": locations
+            'molecule': resnames,
+            'resname': resnames,
+            'path': locations
         }
     )
         if csv_save_dir is not None:
@@ -149,17 +149,17 @@ def directory_iteration(directory_paths, ensemble_analysis, **kwargs):
             logger.info(f'{molname} completed')
 
     except KeyError as err:
-        msg = (f'Invalid ensemble_analysis {err}. An EnsembleAnalysis type that corresponds to an existing '
-                'automated workflow module must be input as a kwarg. '
-                'ex: ensemble_analysis=\'DihedralAnalysis\'')
+        msg = (f"Invalid ensemble_analysis {err}. An EnsembleAnalysis type that corresponds "
+                "to an existing automated workflow module must be input as a kwarg. "
+                "ex: ensemble_analysis='DihedralAnalysis'")
         logger.error(f'{err} is an invalid selection')
 
         raise KeyError(msg)
 
     except TypeError as err:
-        msg = (f'Invalid ensemble_analysis {ensemble_analysis}. An EnsembleAnalysis type that corresponds to an existing '
-                'automated workflow module must be input as a kwarg. '
-                'ex: ensemble_analysis=\'DihedralAnalysis\'')
+        msg = (f"Invalid ensemble_analysis {ensemble_analysis}. An EnsembleAnalysis type that "
+                "corresponds to an existing automated workflow module must be input as a kwarg. "
+                "ex: ensemble_analysis='DihedralAnalysis'")
         logger.error(f'workflow module for {ensemble_analysis} does not exist yet')
 
         raise TypeError(msg)
