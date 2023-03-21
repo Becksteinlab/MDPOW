@@ -38,9 +38,8 @@ def directory_paths(parent_directory=None, csv=None, csv_save_dir=None):
        *csv*
            .csv file containing the molecule names, resnames,
            and paths, in that order, for the MDPOW simulation
-           data to be iterated over
-           must contain header of the form:
-           format: molecule,resname,path
+           data to be iterated over must contain header of the
+           form: `molecule,resname,path`
 
        *csv_save_dir*
            optionally provided directory to save .csv file, otherwise,
