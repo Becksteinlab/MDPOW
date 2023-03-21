@@ -64,9 +64,8 @@ class TestWorkflowsBase(object):
     def test_directory_paths_csv_input(self, csv_input_data):
         csv_path, csv_df = csv_input_data
         directory_paths = base.directory_paths(csv=csv_path)
-        
+
         pd.testing.assert_frame_equal(directory_paths, csv_df)
-        # is additional assertion required here? can this ever fail?
 
     def test_directory_iteration(self, dir_paths_data, caplog):
         directory_paths = dir_paths_data
