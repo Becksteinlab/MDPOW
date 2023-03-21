@@ -529,17 +529,15 @@ def dihedral_violins(df, width=0.9, solvents=SOLVENTS_DEFAULT):
 
     # this method allows for one solvent
     # to be plotted correctly
-    # needs to be corrected to fix legend
-    # for when only one solvent is plotted
-    solvs = np.asarray(solvents)
-    solv2 = 'octanol'
-    if solvs.size > 1:
-        solv2 = solvs[1]
+    solvs = list(solvents)
+    if len(solvs) < 2:
+        solvs.append('N/A')
     
     g = sns.catplot(data=df, x="lambda", y="dihedral", hue="solvent", col="interaction",
                     kind="violin", split=True, width=width, inner=None, cut=0,
                     linewidth=0.5,
-                    hue_order=[solvs[0], solv2], col_order=["Coulomb", "VDW", "Structure"],
+                    #hue_order=[solvs[0], solv2], col_order=["Coulomb", "VDW", "Structure"],
+                    hue_order=[solvs[0], solvs[1]], col_order=["Coulomb", "VDW", "Structure"],
                     sharex=False, sharey=True,
                     height=3.0, aspect=2.0, # height was 3.0, aspect was 2.0
                     facet_kws={'ylim': (-180, 180),
