@@ -323,6 +323,7 @@ def dihedral_groups_ensemble(dirname, atom_group_indices,
     da = DihedralAnalysis(all_dihedrals)
     da.run(start=start, stop=stop, step=step)
     df = da.results
+    # ^should we use .copy() here?
 
     return df
 
@@ -418,14 +419,10 @@ def periodic_angle(df, padding=45):
 
     '''
 
-    df1 = df[df.dihedral > 180 - padding]
-    for row in df1.index:
-        df1.loc[row, 'dihedral'] -= 360
-
-    df2 = df[df.dihedral < -180 + padding]
-    for row in df2.index:
-        df2.loc[row, 'dihedral'] += 360
-
+    df1 = df[df.dihedral > 180 - padding].copy(deep=True)
+    df1.dihedral -= 360
+    df2 = df[df.dihedral < -180 + padding].copy(deep=True)
+    df2.dihedral += 360
     df_aug = pd.concat([df1, df, df2]).reset_index(drop=True)
 
     return df_aug
