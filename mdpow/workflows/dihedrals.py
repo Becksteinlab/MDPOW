@@ -323,7 +323,6 @@ def dihedral_groups_ensemble(dirname, atom_group_indices,
     da = DihedralAnalysis(all_dihedrals)
     da.run(start=start, stop=stop, step=step)
     df = da.results
-    # ^should we use .copy() here?
 
     return df
 
