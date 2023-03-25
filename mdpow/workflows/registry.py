@@ -1,6 +1,21 @@
 # MDPOW: registry.py
 # 2023 Cade Duckworth
 
+"""
+:mod:`mdpow.workflows.registry` --- Registry of currently supported automated workflows
+=======================================================================================
+
+Each entry in :mod:`mdpow.workflows.registry` corresponds to an :class:`~mdpow.analysis.ensemble.EnsembleAnalysis` for which exists a corresponding
+automated workflow.
+
+Intended for use with :mod:`mdpow.workflows.base` to specify which
+:class:`~mdpow.analysis.ensemble.EnsembleAnalysis` should be iterated over
+the provided project data.
+
+.. autodata:: mdpow.workflows.dihedrals
+
+"""
+
 # import analysis
 from mdpow.workflows import dihedrals
  
