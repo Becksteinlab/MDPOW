@@ -2,7 +2,7 @@
  README for MDPOW
 ===================
 
-|build| |cov| |docs|
+|build| |cov| |docs| |zenodo|
 
 .. |P_ow| replace:: *P*\ :sub:`OW`
 .. |P_cw| replace:: *P*\ :sub:`CW`
@@ -92,5 +92,11 @@ Footnotes
 .. |docs| image:: https://readthedocs.org/projects/mdpow/badge/?version=latest
    :target: http://mdpow.readthedocs.org/en/latest/?badge=latest
    :alt: Documentation
+   
+.. |zenodo| image:: https://zenodo.org/badge/44999898.svg
+   :target: https://zenodo.org/badge/latestdoi/44999898
+   :alt: Zenodo
+
+   
 
 .. _INSTALL: INSTALL.rst
