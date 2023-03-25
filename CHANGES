@@ -23,10 +23,13 @@ Changes
 
 Enhancements
 
-* new workflows module (PR #217)
+* new workflows registry that contains each EnsembleAnalysis for which
+  a workflows module exists, for use with workflows base module (#229)
+* new workflows base module that provides iterative workflow use for
+  directories that contain multiple projects (#229)
+* new workflows module (#217)
 * new automated dihedral analysis workflow (detect dihedrals with SMARTS,
-  analyze with EnsembleAnalysis, and generate seaborn violinplots)
-  PR #217)
+  analyze with EnsembleAnalysis, and generate seaborn violinplots) (#217)
 
 Fixes
 
@@ -34,7 +37,7 @@ Fixes
 * fix ensemble.EnsembleAnalysis.check_groups_from_common_ensemble (#212)
 
 
-2021-01-03    0.8.0
+2022-01-03    0.8.0
 ALescoulie, orbeckst
 
 Changes

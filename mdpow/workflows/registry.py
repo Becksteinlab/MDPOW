@@ -12,6 +12,7 @@ Intended for use with :mod:`mdpow.workflows.base` to specify which
 :class:`~mdpow.analysis.ensemble.EnsembleAnalysis` should be iterated over
 the provided project data.
 
+.. seealso:: :mod:`~mdpow.workflows.base`
 .. seealso:: :mod:`~mdpow.workflows.dihedrals`
 
 """
