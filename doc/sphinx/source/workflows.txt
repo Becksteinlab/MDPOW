@@ -11,8 +11,6 @@ analysis :ref:`tools` based on the :ref:`framework`. Existing workflow
 modules, :mod:`~mdpow.workflows.dihedrals`, include functions
 for use with :class:`~mdpow.analysis.dihedral.DihedralAnalysis`.
 
-.. seealso:: :mod:`~mdpow.workflows.registry`
-
 .. toctree::
    :maxdepth: 1
 
