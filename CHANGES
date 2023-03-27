@@ -10,9 +10,6 @@ cadeduckworth, orbeckst, VOD555
 
 Changes
 
-* for mdpow.workflows.dihedrals.periodic_angle()
-  implement .copy(deep=True) to explicitly make
-  a copy DataFrame of the data for angle padding (#242)
 * for ensemble.EnsembleAnalysis._single_frame() 
   changed 'pass' to 'raise NotImplementedError' (#216)
 * for ensemble.EnsembleAnalysis._single_universe() 
@@ -33,6 +30,8 @@ Enhancements
 
 Fixes
 
+* for mdpow.workflows.dihedrals.periodic_angle() implement .copy(deep=True)
+  to explicitly make a copy DataFrame of the data for angle padding (#242)
 * fix rcoulomb in CHARMM energy minimization MDP template file (PR #210)
 * fix ensemble.EnsembleAnalysis.check_groups_from_common_ensemble (#212)
 
