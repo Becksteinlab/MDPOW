@@ -5,7 +5,8 @@
 :mod:`mdpow.workflows.registry` --- Registry of currently supported automated workflows
 =======================================================================================
 
-.. data:: registry
+.. autodata:: registry
+   :value:
 
 Each entry in :mod:`mdpow.workflows.registry` corresponds to an :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`
 for which exists a corresponding automated workflow.
