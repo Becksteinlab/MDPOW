@@ -5,9 +5,6 @@
 :mod:`mdpow.workflows.registry` --- Registry of currently supported automated workflows
 =======================================================================================
 
-.. autodata:: registry
-   :value:
-
 Each entry in :mod:`mdpow.workflows.registry` corresponds to an :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`
 for which exists a corresponding automated workflow.
 
@@ -19,6 +16,8 @@ the provided project data directory. To include a new automated workflow for use
 :mod:`mdpow.workflows.base`, create a key that is the name of the corresponding
 :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`, with the value defined as
 `<workflow module name>.<top-level function>`.
+
+.. autodata:: registry
 
 .. seealso:: :mod:`~mdpow.workflows.base`, :mod:`~mdpow.workflows.dihedrals`
 
