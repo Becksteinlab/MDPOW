@@ -14,7 +14,10 @@ Currently supported workflows - :mod:`~mdpow.workflows.dihedrals`
 
 Intended for use with :mod:`mdpow.workflows.base` to specify which
 :class:`~mdpow.analysis.ensemble.EnsembleAnalysis` should run iteratively over
-the provided project data.
+the provided project data directory. To include a new automated workflow for use with
+:mod:`mdpow.workflows.base`, create a key that is the name of the corresponding
+:class:`~mdpow.analysis.ensemble.EnsembleAnalysis`, with the value defined as
+`<module name>.<top-level function>`.
 
 .. seealso:: :mod:`~mdpow.workflows.base`, :mod:`~mdpow.workflows.dihedrals`
 
@@ -26,15 +29,3 @@ from mdpow.workflows import dihedrals
 registry = {
     'DihedralAnalysis' : dihedrals.automated_dihedral_analysis
 }
-
-"""
-.. data:: registry
-   To include a new automated workflow for use with :mod:`mdpow.workflows.base`,
-   create a key that is the name of the corresponding :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`,
-   with the value defined as `<module name>.<top-level function>`.
-
-"""
-    
-    
-    
-    
