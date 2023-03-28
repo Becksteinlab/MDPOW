@@ -32,6 +32,7 @@ but atom `names` in plots and file names are 1-based.
 .. autofunction:: save_df
 .. autofunction:: periodic_angle
 .. autofunction:: dihedral_violins
+.. autofunction:: build_svg
 .. autofunction:: plot_violins
 
 """
@@ -542,6 +543,35 @@ def dihedral_violins(df, width=0.9, solvents=SOLVENTS_DEFAULT, plot_title=None):
 
     return g
 
+def build_svg(mol, molname=None, name=None, ab_pairs=None,
+              solvents=SOLVENTS_DEFAULT, width=0.9):
+    # atoms
+    a = list(ab_pairs[name[0]][0])
+    # bonds
+    b = list(ab_pairs[name[0]][1])
+
+    drawer = rdMolDraw2D.MolDraw2DSVG(250, 250)
+    drawer.DrawMolecule(mol=mol, highlightAtoms=a, highlightBonds=b)
+    drawer.FinishDrawing()
+    svg = drawer.GetDrawingText().replace('svg:','')
+
+    mol_svg = svgutils.transform.fromstring(svg)
+    m = mol_svg.getroot()
+    m.scale(0.0125).moveto(21.8, 0.35)
+
+    plot_title = f'{molname}, {name[0]} {a} | ''{col_name}'
+    plot = dihedral_violins(name[1], width=width, solvents=solvents, plot_title=plot_title)
+
+    plot_svg = svgutils.transform.from_mpl(plot)
+    p = plot_svg.getroot()
+    p.scale(0.02)
+
+    # 28cm leaves room for lengthier solvent names in the legend
+    # order matters here, plot down first, mol on top (p, m)
+    fig = svgutils.compose.Figure("28cm", "4.2cm", p, m)
+
+    return fig
+
 def plot_violins(df, resname, mol, ab_pairs, figdir=None, molname=None,
                  width=0.9, plot_pdf_width=190, solvents=SOLVENTS_DEFAULT):
     '''Coordinates plotting and optionally saving figures for all dihedral
@@ -602,43 +632,18 @@ def plot_violins(df, resname, mol, ab_pairs, figdir=None, molname=None,
     section = df.groupby(by="selection")
 
     # conversion factor: 1 mm = 3.7795275591 px
-    plot_pdf_width = plot_pdf_width * 3.7795275591
     # DEFAULT: 190 mm = 718.110236229 pixels
+    plot_pdf_width_px = plot_pdf_width * 3.7795275591
 
     # put this into separate function
     for name in section:
-        a = list(ab_pairs[name[0]][0])
-        b = list(ab_pairs[name[0]][1])
-
-        drawer = rdMolDraw2D.MolDraw2DSVG(250, 250)
-        drawer.DrawMolecule(mol=mol, highlightAtoms=a, highlightBonds=b)
-        drawer.FinishDrawing()
-        svg = drawer.GetDrawingText().replace('svg:','')
-
-        mol_svg = svgutils.transform.fromstring(svg)
-        m = mol_svg.getroot()
-        m.scale(0.0125).moveto(21.8, 0.35)
-
-        plot_title = f'{molname}, {name[0]} {list(ab_pairs[name[0]][0])} | ''{col_name}'
-        plot = dihedral_violins(name[1], width=width, solvents=solvents, plot_title=plot_title)
-
-        plot_svg = svgutils.transform.from_mpl(plot)
-        p = plot_svg.getroot()
-        p.scale(0.02)
-
-        mol_svg = svgutils.transform.fromstring(svg)
-        m = mol_svg.getroot()
-        m.scale(0.0125).moveto(21.8, 0.35)
-
-        # 28cm leaves room for lengthier solvent names
-        # in the legend on the rightmost side
-        # width and height for SVG render, previously 30, 5
-        # the order matters here, plot down first, mol on top
-        fig = svgutils.compose.Figure("28cm", "4.2cm", p, m)
+        
+        fig = build_svg(mol=mol, molname=molname, name=name, ab_pairs=ab_pairs,
+                        solvents=solvents, width=width)
 
         figfile = pathlib.Path(newdir) / f"{molname}_{name[0]}_violins.pdf"
         plot_pdf = cairosvg.svg2pdf(bytestring=fig.tostr(), write_to=str(figfile),
-                                    output_width=plot_pdf_width)
+                                    output_width=plot_pdf_width_px)
 
         logger.info(f"Figure saved as {figfile}")
 
