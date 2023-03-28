@@ -13,6 +13,10 @@ Most functions can be used as standalone, individually, or in combination
 depending on the desired results. Details of the completely automated workflow
 are discussed under :func:`~mdpow.workflows.dihedrals.automated_dihedral_analysis`.
 
+Atom indices obtained by :func:`get_atom_indices` are 0-based,
+atom index labels on the molecule in the plots are 0-based,
+but atom `names` in plots and file names are 1-based.
+
 .. autodata:: SOLVENTS_DEFAULT
     :annotation: = ('water', 'octanol')
 .. autodata:: INTERACTIONS_DEFAULT
@@ -37,18 +41,13 @@ import pathlib
 import numpy as np
 import pandas as pd
 
-# add to dependencies for install and tests
 import cairosvg
 import svgutils
-import svgutils.compose as sc
-import svgutils.transform as sg
+import svgutils.compose
+import svgutils.transform
 
 from rdkit import Chem
 from rdkit.Chem import rdCoordGen
-
-# for SVG test
-#from rdkit.Chem.Draw import IPythonConsole
-#from IPython.display import SVG
 from rdkit.Chem.Draw import rdMolDraw2D
 
 import seaborn as sns
@@ -142,8 +141,9 @@ def rdkit_conversion(u, resname):
        :func:`~mdpow.workflows.dihedrals.build_universe` and a `resname` as input.
        Uses `resname` to select the solute for conversion by
        :class:`~MDAnalysis.converters.RDKit.RDKitConverter` to :class:`rdkit.Chem.rdchem.Mol`,
-       and will add element attributes for Hydrogen if not listed in the topology.
-       
+       and will add element attributes for Hydrogen if not listed in the topology,
+       using :func:`MDAnalysis.topology.guessers.guess_atom_element`.
+
        :keywords:
        
        *u*
@@ -167,28 +167,14 @@ def rdkit_conversion(u, resname):
 
     """
 
-    # i think somewhere we decided to ditch try/except method, will check notes
-    # notes pertaining to testing topology attributes for explicit Hs
-    
-    #try:
-    #    solute = u.select_atoms(f'resname {resname}')
-    #    mol = solute.convert_to('RDKIT')
-    #except AttributeError:
-    #    elements = [guess_atom_element(name) for name in u.atoms.names]
-    #    u.add_TopologyAttr("elements", elements)
-    #    solute = u.select_atoms(f'resname {resname}')
-    #    mol = solute.convert_to('RDKIT')
-
     elements = [guess_atom_element(name) for name in u.atoms.names]
     u.add_TopologyAttr("elements", elements)
 
-    # com or cog?
     solute = u.select_atoms(f'resname {resname}')
     solute.unwrap(compound='residues', reference='com')
 
     mol = solute.convert_to('RDKIT')
     rdCoordGen.AddCoords(mol)
-    #rdDepictor.Compute2DCoords(mol), not sure how this is different from above^
 
     for atom in mol.GetAtoms():
         atom.SetProp("atomNote", str(atom.GetIdx()))
@@ -232,8 +218,6 @@ def get_atom_indices(dirname, mol, SMARTS=SMARTS_DEFAULT):
 
     '''
 
-    #u = build_universe(dirname=dirname)
-    #mol = rdkit_conversion(u=u, resname=resname)[0]
     pattern = Chem.MolFromSmarts(SMARTS)
     atom_indices = mol.GetSubstructMatches(pattern)
     
@@ -296,9 +280,6 @@ def get_dihedral_groups(solute, atom_indices):
 
     '''
 
-    #u = build_universe(dirname=dirname)
-    #_, solute = rdkit_conversion(u=u, resname=resname)
-    #atom_indices = get_atom_indices(dirname=dirname, resname=resname, SMARTS=SMARTS)
     dihedral_groups = [solute.atoms[list(a_ind)].names for a_ind
                        in atom_indices]
 
@@ -312,7 +293,7 @@ def get_paired_indices(atom_indices, bond_indices, dihedral_groups):
         dg_list.append(group)
     all_dgs = tuple(dg_list)
 
-    if (len(atom_indices) == len(bond_indices) == len(all_dgs)):
+    if len(atom_indices) == len(bond_indices) == len(all_dgs):
         ab_pairs = {}
         i = 0
         while i < len(all_dgs):
@@ -431,7 +412,7 @@ def save_df(df, df_save_dir, resname=None, molname=None):
     newdir = os.path.join(df_save_dir, subdir)
     os.mkdir(newdir)
 
-    # time and compress level can be adjusted as kwargs
+    # time and compression level can be adjusted as kwargs
     df.to_csv(f'{newdir}/{molname}_full_df.csv.bz2',
               index=False, compression='bz2')
 
@@ -479,7 +460,6 @@ def periodic_angle(df, padding=45):
 
     '''
 
-    # this method is changed in PR242
     df1 = df[df.dihedral > 180 - padding]
     df1.dihedral -= 360
     df2 = df[df.dihedral < -180 + padding]
@@ -525,10 +505,9 @@ def dihedral_violins(df, width=0.9, solvents=SOLVENTS_DEFAULT):
     # (+1 for additional space with axes)
     width_ratios = [len(df[df['interaction'] == "Coulomb"]["lambda"].unique()) + 1,
                     len(df[df['interaction'] == "VDW"]["lambda"].unique()),
-                    len(df[df['interaction'] == "Coulomb"]["lambda"].unique()) - 1] # was - 1
+                    len(df[df['interaction'] == "Coulomb"]["lambda"].unique()) - 1]
 
-    # this method allows for one solvent
-    # to be plotted correctly
+    # this method allows for one solvent to be plotted correctly
     solvs = list(solvents)
     if len(solvs) < 2:
         solvs.append('N/A')
@@ -536,30 +515,28 @@ def dihedral_violins(df, width=0.9, solvents=SOLVENTS_DEFAULT):
     g = sns.catplot(data=df, x="lambda", y="dihedral", hue="solvent", col="interaction",
                     kind="violin", split=True, width=width, inner=None, cut=0,
                     linewidth=0.5,
-                    #hue_order=[solvs[0], solv2], col_order=["Coulomb", "VDW", "Structure"],
                     hue_order=[solvs[0], solvs[1]], col_order=["Coulomb", "VDW", "Structure"],
                     sharex=False, sharey=True,
-                    height=3.0, aspect=2.0, # height was 3.0, aspect was 2.0
+                    height=3.0, aspect=2.0,
                     facet_kws={'ylim': (-180, 180),
                                'gridspec_kws': {'width_ratios': width_ratios,
                                                 }})
 
-    _ = g.set_xlabels(r"$\lambda$")
-    _ = g.set_ylabels(r"dihedral angle $\phi$")
-    _ = g.despine(offset=5)
+    g.set_xlabels(r"$\lambda$")
+    g.set_ylabels(r"dihedral angle $\phi$")
+    g.despine(offset=5)
 
     axC = g.axes_dict['Coulomb']
-    _ = axC.yaxis.set_major_locator(plt.matplotlib.ticker.MultipleLocator(60))
-    _ = axC.yaxis.set_minor_locator(plt.matplotlib.ticker.MultipleLocator(30))
-    _ = axC.yaxis.set_major_formatter(plt.matplotlib.ticker.FormatStrFormatter(r"$%g^\circ$"))
+    axC.yaxis.set_major_locator(plt.matplotlib.ticker.MultipleLocator(60))
+    axC.yaxis.set_minor_locator(plt.matplotlib.ticker.MultipleLocator(30))
+    axC.yaxis.set_major_formatter(plt.matplotlib.ticker.FormatStrFormatter(r"$%g^\circ$"))
 
     axV = g.axes_dict['VDW']
-    _ = axV.yaxis.set_visible(False)
-    _ = axV.spines["left"].set_visible(False)
+    axV.yaxis.set_visible(False)
+    axV.spines["left"].set_visible(False)
 
     axIM = g.axes_dict['Structure']                     
-    #axIM.imshow(im, aspect='equal', origin='upper', extent=(-80.5, 379.5, -222.0, 222.0))
-    _ = axIM.axis('off')
+    axIM.axis('off')
 
     return g
 
@@ -615,7 +592,6 @@ def plot_violins(df, resname, mol, ab_pairs, figdir=None, molname=None,
     if molname is None:
         molname = resname
 
-        # figdir is now necessary??
     if figdir is not None:
         subdir = molname
         newdir = os.path.join(figdir, subdir)
@@ -637,21 +613,21 @@ def plot_violins(df, resname, mol, ab_pairs, figdir=None, molname=None,
         drawer.FinishDrawing()
         svg = drawer.GetDrawingText().replace('svg:','')
 
-        mol_svg = sg.fromstring(svg)
+        mol_svg = svgutils.transform.fromstring(svg)
         m = mol_svg.getroot()
         m.scale(0.0125).moveto(21.8, 0.35)
 
         plot = dihedral_violins(name[1], width=width, solvents=solvents)
-        _ = plot.set_titles(f'{molname}, {name[0]} {list(ab_pairs[name[0]][0])} | ''{col_name}')
+        plot.set_titles(f'{molname}, {name[0]} {list(ab_pairs[name[0]][0])} | ''{col_name}')
         # plot.set_titles needs to stay here during future development
         # this locale ensures that plots are properly named,
         # especially when generated for a project iteratively
 
-        plot_svg = sg.from_mpl(plot)
+        plot_svg = svgutils.transform.from_mpl(plot)
         p = plot_svg.getroot()
         p.scale(0.02)
 
-        mol_svg = sg.fromstring(svg)
+        mol_svg = svgutils.transform.fromstring(svg)
         m = mol_svg.getroot()
         m.scale(0.0125).moveto(21.8, 0.35)
 
@@ -659,7 +635,7 @@ def plot_violins(df, resname, mol, ab_pairs, figdir=None, molname=None,
         # in the legend on the rightmost side
         # width and height for SVG render, previously 30, 5
         # the order matters here, plot down first, mol on top
-        fig = sc.Figure("28cm", "4.2cm", p, m)
+        fig = svgutils.compose.Figure("28cm", "4.2cm", p, m)
 
         # figdir is now necessary and plots are not returned with molecule graphic
         figfile = pathlib.Path(newdir) / f"{molname}_{name[0]}_violins.pdf"
