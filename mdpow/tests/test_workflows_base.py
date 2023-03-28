@@ -99,29 +99,3 @@ class TestWorkflowsBase(object):
         # test logger error recording
         assert "'DarthVaderAnalysis' is an invalid selection" in caplog.text, ('did not catch incorrect '
                'key specification for workflows.registry that results in KeyError')
-
-    def test_automated_project_analysis_TypeError(self, project_paths_data, caplog):
-        # this will currently test for input of analysis type
-        # that does not have a corresponding automation module
-        # this test and the corresponding error catcher might
-        # not be necessary once all automation workflows
-        # modules in the registry are completed
-        caplog.clear()
-        caplog.set_level(logging.ERROR, logger='mdpow.workflows.base')
-
-        project_paths = project_paths_data
-        # change resname to match topology (every SAMPL7 resname is 'UNK')
-        # only necessary for this dataset, not necessary for normal use
-        project_paths['resname'] = 'UNK'
-
-        # test error output when raised
-        with pytest.raises(TypeError,
-                           match="Invalid ensemble_analysis SolvationAnalysis. An EnsembleAnalysis "
-                                 "type that corresponds to an existing automated workflow module must "
-                                 "be input as a kwarg. ex: ensemble_analysis='DihedralAnalysis'"):
-            except KeyError:
-                base.automated_project_analysis(project_paths, ensemble_analysis='SolvationAnalysis', solvents=('water',))
-
-        # test logger error recording
-        assert 'workflow module for SolvationAnalysis does not exist yet' in caplog.text, ('did not catch incorrect '
-               'key specification for workflows.registry that results in TypeError (NoneType)')
