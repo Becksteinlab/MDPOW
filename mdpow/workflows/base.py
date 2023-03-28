@@ -5,8 +5,20 @@
 :mod:`mdpow.workflows.base` --- Automated workflow base functions
 =================================================================
 
-.. autofunction:: directory_paths
-.. autofunction:: directory_iteration
+To analyze multiple MDPOW projects, provide :func:`project_paths`
+with the top-level directory containing all MDPOW projects' simulation data
+to obtain a :class:`pandas.DataFrame` containing the project information
+and paths. Then, :func:`automated_project_analysis` takes as input the
+aforementioned :class:`pandas.DataFrame` and runs the specified
+:class:`~mdpow.analysis.ensemble.EnsembleAnalysis` for all MDPOW projects
+under the top-level directory provided to :func:`project_paths`.
+
+Currently supported workflows - :mod:`~mdpow.workflows.dihedrals`
+
+.. seealso:: :mod:`~mdpow.workflows.registry`
+
+.. autofunction:: project_paths
+.. autofunction:: automated_project_analysis
 
 """
 
@@ -20,7 +32,7 @@ import logging
 
 logger = logging.getLogger('mdpow.workflows.base')
 
-def directory_paths(parent_directory=None, csv=None, csv_save_dir=None):
+def project_paths(parent_directory=None, csv=None, csv_save_dir=None):
     """Takes a top directory containing MDPOW projects and determines
        the molname, resname, and path, of each MDPOW project within.
 
@@ -32,7 +44,7 @@ def directory_paths(parent_directory=None, csv=None, csv_save_dir=None):
        *parent_directory*
            the path for the location of the top directory 
            under which the subdirectories of MDPOW simulation
-           data exist, additionally creates a 'dir_paths.csv' file
+           data exist, additionally creates a 'project_paths.csv' file
            for user manipulation of metadata and for future reference
 
        *csv*
@@ -47,20 +59,20 @@ def directory_paths(parent_directory=None, csv=None, csv_save_dir=None):
 
        :returns:
 
-       *directory_paths*
+       *project_paths*
            :class:`pandas.DataFrame` containing MDPOW project metadata
 
        .. rubric:: Example
        
        Typical Workflow::
 
-           directory_paths = directory_paths(parent_directory='/foo/bar/MDPOW_projects')
-           directory_iteration(directory_paths)
+           project_paths = project_paths(parent_directory='/foo/bar/MDPOW_projects')
+           automated_project_analysis(project_paths)
 
-           or
+           'or'
 
-           directory_paths = directory_paths(csv='/foo/bar/MDPOW.csv')
-           directory_iteration(directory_paths)
+           project_paths = project_paths(csv='/foo/bar/MDPOW.csv')
+           automated_project_analysis(project_paths)
 
     """
 
@@ -80,7 +92,7 @@ def directory_paths(parent_directory=None, csv=None, csv_save_dir=None):
             res_temp = loc.strip().split('/')
             resnames.append(res_temp[-1])
 
-        directory_paths = pd.DataFrame(
+        project_paths = pd.DataFrame(
         {
             'molecule': resnames,
             'resname': resnames,
@@ -89,32 +101,31 @@ def directory_paths(parent_directory=None, csv=None, csv_save_dir=None):
     )
         if csv_save_dir is not None:
             
-            directory_paths.to_csv(f'{csv_save_dir}/dir_paths.csv', index=False)
-            logger.info(f'dir_paths saved under {csv_save_dir}')
+            project_paths.to_csv(f'{csv_save_dir}/project_paths.csv', index=False)
+            logger.info(f'project_paths saved under {csv_save_dir}')
 
         else:
-            current_directory = os.system('pwd')
-            directory_paths.to_csv('dir_paths.csv', index=False)
-            logger.info(f'dir_paths saved under {current_directory}')
+            current_directory = os.getcwd()
+            project_paths.to_csv('project_paths.csv', index=False)
+            logger.info(f'project_paths saved under {current_directory}')
 
     elif csv is not None:
         locations = pd.read_csv(csv)
-        directory_paths = locations.sort_values(by=['molecule', 'resname', 'path']).reset_index(drop=True)
+        project_paths = locations.sort_values(by=['molecule', 'resname', 'path']).reset_index(drop=True)
 
-    return directory_paths
+    return project_paths
 
-def directory_iteration(directory_paths, ensemble_analysis, **kwargs):
-    """Takes a :class:`pandas.DataFrame` created by
-       :func:`~mdpow.workflows.base.directory_paths`
-       and iterates over the project paths to implement
-       :func:`~mdpow.workflows.dihedrals.automated_dihedral_analysis`
-       for each project directory.
+def automated_project_analysis(project_paths, ensemble_analysis, **kwargs):
+    """Takes a :class:`pandas.DataFrame` created by :func:`~mdpow.workflows.base.project_paths`
+       and iteratively runs the specified :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`
+       for each of the projects by running the associated automated workflow
+       in each project directory returned by :func:`~mdpow.workflows.base.project_paths`.
 
        Compatibility with more automated analyses in development.
 
        :keywords:
 
-       *directory_paths*
+       *project_paths*
            :class:`pandas.DataFrame` that provides paths to MDPOW projects
 
        *ensemble_analysis*
@@ -122,21 +133,23 @@ def directory_iteration(directory_paths, ensemble_analysis, **kwargs):
            that corresponds to the desired automated workflow module
 
        *kwargs*
-           keyword arguments from :func:`~mdpow.workflows.dihedrals.automated_dihedral_analysis`
+           keyword arguments for the supported automated workflows,
+           currently - :func:`~mdpow.workflows.dihedrals.automated_dihedral_analysis`
 
            .. autodata:: mdpow.workflows.dihedrals.automated_dihedral_analysis
 
+       .. seealso:: :class:`~mdpow.analysis.dihedral.DihedralAnalysis`, :mod:`mdpow.workflows.dihedrals`
        .. rubric:: Example
 
        Typical Workflow::
 
-           directory_paths = directory_paths(parent_directory='/foo/bar/MDPOW_projects')
-           directory_iteration(directory_paths, ensemble_analysis='DihedralAnalysis', **kwargs)
+           project_paths = project_paths(parent_directory='/foo/bar/MDPOW_projects')
+           automated_project_analysis(project_paths, ensemble_analysis='DihedralAnalysis', **kwargs)
 
     """
 
     try:
-        for row in directory_paths.itertuples():
+        for row in project_paths.itertuples():
             molname = row.molecule
             resname = row.resname
             dirname = row.path
@@ -163,4 +176,5 @@ def directory_iteration(directory_paths, ensemble_analysis, **kwargs):
 
         raise TypeError(msg)
 
-    return logger.info('all analyses completed')
+    logger.info('all analyses completed')
+    return

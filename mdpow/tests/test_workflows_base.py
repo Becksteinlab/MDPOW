@@ -36,7 +36,7 @@ class TestWorkflowsBase(object):
 
     @pytest.fixture(scope='function')
     def csv_input_data(self):
-        csv_path = STATES['workflows'] / 'dir_paths.csv'
+        csv_path = STATES['workflows'] / 'project_paths.csv'
         csv_df = pd.read_csv(csv_path).reset_index(drop=True)
         return csv_path, csv_df
 
@@ -48,45 +48,45 @@ class TestWorkflowsBase(object):
         return test_df
 
     @pytest.fixture(scope='function')
-    def dir_paths_data(self, SM_tmp_dir):
-        directory_paths = base.directory_paths(parent_directory=SM_tmp_dir)
-        return directory_paths
+    def project_paths_data(self, SM_tmp_dir):
+        project_paths = base.project_paths(parent_directory=SM_tmp_dir)
+        return project_paths
 
-    def test_directory_paths(self, test_df_data, dir_paths_data):
+    def test_project_paths(self, test_df_data, project_paths_data):
         test_df = test_df_data
-        directory_paths = dir_paths_data
+        project_paths = project_paths_data
 
-        assert directory_paths['molecule'][0] == test_df['molecule'][0]
-        assert directory_paths['molecule'][1] == test_df['molecule'][1]
-        assert directory_paths['resname'][0] == test_df['resname'][0]
-        assert directory_paths['resname'][1] == test_df['resname'][1]
+        assert project_paths['molecule'][0] == test_df['molecule'][0]
+        assert project_paths['molecule'][1] == test_df['molecule'][1]
+        assert project_paths['resname'][0] == test_df['resname'][0]
+        assert project_paths['resname'][1] == test_df['resname'][1]
 
-    def test_directory_paths_csv_input(self, csv_input_data):
+    def test_project_paths_csv_input(self, csv_input_data):
         csv_path, csv_df = csv_input_data
-        directory_paths = base.directory_paths(csv=csv_path)
+        project_paths = base.project_paths(csv=csv_path)
 
-        pd.testing.assert_frame_equal(directory_paths, csv_df)
+        pd.testing.assert_frame_equal(project_paths, csv_df)
 
-    def test_directory_iteration(self, dir_paths_data, caplog):
-        directory_paths = dir_paths_data
+    def test_automated_project_analysis(self, project_paths_data, caplog):
+        project_paths = project_paths_data
         # change resname to match topology (every SAMPL7 resname is 'UNK')
         # only necessary for this dataset, not necessary for normal use
-        directory_paths['resname'] = 'UNK'
+        project_paths['resname'] = 'UNK'
 
-        base.directory_iteration(directory_paths, solvents=('water',),
+        base.automated_project_analysis(project_paths, solvents=('water',),
                                  ensemble_analysis='DihedralAnalysis')
 
         assert 'all analyses completed' in caplog.text, ('automated_dihedral_analysis '
                'did not iteratively run to completion for the provided project')
 
-    def test_directory_iteration_KeyError(self, dir_paths_data, caplog):
+    def test_automated_project_analysis_KeyError(self, project_paths_data, caplog):
         caplog.clear()
         caplog.set_level(logging.ERROR, logger='mdpow.workflows.base')
 
-        directory_paths = dir_paths_data
+        project_paths = project_paths_data
         # change resname to match topology (every SAMPL7 resname is 'UNK')
         # only necessary for this dataset, not necessary for normal use
-        directory_paths['resname'] = 'UNK'
+        project_paths['resname'] = 'UNK'
 
         # test error output when raised
         with pytest.raises(KeyError,
@@ -94,13 +94,13 @@ class TestWorkflowsBase(object):
                                  "An EnsembleAnalysis type that corresponds to an existing "
                                  "automated workflow module must be input as a kwarg. ex: "
                                  "ensemble_analysis='DihedralAnalysis'"):
-            base.directory_iteration(directory_paths, ensemble_analysis='DarthVaderAnalysis', solvents=('water',))
+            base.automated_project_analysis(project_paths, ensemble_analysis='DarthVaderAnalysis', solvents=('water',))
 
         # test logger error recording
         assert "'DarthVaderAnalysis' is an invalid selection" in caplog.text, ('did not catch incorrect '
                'key specification for workflows.registry that results in KeyError')
 
-    def test_directory_iteration_TypeError(self, dir_paths_data, caplog):
+    def test_automated_project_analysis_TypeError(self, project_paths_data, caplog):
         # this will currently test for input of analysis type
         # that does not have a corresponding automation module
         # this test and the corresponding error catcher might
@@ -109,17 +109,17 @@ class TestWorkflowsBase(object):
         caplog.clear()
         caplog.set_level(logging.ERROR, logger='mdpow.workflows.base')
 
-        directory_paths = dir_paths_data
+        project_paths = project_paths_data
         # change resname to match topology (every SAMPL7 resname is 'UNK')
         # only necessary for this dataset, not necessary for normal use
-        directory_paths['resname'] = 'UNK'
+        project_paths['resname'] = 'UNK'
 
         # test error output when raised
         with pytest.raises(TypeError,
                            match="Invalid ensemble_analysis SolvationAnalysis. An EnsembleAnalysis "
                                  "type that corresponds to an existing automated workflow module must "
                                  "be input as a kwarg. ex: ensemble_analysis='DihedralAnalysis'"):
-            base.directory_iteration(directory_paths, ensemble_analysis='SolvationAnalysis', solvents=('water',))
+            base.automated_project_analysis(project_paths, ensemble_analysis='SolvationAnalysis', solvents=('water',))
 
         # test logger error recording
         assert 'workflow module for SolvationAnalysis does not exist yet' in caplog.text, ('did not catch incorrect '
