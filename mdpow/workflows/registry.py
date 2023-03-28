@@ -10,6 +10,8 @@ for which exists a corresponding automated workflow.
 
 Currently supported workflows :mod:`~mdpow.workflows.dihedrals`
 
+.. data:: keys
+
 Intended for use with :mod:`mdpow.workflows.base` to specify which
 :class:`~mdpow.analysis.ensemble.EnsembleAnalysis` should run iteratively over
 the provided project data.
@@ -21,15 +23,11 @@ the provided project data.
 # import analysis
 from mdpow.workflows import dihedrals
  
- f"""
- .. data:: {registry.keys()}
-
- """
 registry = {
     'DihedralAnalysis' : dihedrals.automated_dihedral_analysis
 }
 
-
+keys = registry.keys()
 
     
     
