@@ -22,8 +22,8 @@ the provided project data.
 from mdpow.workflows import dihedrals
  
  f"""
- :data: {registry.keys()}
- 
+ .. data:: {registry.keys()}
+
  """
 registry = {
     'DihedralAnalysis' : dihedrals.automated_dihedral_analysis
