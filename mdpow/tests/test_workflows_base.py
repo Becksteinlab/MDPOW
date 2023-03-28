@@ -119,7 +119,8 @@ class TestWorkflowsBase(object):
                            match="Invalid ensemble_analysis SolvationAnalysis. An EnsembleAnalysis "
                                  "type that corresponds to an existing automated workflow module must "
                                  "be input as a kwarg. ex: ensemble_analysis='DihedralAnalysis'"):
-            base.automated_project_analysis(project_paths, ensemble_analysis='SolvationAnalysis', solvents=('water',))
+            except KeyError:
+                base.automated_project_analysis(project_paths, ensemble_analysis='SolvationAnalysis', solvents=('water',))
 
         # test logger error recording
         assert 'workflow module for SolvationAnalysis does not exist yet' in caplog.text, ('did not catch incorrect '
