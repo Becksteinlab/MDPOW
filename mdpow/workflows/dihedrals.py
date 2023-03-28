@@ -468,7 +468,7 @@ def periodic_angle(df, padding=45):
 
     return df_aug
 
-def dihedral_violins(df, width=0.9, solvents=SOLVENTS_DEFAULT):
+def dihedral_violins(df, width=0.9, solvents=SOLVENTS_DEFAULT, plot_title=None):
     '''Plots distributions of dihedral angles for one dihedral atom group
        as violin plots, using as input the augmented :class:`pandas.DataFrame`
        from :func:`~mdpow.workflows.dihedrals.periodic_angle`.
@@ -537,6 +537,8 @@ def dihedral_violins(df, width=0.9, solvents=SOLVENTS_DEFAULT):
 
     axIM = g.axes_dict['Structure']                     
     axIM.axis('off')
+
+    g.set_titles(plot_title)
 
     return g
 
@@ -617,11 +619,8 @@ def plot_violins(df, resname, mol, ab_pairs, figdir=None, molname=None,
         m = mol_svg.getroot()
         m.scale(0.0125).moveto(21.8, 0.35)
 
-        plot = dihedral_violins(name[1], width=width, solvents=solvents)
-        plot.set_titles(f'{molname}, {name[0]} {list(ab_pairs[name[0]][0])} | ''{col_name}')
-        # plot.set_titles needs to stay here during future development
-        # this locale ensures that plots are properly named,
-        # especially when generated for a project iteratively
+        plot_title = f'{molname}, {name[0]} {list(ab_pairs[name[0]][0])} | ''{col_name}'
+        plot = dihedral_violins(name[1], width=width, solvents=solvents, plot_title=plot_title)
 
         plot_svg = svgutils.transform.from_mpl(plot)
         p = plot_svg.getroot()
@@ -637,15 +636,15 @@ def plot_violins(df, resname, mol, ab_pairs, figdir=None, molname=None,
         # the order matters here, plot down first, mol on top
         fig = svgutils.compose.Figure("28cm", "4.2cm", p, m)
 
-        # figdir is now necessary and plots are not returned with molecule graphic
         figfile = pathlib.Path(newdir) / f"{molname}_{name[0]}_violins.pdf"
         plot_pdf = cairosvg.svg2pdf(bytestring=fig.tostr(), write_to=str(figfile),
                                     output_width=plot_pdf_width)
 
         logger.info(f"Figure saved as {figfile}")
 
-    return logger.info(f"All figures generated and saved in {figdir}")
-        
+    logger.info(f"All figures generated and saved in {figdir}")
+
+    return None
 
 def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
                                 resname=None, molname=None,
@@ -775,4 +774,6 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
     plot_violins(df_aug, resname=resname, molname=molname, mol=mol, plot_pdf_width=plot_pdf_width,
                  ab_pairs=ab_pairs, figdir=figdir, width=width, solvents=solvents)
 
-    return logger.info(f"DihedralAnalysis completed for all projects in {dirname}")
+    logger.info(f"DihedralAnalysis completed for all projects in {dirname}")
+
+    return
