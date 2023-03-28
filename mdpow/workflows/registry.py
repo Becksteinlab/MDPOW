@@ -7,11 +7,10 @@
 
 Each entry in :mod:`mdpow.workflows.registry` corresponds to an :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`
 for which exists a corresponding automated workflow.
-Currently supported workflows :class:~`DihedralAnalysis`
 
-.. data:: registry
+Currently supported workflows :class:`~mdpow.analysis.dihedral.DihedralAnalysis`
 
-    :value: registry.registry['DihedralAnalysis']
+.. data:: registry.registry
 
 Intended for use with :mod:`mdpow.workflows.base` to specify which
 :class:`~mdpow.analysis.ensemble.EnsembleAnalysis` should be iterated over
