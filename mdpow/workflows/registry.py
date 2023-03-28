@@ -10,7 +10,7 @@ for which exists a corresponding automated workflow.
 
 Currently supported workflows :class:`~mdpow.analysis.dihedral.DihedralAnalysis`
 
-:data: `~mdpow.workflows.registry.registry.keys()`
+.. data:: `~mdpow.workflows.registry`
 
 Intended for use with :mod:`mdpow.workflows.base` to specify which
 :class:`~mdpow.analysis.ensemble.EnsembleAnalysis` should run iteratively over
