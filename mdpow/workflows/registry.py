@@ -30,6 +30,8 @@ from mdpow.workflows import dihedrals
 """
 .. data:: mdpow.workflows.registry.registry
 
+   :type: dictionary
+
    Intended for use with :mod:`mdpow.workflows.base` to specify which
    :class:`~mdpow.analysis.ensemble.EnsembleAnalysis` should run iteratively over
    the provided project data directory. To include a new automated workflow for use with
