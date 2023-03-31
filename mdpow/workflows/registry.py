@@ -12,11 +12,11 @@ for which exists a corresponding automated workflow.
    :widths: auto
    :name: workflows_registry
 
-   +-------------------------------+-----------------------------------------------------------------------+
-   | key/keyword: EnsembleAnalysis | value: <workflow module name>.<top-level automated analysis function> |
-   +===============================+=======================================================================+
-   | DihedralAnalysis              | :ref:`dihedrals.automated_dihedral_analysis`                          |
-   +-------------------------------+-----------------------------------------------------------------------+
+   +-------------------------------+------------------------------------------------------------------------------------------------------+
+   | key/keyword: EnsembleAnalysis | value: <workflow module name>.<top-level automated analysis function>                                |
+   +===============================+======================================================================================================+
+   | DihedralAnalysis              | :ref:`dihedrals.automated_dihedral_analysis <mdpow.workflows.dihedrals.automated_dihedral_analysis>` |
+   +-------------------------------+------------------------------------------------------------------------------------------------------+
 
 Intended for use with :mod:`mdpow.workflows.base` to specify which
 :class:`~mdpow.analysis.ensemble.EnsembleAnalysis` should run iteratively over
