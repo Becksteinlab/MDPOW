@@ -13,9 +13,9 @@ for which exists a corresponding automated workflow.
    :name: workflows_registry
 
    +-------------------------------+------------------------------------------------------------------------------------------------------+
-   | key/keyword: EnsembleAnalysis | value: <workflow module name>.<top-level automated analysis function>                                |
+   | key/keyword: EnsembleAnalysis | value: <workflow module>.<top-level automated analysis function>                                     |
    +===============================+======================================================================================================+
-   | DihedralAnalysis              | :ref:`dihedrals.automated_dihedral_analysis <mdpow.workflows.dihedrals.automated_dihedral_analysis>` |
+   | DihedralAnalysis              | :any:`dihedrals.automated_dihedral_analysis <mdpow.workflows.dihedrals.automated_dihedral_analysis>` |
    +-------------------------------+------------------------------------------------------------------------------------------------------+
 
 Intended for use with :mod:`mdpow.workflows.base` to specify which
@@ -23,7 +23,7 @@ Intended for use with :mod:`mdpow.workflows.base` to specify which
 the provided project data directory. To include a new automated workflow for use with
 :mod:`mdpow.workflows.base`, create a key that is the name of the corresponding
 :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`, with the value defined as
-`<workflow module name>.<top-level automated analysis function>`.
+`<workflow module>.<top-level automated analysis function>`.
 
 .. autodata:: registry
 
