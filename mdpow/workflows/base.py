@@ -13,8 +13,6 @@ aforementioned :class:`pandas.DataFrame` and runs the specified
 :class:`~mdpow.analysis.ensemble.EnsembleAnalysis` for all MDPOW projects
 under the top-level directory provided to :func:`project_paths`.
 
-Currently supported workflows - :mod:`~mdpow.workflows.dihedrals`
-
 .. seealso:: :mod:`~mdpow.workflows.registry`
 
 .. autofunction:: project_paths
@@ -98,12 +96,10 @@ def project_paths(parent_directory=None, csv=None, csv_save_dir=None):
             'resname': resnames,
             'path': locations
         }
-    )
+        )
         if csv_save_dir is not None:
-            
             project_paths.to_csv(f'{csv_save_dir}/project_paths.csv', index=False)
             logger.info(f'project_paths saved under {csv_save_dir}')
-
         else:
             current_directory = os.getcwd()
             project_paths.to_csv('project_paths.csv', index=False)
@@ -134,9 +130,8 @@ def automated_project_analysis(project_paths, ensemble_analysis, **kwargs):
 
        *kwargs*
            keyword arguments for the supported automated workflows,
-           currently - :func:`~mdpow.workflows.dihedrals.automated_dihedral_analysis`
-
-           .. autodata:: mdpow.workflows.dihedrals.automated_dihedral_analysis
+           see the :mod:`~mdpow.workflows.registry` for all available
+           workflows and their call signatures
 
        .. seealso:: :class:`~mdpow.analysis.dihedral.DihedralAnalysis`, :mod:`mdpow.workflows.dihedrals`
        .. rubric:: Example
