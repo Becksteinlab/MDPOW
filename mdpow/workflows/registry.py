@@ -12,18 +12,18 @@ for which exists a corresponding automated workflow.
    :widths: auto
    :name: workflows_registry
 
-   +------------------+-------------------------------------------------------------------+
-   | key (keyword)    | value (<workflow module>.<top-level automated analysis function>) |
-   +==================+===================================================================+
-   | DihedralAnalysis | :func:`dihedrals.automated_dihedral_analysis`                     |
-   +------------------+-------------------------------------------------------------------+
+   +-------------------------------+-----------------------------------------------------------------------+
+   | key/keyword: EnsembleAnalysis | value: <workflow module name>.<top-level automated analysis function> |
+   +===============================+=======================================================================+
+   | DihedralAnalysis              | :ref:`dihedrals.automated_dihedral_analysis`                          |
+   +-------------------------------+-----------------------------------------------------------------------+
 
 Intended for use with :mod:`mdpow.workflows.base` to specify which
 :class:`~mdpow.analysis.ensemble.EnsembleAnalysis` should run iteratively over
 the provided project data directory. To include a new automated workflow for use with
 :mod:`mdpow.workflows.base`, create a key that is the name of the corresponding
 :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`, with the value defined as
-`<workflow module name>.<top-level function>`.
+`<workflow module name>.<top-level automated analysis function>`.
 
 .. autodata:: registry
 
