@@ -28,7 +28,7 @@ for which exists a corresponding automated workflow.
 from mdpow.workflows import dihedrals
 
 """
-.. data:: registry
+.. data:: mdpow.workflows.registry.registry
 
    Intended for use with :mod:`mdpow.workflows.base` to specify which
    :class:`~mdpow.analysis.ensemble.EnsembleAnalysis` should run iteratively over
