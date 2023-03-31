@@ -67,7 +67,7 @@ def project_paths(parent_directory=None, csv=None, csv_save_dir=None):
            project_paths = project_paths(parent_directory='/foo/bar/MDPOW_projects')
            automated_project_analysis(project_paths)
 
-        or::
+       or::
 
            project_paths = project_paths(csv='/foo/bar/MDPOW.csv')
            automated_project_analysis(project_paths)
