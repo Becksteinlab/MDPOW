@@ -8,7 +8,15 @@
 Each entry in :mod:`mdpow.workflows.registry` corresponds to an :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`
 for which exists a corresponding automated workflow.
 
-Currently supported workflows - :mod:`~mdpow.workflows.dihedrals`
+.. table:: Currently supported automated workflows.
+   :widths: auto
+   :name: workflows_registry
+
+   +------------------+-------------------------------------------------------------------+
+   | key (keyword)    | value (<workflow module>.<top-level automated analysis function>) |
+   +==================+===================================================================+
+   | DihedralAnalysis | :func:`dihedrals.automated_dihedral_analysis`                     |
+   +------------------+-------------------------------------------------------------------+
 
 Intended for use with :mod:`mdpow.workflows.base` to specify which
 :class:`~mdpow.analysis.ensemble.EnsembleAnalysis` should run iteratively over
