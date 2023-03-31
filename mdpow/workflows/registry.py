@@ -28,8 +28,7 @@ for which exists a corresponding automated workflow.
 from mdpow.workflows import dihedrals
 
 """
-.. data:: mdpow.workflows.registry.registry
-
+.. attribute:: registry
    :type: dictionary
 
    Intended for use with :mod:`mdpow.workflows.base` to specify which
