@@ -19,7 +19,7 @@ the provided project data directory. To include a new automated workflow for use
 
 .. autodata:: registry
 
-.. seealso:: :mod:`~mdpow.workflows.base`, :mod:`~mdpow.workflows.dihedrals`
+.. seealso:: :mod:`~mdpow.workflows.base`
 
 """
 
