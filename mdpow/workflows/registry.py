@@ -29,7 +29,6 @@ from mdpow.workflows import dihedrals
 
 """
 .. :data: mdpow.workflows.registry.registry
-
    Intended for use with :mod:`mdpow.workflows.base` to specify which
    :class:`~mdpow.analysis.ensemble.EnsembleAnalysis` should run iteratively over
    the provided project data directory. To include a new automated workflow for use with
@@ -37,7 +36,8 @@ from mdpow.workflows import dihedrals
    :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`, with the value defined as
    `<workflow module>.<top-level automated analysis function>`.
 
-   The currently available workflows are listed in the :ref:`Currently supported automated workflows. <mdpow.workflows.registry.workflows_registry>`
+   The currently available workflows are listed in the
+   :ref:`Currently supported automated workflows. <mdpow.workflows.registry.workflows_registry>`
 
 """
 registry = {
