@@ -5,8 +5,8 @@
 :mod:`mdpow.workflows.registry` --- Registry of currently supported automated workflows
 =======================================================================================
 
-Each entry in :mod:`mdpow.workflows.registry` corresponds to an :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`
-for which exists a corresponding automated workflow.
+:mod:`mdpow.workflows.registry` hosts a dictionary with keys that correspond to an
+:class:`~mdpow.analysis.ensemble.EnsembleAnalysis` for which exists a corresponding automated workflow.
 
 .. table:: Currently supported automated workflows.
    :widths: auto
@@ -34,6 +34,9 @@ registry = {
 }
 
 """
+Each entry corresponds to an :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`
+for which exists a corresponding automated workflow.
+
 Intended for use with :mod:`mdpow.workflows.base` to specify which
 :class:`~mdpow.analysis.ensemble.EnsembleAnalysis` should run iteratively over
 the provided project data directory. To include a new automated workflow for use with
@@ -42,6 +45,6 @@ the provided project data directory. To include a new automated workflow for use
 `<workflow module>.<top-level automated analysis function>`.
 
 The currently available workflows are listed in the
-:ref:`Currently supported automated workflows. <mdpow.workflows.registry.workflows_registry>`
+:any:`Currently supported automated workflows. <workflows_registry>`
 
 """
