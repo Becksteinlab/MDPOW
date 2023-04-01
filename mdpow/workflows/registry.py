@@ -31,6 +31,8 @@ registry = {
 
     'DihedralAnalysis' : dihedrals.automated_dihedral_analysis
 
+}
+
 """
 Intended for use with :mod:`mdpow.workflows.base` to specify which
 :class:`~mdpow.analysis.ensemble.EnsembleAnalysis` should run iteratively over
@@ -43,5 +45,3 @@ The currently available workflows are listed in the
 :ref:`Currently supported automated workflows. <mdpow.workflows.registry.workflows_registry>`
 
 """
-
-}
