@@ -27,13 +27,15 @@ but atom `names` in plots and file names are 1-based.
 .. autofunction:: build_universe
 .. autofunction:: rdkit_conversion
 .. autofunction:: get_atom_indices
-.. autofunction:: dihedral_groups
+.. autofunction:: get_bond_indices
+.. autofunction:: get_dihedral_groups
+.. autofunction:: get_paired_indices
 .. autofunction:: dihedral_groups_ensemble
 .. autofunction:: save_df
-.. autofunction:: periodic_angle
+.. autofunction:: periodic_angle_padding
 .. autofunction:: dihedral_violins
 .. autofunction:: build_svg
-.. autofunction:: plot_violins
+.. autofunction:: plot_dihedral_violins
 
 """
 #^need to update function list
@@ -419,7 +421,7 @@ def save_df(df, df_save_dir, resname=None, molname=None):
 
     logger.info(f'Results DataFrame saved as {newdir}/{molname}_full_df.csv.bz2')
 
-def periodic_angle(df, padding=45):
+def periodic_angle_padding(df, padding=45):
     '''Pads the angles from the results :class:`~pandas.DataFrame`
        to maintain periodicity in the violin plots.
     
@@ -456,7 +458,7 @@ def periodic_angle(df, padding=45):
            da = DihedralAnalysis(all_dihedrals)
            da.run(start=0, stop=100, step=10)
            df = da.results
-           df_aug = periodic_angle(df, padding=45)
+           df_aug = periodic_angle_padding(df, padding=45)
            plot = dihedral_violins(df_aug, width=0.9)
 
     '''
@@ -472,13 +474,13 @@ def periodic_angle(df, padding=45):
 def dihedral_violins(df, width=0.9, solvents=SOLVENTS_DEFAULT, plot_title=None):
     '''Plots distributions of dihedral angles for one dihedral atom group
        as violin plots, using as input the augmented :class:`pandas.DataFrame`
-       from :func:`~mdpow.workflows.dihedrals.periodic_angle`.
+       from :func:`~mdpow.workflows.dihedrals.periodic_angle_padding`.
 
        :keywords:
 
        *df*
            augmented results :class:`pandas.DataFrame` from
-           :func:`~mdpow.workflows.dihedrals.periodic_angle`
+           :func:`~mdpow.workflows.dihedrals.periodic_angle_padding`
 
        *width*
            width of the violin element (>1 overlaps)
@@ -572,7 +574,7 @@ def build_svg(mol, molname=None, name=None, ab_pairs=None,
 
     return fig
 
-def plot_violins(df, resname, mol, ab_pairs, figdir=None, molname=None,
+def plot_dihedral_violins(df, resname, mol, ab_pairs, figdir=None, molname=None,
                  width=0.9, plot_pdf_width=190, solvents=SOLVENTS_DEFAULT):
     '''Coordinates plotting and optionally saving figures for all dihedral
        atom groups.
@@ -590,7 +592,7 @@ def plot_violins(df, resname, mol, ab_pairs, figdir=None, molname=None,
        
        *df*
            augmented results :class:`pandas.DataFrame` from
-           :func:`~mdpow.workflows.dihedrals.periodic_angle`
+           :func:`~mdpow.workflows.dihedrals.periodic_angle_padding`
 
        *resname*
            `resname` for the molecule as defined in 
@@ -710,7 +712,7 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
            value in degrees
            default: 45
 
-           .. seealso:: :func:`~mdpow.workflows.dihedrals.periodic_angle`
+           .. seealso:: :func:`~mdpow.workflows.dihedrals.periodic_angle_padding`
 
        *width*
            width of the violin element (>1 overlaps)
@@ -774,9 +776,9 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
     if df_save_dir is not None:
         save_df(df=df, df_save_dir=df_save_dir, resname=resname, molname=molname)
 
-    df_aug = periodic_angle(df, padding=padding)
+    df_aug = periodic_angle_padding(df, padding=padding)
 
-    plot_violins(df_aug, resname=resname, molname=molname, mol=mol, plot_pdf_width=plot_pdf_width,
+    plot_dihedral_violins(df_aug, resname=resname, molname=molname, mol=mol, plot_pdf_width=plot_pdf_width,
                  ab_pairs=ab_pairs, figdir=figdir, width=width, solvents=solvents)
 
     logger.info(f"DihedralAnalysis completed for all projects in {dirname}")

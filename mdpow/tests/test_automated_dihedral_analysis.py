@@ -70,7 +70,7 @@ class TestAutomatedDihedralAnalysis(object):
         df = dihedrals.dihedral_groups_ensemble(atom_indices=atom_group_indices,
                                                 dirname=SM25_tmp_dir,
                                                 solvents=('water',))
-        df_aug = dihedrals.periodic_angle(df)
+        df_aug = dihedrals.periodic_angle_padding(df)
         return df, df_aug
         # fixture output, tuple:
         # dihedral_data[0]=df
@@ -211,7 +211,7 @@ class TestAutomatedDihedralAnalysis(object):
     # issue raised (#239) to identify and resolve exact package/version responsible
     @pytest.mark.skipif(sys.version_info < (3, 8), reason='pytest=7.2.0, build=py37h89c1867_0, '
                        'returns incorrect atom_indices for dihedral atom group selections')
-    def test_periodic_angle(self, dihedral_data):
+    def test_periodic_angle_padding(self, dihedral_data):
 
         _, df_aug = dihedral_data
 
