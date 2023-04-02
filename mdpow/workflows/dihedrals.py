@@ -38,7 +38,7 @@ but atom `names` in plots and file names are 1-based.
 .. autofunction:: plot_dihedral_violins
 
 """
-#^need to update function list
+
 import os
 import pathlib
 import numpy as np
@@ -637,7 +637,6 @@ def plot_dihedral_violins(df, resname, mol, ab_pairs, figdir=None, molname=None,
     # DEFAULT: 190 mm = 718.110236229 pixels
     plot_pdf_width_px = plot_pdf_width * 3.7795275591
 
-    # put this into separate function
     for name in section:
         
         fig = build_svg(mol=mol, molname=molname, name=name, ab_pairs=ab_pairs,
