@@ -300,16 +300,13 @@ def get_dihedral_groups(solute, atom_indices):
 
 def get_paired_indices(atom_indices, bond_indices, dihedral_groups):
 
-    dg_list = []
-    for dg in dihedral_groups:
-        group = (f'{dg[0]}-{dg[1]}-{dg[2]}-{dg[3]}')
-        dg_list.append(group)
-    all_dgs = tuple(dg_list)
+    all_dgs = [f'{dg[0]}-{dg[1]}-{dg[2]}-{dg[3]}' for dg in dihedral_groups]
 
     assert (len(atom_indices) == len(bond_indices) == len(all_dgs),
             "atom_indices, bond_indices, and dihedral_groups are out of sync")
 
     ab_pairs = {}
+    # check Oliver's other comment for this
     ab_pairs = {all_dgs[i]: (atom_indices[i], bond_indices[i]) for i in range(len(all_dgs))}
 
     return ab_pairs
@@ -557,9 +554,9 @@ def dihedral_violins(df, width=0.9, solvents=SOLVENTS_DEFAULT, plot_title=None):
 def build_svg(mol, molname=None, name=None, ab_pairs=None,
               solvents=SOLVENTS_DEFAULT, width=0.9):
     # atoms
-    a = list(ab_pairs[name[0]][0])
+    a = ab_pairs[name[0]][0]
     # bonds
-    b = list(ab_pairs[name[0]][1])
+    b = ab_pairs[name[0]][1]
 
     drawer = rdMolDraw2D.MolDraw2DSVG(250, 250)
     drawer.DrawMolecule(mol=mol, highlightAtoms=a, highlightBonds=b)
