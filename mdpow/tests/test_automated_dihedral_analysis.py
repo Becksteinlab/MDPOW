@@ -30,6 +30,7 @@ RESOURCES = pathlib.PurePath(resource_filename(__name__, 'testing_resources'))
 MANIFEST = RESOURCES / "manifest.yml"
 
 resname = "UNK"
+molname = "SM25"
 
 @pytest.fixture(scope="function")
 def molname_workflows_directory(tmp_path, molname='SM25'):
@@ -302,16 +303,18 @@ class TestAutomatedDihedralAnalysis(object):
                                               solvents=('water',))
         assert f'Figure saved as {SM25_tmp_dir}/SM25/SM25_C10-C5-S4-O11_violins.pdf' in caplog.text, 'PDF file not saved'
 
-    #def test_DataFrame_input(self, SM25_tmp_dir, dihedral_data):
-    #    df, _ = dihedral_data
-    #    dihedrals.automated_dihedral_analysis(dirname=SM25_tmp_dir, figdir=SM25_tmp_dir,
-    #                                          resname=resname, solvents=('water',), dataframe=df)
-    #    assert (SM25_tmp_dir / 'SM25' / 'SM25_C10-C5-S4-O11_violins.pdf').exists(), 'PDF file not generated'
+    def test_DataFrame_input(self, SM25_tmp_dir, dihedral_data):
+        df, _ = dihedral_data
+        dihedrals.automated_dihedral_analysis(dirname=SM25_tmp_dir, figdir=SM25_tmp_dir,
+                                              resname=resname, molname=molname,
+                                              solvents=('water',), dataframe=df)
+        assert (SM25_tmp_dir / 'SM25' / 'SM25_C10-C5-S4-O11_violins.pdf').exists(), 'PDF file not generated'
 
     def test_DataFrame_input_info(self, SM25_tmp_dir, dihedral_data, caplog):
         caplog.clear()
         caplog.set_level(logging.INFO, logger='mdpow.workflows.dihedrals')
         df, _ = dihedral_data
         dihedrals.automated_dihedral_analysis(dirname=SM25_tmp_dir, figdir=SM25_tmp_dir,
-                                              resname=resname, solvents=('water',), dataframe=df)
+                                              resname=resname, molname=molname,
+                                              solvents=('water',), dataframe=df)
         assert 'Proceeding with results DataFrame provided.' in caplog.text, 'No dataframe provided or dataframe not recognized'
