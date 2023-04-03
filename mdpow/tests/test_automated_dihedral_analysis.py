@@ -171,7 +171,7 @@ class TestAutomatedDihedralAnalysis(object):
         u = dihedrals.build_universe(dirname=SM25_tmp_dir)
         solute = u.select_atoms('resname UNK')
         solute_names = solute.atoms.names
-        assert solute_names == self.universe_solute_atom_names
+        assert solute_names.all() == self.universe_solute_atom_names.all()
 
     # the following 'reason' affects every downstream function that relies
     # on the atom indices returned for dihedral atom group selections
