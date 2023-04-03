@@ -23,6 +23,8 @@ but atom `names` in plots and file names are 1-based.
     :annotation: = ('Coulomb', 'VDW')
 .. autodata:: SMARTS_DEFAULT
     :annotation: = [!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]
+.. autodata:: PLOT_WIDTH_DEFAULT
+    :annotation: = 190
 .. autofunction:: automated_dihedral_analysis
 .. autofunction:: build_universe
 .. autofunction:: rdkit_conversion
@@ -99,6 +101,14 @@ SMARTS_DEFAULT = '[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]'
      * ``[!#1]~` or `~[!#1]`` : the first and last portion specify any bond,
        to any atom that is not hydrogen
 
+"""
+
+PLOT_WIDTH_DEFAULT = 190
+"""Plot width (:code:`plot_pdf_width`) should be provided in millimeters (mm),
+   and is converted to pixels (px) for use with :mod:`cairosvg`.
+
+   conversion factor: 1 mm = 3.7795275591 px
+   default value: 190 mm = 718.110236229 pixels
 """
 
 def build_universe(dirname):
@@ -296,12 +306,11 @@ def get_paired_indices(atom_indices, bond_indices, dihedral_groups):
         dg_list.append(group)
     all_dgs = tuple(dg_list)
 
-    if len(atom_indices) == len(bond_indices) == len(all_dgs):
-        ab_pairs = {}
-        i = 0
-        while i < len(all_dgs):
-            ab_pairs[f'{all_dgs[i]}'] = (atom_indices[i], bond_indices[i])
-            i += 1
+    assert (len(atom_indices) == len(bond_indices) == len(all_dgs),
+            "atom_indices, bond_indices, and dihedral_groups are out of sync")
+
+    ab_pairs = {}
+    ab_pairs = {all_dgs[i]: (atom_indices[i], bond_indices[i]) for i in range(len(all_dgs))}
 
     return ab_pairs
 
@@ -575,7 +584,7 @@ def build_svg(mol, molname=None, name=None, ab_pairs=None,
     return fig
 
 def plot_dihedral_violins(df, resname, mol, ab_pairs, figdir=None, molname=None,
-                 width=0.9, plot_pdf_width=190, solvents=SOLVENTS_DEFAULT):
+                 width=0.9, plot_pdf_width=PLOT_WIDTH_DEFAULT, solvents=SOLVENTS_DEFAULT):
     '''Coordinates plotting and optionally saving figures for all dihedral
        atom groups.
        
@@ -613,6 +622,10 @@ def plot_dihedral_violins(df, resname, mol, ab_pairs, figdir=None, molname=None,
 
        *solvents*
            The default solvents are documented under :data:`SOLVENTS_DEFAULT`.
+
+       *plot_pdf_width*
+           The default value for width of plot output is described in detail under
+           :data:`PLOT_WIDTH_DEFAULT`.
 
        :returns:
 
@@ -654,7 +667,7 @@ def plot_dihedral_violins(df, resname, mol, ab_pairs, figdir=None, molname=None,
 
 def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
                                 resname=None, molname=None,
-                                SMARTS=SMARTS_DEFAULT, plot_pdf_width=190,
+                                SMARTS=SMARTS_DEFAULT, plot_pdf_width=PLOT_WIDTH_DEFAULT,
                                 dataframe=None, padding=45, width=0.9,
                                 solvents=SOLVENTS_DEFAULT,
                                 interactions=INTERACTIONS_DEFAULT,
@@ -724,6 +737,10 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
 
        *interactions*
            The default interactions are documented under :data:`INTERACTIONS_DEFAULT`.
+
+       *plot_pdf_width*
+           The default value for width of plot output is described in detail under
+           :data:`PLOT_WIDTH_DEFAULT`.
 
        *start, stop, step*
            arguments passed to :func:`~mdpow.analysis.ensemble.EnsembleAnalysis.run`,
