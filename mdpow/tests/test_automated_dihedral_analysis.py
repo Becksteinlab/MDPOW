@@ -65,6 +65,20 @@ class TestAutomatedDihedralAnalysis(object):
         # atom_indices[1]=atom_group_indices_alt
 
     @pytest.fixture(scope="function")
+    def bond_indices(self, mol_sol_data, atom_indices):
+        mol, _ = mol_sol_data
+        aix, _ = atom_indices
+        bond_indices = dihedrals.get_bond_indices(mol=mol, atom_indices=aix)
+        return bond_indices
+
+    @pytest.fixture(scope="function")
+    def dihedral_groups(self, mol_sol_data, atom_indices):
+        _, solute = mol_sol_data
+        aix, _ = atom_indices
+        dihedral_groups = dihedrals.get_dihedral_groups(solute=solute, atom_indices=aix)
+        return dihedral_groups
+
+    @pytest.fixture(scope="function")
     def dihedral_data(self, SM25_tmp_dir, atom_indices):
         atom_group_indices, _ = atom_indices
         df = dihedrals.dihedral_groups_ensemble(atom_indices=atom_group_indices,
@@ -82,7 +96,29 @@ class TestAutomatedDihedralAnalysis(object):
                                 (1, 2, 3, 4),(1, 12, 13, 14),(2, 3, 4, 5),(2, 3, 4, 9),
                                 (2, 1, 12, 13),(3, 2, 1, 12),(5, 4, 3, 11),(5, 4, 3, 10),
                                 (9, 4, 3, 11),(9, 4, 3, 10),(12, 13, 14, 15),(12, 13, 14, 19))
-    
+
+    check_bond_indices = ((8, 4, 2), (8, 9, 14), (4, 2, 0), (4, 2, 1),
+                          (4, 2, 3), (9, 14, 21), (2, 3, 6), (2, 3, 7),
+                          (4, 9, 14), (2, 4, 9), (6, 3, 0), (6, 3, 1),
+                          (7, 3, 0), (7, 3, 1), (14, 21, 25), (14, 21, 26))
+
+    check_ab_pairs = {'O1-C2-N3-S4': ((0, 1, 2, 3), (8, 4, 2)),
+                      'O1-C2-C13-C14': ((0, 1, 12, 13), (8, 9, 14)),
+                      'C2-N3-S4-O12': ((1, 2, 3, 11), (4, 2, 0)),
+                      'C2-N3-S4-O11': ((1, 2, 3, 10), (4, 2, 1)),
+                      'C2-N3-S4-C5': ((1, 2, 3, 4), (4, 2, 3)),
+                      'C2-C13-C14-C15': ((1, 12, 13, 14), (9, 14, 21)),
+                      'N3-S4-C5-C6': ((2, 3, 4, 5), (2, 3, 6)),
+                      'N3-S4-C5-C10': ((2, 3, 4, 9), (2, 3, 7)),
+                      'N3-C2-C13-C14': ((2, 1, 12, 13), (4, 9, 14)),
+                      'S4-N3-C2-C13': ((3, 2, 1, 12), (2, 4, 9)),
+                      'C6-C5-S4-O12': ((5, 4, 3, 11), (6, 3, 0)),
+                      'C6-C5-S4-O11': ((5, 4, 3, 10), (6, 3, 1)),
+                      'C10-C5-S4-O12': ((9, 4, 3, 11), (7, 3, 0)),
+                      'C10-C5-S4-O11': ((9, 4, 3, 10), (7, 3, 1)),
+                      'C13-C14-C15-C16': ((12, 13, 14, 15), (14, 21, 25)),
+                      'C13-C14-C15-C20': ((12, 13, 14, 19), (14, 21, 26))}
+
     # tuple-tuples of dihedral atom group indices
     # collected using alternate SMARTS input (explicitly defined)
     # see: fixture - atom_indices().atom_group_indices_alt
@@ -147,6 +183,10 @@ class TestAutomatedDihedralAnalysis(object):
         atom_group_indices, _ = atom_indices
         assert atom_group_indices == self.check_atom_group_indices
 
+    def test_bond_indices(self, bond_indices):
+        bix = bond_indices
+        assert bix == self.check_bond_indices
+
     # the following 'reason' affects every downstream function that relies
     # on the atom indices returned for dihedral atom group selections
     # issue raised (#239) to identify and resolve exact package/version responsible
@@ -161,14 +201,20 @@ class TestAutomatedDihedralAnalysis(object):
     # issue raised (#239) to identify and resolve exact package/version responsible
     @pytest.mark.skipif(sys.version_info < (3, 8), reason='pytest=7.2.0, build=py37h89c1867_0, '
                        'returns incorrect atom_indices for dihedral atom group selections')
-    def test_dihedral_groups(self, SM25_tmp_dir, mol_sol_data, atom_indices):
-        _, solute = mol_sol_data
-        atom_group_indices, _ = atom_indices
-        groups = dihedrals.get_dihedral_groups(solute=solute, atom_indices=atom_group_indices)
+    def test_dihedral_groups(self, dihedral_groups):
+        groups = dihedral_groups
         i = 0
         while i < len(groups):
             assert groups[i].all() == self.check_groups[i].all()
             i+=1
+
+    def test_ab_pairs(self, atom_indices, bond_indices, dihedral_groups):
+        aix, _ = atom_indices
+        bix = bond_indices
+        groups = dihedral_groups
+        ab_pairs = dihedrals.get_paired_indices(atom_indices=aix, bond_indices=bix,
+                                                dihedral_groups=groups)
+        assert ab_pairs == self.check_ab_pairs
 
     # the following 'reason' affects every downstream function that relies
     # on the atom indices returned for dihedral atom group selections
