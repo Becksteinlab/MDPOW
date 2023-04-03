@@ -183,6 +183,11 @@ class TestAutomatedDihedralAnalysis(object):
         atom_group_indices, _ = atom_indices
         assert atom_group_indices == self.check_atom_group_indices
 
+    # the following 'reason' affects every downstream function that relies
+    # on the atom indices returned for dihedral atom group selections
+    # issue raised (#239) to identify and resolve exact package/version responsible
+    @pytest.mark.skipif(sys.version_info < (3, 8), reason='pytest=7.2.0, build=py37h89c1867_0, '
+                       'returns incorrect atom_indices for dihedral atom group selections')
     def test_bond_indices(self, bond_indices):
         bix = bond_indices
         assert bix == self.check_bond_indices
@@ -208,6 +213,11 @@ class TestAutomatedDihedralAnalysis(object):
             assert groups[i].all() == self.check_groups[i].all()
             i+=1
 
+    # the following 'reason' affects every downstream function that relies
+    # on the atom indices returned for dihedral atom group selections
+    # issue raised (#239) to identify and resolve exact package/version responsible
+    @pytest.mark.skipif(sys.version_info < (3, 8), reason='pytest=7.2.0, build=py37h89c1867_0, '
+                       'returns incorrect atom_indices for dihedral atom group selections')
     def test_ab_pairs(self, atom_indices, bond_indices, dihedral_groups):
         aix, _ = atom_indices
         bix = bond_indices
