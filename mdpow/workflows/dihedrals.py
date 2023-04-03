@@ -302,8 +302,8 @@ def get_paired_indices(atom_indices, bond_indices, dihedral_groups):
 
     all_dgs = [f'{dg[0]}-{dg[1]}-{dg[2]}-{dg[3]}' for dg in dihedral_groups]
 
-    assert (len(atom_indices) == len(bond_indices) == len(all_dgs),
-            "atom_indices, bond_indices, and dihedral_groups are out of sync")
+    #assert len(atom_indices) == len(bond_indices) == len(all_dgs),
+    #       "atom_indices, bond_indices, and dihedral_groups are out of sync"
 
     ab_pairs = {}
     # check Oliver's other comment for this
