@@ -104,7 +104,7 @@ SMARTS_DEFAULT = '[!#1]~[!$(*#*)&!D1]-!@[!$(*#*)&!D1]~[!#1]'
 """
 
 PLOT_WIDTH_DEFAULT = 190
-"""Plot width (:code:`plot_pdf_width`) should be provided in millimeters (mm),
+"""Plot width (`plot_pdf_width`) should be provided in millimeters (mm),
    and is converted to pixels (px) for use with :mod:`cairosvg`.
 
    conversion factor: 1 mm = 3.7795275591 px
