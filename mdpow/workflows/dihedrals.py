@@ -302,11 +302,7 @@ def get_paired_indices(atom_indices, bond_indices, dihedral_groups):
 
     all_dgs = [f'{dg[0]}-{dg[1]}-{dg[2]}-{dg[3]}' for dg in dihedral_groups]
 
-    #assert len(atom_indices) == len(bond_indices) == len(all_dgs),
-    #       "atom_indices, bond_indices, and dihedral_groups are out of sync"
-
     ab_pairs = {}
-    # check Oliver's other comment for this
     ab_pairs = {all_dgs[i]: (atom_indices[i], bond_indices[i]) for i in range(len(all_dgs))}
 
     return ab_pairs
@@ -510,13 +506,10 @@ def dihedral_violins(df, width=0.9, solvents=SOLVENTS_DEFAULT, plot_title=None):
                             "interaction",
                             "lambda"]).reset_index(drop=True)
 
-    # number of Coul windows + 1 / number of VDW windows
-    # (+1 for additional space with axes)
     width_ratios = [len(df[df['interaction'] == "Coulomb"]["lambda"].unique()) + 1,
                     len(df[df['interaction'] == "VDW"]["lambda"].unique()),
                     len(df[df['interaction'] == "Coulomb"]["lambda"].unique()) - 1]
 
-    # this method allows for one solvent to be plotted correctly
     solvs = list(solvents)
     if len(solvs) < 2:
         solvs.append('N/A')
@@ -574,7 +567,6 @@ def build_svg(mol, molname=None, name=None, ab_pairs=None,
     p = plot_svg.getroot()
     p.scale(0.02)
 
-    # 28cm leaves room for lengthier solvent names in the legend
     # order matters here, plot down first, mol on top (p, m)
     fig = svgutils.compose.Figure("28cm", "4.2cm", p, m)
 
@@ -643,8 +635,6 @@ def plot_dihedral_violins(df, resname, mol, ab_pairs, figdir=None, molname=None,
 
     section = df.groupby(by="selection")
 
-    # conversion factor: 1 mm = 3.7795275591 px
-    # DEFAULT: 190 mm = 718.110236229 pixels
     plot_pdf_width_px = plot_pdf_width * 3.7795275591
 
     for name in section:
