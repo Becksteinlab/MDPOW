@@ -133,10 +133,15 @@ def automated_project_analysis(project_paths, ensemble_analysis, **kwargs):
            see the :mod:`~mdpow.workflows.registry` for all available
            workflows and their call signatures
 
-       .. seealso:: :class:`~mdpow.analysis.dihedral.DihedralAnalysis`, :mod:`mdpow.workflows.dihedrals`
        .. rubric:: Example
 
-       Typical Workflow::
+       A typical workflow is the automated dihedral analysis from 
+       :mod:`mdpow.workflows.dihedrals`, which applies the *ensemble analysis*
+       :class:`~mdpow.analysis.dihedral.DihedralAnalysis` to each project. 
+       The :data:`~mdpow.workflows.registry.registry` contains this automated
+       workflow under the key *"DihedralAnalysis"* and so the automated execution
+       for all `project_paths` (obtained via :func:`project_paths`) is performed by 
+       passing the specific key to :func:`automated_project_analysis`::
 
            project_paths = project_paths(parent_directory='/foo/bar/MDPOW_projects')
            automated_project_analysis(project_paths, ensemble_analysis='DihedralAnalysis', **kwargs)
