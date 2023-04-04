@@ -1,0 +1,3 @@
+molecule,resname,path
+SM25,SM25,mdpow/tests/testing_resources/states/workflows/SM25
+SM26,SM26,mdpow/tests/testing_resources/states/workflows/SM26
