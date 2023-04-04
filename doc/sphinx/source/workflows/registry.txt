@@ -1,0 +1,7 @@
+==================
+Workflows Registry
+==================
+
+.. versionadded:: 0.9.0
+
+.. automodule:: mdpow.workflows.registry
