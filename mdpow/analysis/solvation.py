@@ -56,21 +56,38 @@ class SolvationAnalysis(EnsembleAnalysis):
         self._dists = distances
 
     def _prepare_ensemble(self):
-        self._col = ['distance', 'solvent', 'interaction',
-                     'lambda', 'time', 'N_solvent']
+        self._col = ['solute_ix', 'solvent_ix', 'distance',
+                     'solvent', 'interaction',
+                     'lambda', 'time']
         self.results = pd.DataFrame(columns=self._col)
         self._res_dict = {key: [] for key in self._col}
 
     def _single_frame(self):
         solute = self._solute[self._key]
         solvent = self._solvent[self._key]
-        pairs, distances = capped_distance(solute.positions, solvent.positions,
-                                          max(self._dists), box=self._ts.dimensions)
-        solute_i, solvent_j = np.transpose(pairs)
-        for d in self._dists:
-            close_solv_atoms = solvent[solvent_j[distances < d]]
-            result = [d, self._key[0], self._key[1],self._key[2],
-                      self._ts.time, close_solv_atoms.n_atoms]
+        #pairs, distances = capped_distance(solute.positions, solvent.positions,
+        pairs, distances = capped_distance(solute, solvent,
+                                           self._dists[0], box=self._ts.dimensions,
+                                           return_distances=True)
+        #solute_i, solvent_j = np.transpose(pairs)
+        #for d in self._dists:
+        #    close_solv_atoms = solvent[solvent_j[distances < d]]
+        #    result = [d, self._key[0], self._key[1],self._key[2],
+        #              self._ts.time, close_solv_atoms.n_atoms]
+        #    for i in range(len(self._col)):
+        #        self._res_dict[self._col[i]].append(result[i])
+
+        for k, [i, j] in enumerate(pairs):
+            #su = solute.positions[i]
+            su = solute[i]
+            su_info = [su.ix, su.name, su.type, su.resname, su.resid, su.segid]
+            #sv = solvent.positions[j]
+            sv = solvent[j]
+            sv_info = [sv.ix, sv.name, sv.type, sv.resname, sv.resid, sv.segid]
+            d = distances[k]
+            result = [su_info, sv_info, d,
+                      self._key[0], self._key[1],
+                      self._key[2], self._ts.time]
             for i in range(len(self._col)):
                 self._res_dict[self._col[i]].append(result[i])
 
