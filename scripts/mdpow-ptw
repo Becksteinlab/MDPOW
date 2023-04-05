@@ -1,49 +1,36 @@
 #!/usr/bin/env python
 """%(prog)s [options] DIRECTORY [DIRECTORY ...]
 
-Run the free energy analysis for a solvent  in <DIRECTORY>/FEP
-and return DeltaG.
+Run the free energy analysis for water and toluene in <DIRECTORY>/FEP
+and return the toluene-water partition coefficient log P_cw.
 
 DIRECTORY should contain all the files resulting from running
-``mdpow.fep.Ghyd.setup()`` (or the corresponding ``Goct.setup()`` or
-``Gcyclohexane.setup()`` and the results of the MD FEP
-simulations. It relies on the canonical naming scheme (basically: just
-use the defaults as in the tutorial).
+``mdpow.fep.Ghyd.setup()`` and ``mdpow.fep.Gtol.setup()`` and the results of
+the MD FEP simulations. It relies on the canonical naming scheme (basically:
+just use the defaults as in the tutorial).
 
 The dV/dlambda plots can be produced automatically (--plot=auto). If multiple
 DIRECTORY arguments are provided then one has to choose the auto option (or
 None).
 
-The total solvation free energy is calculated as
-
-  DeltaG* = -(DeltaG_coul + DeltaG_vdw)
-
-Note that the standard state refers to the "Ben-Naim" standard state
-of transferring 1 M of compound in the gas phase to 1 M in the aqueous
-phase.
-
 Results are *appended* to a data file with **Output file format**::
 
-          .                 ---------- kJ/mol ---
-          molecule solvent  DeltaG*  coulomb  vdw
-
-All observables are quoted with an error estimate, which is derived
-from the correlation time and error propagation through Simpson's rule
-(see :meth:`mdpow.fep.Gsolv`). It ultimately comes from the error on
-<dV/dlambda>, which is estimated as the error to determine the
-average.
+ molecule  DeltaG0(kJ/mol) ErrorDeltaG0  "logPtw"  log P_TW  Error logPtw   directory
 
 molecule
     molecule name as used in the itp
-DeltaG*
-    solvation free energy vacuum --> solvent, in kJ/mol
-coulomb
-    discharging contribution to the DeltaG*
-vdw
-    decoupling contribution to the DeltaG*
+DeltaG0, ErrorDeltaG0
+    transfer free energy water --> toluene, in kJ/mol; error from correlation time
+    and error propagation through Simpson's rule (see :meth:`mdpow.fep.Gsolv`)
+log P_TW
+    base-10 logarithm of the toluene-water partition coefficient; >0: partitions into
+    toluene, <0: partitions preferrably into water
+wat_ok, tol_ok
+    "OK": input data was clean; "BAD": some input data xvg files contained
+    unparseable lines that were skipped; this can mean that the data became
+    corrupted and caution should be used.
 directory
     folder in which the simulations were stored
-
 """
 from __future__ import absolute_import, print_function, division
 
@@ -54,137 +41,118 @@ import mdpow.filelock
 import logging
 logger = logging.getLogger('mdpow')
 
-suffix = {'water':'hyd',
-          'octanol':'oct',
-          'cyclohexane':'cyclo',
-          'toluene':'tol',
-      }
-
-def load_gsolv(solvent, directory, **kwargs):
+def load_gsolv(directory, **kwargs):
     FEPdir = os.path.join(directory, "FEP")
 
-    files = {solvent: os.path.join(FEPdir, solvent,
-                                   'G{0}.fep'.format(suffix[solvent])),
-         }
-    files_not_found = dict(((solv,fn) for solv,fn in files.items()
+    files = {'water': os.path.join(FEPdir, 'water', 'Ghyd.fep'),
+             'toluene': os.path.join(FEPdir, 'toluene', 'Gtol.fep'),
+             }
+    files_not_found = dict(((solvent,fn) for solvent,fn in files.items()
                             if not os.path.exists(fn)))
     if len(files_not_found) > 0:
         raise OSError("Missing input files: %r" % files_not_found)
 
     permissive = kwargs.pop('permissive', False)
-    logger.info("[%s] Reading {0} data %r".format(solvent), directory, files[solvent])
-    return mdpow.fep.Gsolv(filename=files[solvent], basedir=directory, permissive=permissive)
+    logger.info("Reading water data %(water)r", files)
+    gwat = mdpow.fep.Ghyd(filename=files['water'], basedir=directory, permissive=permissive)
+    logger.info("Reading toluene data %(toluene)r", files)
+    gtol = mdpow.fep.Gtol(filename=files['toluene'], basedir=directory, permissive=permissive)
 
-def run_gsolv(solvent, directory, **kwargs):
-    """Do the solvation free analysis
+    return gwat, gtol
+
+
+def run_ptw(directory, **kwargs):
+    """Do the P_TW analysis
 
     :Arguments:
         *directory*
              directory under which the project is stored
         *plotfile*
              name of a file to plot dV/dlambda graphs to
+        *outfile*
+             name of a file to append results to
         *energyfile*
              append individual energy terms to this file
         *force*
              force rereading data files [False]
 
-    **Output file format:**
+    **Output file format (energies and log P_tw with errors) :**
 
-        molecule DeltaGhyd  Coulomb VDW directory
+        molecule   DeltaG0(kJ/mol)    log P_TW    directory
 
-        (all values as average and error)
+    Removed from output (>0.2.1):
+     * wat_ok and tol_ok are "OK" if no lines were skipped in the input data files due to
+       file corruption, and "BAD" otherwise.
+
     """
     import gc
 
-    fmt_energy = "%s  %s\n"
+    fmt_result = "%-8s %+8.2f %8.2f  logPtw %+8.2f %8.2f   %s\n"
+    fmt_energy = "%s  %+8.2f %8.2f   logPtw %+8.2f %8.2f  %s\n"
     _datastatus = {True: 'BAD',  # suspect file corruption
                    False: 'OK'}
 
     def datstat(g):
         return _datastatus[g.contains_corrupted_xvgs()]
 
-    gsolv = load_gsolv(solvent, directory, permissive=kwargs.pop('permissive',False),)
-    logger.info("The solvent is %s.", solvent)
+    estimator=kwargs.pop('estimator', 'alchemlyb')
+    gwat, gtol = load_gsolv(directory, permissive=kwargs.pop('permissive',False),)
+    transferFE, logPtw = mdpow.fep.pTW(gtol, gwat, stride=kwargs.pop('stride', None),
+                                       start=kwargs.pop('start', 0), stop=kwargs.pop('stop', None),
+                                       force=kwargs.pop('force', False), SI=kwargs.pop('SI', False),
+                                       estimator=estimator,
+                                       method=kwargs.pop('method', 'MBAR'))
 
-    # for this version. use the method given instead of the one in the input cfg file
-    estimator = kwargs.pop('estimator', 'alchemlyb')
-    if not estimator in ('mdpow', 'alchemlyb'):
-        errmsg = "estimator = %r is not supported, must be 'mdpow' or 'alchemlyb'" % estimator
-        logger.error(errmsg)
-        raise ValueError(errmsg)
+    if datstat(gwat) == 'BAD' or datstat(gtol) == 'BAD':
+            logger.warning("Possible file corruption: water:%s, toluene:%s",
+                           datstat(gwat), datstat(gtol))
 
-    gsolv.method = kwargs.pop('method', 'MBAR')
-    if estimator == 'mdpow':
-        if gsolv.method != "TI":
-            errmsg = "Method %s is not implemented in MDPOW, use estimator='alchemlyb'" % gsolv.method
-            logger.error(errmsg)
-            raise ValueError(errmsg)
+    if kwargs.get('outfile', None):
+        with mdpow.filelock.FileLock(kwargs['outfile'], timeout=2):
+            with open(kwargs['outfile'], mode='a') as out:
+                out.write(fmt_result % \
+                              (gwat.molecule, transferFE.value, transferFE.error,
+                               logPtw.value, logPtw.error, directory))
+                # removed (>0.2.1):
+                # datstat(gwat), datstat(gtol) --> wat_ok tol_ok
+            logger.info("Wrote results to %(outfile)r", kwargs)
 
-    energyfile = kwargs.pop('energyfile', None)
-    plotfile = kwargs.pop('plotfile', None)
+    if kwargs.get('energyfile', None):
+        with mdpow.filelock.FileLock(kwargs['energyfile'], timeout=2):
+            with open(kwargs['energyfile'], mode='a') as out:
+                for g in gwat, gtol:
+                    out.write(fmt_energy % \
+                                  (g.summary(), transferFE.value, transferFE.error,
+                                   logPtw.value, logPtw.error,  directory))
+            logger.info("Wrote solvation energy terms to %(energyfile)r", kwargs)
 
-    if not hasattr(gsolv, 'start'):
-        gsolv.start = kwargs.pop('start', 0)
-    if not hasattr(gsolv, 'stop'):
-        gsolv.stop = kwargs.pop('stop', None)
-    if not hasattr(gsolv, 'SI'):
-        kwargs.setdefault('SI', True)
-    else:
-        kwargs.setdefault('SI', gsolv.SI)
-
-    # make sure that we have data
-    if kwargs['force'] or 'Gibbs' not in gsolv.results.DeltaA:
-        logger.info("[%(directory)s] Forcing (re)analysis of hydration free energy data", vars())
-        # write out the settings when the analysis is performed
-        logger.info("Estimator is %s.", estimator)
-        logger.info("Free energy calculation method is %s.", gsolv.method)
-        if estimator == 'mdpow':
-            # do the analysis (only use keywords that are needed for FEP.analysis())
-            akw = {'stride': kwargs.pop('stride', None), 'force': kwargs.pop('force', False)}
-            gsolv.analyze(**akw)
-        elif estimator == 'alchemlyb':
-            if kwargs['SI']:
-                logger.info("Statistical inefficiency analysis will be performed.")
-            else:
-                logger.info("Statistical inefficiency analysis won't be performed.")
-            gsolv.analyze_alchemlyb(**kwargs)
-    else:
-        logger.info("[%(directory)s] Reading existing data from pickle file.", vars())
-
-    gsolv.logger_DeltaA0()
-
-    if datstat(gsolv) == 'BAD':
-        logger.warning("[%s] Possible file corruption: %s:%s", directory, solvent, datstat(gsolv))
-
-    if energyfile:
-        with mdpow.filelock.FileLock(energyfile, timeout=2):
-            with open(energyfile, mode='a') as out:
-                out.write(fmt_energy % (gsolv.summary(), directory))
-            logger.info("[%s] Wrote solvation energy terms to %r", directory, energyfile)
-
+    plotfile = kwargs.get('plotfile', None)
     if estimator == 'alchemlyb':
         plotfile = False
     if plotfile:
         if plotfile == 'auto':
-            plotfile = auto_plotfile(directory, gsolv)
+            plotfile = auto_plotfile(directory, gwat)
         import matplotlib
-        matplotlib.use('agg')  # quick non-interactive plotting
-        from pylab import clf, title, savefig
+        from matplotlib.pyplot import clf, title, savefig
         clf()
-        gsolv.plot(color='k', ls='--')
+        gwat.plot(color='k', ls='--')
+        gtol.plot(color='r', ls='-')
         activate_subplot(1)
-        title(r"[{0}] $\Delta G$".format(gsolv.molecule))
+        title(r"[%s] $\Delta A^0 = %.2f\pm%.2f$ kJ/mol" % \
+                  (gtol.molecule, transferFE.value, transferFE.error))
         activate_subplot(2)
+        title(r"$\log P_{CW} = %.2f\pm%.2f$" % logPtw.astuple())
         savefig(plotfile)
         logger.info("Wrote graph to %(plotfile)r", vars())
 
-    del gsolv
+    del gwat
+    del gtol
     gc.collect()  # try to free as much memory as possible
 
 
 def auto_plotfile(directory, gsolv):
-    return os.path.join(directory, "dVdl_{0}_{1}.pdf".format(
-        gsolv.molecule, gsolv.solvent_type))
+    return os.path.join(directory,
+                        "dVdl_{0}_ptw.pdf".format(gsolv.molecule))
 
 
 def activate_subplot(numPlot):
@@ -200,38 +168,36 @@ def activate_subplot(numPlot):
 
 
 def parse_filename_option(fn):
-    if fn.lower() == "none":
-        fn = None
-    elif fn.lower() == "auto":
-        fn = "auto"
-    return fn
+        if fn.lower() == "none":
+            fn = None
+        elif fn.lower() == "auto":
+            fn = "auto"
+        return fn
 
 def realpath_or_none(fn):
-    if not fn is None:
-        fn = os.path.realpath(fn)
-    return fn
+        if not fn is None:
+            fn = os.path.realpath(fn)
+        return fn
 
 if __name__ == "__main__":
     import sys
     import os.path
     import argparse
 
-    parser = argparse.ArgumentParser(usage=__doc__, prog='mdpow-solvationenergy',
+    parser = argparse.ArgumentParser(usage=__doc__, prog='mdpow-ptw',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("directory", nargs='+',
                         help="directory or directories which contain all the files "
-                        "resulting from running mdpow.fep.Ghyd.setup() ",)
+                        "resulting from running mdpow.fep.Ghyd.setup() and mdpow.fep.Gtol.setup()"
+                        "and the results of the MD FEP simulations.",)
     parser.add_argument('--plotfile', dest="plotfile", default='none',
                         help="plot dV/dlambda to FILE; use png or pdf suffix to "
                         "determine the file type. 'auto' generates a pdf file "
-                        "DIRECTORY/dVdl_<molname>_<solvent>.pdf and 'none' disables it. "
-                        "The plot function is only available for mdpow estimator, "
+                        "DIRECTORY/dVdl_<molname>_ptw.pdf and 'none' disables it "
+                        "The plot function is only available for mdpow estimator,"
                         "and is disabled when using alchemlyb estimators.",
                         metavar="FILE")
-    parser.add_argument('--solvent', '-S', dest='solvent', default='water',
-                        choices=['water', 'octanol', 'cyclohexane', 'toluene'], metavar="NAME",
-                        help="solvent NAME for compound, 'water', 'octanol', or 'cyclohexane' ")
-    parser.add_argument('-o', '--outfile', dest="outfile", default="gsolv.txt",
+    parser.add_argument('-o', '--outfile', dest="outfile", default="ptw.txt",
                         help="append one-line results summary to FILE ",
                         metavar="FILE")
     parser.add_argument('-e', '--energies', dest="energyfile", default="energies.txt",
@@ -250,12 +216,12 @@ if __name__ == "__main__":
     SIs.add_argument('--SI', dest='SI',
                      action="store_true", default=True,
                      help="enable statistical inefficiency (SI) analysis. "
-                     "Statistical inefficiency analysis is performed by default when using "
+                     "Statistical inefficiency analysis is performed by default when using"
                      "alchemlyb estimators and is always disabled when using mdpow estimator.")
     SIs.add_argument('--no-SI', dest='noSI',
                      action="store_true", default=False,
                      help="disable statistical inefficiency analysis. "
-                     "Statistical inefficiency analysis is performed by default when using "
+                     "Statistical inefficiency analysis is performed by default when using"
                      "alchemlyb estimators and is disabled when using mdpow estimator. ")
     parser.add_argument('-s', '--stride', dest="stride", type=int, default=1,
                         help="use every N-th datapoint from the original dV/dlambda data. ",
@@ -286,14 +252,15 @@ if __name__ == "__main__":
             continue
         logger.info("Analyzing directory %r... (can take a while)", directory)
 
-        plotfile = parse_filename_option(opts.plotfile)
+        opts.plotfile = parse_filename_option(opts.plotfile)
 
         try:
-            run_gsolv(opts.solvent, directory, plotfile=plotfile,
-                      energyfile=realpath_or_none(opts.energyfile),
-                      force=opts.force, stride=opts.stride, start=opts.start,
-                      stop=opts.stop, estimator=opts.estimator,
-                      method=opts.method, permissive=opts.permissive, SI=opts.SI and not opts.noSI)
+            run_ptw(directory, plotfile=opts.plotfile,
+                    outfile=realpath_or_none(opts.outfile),
+                    energyfile=realpath_or_none(opts.energyfile),
+                    force=opts.force, stride=opts.stride, start=opts.start,
+                    stop=opts.stop, estimator=opts.estimator,
+                    method=opts.method, permissive=opts.permissive, SI=opts.SI and not opts.noSI)
         except (OSError, IOError) as err:
             logger.error("Running analysis in directory %r failed: %s", directory, str(err))
         except Exception as err:

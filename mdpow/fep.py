@@ -87,10 +87,15 @@ solvation free energy in octanol there is
    :members:
    :inherited-members:
 
+.. autoclass:: Gtol
+   :members:
+   :inherited-members:
+
 .. autofunction:: pOW
 
 .. autofunction:: pCW
 
+.. autofunction:: pTW
 
 Developer notes
 ---------------
@@ -152,7 +157,8 @@ import numkit.timeseries
 from numkit.observables import QuantityWithError
 
 from alchemlyb.parsing.gmx import extract_dHdl, extract_u_nk
-from alchemlyb.estimators import TI, BAR, MBAR
+from alchemlyb.estimators import TI, BAR
+from alchemlyb.estimators import AutoMBAR as MBAR
 from alchemlyb.parsing.gmx import _extract_dataframe
 from pymbar.timeseries import (statisticalInefficiency,
                                subsampleCorrelatedData, )
@@ -1325,6 +1331,13 @@ class Gwoct(Goct):
     dirname_default = os.path.join(Gsolv.topdir_default, solvent_default)
 
 
+class Gtol(Gsolv):
+    """Sets up and analyses MD to obtain the solvation free energy of a solute in toluene.
+    """
+    solvent_default = "toluene"
+    dirname_default = os.path.join(Gsolv.topdir_default, solvent_default)
+
+
 def p_transfer(G1, G2, **kwargs):
     """Compute partition coefficient from two :class:`Gsolv` objects.
 
@@ -1440,6 +1453,7 @@ def p_transfer(G1, G2, **kwargs):
     # lower case initials, in reverse order of transfer, e.g.
     # water -> octanol:      P_ow
     # water -> cyclohexane:  P_cw
+    # water -> toluene:      P_tw
     coefficient = "P_{0}{1}".format(
         G2.solvent_type.lower()[0], G1.solvent_type.lower()[0])
 
@@ -1538,6 +1552,51 @@ def pCW(G1, G2, **kwargs):
         args = (G2, G1)
     else:
         msg = "For pCW need water and cyclohexane simulations but instead got {0} and {1}".format(
+            G1.solvent_type, G2.solvent_type)
+        logger.error(msg)
+        raise ValueError(msg)
+    return p_transfer(*args, **kwargs)
+
+def pTW(G1, G2, **kwargs):
+    """Compute water-toluene partition coefficient from two :class:`Gsolv` objects.
+
+    transfer free energy from water into toluene::
+
+            DeltaDeltaG0 = DeltaG0_tol - DeltaG0_water
+
+    toluene/water partition coefficient::
+
+            log P_tol/wat =  log [X]_tol/[X]_wat
+
+    :Arguments:
+       *G1*, *G2*
+           *G1* and *G2* should be a :class:`Ghyd` and a :class:`Gtol` instance,
+           but order does not matter
+       *force*
+           force rereading of data files even if some data were already stored [False]
+       *stride*
+           analyze every *stride*-th datapoint in the dV/dlambda files
+       *start*
+           Start frame of data analyzed in every fep window.
+       *stop*
+           Stop frame of data analyzed in every fep window.
+       *SI*
+           Set to ``True`` if you want to perform statistical inefficiency
+           to preprocess the data.
+       *estimator*
+           Set to ``alchemlyb`` if you want to use alchemlyb estimators,
+           or ``mdpow`` if you want the default TI method.
+       *method*
+           Use `TI`, `BAR` or `MBAR` method in `alchemlyb`, or `TI` in `mdpow`.
+
+    :Returns: (transfer free energy, log10 of the toluene/water partition coefficient = log Ptw)
+    """
+    if G1.solvent_type == "water" and G2.solvent_type == "toluene":
+        args = (G1, G2)
+    elif G1.solvent_type == "toluene" and G2.solvent_type == "water":
+        args = (G2, G1)
+    else:
+        msg = "For pTW need water and toluene simulations but instead got {0} and {1}".format(
             G1.solvent_type, G2.solvent_type)
         logger.error(msg)
         raise ValueError(msg)

@@ -244,6 +244,10 @@ intersphinx_mapping = {'https://docs.python.org/': None,
                        'https://numpy.org/doc/stable/': None,
                        'https://docs.scipy.org/doc/scipy/reference/': None,
                        'https://gromacswrapper.readthedocs.io/en/latest': None,
+                       'https://docs.mdanalysis.org/stable/': None,
+                       'https://www.rdkit.org/docs/': None,
+                       'https://pandas.pydata.org/docs/': None,
+                       'https://seaborn.pydata.org': None,
                    }
 
 
