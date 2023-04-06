@@ -10,12 +10,12 @@ useful for automated use of
 See each function for usage, output, and examples. 
 Most functions can be used as standalone or in combination
 depending on the desired results. Complete automation encompassed in
-:func:`~mdpow.workflows.solvations.automated_solvation_analysis`.
+:func:`~mdpow.workflows.solvations.automated_solvation_shell_analysis`.
 
 .. autofunction:: solvation_ensemble
 .. autofunction:: solvation_analysis
 .. autofunction:: asa_save_df
-.. autofunction:: automated_solvation_analysis
+.. autofunction:: automated_solvation_shell_analysis
 """
 
 import os
@@ -79,7 +79,7 @@ def asa_save_df(df, df_save_dir=None, resname=None, molname=None):
         # this part might need some work
     return
     
-def automated_solvation_analysis(dirname, df_save_dir=None, resname=None, molname=None,
+def automated_solvation_shell_analysis(dirname, df_save_dir=None, resname=None, molname=None,
                                  solvents=('water', 'octanol'), interactions=('Coulomb', 'VDW'),
                                  distances=[1.2, 2.4], figdir=None,
                                  start=None, stop=None, step=None,
