@@ -12,11 +12,13 @@ The :mod:`mdpow.workflows.registry` module hosts a dictionary with keys that cor
    :widths: auto
    :name: workflows_registry
 
-   +-------------------------------+------------------------------------------------------------------------------------------------------+
-   | key/keyword: EnsembleAnalysis | value: <workflow module>.<top-level automated analysis function>                                     |
-   +===============================+======================================================================================================+
-   | DihedralAnalysis              | :any:`dihedrals.automated_dihedral_analysis <mdpow.workflows.dihedrals.automated_dihedral_analysis>` |
-   +-------------------------------+------------------------------------------------------------------------------------------------------+
+   +-------------------------------+----------------------------------------------------------------------------------------------------------------------+
+   | key/keyword: EnsembleAnalysis | value: <workflow module>.<top-level automated analysis function>                                                     |
+   +===============================+======================================================================================================================+
+   | DihedralAnalysis              | :any:`dihedrals.automated_dihedral_analysis <mdpow.workflows.dihedrals.automated_dihedral_analysis>`                 |
+   +-------------------------------+----------------------------------------------------------------------------------------------------------------------+
+   | SolvationAnalysis             | :any:`solvations.automated_solvation_shell_analysis <mdpow.workflows.solvations.automated_solvation_shell_analysis>` |
+   +-------------------------------+----------------------------------------------------------------------------------------------------------------------+
 
 .. autodata:: registry
 
@@ -26,10 +28,12 @@ The :mod:`mdpow.workflows.registry` module hosts a dictionary with keys that cor
 
 # import analysis
 from mdpow.workflows import dihedrals
+from mdpow.workflows import solvations
 
 registry = {
 
-    'DihedralAnalysis' : dihedrals.automated_dihedral_analysis
+    'DihedralAnalysis' : dihedrals.automated_dihedral_analysis,
+    'SolvationAnalysis' : solvations.automated_solvation_shell_analysis
 
 }
 
