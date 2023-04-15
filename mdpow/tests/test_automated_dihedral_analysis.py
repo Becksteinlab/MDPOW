@@ -52,14 +52,13 @@ class TestAutomatedDihedralAnalysis(object):
         return mol, solute
 
     @pytest.fixture(scope="function")
-    def atom_indices(self, SM25_tmp_dir, mol_sol_data):
+    def atom_indices(self, mol_sol_data):
         mol, _ = mol_sol_data
-        atom_group_indices = dihedrals.get_atom_indices(dirname=SM25_tmp_dir, mol=mol)
+        atom_group_indices = dihedrals.get_atom_indices(mol=mol)
 
         # testing optional user input of alternate SMARTS string
         # for automated dihedral atom group selection
-        atom_group_indices_alt = dihedrals.get_atom_indices(dirname=SM25_tmp_dir, mol=mol,
-                                                            SMARTS='[!$(*#*)&!D1]-!@[!$(*#*)&!D1]')
+        atom_group_indices_alt = dihedrals.get_atom_indices(mol=mol, SMARTS='[!$(*#*)&!D1]-!@[!$(*#*)&!D1]')
         return atom_group_indices, atom_group_indices_alt
         # fixture output, tuple:
         # atom_indices[0]=atom_group_indices
@@ -252,14 +251,14 @@ class TestAutomatedDihedralAnalysis(object):
 
     def test_save_df(self, dihedral_data, SM25_tmp_dir):
         df, _ = dihedral_data
-        dihedrals.save_df(df=df, df_save_dir=SM25_tmp_dir, molname='SM25')
+        dihedrals.save_df(df=df, df_save_dir=SM25_tmp_dir, resname='UNK', molname='SM25')
         assert (SM25_tmp_dir / 'SM25' / 'SM25_full_df.csv.bz2').exists(), 'Compressed csv file not saved'
 
     def test_save_df_info(self, dihedral_data, SM25_tmp_dir, caplog):
         df, _ = dihedral_data
         caplog.clear()
         caplog.set_level(logging.INFO, logger='mdpow.workflows.dihedrals')
-        dihedrals.save_df(df=df, df_save_dir=SM25_tmp_dir, molname='SM25')
+        dihedrals.save_df(df=df, df_save_dir=SM25_tmp_dir, resname='UNK', molname='SM25')
         assert f'Results DataFrame saved as {SM25_tmp_dir}/SM25/SM25_full_df.csv.bz2' in caplog.text, 'Save location not logged or returned'
 
     # the following 'reason' affects every downstream function that relies

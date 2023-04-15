@@ -808,7 +808,7 @@ def automated_dihedral_analysis(dirname, figdir, resname,
 
     u = build_universe(dirname=dirname)
     mol, solute = rdkit_conversion(u=u, resname=resname)
-    atom_indices = get_atom_indices(dirname=dirname, mol=mol, SMARTS=SMARTS)
+    atom_indices = get_atom_indices(mol=mol, SMARTS=SMARTS)
     bond_indices = get_bond_indices(mol=mol, atom_indices=atom_indices)
     dihedral_groups = get_dihedral_groups(solute=solute, atom_indices=atom_indices)
     ab_pairs = get_paired_indices(atom_indices=atom_indices, bond_indices=bond_indices,
@@ -821,7 +821,7 @@ def automated_dihedral_analysis(dirname, figdir, resname,
 
     else:
 
-        df = dihedral_groups_ensemble(atom_indices=atom_indices, dirname=dirname,
+        df = dihedral_groups_ensemble(dirname=dirname, atom_indices=atom_indices,
                                       solvents=solvents, interactions=interactions,
                                       start=start, stop=stop, step=step)
 
@@ -830,6 +830,7 @@ def automated_dihedral_analysis(dirname, figdir, resname,
 
     df_aug = periodic_angle_padding(df, padding=padding)
 
+    #kwargs in weird order
     plot_dihedral_violins(df_aug, resname=resname, molname=molname, mol=mol, plot_pdf_width=plot_pdf_width,
                  ab_pairs=ab_pairs, figdir=figdir, width=width, solvents=solvents)
 
