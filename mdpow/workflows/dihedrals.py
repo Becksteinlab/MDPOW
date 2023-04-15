@@ -718,7 +718,7 @@ def plot_dihedral_violins(df, resname, mol, ab_pairs, figdir, molname=None,
 
                                          #for this current version, figdir is required and will
                                          #cause issues if not specified
-def automated_dihedral_analysis(dirname, figdir=None, resname,
+def automated_dihedral_analysis(dirname, resname, figdir=None,
                                 df_save_dir=None, molname=None,
                                 SMARTS=SMARTS_DEFAULT, plot_pdf_width=PLOT_WIDTH_DEFAULT,
                                 dataframe=None, padding=45, width=0.9,
