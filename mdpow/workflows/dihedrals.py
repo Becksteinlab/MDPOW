@@ -710,7 +710,15 @@ def plot_dihedral_violins(df, resname, mol, ab_pairs, figdir, molname=None,
 
     return None
 
-def automated_dihedral_analysis(dirname, figdir, resname,
+                                         #figdir=None is a temporary way to satisfy
+                                         #workflows base tests until issue #244 is resolved
+                                         #because it currently uses a **kwargs convention and the
+                                         #positional argument figdir will not carry over nicely, 
+                                         #or requires changes that will result in wasted time
+
+                                         #for this current version, figdir is required and will
+                                         #cause issues if not specified
+def automated_dihedral_analysis(dirname, figdir=None, resname,
                                 df_save_dir=None, molname=None,
                                 SMARTS=SMARTS_DEFAULT, plot_pdf_width=PLOT_WIDTH_DEFAULT,
                                 dataframe=None, padding=45, width=0.9,
