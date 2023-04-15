@@ -259,10 +259,10 @@ def get_bond_indices(mol, atom_indices):
 
 def get_dihedral_groups(solute, atom_indices):
     '''Uses the 0-based `atom_indices` of the relevant dihedral atom groups
-       determined by :func:`~mdpow.workflows.dihedral.get_atom_indices`
+       determined by :func:`~mdpow.workflows.dihedrals.get_atom_indices`
        and returns the 1-based index names for each atom in each group.
 
-       Requires the `atom_indices` from :func:`~mdpow.workflows.dihedral.get_atom_indices`
+       Requires the `atom_indices` from :func:`~mdpow.workflows.dihedrals.get_atom_indices`
        to index the `solute` specified by :func:`~MDAnalysis.core.groups.select_atoms`
        and return an array of the names of each atom within its respective
        dihedral atom group as identified by the SMARTS selection string.
