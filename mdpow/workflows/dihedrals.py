@@ -204,7 +204,7 @@ def get_atom_indices(mol, SMARTS=SMARTS_DEFAULT):
 
        :keywords:
 
-        *mol*
+       *mol*
            :class:`rdkit.Chem.rdchem.Mol` object converted from `solute`
 
        *SMARTS*
@@ -450,7 +450,7 @@ def periodic_angle_padding(df, padding=45):
        as input and pads the angles to maintain periodicity
        for properly plotting dihedral angle frequencies as KDE violins
        with :func:`~mdpow.workflows.dihedrals.dihedral_violins` and
-       :func:`~mdpow.workflows.dihedrals.plot_violins`.
+       :func:`~mdpow.workflows.dihedrals.plot_dihedral_violins`.
        Creates two new :class:`pandas.DataFrame` based on the 
        `padding` value specified, pads the angle values, concatenates
        all three :class:`pandas.DataFrame`, maintaining original data and
