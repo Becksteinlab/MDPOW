@@ -483,9 +483,12 @@ def periodic_angle_padding(df, padding=45):
     return df_aug
 
 def dihedral_violins(df, width=0.9, solvents=SOLVENTS_DEFAULT, plot_title=None):
-    '''Plots distributions of dihedral angles for one dihedral atom group
-       as violin plots, using as input the augmented :class:`pandas.DataFrame`
-       from :func:`~mdpow.workflows.dihedrals.periodic_angle_padding`.
+    '''Plots kernel density estimates (KDE) of dihedral angle frequencies for
+       one dihedral atom group as violin plots, using as input the augmented
+       :class:`pandas.DataFrame` from :func:`~mdpow.workflows.dihedrals.periodic_angle_padding`.
+
+       Output is converted to SVG by :func:`~mdpow.workflows.dihedrals.build_svg`
+       and final output is saved as PDF by :func:`~mdpow.workflows.dihedrals.plot_dihedral_violins`
 
        :keywords:
 
@@ -499,13 +502,20 @@ def dihedral_violins(df, width=0.9, solvents=SOLVENTS_DEFAULT, plot_title=None):
 
        *solvents*
            The default solvents are documented under :data:`SOLVENTS_DEFAULT`.
+
+       *plot_title*
+           format: f'{molname}, {name[0]} {a} | ''{col_name}'
+           determined by,
+
+           .. seealso:: :func:`~mdpow.workflows.dihedrals.build_svg`
+
        
        :returns:
 
-       *violin plot*
+       *g (violin plot)*
            returns a :class:`seaborn.FacetGrid` object containing a violin plot of the
-           kernel density estimations (KDE) of the dihedral angle frequencies for each
-           relevant dihedral atom group in the molecule from the current MDPOW project
+           kernel density estimates (KDE) of the dihedral angle frequencies for each
+           dihedral atom group identified by :data:`SMARTS_DEFAULT`
 
     '''
 
@@ -553,12 +563,50 @@ def dihedral_violins(df, width=0.9, solvents=SOLVENTS_DEFAULT, plot_title=None):
 
     return g
 
-def build_svg(mol, molname=None, name=None, ab_pairs=None,
+def build_svg(mol, molname, ab_pairs, atom_group_selection,
               solvents=SOLVENTS_DEFAULT, width=0.9):
+    '''Converts and combines figure components into an
+       SVG object to be converted and saved as a publication
+       quality PDF.
+
+       :keywords:
+
+       *mol*
+           :class:`rdkit.Chem.rdchem.Mol` object converted from `solute`
+
+       *molname*
+           molecule name to be used for labelling
+           plots, if different from `resname`
+           (in this case, carried over from an upstream
+            decision between the two)
+
+       *ab_pairs*
+           dictionary with key-value pair: '*#-*#-*#-*#': (atom_indices[i], bond_indices[i])
+
+           .. seealso:: :func:`~mdpow.workflows.dihedrals.get_paired_indices`
+
+       *atom_group_selection*
+           `name` of each section in the `groupby` series of atom group selections
+
+           .. seealso:: :func:`~mdpow.workflows.dihedrals.plot_dihedral_violins`
+
+       *solvents*
+           The default solvents are documented under :data:`SOLVENTS_DEFAULT`.
+
+       *width*
+           width of the violin element (>1 overlaps)
+           default: 0.9
+
+       :returns:
+
+       *fig*
+           :mod:`svgutils` SVG figure object
+
+    '''
     # atoms
-    a = ab_pairs[name[0]][0]
+    a = ab_pairs[atom_group_selection[0]][0]
     # bonds
-    b = ab_pairs[name[0]][1]
+    b = ab_pairs[atom_group_selection[0]][1]
 
     drawer = rdMolDraw2D.MolDraw2DSVG(250, 250)
     drawer.DrawMolecule(mol=mol, highlightAtoms=a, highlightBonds=b)
@@ -569,8 +617,8 @@ def build_svg(mol, molname=None, name=None, ab_pairs=None,
     m = mol_svg.getroot()
     m.scale(0.0125).moveto(21.8, 0.35)
 
-    plot_title = f'{molname}, {name[0]} {a} | ''{col_name}'
-    plot = dihedral_violins(name[1], width=width, solvents=solvents, plot_title=plot_title)
+    plot_title = f'{molname}, {atom_group_selection[0]} {a} | ''{col_name}'
+    plot = dihedral_violins(atom_group_selection[1], width=width, solvents=solvents, plot_title=plot_title)
 
     plot_svg = svgutils.transform.from_mpl(plot)
     p = plot_svg.getroot()
@@ -581,19 +629,19 @@ def build_svg(mol, molname=None, name=None, ab_pairs=None,
 
     return fig
 
-def plot_dihedral_violins(df, resname, mol, ab_pairs, figdir=None, molname=None,
+def plot_dihedral_violins(df, resname, mol, ab_pairs, figdir, molname=None,
                  width=0.9, plot_pdf_width=PLOT_WIDTH_DEFAULT, solvents=SOLVENTS_DEFAULT):
-    '''Coordinates plotting and optionally saving figures for all dihedral
-       atom groups.
+    '''Coordinates plotting and saving figures for all dihedral atom groups.
        
-       Makes a subdirectory within the specified
-       `figdir` using `resname` or `molname` provided and saves violin plot
-       figur for each dihedral atom group separately.
+       Makes a subdirectory for the current project within the specified
+       `figdir` using `resname` or `molname` as title and saves production
+       quality PDFs for each dihedral atom group separately.
 
        .. seealso::
 
           :func:`~mdpow.workflows.dihedrals.automated_dihedral_analysis`,
-          :func:`~mdpow.workflows.dihedrals.dihedral_violins`
+          :func:`~mdpow.workflows.dihedrals.dihedral_violins`,
+          :func:`~mdpow.workflows.dihedrals.build_svg`
        
        :keywords:
        
@@ -605,8 +653,16 @@ def plot_dihedral_violins(df, resname, mol, ab_pairs, figdir=None, molname=None,
            `resname` for the molecule as defined in 
            the topology and trajectory
 
+       *mol*
+           :class:`rdkit.Chem.rdchem.Mol` object converted from `solute`
+
+       *ab_pairs*
+           dictionary with key-value pair: '*#-*#-*#-*#': (atom_indices[i], bond_indices[i])
+
+           .. seealso:: :func:`~mdpow.workflows.dihedrals.get_paired_indices`
+
        *figdir*
-           optional, path to the location to save figures
+           path to the location to save figures
 
        *molname*
            molecule name to be used for labelling
@@ -618,19 +674,12 @@ def plot_dihedral_violins(df, resname, mol, ab_pairs, figdir=None, molname=None,
 
            .. seealso:: :func:`~mdpow.workflows.dihedrals.dihedral_violins`
 
-       *solvents*
-           The default solvents are documented under :data:`SOLVENTS_DEFAULT`.
-
        *plot_pdf_width*
            The default value for width of plot output is described in detail under
            :data:`PLOT_WIDTH_DEFAULT`.
 
-       :returns:
-
-       *violin plot*
-           returns a :class:`seaborn.FacetGrid` object containing a violin plot of the
-           kernel density estimations (KDE) of the dihedral angle frequencies for each
-           relevant dihedral atom group in the molecule from the current MDPOW project
+       *solvents*
+           The default solvents are documented under :data:`SOLVENTS_DEFAULT`.
 
     '''
 
@@ -648,7 +697,7 @@ def plot_dihedral_violins(df, resname, mol, ab_pairs, figdir=None, molname=None,
 
     for name in section:
         
-        fig = build_svg(mol=mol, molname=molname, name=name, ab_pairs=ab_pairs,
+        fig = build_svg(mol=mol, molname=molname, atom_group_selection=name, ab_pairs=ab_pairs,
                         solvents=solvents, width=width)
 
         figfile = pathlib.Path(newdir) / f"{molname}_{name[0]}_violins.pdf"
@@ -661,8 +710,8 @@ def plot_dihedral_violins(df, resname, mol, ab_pairs, figdir=None, molname=None,
 
     return None
 
-def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
-                                resname=None, molname=None,
+def automated_dihedral_analysis(dirname, figdir, resname,
+                                df_save_dir=None, molname=None,
                                 SMARTS=SMARTS_DEFAULT, plot_pdf_width=PLOT_WIDTH_DEFAULT,
                                 dataframe=None, padding=45, width=0.9,
                                 solvents=SOLVENTS_DEFAULT,
@@ -674,13 +723,11 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
     
        For one MDPOW project, automatically determines all relevant dihedral atom groups
        in the molecule, runs :class:`~mdpow.analysis.dihedral.DihedralAnalysis` for each group,
-       pads the dihedral angles from analysis results for all groups to maintain periodicity,
-       creates violin plots of dihedral angle frequencies for each group, separately, from the
-       padded results.
+       pads the dihedral angles to maintain periodicity, creates violin plots of dihedral angle
+       frequencies (KDEs), and saves publication quality PDF figures for each group, separately.
 
        Optionally saves all pre-padded :class:`~mdpow.analysis.dihedral.DihedralAnalysis` results
-       as a single :class:`pandas.DataFrame`, and separate violin plots for each dihedral atom group
-       in `df_save_dir`, and `figdir` directories provided, respectively.
+       as a single :class:`pandas.DataFrame` in `df_save_dir` provided.
 
        :keywords:
 
@@ -694,22 +741,26 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
            and .xtc files for trajectory. It will default to using the tpr file
            available.
 
-       *df_save_dir*
-           optional, path to the location to save results :class:`pandas.DataFrame`
-
        *figdir*
-           optional, path to the location to save figures
+           path to the location to save figures
 
        *resname*
            `resname` for the molecule as defined in 
            the topology and trajectory
 
+       *df_save_dir*
+           optional, path to the location to save results :class:`pandas.DataFrame`
+
        *molname*
            molecule name to be used for labelling
            plots, if different from `resname`
-           
+
        *SMARTS*
            The default SMARTS string is described in detail under :data:`SMARTS_DEFAULT`.
+
+       *plot_pdf_width*
+           The default value for width of plot output is described in detail under
+           :data:`PLOT_WIDTH_DEFAULT`.
 
        *dataframe*
            optional, if :class:`~mdpow.analysis.dihedral.DihedralAnalysis`
@@ -734,22 +785,11 @@ def automated_dihedral_analysis(dirname=None, df_save_dir=None, figdir=None,
        *interactions*
            The default interactions are documented under :data:`INTERACTIONS_DEFAULT`.
 
-       *plot_pdf_width*
-           The default value for width of plot output is described in detail under
-           :data:`PLOT_WIDTH_DEFAULT`.
-
        *start, stop, step*
            arguments passed to :func:`~mdpow.analysis.ensemble.EnsembleAnalysis.run`,
            as parameters for iterating through the trajectories of the current ensemble
 
            .. seealso:: :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`
-
-       :returns:
-
-       *violin plot*
-           returns a :class:`seaborn.FacetGrid` object containing a violin plot of the
-           kernel density estimations (KDE) of the dihedral angle frequencies for each
-           relevant dihedral atom group in the molecule from the current MDPOW project
 
        .. rubric:: Example
        
