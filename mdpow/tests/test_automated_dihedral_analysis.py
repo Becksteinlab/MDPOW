@@ -32,7 +32,7 @@ MANIFEST = RESOURCES / "manifest.yml"
 resname = "UNK"
 molname = "SM25"
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def molname_workflows_directory(tmp_path, molname='SM25'):
     m = pybol.Manifest(str(MANIFEST))
     m.assemble('workflows', tmp_path)
@@ -40,18 +40,18 @@ def molname_workflows_directory(tmp_path, molname='SM25'):
 
 class TestAutomatedDihedralAnalysis(object):
 
-    @pytest.fixture(scope="function")
+    @pytest.fixture
     def SM25_tmp_dir(self, molname_workflows_directory):
         dirname = molname_workflows_directory
         return dirname
 
-    @pytest.fixture(scope="function")
+    @pytest.fixture
     def mol_sol_data(self, SM25_tmp_dir):
         u = dihedrals.build_universe(dirname=SM25_tmp_dir)
         mol, solute = dihedrals.rdkit_conversion(u=u, resname=resname)
         return mol, solute
 
-    @pytest.fixture(scope="function")
+    @pytest.fixture
     def atom_indices(self, mol_sol_data):
         mol, _ = mol_sol_data
         atom_group_indices = dihedrals.get_atom_indices(mol=mol)
@@ -64,21 +64,21 @@ class TestAutomatedDihedralAnalysis(object):
         # atom_indices[0]=atom_group_indices
         # atom_indices[1]=atom_group_indices_alt
 
-    @pytest.fixture(scope="function")
+    @pytest.fixture
     def bond_indices(self, mol_sol_data, atom_indices):
         mol, _ = mol_sol_data
         aix, _ = atom_indices
         bond_indices = dihedrals.get_bond_indices(mol=mol, atom_indices=aix)
         return bond_indices
 
-    @pytest.fixture(scope="function")
+    @pytest.fixture
     def dihedral_groups(self, mol_sol_data, atom_indices):
         _, solute = mol_sol_data
         aix, _ = atom_indices
         dihedral_groups = dihedrals.get_dihedral_groups(solute=solute, atom_indices=aix)
         return dihedral_groups
 
-    @pytest.fixture(scope="function")
+    @pytest.fixture
     def dihedral_data(self, SM25_tmp_dir, atom_indices):
         atom_group_indices, _ = atom_indices
         df = dihedrals.dihedral_groups_ensemble(atom_indices=atom_group_indices,
