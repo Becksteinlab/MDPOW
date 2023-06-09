@@ -180,13 +180,16 @@ def rdkit_conversion(u, resname):
 
     """
 
-    elements = [guess_atom_element(name) for name in u.atoms.names]
-    u.add_TopologyAttr("elements", elements)
+    try:
+        solute = u.select_atoms(f'resname {resname}')
+        mol = solute.convert_to('RDKIT')
+    except AttributeError:
+        elements = [guess_atom_element(name) for name in u.atoms.names]
+        u.add_TopologyAttr("elements", elements)
+        solute = u.select_atoms(f'resname {resname}')
+        mol = solute.convert_to('RDKIT')
 
-    solute = u.select_atoms(f'resname {resname}')
     solute.unwrap(compound='residues', reference='com')
-
-    mol = solute.convert_to('RDKIT')
     rdCoordGen.AddCoords(mol)
 
     for atom in mol.GetAtoms():
