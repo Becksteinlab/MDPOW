@@ -515,7 +515,7 @@ def dihedral_violins(df, width=0.9, solvents=SOLVENTS_DEFAULT, plot_title=None):
        
        :returns:
 
-       *g (violin plot)*
+       *g*
            returns a :class:`seaborn.FacetGrid` object containing a violin plot of the
            kernel density estimates (KDE) of the dihedral angle frequencies for each
            dihedral atom group identified by :data:`SMARTS_DEFAULT`
