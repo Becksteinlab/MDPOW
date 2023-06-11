@@ -315,7 +315,8 @@ def get_paired_indices(atom_indices, bond_indices, dihedral_groups):
        :returns:
 
        *ab_pairs*
-           dictionary with key-value pair: '*#-*#-*#-*#': (atom_indices[i], bond_indices[i])
+           dictionary with key-value pair
+           example: 'C1-N2-O3-S4': (atom_indices[i], bond_indices[i])
     
     '''
 
@@ -583,7 +584,8 @@ def build_svg(mol, molname, ab_pairs, atom_group_selection,
             decision between the two)
 
        *ab_pairs*
-           dictionary with key-value pair: '*#-*#-*#-*#': (atom_indices[i], bond_indices[i])
+           dictionary with key-value pair
+           example: 'C1-N2-O3-S4': (atom_indices[i], bond_indices[i])
 
            .. seealso:: :func:`~mdpow.workflows.dihedrals.get_paired_indices`
 
@@ -659,7 +661,8 @@ def plot_dihedral_violins(df, resname, mol, ab_pairs, figdir=None, molname=None,
            :class:`rdkit.Chem.rdchem.Mol` object converted from `solute`
 
        *ab_pairs*
-           dictionary with key-value pair: '*#-*#-*#-*#': (atom_indices[i], bond_indices[i])
+           dictionary with key-value pair
+           example: 'C1-N2-O3-S4': (atom_indices[i], bond_indices[i])
 
            .. seealso:: :func:`~mdpow.workflows.dihedrals.get_paired_indices`
 
