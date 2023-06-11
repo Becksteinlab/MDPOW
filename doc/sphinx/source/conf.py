@@ -249,7 +249,7 @@ intersphinx_mapping = {'https://docs.python.org/': None,
                        'https://pandas.pydata.org/docs/': None,
                        'https://seaborn.pydata.org': None,
                        'https://cairosvg.org/documentation/': None,
-                       'https://svgutils.readthedocs.io/en/latest/#': None,
+                       'https://svgutils.readthedocs.io/en/latest/': None,
                        'https://pypdf.readthedocs.io/en/stable/': None,
                    }
 
