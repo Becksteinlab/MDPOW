@@ -299,6 +299,8 @@ def get_paired_indices(atom_indices, bond_indices, dihedral_groups):
        as the value, with the key being the respective member
        of `dihedral_groups` to facilitate highlighting the 
        relevant dihedral atom group when generating violin plots.
+       As an example, `'C1-N2-O3-S4': ((0, 1, 2, 3), (0, 1, 2))`,
+       would be one key-value pair in the dictionary.
 
        :keywords:
 
@@ -314,8 +316,8 @@ def get_paired_indices(atom_indices, bond_indices, dihedral_groups):
        :returns:
 
        *ab_pairs*
-           dictionary with key-value pair
-           example: 'C1-N2-O3-S4': (atom_indices[i], bond_indices[i])
+           dictionary with key-value pair for dihedral atom group,
+           atom indices, and bond indices
     
     '''
 
@@ -583,8 +585,8 @@ def build_svg(mol, molname, ab_pairs, atom_group_selection,
             decision between the two)
 
        *ab_pairs*
-           dictionary with key-value pair
-           example: 'C1-N2-O3-S4': (atom_indices[i], bond_indices[i])
+           dictionary with key-value pair for dihedral atom group,
+           atom indices, and bond indices
 
            .. seealso:: :func:`~mdpow.workflows.dihedrals.get_paired_indices`
 
@@ -660,8 +662,8 @@ def plot_dihedral_violins(df, resname, mol, ab_pairs, figdir=None, molname=None,
            :class:`rdkit.Chem.rdchem.Mol` object converted from `solute`
 
        *ab_pairs*
-           dictionary with key-value pair
-           example: 'C1-N2-O3-S4': (atom_indices[i], bond_indices[i])
+           dictionary with key-value pair for dihedral atom group,
+           atom indices, and bond indices
 
            .. seealso:: :func:`~mdpow.workflows.dihedrals.get_paired_indices`
 
