@@ -11,3 +11,4 @@ seaborn
 matplotlib
 svgutils
 cairosvg
+pypdf

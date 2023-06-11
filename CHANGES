@@ -23,7 +23,8 @@ Changes
 
 Enhancements
 
-* convert figure components to SVG and save as scalable PDFs
+* convert figure components to SVG, save as individual PDFs,
+  and generate PDF of all figures combined in one file,
   for workflows dihedrals module (#243)
 * add RDKit mol object to dihedrals plot with dihedral atom
   indices labeled and dihedral atom group bonds highlighted
