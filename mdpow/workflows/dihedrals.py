@@ -176,8 +176,7 @@ def rdkit_conversion(u, resname):
            :class:`rdkit.Chem.rdchem.Mol` object converted from `solute`
            
        *solute*
-           molecule specified by :func:`~MDAnalysis.core.groups.select_atoms`
-           for :class:`~MDAnalysis.core.universe.Universe` object
+           the :any:`MDAnalysis` `AtomGroup` for the solute
 
     """
 
@@ -274,8 +273,7 @@ def get_dihedral_groups(solute, atom_indices):
        :keywords:
 
        *solute*
-           molecule specified by :func:`~MDAnalysis.core.groups.select_atoms`
-           for :class:`~MDAnalysis.core.universe.Universe` object
+           the :any:`MDAnalysis` `AtomGroup` for the solute
 
        *atom_indices*
            tuple of tuples of indices for each dihedral atom group
