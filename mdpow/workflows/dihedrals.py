@@ -687,46 +687,45 @@ def plot_dihedral_violins(df, resname, mol, ab_pairs, figdir=None, molname=None,
 
     '''
 
+    assert figdir is not None, "figdir MUST be set, even though it is a kwarg. Will be changed with #244"
+
     if molname is None:
         molname = resname
 
-    if figdir is not None:
-        subdir = molname
-        newdir = os.path.join(figdir, subdir)
-        os.mkdir(newdir)
+    subdir = molname
+    newdir = os.path.join(figdir, subdir)
+    os.mkdir(newdir)
 
-        section = df.groupby(by="selection")
+    section = df.groupby(by="selection")
 
-        plot_pdf_width_px = plot_pdf_width * 3.7795275591
+    plot_pdf_width_px = plot_pdf_width * 3.7795275591
 
-        # create PDF file list
-        pdf_list = []
+    pdf_list = []
 
-        for name in section:
+    for name in section:
         
-            fig = build_svg(mol=mol, molname=molname, atom_group_selection=name, ab_pairs=ab_pairs,
-                            solvents=solvents, width=width)
+        fig = build_svg(mol=mol, molname=molname, atom_group_selection=name, ab_pairs=ab_pairs,
+                        solvents=solvents, width=width)
 
-            figfile = pathlib.Path(newdir) / f"{molname}_{name[0]}_violins.pdf"
-            if figdir is not None:
-                plot_pdf = cairosvg.svg2pdf(bytestring=fig.tostr(), write_to=str(figfile),
-                                            output_width=plot_pdf_width_px)
+        figfile = pathlib.Path(newdir) / f"{molname}_{name[0]}_violins.pdf"
+        if figdir is not None:
+            plot_pdf = cairosvg.svg2pdf(bytestring=fig.tostr(), write_to=str(figfile),
+                                        output_width=plot_pdf_width_px)
                 
             # add PDF for each dihedral atom group to all_PDFs list
-            pdf_list.append(f'{figfile}')
+        pdf_list.append(f'{figfile}')
 
-            logger.info(f"Figure saved as {figfile}")
+        logger.info(f"Figure saved as {figfile}")
 
-        logger.info(f"All figures generated and saved in {figdir}")
+    logger.info(f"All figures generated and saved in {figdir}")
 
-    # create a combined PDF for all dihedral atom groups
     merger = pypdf.PdfWriter()
 
     for pdf in pdf_list:
         merger.append(pdf)
-    # name chosen so that this is the first PDF file in the figure directory
     merger.write(f"{figdir}/{molname}/{molname}_all_figures.pdf")
     merger.close()
+    logger.info(f"PDF of combined figures generated and saved as {figdir}/{molname}/{molname}_all_figures.pdf")
 
     return None
 
