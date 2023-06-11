@@ -292,8 +292,7 @@ def get_dihedral_groups(solute, atom_indices):
 
 def get_paired_indices(atom_indices, bond_indices, dihedral_groups):
     '''Combines `atom_indices` and `bond_indices` in tuples
-       to be paired with their respective `dihedral_groups` in
-       :func:`~MDAnalysis.core.groups.select_atoms` selection string format.
+       to be paired with their respective dihedral atom groups.
 
        A dictionary is created with key-value pairs as follows:
        `atom_indices` and `bond_indices` are joined in a tuple
