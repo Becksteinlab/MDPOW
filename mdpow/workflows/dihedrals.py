@@ -856,9 +856,8 @@ def automated_dihedral_analysis(dirname, resname,
 
     df_aug = periodic_angle_padding(df, padding=padding)
 
-    #kwargs in weird order
-    plot_dihedral_violins(df_aug, resname=resname, molname=molname, mol=mol, plot_pdf_width=plot_pdf_width,
-                 ab_pairs=ab_pairs, figdir=figdir, width=width, solvents=solvents)
+    plot_dihedral_violins(df=df_aug, resname=resname, mol=mol, ab_pairs=ab_pairs, figdir=figdir, molname=molname,
+                 width=width, plot_pdf_width=plot_pdf_width, solvents=solvents)
 
     logger.info(f"DihedralAnalysis completed for all projects in {dirname}")
 
