@@ -21,15 +21,17 @@ def create_logger(logfile="mdpow.log"):
     log.create('gromacs', logfile)  # and the GromacsWrapper messages
     return logger
 
-def log_banner():
+def log_banner(logger):
     """Log program name and licence at INFO level."""
     logger.info("MDPOW %s starting.", __version__)
-    logger.info("Copyright (c) 2010-2021 Shujie Fan, Ian Kenney, Alia Lescoulie, Bogdan Iorga, and Oliver Beckstein")
+    logger.info("Copyright (c) 2010-2023 Shujie Fan, Ian Kenney, "
+                "Alia Lescoulie, Cade Duckworth, Bogdan Iorga, and "
+                "Oliver Beckstein")
     logger.info("Released under the GNU Public Licence, version 3.")
     logger.info("For bug reports and help: https://github.com/Becksteinlab/MDPOW/issues")
 
 logger = create_logger()
-log_banner()
+log_banner(logger)
 
 # AVOID IMPORTS OF OTHER PACKAGES IN __init__.py; only standard
 # library and mdpow.log are allowed. Anything else will break 'pip
