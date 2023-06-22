@@ -686,7 +686,7 @@ def plot_dihedral_violins(df, resname, mol, ab_pairs, figdir=None, molname=None,
 
     '''
 
-    #assert figdir is not None, "figdir MUST be set, even though it is a kwarg. Will be changed with #244"
+    assert figdir is not None, "figdir MUST be set, even though it is a kwarg. Will be changed with #244"
 
     if molname is None:
         molname = resname
