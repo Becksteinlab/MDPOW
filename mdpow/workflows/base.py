@@ -24,7 +24,7 @@ import os
 import re
 import pandas as pd
 
-import registry
+from ..workflows import registry
 
 import logging
 
