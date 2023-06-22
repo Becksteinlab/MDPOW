@@ -64,6 +64,7 @@ from mdpow.analysis.dihedral import DihedralAnalysis
 
 import MDAnalysis as mda
 from MDAnalysis.topology.guessers import guess_atom_element
+from MDAnalysis.topology.guessers import guess_types
 
 import logging
 
@@ -184,8 +185,7 @@ def rdkit_conversion(u, resname):
         solute = u.select_atoms(f'resname {resname}')
         mol = solute.convert_to('RDKIT')
     except AttributeError:
-        elements = [guess_atom_element(name) for name in u.atoms.names]
-        u.add_TopologyAttr("elements", elements)
+        u.add_TopologyAttr("elements", guess_types(u.atoms.names))
         solute = u.select_atoms(f'resname {resname}')
         mol = solute.convert_to('RDKIT')
 
