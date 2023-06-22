@@ -24,7 +24,7 @@ import os
 import re
 import pandas as pd
 
-from mdpow.workflows import registry
+import registry
 
 import logging
 
