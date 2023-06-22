@@ -15,7 +15,7 @@ dependencies:
 - numkit
 - gromacswrapper
 - alchemlyb <2
-- rdkit <2023
+- rdkit <=2022.09.1
 - seaborn
 - svgutils
 - cairosvg
