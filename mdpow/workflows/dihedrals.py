@@ -63,7 +63,6 @@ import mdpow
 from mdpow.analysis.dihedral import DihedralAnalysis
 
 import MDAnalysis as mda
-from MDAnalysis.topology.guessers import guess_atom_element
 from MDAnalysis.topology.guessers import guess_types
 
 import logging
