@@ -10,9 +10,6 @@ import scipy
 import numpy as np
 import pandas as pd
 
-import rdkit
-from rdkit import Chem
-
 import seaborn
 
 from numpy.testing import assert_almost_equal
@@ -22,7 +19,7 @@ from . import RESOURCES
 
 import py.path
 
-from ..workflows import dihedrals
+from mdpow.workflows import dihedrals
 
 from pkg_resources import resource_filename
 
@@ -76,7 +73,7 @@ class TestAutomatedDihedralAnalysis(object):
                                 (1, 2, 3, 4),(1, 12, 13, 14),(2, 3, 4, 5),(2, 3, 4, 9),
                                 (2, 1, 12, 13),(3, 2, 1, 12),(5, 4, 3, 11),(5, 4, 3, 10),
                                 (9, 4, 3, 11),(9, 4, 3, 10),(12, 13, 14, 15),(12, 13, 14, 19))
-    
+
     # tuple-tuples of dihedral atom group indices
     # collected using alternate SMARTS input (explicitly defined)
     # see: fixture - atom_indices().atom_group_indices_alt
@@ -124,7 +121,7 @@ class TestAutomatedDihedralAnalysis(object):
     # results included in 'df_aug'
     ADG_C13141520_mean = 91.71943996962284
     ADG_C13141520_var = 0.8773028474908289
-    
+
     def test_build_universe(self, SM25_tmp_dir):
         u = dihedrals.build_universe(dirname=SM25_tmp_dir)
         solute = u.select_atoms('resname UNK')
