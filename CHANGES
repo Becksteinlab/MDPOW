@@ -20,6 +20,7 @@ Changes
   EnsembleAnalysis.run() method, no longer needed (per comments, #199)
 * added support for Python 3.10
 * dropped testing on Python 3.6
+* internal log_banner() now uses logger as argument
 
 Enhancements
 
