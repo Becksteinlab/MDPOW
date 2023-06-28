@@ -14,7 +14,8 @@ dependencies:
 - mdanalysis >=2
 - numkit
 - gromacswrapper
-- alchemlyb <2
+- alchemlyb >=2
+- pymbar >=4
 - rdkit
 - seaborn
 
