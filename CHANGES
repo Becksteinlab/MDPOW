@@ -18,9 +18,10 @@ Changes
   and use _single_frame OR _single_universe (#216)
 * _prepare_universe and _conclude_universe removed from 
   EnsembleAnalysis.run() method, no longer needed (per comments, #199)
-* added support for Python 3.10
-* dropped testing on Python 3.6
-* internal log_banner() now uses logger as argument
+* added support for Python 3.10 (#202)
+* dropped testing on Python 3.6 (PR #220, #202)
+* use pymbar >= 4 and alchemlyb >= 2 (#246)
+* internal log_banner() now uses logger as argument (PR #247)
 
 Enhancements
 
