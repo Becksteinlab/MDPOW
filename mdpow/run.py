@@ -94,7 +94,7 @@ def get_mdp_files(cfg, protocols):
             logger.debug("%(protocol)s: Using MDP file %(mdp)r from config file", vars())
     return mdpfiles
 
-def runMD_or_exit(S, protocol, params, cfg, exit_on_error=False, **kwargs):
+def runMD_or_exit(S, protocol, params, cfg, exit_on_error=True, **kwargs):
     """run simulation
 
     Can launch :program:`mdrun` itself (:class:`gromacs.run.MDrunner`) or exit so
@@ -116,7 +116,7 @@ def runMD_or_exit(S, protocol, params, cfg, exit_on_error=False, **kwargs):
       :class:`~gromacs.tools.Mdrun`.
 
     .. versionchanged:: 0.9.0
-       New kwarg `exit_in_error`.
+       New kwarg `exit_on_error`.
 
     """
     dirname = kwargs.pop("dirname", None)
