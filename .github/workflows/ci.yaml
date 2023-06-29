@@ -77,8 +77,10 @@ jobs:
       run: |
          python -m pip install pybol
     - name: Install GROMACS (${{ matrix.gromacs-version }})
+      # include mdanalysis here AGAIN to work around micromamba removing mdanalysis 
+      # while downgrading libxml2 (see issue #252)
       run: |
-         micromamba install 'gromacs==${{ matrix.gromacs-version }}' pocl
+         micromamba install 'gromacs==${{ matrix.gromacs-version }}' pocl mdanalysis
 
     - name: Install package (with no dependencies)
       run: |
