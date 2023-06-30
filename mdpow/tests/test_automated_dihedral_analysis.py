@@ -64,15 +64,15 @@ class TestAutomatedDihedralAnalysis(object):
     @pytest.fixture
     def bond_indices(self, mol_sol_data, atom_indices):
         mol, _ = mol_sol_data
-        aix, _ = atom_indices
-        bond_indices = dihedrals.get_bond_indices(mol=mol, atom_indices=aix)
+        atom_index, _ = atom_indices
+        bond_indices = dihedrals.get_bond_indices(mol=mol, atom_indices=atom_index)
         return bond_indices
 
     @pytest.fixture
     def dihedral_groups(self, mol_sol_data, atom_indices):
         _, solute = mol_sol_data
-        aix, _ = atom_indices
-        dihedral_groups = dihedrals.get_dihedral_groups(solute=solute, atom_indices=aix)
+        atom_index, _ = atom_indices
+        dihedral_groups = dihedrals.get_dihedral_groups(solute=solute, atom_indices=atom_index)
         return dihedral_groups
 
     @pytest.fixture
@@ -98,6 +98,23 @@ class TestAutomatedDihedralAnalysis(object):
     # collected using alternate SMARTS input (explicitly defined)
     # see: fixture - atom_indices().atom_group_indices_alt
     check_atom_group_indices_alt = ((1, 2), (1, 12), (2, 3), (3, 4), (12, 13), (13, 14))
+
+    check_atom_name_index_pairs = {'O1-C2-N3-S4': (0, 1, 2, 3),
+                                   'O1-C2-C13-C14': (0, 1, 12, 13),
+                                   'C2-N3-S4-O12': (1, 2, 3, 11),
+                                   'C2-N3-S4-O11': (1, 2, 3, 10),
+                                   'C2-N3-S4-C5': (1, 2, 3, 4),
+                                   'C2-C13-C14-C15': (1, 12, 13, 14),
+                                   'N3-S4-C5-C6': (2, 3, 4, 5),
+                                   'N3-S4-C5-C10': (2, 3, 4, 9),
+                                   'N3-C2-C13-C14': (2, 1, 12, 13),
+                                   'S4-N3-C2-C13': (3, 2, 1, 12),
+                                   'C6-C5-S4-O12': (5, 4, 3, 11),
+                                   'C6-C5-S4-O11': (5, 4, 3, 10),
+                                   'C10-C5-S4-O12': (9, 4, 3, 11),
+                                   'C10-C5-S4-O11': (9, 4, 3, 10),
+                                   'C13-C14-C15-C16': (12, 13, 14, 15),
+                                   'C13-C14-C15-C20': (12, 13, 14, 19)}
 
     check_groups = [np.array(['O1', 'C2', 'N3', 'S4'], dtype=object),
                     np.array(['O1', 'C2', 'C13', 'C14'], dtype=object),
@@ -171,6 +188,25 @@ class TestAutomatedDihedralAnalysis(object):
         reference = [g.all() for g in self.check_groups]
 
         assert set(values) == set(reference)
+
+    # atom indices are determined by RDKit Mol object
+    # bond indices are determined by atom indices and are subsequently self-consistent
+    # dihedral group names are determined by the MDAnalysis solute object from RDKit-derived atom indices
+    # this test checks if indexing schemes for RDKit and MDAnalysis are consistent
+    def test_RDKit_MDAnalysis_atom_index_consistency(self, atom_indices, bond_indices, dihedral_groups):
+        atom_index, _ = atom_indices
+        bond_index = bond_indices
+        groups = dihedral_groups
+
+        name_index_pairs = dihedrals.get_paired_indices(atom_indices=atom_index, bond_indices=bond_index,
+                                                dihedral_groups=groups)
+        
+        atom_name_index_pairs = {}
+
+        for key in name_index_pairs.keys():
+            atom_name_index_pairs[key] = name_index_pairs[key][0]
+
+        assert atom_name_index_pairs == self.check_atom_name_index_pairs
 
     # Possible ordering issue (#239)
     def test_dihedral_groups_ensemble(self, dihedral_data):

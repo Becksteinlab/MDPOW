@@ -246,11 +246,11 @@ def get_bond_indices(mol, atom_indices):
     
     bonds = []
 
-    for aix in atom_indices:
+    for atom_index in atom_indices:
 
-        x = mol.GetBondBetweenAtoms(aix[0], aix[1]).GetIdx()
-        y = mol.GetBondBetweenAtoms(aix[1], aix[2]).GetIdx()
-        z = mol.GetBondBetweenAtoms(aix[2], aix[3]).GetIdx()
+        x = mol.GetBondBetweenAtoms(atom_index[0], atom_index[1]).GetIdx()
+        y = mol.GetBondBetweenAtoms(atom_index[1], atom_index[2]).GetIdx()
+        z = mol.GetBondBetweenAtoms(atom_index[2], atom_index[3]).GetIdx()
         bix = (x, y, z)
 
         bonds.append(bix)
@@ -283,8 +283,10 @@ def get_dihedral_groups(solute, atom_indices):
            list of :func:`numpy.array` for atom names in each dihedral atom group
 
     '''
-
-    dihedral_groups = [solute.atoms[list(a_ind)].names for a_ind
+    # currently uses RDKit Mol object atom indices to retrieve
+    # atom names from the MDAnalysis solute object
+    # RDKit-MDAnalysis index consistency is currently tested
+    dihedral_groups = [solute.atoms[list(atom_index)].names for atom_index
                        in atom_indices]
 
     return dihedral_groups
@@ -314,7 +316,7 @@ def get_paired_indices(atom_indices, bond_indices, dihedral_groups):
 
        :returns:
 
-       *ab_pairs*
+       *name_index_pairs*
            dictionary with key-value pair for dihedral atom group,
            atom indices, and bond indices
     
@@ -322,10 +324,10 @@ def get_paired_indices(atom_indices, bond_indices, dihedral_groups):
 
     all_dgs = [f'{dg[0]}-{dg[1]}-{dg[2]}-{dg[3]}' for dg in dihedral_groups]
 
-    ab_pairs = {}
-    ab_pairs = {all_dgs[i]: (atom_indices[i], bond_indices[i]) for i in range(len(all_dgs))}
+    name_index_pairs = {}
+    name_index_pairs = {all_dgs[i]: (atom_indices[i], bond_indices[i]) for i in range(len(all_dgs))}
 
-    return ab_pairs
+    return name_index_pairs
 
 def dihedral_groups_ensemble(dirname, atom_indices,
                              solvents=SOLVENTS_DEFAULT,
@@ -564,7 +566,7 @@ def dihedral_violins(df, width=0.9, solvents=SOLVENTS_DEFAULT, plot_title=None):
 
     return g
 
-def build_svg(mol, molname, ab_pairs, atom_group_selection,
+def build_svg(mol, molname, name_index_pairs, atom_group_selection,
               solvents=SOLVENTS_DEFAULT, width=0.9):
     '''Converts and combines figure components into an
        SVG object to be converted and saved as a publication
@@ -581,7 +583,7 @@ def build_svg(mol, molname, ab_pairs, atom_group_selection,
            (in this case, carried over from an upstream
             decision between the two)
 
-       *ab_pairs*
+       *name_index_pairs*
            dictionary with key-value pair for dihedral atom group,
            atom indices, and bond indices
 
@@ -605,13 +607,12 @@ def build_svg(mol, molname, ab_pairs, atom_group_selection,
            :mod:`svgutils` SVG figure object
 
     '''
-    # atoms
-    a = ab_pairs[atom_group_selection[0]][0]
-    # bonds
-    b = ab_pairs[atom_group_selection[0]][1]
+
+    atom_index = name_index_pairs[atom_group_selection[0]][0]
+    bond_index = name_index_pairs[atom_group_selection[0]][1]
 
     drawer = rdMolDraw2D.MolDraw2DSVG(250, 250)
-    drawer.DrawMolecule(mol=mol, highlightAtoms=a, highlightBonds=b)
+    drawer.DrawMolecule(mol=mol, highlightAtoms=atom_index, highlightBonds=bond_index)
     drawer.FinishDrawing()
     svg = drawer.GetDrawingText().replace('svg:','')
 
@@ -619,7 +620,7 @@ def build_svg(mol, molname, ab_pairs, atom_group_selection,
     m = mol_svg.getroot()
     m.scale(0.0125).moveto(21.8, 0.35)
 
-    plot_title = f'{molname}, {atom_group_selection[0]} {a} | ''{col_name}'
+    plot_title = f'{molname}, {atom_group_selection[0]} {atom_index} | ''{col_name}'
     plot = dihedral_violins(atom_group_selection[1], width=width, solvents=solvents, plot_title=plot_title)
 
     plot_svg = svgutils.transform.from_mpl(plot)
@@ -631,7 +632,7 @@ def build_svg(mol, molname, ab_pairs, atom_group_selection,
 
     return fig
 
-def plot_dihedral_violins(df, resname, mol, ab_pairs, figdir=None, molname=None,
+def plot_dihedral_violins(df, resname, mol, name_index_pairs, figdir=None, molname=None,
                  width=0.9, plot_pdf_width=PLOT_WIDTH_DEFAULT, solvents=SOLVENTS_DEFAULT):
     '''Coordinates plotting and saving figures for all dihedral atom groups.
        
@@ -658,7 +659,7 @@ def plot_dihedral_violins(df, resname, mol, ab_pairs, figdir=None, molname=None,
        *mol*
            :class:`rdkit.Chem.rdchem.Mol` object converted from `solute`
 
-       *ab_pairs*
+       *name_index_pairs*
            dictionary with key-value pair for dihedral atom group,
            atom indices, and bond indices
 
@@ -703,7 +704,7 @@ def plot_dihedral_violins(df, resname, mol, ab_pairs, figdir=None, molname=None,
 
     for name in section:
         
-        fig = build_svg(mol=mol, molname=molname, atom_group_selection=name, ab_pairs=ab_pairs,
+        fig = build_svg(mol=mol, molname=molname, atom_group_selection=name, name_index_pairs=name_index_pairs,
                         solvents=solvents, width=width)
 
         figfile = pathlib.Path(newdir) / f"{molname}_{name[0]}_violins.pdf"
@@ -835,7 +836,7 @@ def automated_dihedral_analysis(dirname, resname,
     atom_indices = get_atom_indices(mol=mol, SMARTS=SMARTS)
     bond_indices = get_bond_indices(mol=mol, atom_indices=atom_indices)
     dihedral_groups = get_dihedral_groups(solute=solute, atom_indices=atom_indices)
-    ab_pairs = get_paired_indices(atom_indices=atom_indices, bond_indices=bond_indices,
+    name_index_pairs = get_paired_indices(atom_indices=atom_indices, bond_indices=bond_indices,
                                   dihedral_groups=dihedral_groups)
 
     if dataframe is not None:
@@ -854,7 +855,7 @@ def automated_dihedral_analysis(dirname, resname,
 
     df_aug = periodic_angle_padding(df, padding=padding)
 
-    plot_dihedral_violins(df=df_aug, resname=resname, mol=mol, ab_pairs=ab_pairs, figdir=figdir, molname=molname,
+    plot_dihedral_violins(df=df_aug, resname=resname, mol=mol, name_index_pairs=name_index_pairs, figdir=figdir, molname=molname,
                  width=width, plot_pdf_width=plot_pdf_width, solvents=solvents)
 
     logger.info(f"DihedralAnalysis completed for all projects in {dirname}")
