@@ -164,8 +164,8 @@ class TestAutomatedDihedralAnalysis(object):
     # Use set comparison because ordering of indices appears to change
     # between RDKIT versions; issue raised (#239) to identify and
     # resolve exact package/version responsible
-    def test_dihedral_groups(self, SM25_tmp_dir):
-        groups = dihedrals.get_dihedral_groups(dirname=SM25_tmp_dir, resname=resname)
+    def test_dihedral_groups(self, dihedral_groups):
+        groups = dihedral_groups
 
         values = [g.all() for g in groups]
         reference = [g.all() for g in self.check_groups]
