@@ -165,7 +165,7 @@ class TestAutomatedDihedralAnalysis(object):
     # between RDKIT versions; issue raised (#239) to identify and
     # resolve exact package/version responsible
     def test_dihedral_groups(self, SM25_tmp_dir):
-        groups = dihedrals.dihedral_groups(dirname=SM25_tmp_dir, resname=self.resname)
+        groups = dihedrals.get_dihedral_groups(dirname=SM25_tmp_dir, resname=self.resname)
 
         values = [g.all() for g in groups]
         reference = [g.all() for g in self.check_groups]
