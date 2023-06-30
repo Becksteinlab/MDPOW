@@ -14,7 +14,7 @@ from mdpow.config import get_configuration
 from . import RESOURCES
 
 class TestFEPScript(object):
-    def setup(self):
+    def setup_method(self):
         self.tmpdir = td.TempDir()
         self.old_path = os.getcwd()
         self.resources = RESOURCES
@@ -28,7 +28,7 @@ class TestFEPScript(object):
         S.dirs.includes = os.path.join(self.tmpdir.name, 'top')
         S.save()
 
-    def teardown(self):
+    def teardown_method(self):
         self.tmpdir.dissolve()
 
     def _run_fep(self, solvent, dirname):
