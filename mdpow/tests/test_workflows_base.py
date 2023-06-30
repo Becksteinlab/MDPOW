@@ -63,13 +63,19 @@ class TestWorkflowsBase(object):
         pd.testing.assert_frame_equal(project_paths, csv_df)
 
     def test_automated_project_analysis(self, project_paths_data, caplog):
+        caplog.clear()
+        caplog.set_level(logging.ERROR, logger='mdpow.workflows.base')
+        
         project_paths = project_paths_data
         # change resname to match topology (every SAMPL7 resname is 'UNK')
         # only necessary for this dataset, not necessary for normal use
         project_paths['resname'] = 'UNK'
 
-        base.automated_project_analysis(project_paths, solvents=('water',),
-                                        ensemble_analysis='DihedralAnalysis')
+        with pytest.raises(AssertionError,
+                           match="figdir MUST be set, even though it is a kwarg. Will be changed with #244"):
+        
+            base.automated_project_analysis(project_paths, solvents=('water',),
+                                            ensemble_analysis='DihedralAnalysis')
 
         assert 'all analyses completed' in caplog.text, ('automated_dihedral_analysis '
                'did not iteratively run to completion for the provided project')
