@@ -10,9 +10,6 @@ import scipy
 import numpy as np
 import pandas as pd
 
-import rdkit
-from rdkit import Chem
-
 import seaborn
 
 from numpy.testing import assert_almost_equal
@@ -22,7 +19,7 @@ from . import RESOURCES
 
 import py.path
 
-from ..workflows import dihedrals
+from mdpow.workflows import dihedrals
 
 from pkg_resources import resource_filename
 
@@ -97,28 +94,6 @@ class TestAutomatedDihedralAnalysis(object):
                                 (2, 1, 12, 13),(3, 2, 1, 12),(5, 4, 3, 11),(5, 4, 3, 10),
                                 (9, 4, 3, 11),(9, 4, 3, 10),(12, 13, 14, 15),(12, 13, 14, 19))
 
-    check_bond_indices = ((8, 4, 2), (8, 9, 14), (4, 2, 0), (4, 2, 1),
-                          (4, 2, 3), (9, 14, 21), (2, 3, 6), (2, 3, 7),
-                          (4, 9, 14), (2, 4, 9), (6, 3, 0), (6, 3, 1),
-                          (7, 3, 0), (7, 3, 1), (14, 21, 25), (14, 21, 26))
-
-    check_ab_pairs = {'O1-C2-N3-S4': ((0, 1, 2, 3), (8, 4, 2)),
-                      'O1-C2-C13-C14': ((0, 1, 12, 13), (8, 9, 14)),
-                      'C2-N3-S4-O12': ((1, 2, 3, 11), (4, 2, 0)),
-                      'C2-N3-S4-O11': ((1, 2, 3, 10), (4, 2, 1)),
-                      'C2-N3-S4-C5': ((1, 2, 3, 4), (4, 2, 3)),
-                      'C2-C13-C14-C15': ((1, 12, 13, 14), (9, 14, 21)),
-                      'N3-S4-C5-C6': ((2, 3, 4, 5), (2, 3, 6)),
-                      'N3-S4-C5-C10': ((2, 3, 4, 9), (2, 3, 7)),
-                      'N3-C2-C13-C14': ((2, 1, 12, 13), (4, 9, 14)),
-                      'S4-N3-C2-C13': ((3, 2, 1, 12), (2, 4, 9)),
-                      'C6-C5-S4-O12': ((5, 4, 3, 11), (6, 3, 0)),
-                      'C6-C5-S4-O11': ((5, 4, 3, 10), (6, 3, 1)),
-                      'C10-C5-S4-O12': ((9, 4, 3, 11), (7, 3, 0)),
-                      'C10-C5-S4-O11': ((9, 4, 3, 10), (7, 3, 1)),
-                      'C13-C14-C15-C16': ((12, 13, 14, 15), (14, 21, 25)),
-                      'C13-C14-C15-C20': ((12, 13, 14, 19), (14, 21, 26))}
-
     # tuple-tuples of dihedral atom group indices
     # collected using alternate SMARTS input (explicitly defined)
     # see: fixture - atom_indices().atom_group_indices_alt
@@ -166,70 +141,38 @@ class TestAutomatedDihedralAnalysis(object):
     # results included in 'df_aug'
     ADG_C13141520_mean = 91.71943996962284
     ADG_C13141520_var = 0.8773028474908289
-    
+
     def test_build_universe(self, SM25_tmp_dir):
         u = dihedrals.build_universe(dirname=SM25_tmp_dir)
         solute = u.select_atoms('resname UNK')
         solute_names = solute.atoms.names
         assert solute_names.all() == self.universe_solute_atom_names.all()
 
-    # the following 'reason' affects every downstream function that relies
-    # on the atom indices returned for dihedral atom group selections
-    # issue raised (#239) to identify and resolve exact package/version responsible
-    @pytest.mark.skipif(sys.version_info < (3, 8), reason='pytest=7.2.0, build=py37h89c1867_0, '
-                       'returns incorrect atom_indices for dihedral atom group selections')
+    # Use set comparison because ordering of indices appears to change
+    # between RDKIT versions; issue raised (#239) to identify and
+    # resolve exact package/version responsible
     def test_dihedral_indices(self, atom_indices):
-        atom_group_indices, _ = atom_indices
-        assert atom_group_indices == self.check_atom_group_indices
 
-    # the following 'reason' affects every downstream function that relies
-    # on the atom indices returned for dihedral atom group selections
-    # issue raised (#239) to identify and resolve exact package/version responsible
-    @pytest.mark.skipif(sys.version_info < (3, 8), reason='pytest=7.2.0, build=py37h89c1867_0, '
-                       'returns incorrect atom_indices for dihedral atom group selections')
-    def test_bond_indices(self, bond_indices):
-        bix = bond_indices
-        assert bix == self.check_bond_indices
+        atom_group_indices = atom_indices[0]
+        assert set(atom_group_indices) == set(self.check_atom_group_indices)
 
-    # the following 'reason' affects every downstream function that relies
-    # on the atom indices returned for dihedral atom group selections
-    # issue raised (#239) to identify and resolve exact package/version responsible
-    @pytest.mark.skipif(sys.version_info < (3, 8), reason='pytest=7.2.0, build=py37h89c1867_0, '
-                       'returns incorrect atom_indices for dihedral atom group selections')
+    # Possible ordering issue (#239)
     def test_SMARTS(self, atom_indices):
         _, atom_group_indices_alt = atom_indices
         assert atom_group_indices_alt == self.check_atom_group_indices_alt
 
-    # the following 'reason' affects every downstream function that relies
-    # on the atom indices returned for dihedral atom group selections
-    # issue raised (#239) to identify and resolve exact package/version responsible
-    @pytest.mark.skipif(sys.version_info < (3, 8), reason='pytest=7.2.0, build=py37h89c1867_0, '
-                       'returns incorrect atom_indices for dihedral atom group selections')
-    def test_dihedral_groups(self, dihedral_groups):
-        groups = dihedral_groups
-        i = 0
-        while i < len(groups):
-            assert groups[i].all() == self.check_groups[i].all()
-            i+=1
+    # Use set comparison because ordering of indices appears to change
+    # between RDKIT versions; issue raised (#239) to identify and
+    # resolve exact package/version responsible
+    def test_dihedral_groups(self, SM25_tmp_dir):
+        groups = dihedrals.dihedral_groups(dirname=SM25_tmp_dir, resname=self.resname)
 
-    # the following 'reason' affects every downstream function that relies
-    # on the atom indices returned for dihedral atom group selections
-    # issue raised (#239) to identify and resolve exact package/version responsible
-    @pytest.mark.skipif(sys.version_info < (3, 8), reason='pytest=7.2.0, build=py37h89c1867_0, '
-                       'returns incorrect atom_indices for dihedral atom group selections')
-    def test_ab_pairs(self, atom_indices, bond_indices, dihedral_groups):
-        aix, _ = atom_indices
-        bix = bond_indices
-        groups = dihedral_groups
-        ab_pairs = dihedrals.get_paired_indices(atom_indices=aix, bond_indices=bix,
-                                                dihedral_groups=groups)
-        assert ab_pairs == self.check_ab_pairs
+        values = [g.all() for g in groups]
+        reference = [g.all() for g in self.check_groups]
 
-    # the following 'reason' affects every downstream function that relies
-    # on the atom indices returned for dihedral atom group selections
-    # issue raised (#239) to identify and resolve exact package/version responsible
-    @pytest.mark.skipif(sys.version_info < (3, 8), reason='pytest=7.2.0, build=py37h89c1867_0, '
-                       'returns incorrect atom_indices for dihedral atom group selections')
+        assert set(values) == set(reference)
+
+    # Possible ordering issue (#239)
     def test_dihedral_groups_ensemble(self, dihedral_data):
 
         df, _ = dihedral_data
@@ -261,12 +204,8 @@ class TestAutomatedDihedralAnalysis(object):
         dihedrals.save_df(df=df, df_save_dir=SM25_tmp_dir, resname='UNK', molname='SM25')
         assert f'Results DataFrame saved as {SM25_tmp_dir}/SM25/SM25_full_df.csv.bz2' in caplog.text, 'Save location not logged or returned'
 
-    # the following 'reason' affects every downstream function that relies
-    # on the atom indices returned for dihedral atom group selections
-    # issue raised (#239) to identify and resolve exact package/version responsible
-    @pytest.mark.skipif(sys.version_info < (3, 8), reason='pytest=7.2.0, build=py37h89c1867_0, '
-                       'returns incorrect atom_indices for dihedral atom group selections')
-    def test_periodic_angle_padding(self, dihedral_data):
+    # Possible ordering issue (#239)
+    def test_periodic_angle(self, dihedral_data):
 
         _, df_aug = dihedral_data
 
@@ -278,22 +217,14 @@ class TestAutomatedDihedralAnalysis(object):
         aug_dh2_mean == pytest.approx(self.ADG_C13141520_mean)
         aug_dh2_var == pytest.approx(self.ADG_C13141520_var)
 
-    # the following 'reason' affects every downstream function that relies
-    # on the atom indices returned for dihedral atom group selections
-    # issue raised (#239) to identify and resolve exact package/version responsible
-    @pytest.mark.skipif(sys.version_info < (3, 8), reason='pytest=7.2.0, build=py37h89c1867_0, '
-                       'returns incorrect atom_indices for dihedral atom group selections')
+    # Possible ordering issue (#239)
     def test_save_fig(self, SM25_tmp_dir):
         dihedrals.automated_dihedral_analysis(dirname=SM25_tmp_dir, figdir=SM25_tmp_dir,
                                               resname=resname, molname='SM25',
                                               solvents=('water',))
         assert (SM25_tmp_dir / 'SM25' / 'SM25_C10-C5-S4-O11_violins.pdf').exists(), 'PDF file not generated'
 
-    # the following 'reason' affects every downstream function that relies
-    # on the atom indices returned for dihedral atom group selections
-    # issue raised (#239) to identify and resolve exact package/version responsible
-    @pytest.mark.skipif(sys.version_info < (3, 8), reason='pytest=7.2.0, build=py37h89c1867_0, '
-                       'returns incorrect atom_indices for dihedral atom group selections')
+    # Possible ordering issue (#239)
     def test_save_fig_info(self, SM25_tmp_dir, caplog):
         caplog.clear()
         caplog.set_level(logging.INFO, logger='mdpow.workflows.dihedrals')

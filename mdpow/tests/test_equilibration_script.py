@@ -11,14 +11,14 @@ from mdpow.config import get_configuration
 from . import RESOURCES
 
 class TestEquilibriumScript(object):
-    def setup(self):
+    def setup_method(self):
         self.tmpdir = td.TempDir()
         self.old_path = os.getcwd()
         self.resources = RESOURCES
         m = pybol.Manifest(str(self.resources / 'manifest.yml'))
         m.assemble('base', self.tmpdir.name)
 
-    def teardown(self):
+    def teardown_method(self):
         self.tmpdir.dissolve()
 
     def _run_equil(self, solvent, dirname):

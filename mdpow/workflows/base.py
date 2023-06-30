@@ -35,12 +35,12 @@ def project_paths(parent_directory=None, csv=None, csv_save_dir=None):
        the molname, resname, and path, of each MDPOW project within.
 
        Optionally takes a .csv file containing `molname`, `resname`, and
-       `paths`, in that order. 
+       `paths`, in that order.
 
        :keywords:
 
        *parent_directory*
-           the path for the location of the top directory 
+           the path for the location of the top directory
            under which the subdirectories of MDPOW simulation
            data exist, additionally creates a 'project_paths.csv' file
            for user manipulation of metadata and for future reference
@@ -61,7 +61,7 @@ def project_paths(parent_directory=None, csv=None, csv_save_dir=None):
            :class:`pandas.DataFrame` containing MDPOW project metadata
 
        .. rubric:: Example
-       
+
        Typical Workflow::
 
            project_paths = project_paths(parent_directory='/foo/bar/MDPOW_projects')
@@ -80,7 +80,7 @@ def project_paths(parent_directory=None, csv=None, csv_save_dir=None):
 
         reg_compile = re.compile('FEP')
         for dirpath, dirnames, filenames in os.walk(parent_directory):
-            result = [dirpath.strip() for dirname in dirnames if  reg_compile.match(dirname)]
+            result = [dirpath.strip() for dirname in dirnames if reg_compile.match(dirname)]
             if result:
                 locations.append(result[0])
 
@@ -91,12 +91,12 @@ def project_paths(parent_directory=None, csv=None, csv_save_dir=None):
             resnames.append(res_temp[-1])
 
         project_paths = pd.DataFrame(
-        {
-            'molecule': resnames,
-            'resname': resnames,
-            'path': locations
-        }
-        )
+            {
+                'molecule': resnames,
+                'resname': resnames,
+                'path': locations
+            }).sort_values(by=['molecule', 'resname', 'path']
+                           ).reset_index(drop=True)
         if csv_save_dir is not None:
             project_paths.to_csv(f'{csv_save_dir}/project_paths.csv', index=False)
             logger.info(f'project_paths saved under {csv_save_dir}')
@@ -135,12 +135,12 @@ def automated_project_analysis(project_paths, ensemble_analysis, **kwargs):
 
        .. rubric:: Example
 
-       A typical workflow is the automated dihedral analysis from 
+       A typical workflow is the automated dihedral analysis from
        :mod:`mdpow.workflows.dihedrals`, which applies the *ensemble analysis*
-       :class:`~mdpow.analysis.dihedral.DihedralAnalysis` to each project. 
+       :class:`~mdpow.analysis.dihedral.DihedralAnalysis` to each project.
        The :data:`~mdpow.workflows.registry.registry` contains this automated
        workflow under the key *"DihedralAnalysis"* and so the automated execution
-       for all `project_paths` (obtained via :func:`project_paths`) is performed by 
+       for all `project_paths` (obtained via :func:`project_paths`) is performed by
        passing the specific key to :func:`automated_project_analysis`::
 
            project_paths = project_paths(parent_directory='/foo/bar/MDPOW_projects')

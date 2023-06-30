@@ -11,7 +11,7 @@ from . import RESOURCES
 
 class Test_Gsolv_manual(object):
 
-    def setup(self):
+    def setup_method(self):
         self.tmpdir = td.TempDir()
         self.m = pybol.Manifest(str(RESOURCES / 'manifest.yml'))
         self.m.assemble('md_npt',self.tmpdir.name)
@@ -24,7 +24,7 @@ class Test_Gsolv_manual(object):
         self.S.dirs.includes = os.path.join(self.tmpdir.name, 'top')
         self.S.save()
 
-    def teardown(self):
+    def teardown_method(self):
         self.tmpdir.dissolve()
 
     def _setup(self, **kwargs):

@@ -4,7 +4,8 @@ scipy
 pandas
 pyyaml
 GromacsWrapper>=0.5.1
-alchemlyb
+alchemlyb>=2
+pymbar>=4
 mdanalysis
 rdkit
 seaborn

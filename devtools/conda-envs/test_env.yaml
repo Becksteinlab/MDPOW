@@ -14,8 +14,9 @@ dependencies:
 - mdanalysis >=2
 - numkit
 - gromacswrapper
-- alchemlyb <2
-- rdkit <=2022.09.1
+- alchemlyb >=2
+- pymbar >=4
+- rdkit
 - seaborn
 - svgutils
 - cairosvg

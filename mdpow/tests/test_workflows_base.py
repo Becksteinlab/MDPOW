@@ -9,17 +9,12 @@ import logging
 
 import pandas as pd
 
-from . import RESOURCES
-from . import STATES
-
-import py.path
-
-from ..workflows import base
+from mdpow.workflows import base
 
 from pkg_resources import resource_filename
 
-RESOURCES = pathlib.PurePath(resource_filename(__name__, 'testing_resources'))
-MANIFEST = RESOURCES / 'manifest.yml'
+from . import RESOURCES, MANIFEST, STATES
+
 
 @pytest.fixture(scope='function')
 def molname_workflows_directory(tmp_path):

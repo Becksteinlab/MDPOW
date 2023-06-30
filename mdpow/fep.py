@@ -157,11 +157,10 @@ import numkit.timeseries
 from numkit.observables import QuantityWithError
 
 from alchemlyb.parsing.gmx import extract_dHdl, extract_u_nk
-from alchemlyb.estimators import TI, BAR
-from alchemlyb.estimators import AutoMBAR as MBAR
+from alchemlyb.estimators import TI, BAR, MBAR
 from alchemlyb.parsing.gmx import _extract_dataframe
-from pymbar.timeseries import (statisticalInefficiency,
-                               subsampleCorrelatedData, )
+from alchemlyb.preprocessing.subsampling import statistical_inefficiency
+
 import gromacs
 import gromacs.utilities
 try:
@@ -1054,19 +1053,16 @@ class Gsolv(Journalled):
             for l in lambdas:
                 xvg_file = self.dgdl_xvg(self.wdir(component, l))
                 xvg_df = extract(xvg_file, T=self.Temperature).iloc[start:stop:stride]
+                full_len = len(xvg_df)
                 if SI:
                     logger.info("Performing statistical inefficiency analysis for window %s %04d" % (component, 1000 * l))
                     ts = _extract_dataframe(xvg_file).iloc[start:stop:stride]
                     ts = pd.DataFrame({'time': ts.iloc[:,0], 'dhdl': ts.iloc[:,1]})
                     ts = ts.set_index('time')
-                    # calculate statistical inefficiency of series
-                    statinef  = statisticalInefficiency(ts, fast=False)
-                    logger.info("The statistical inefficiency value is {:.4f}.".format(statinef))
-                    logger.info("The data are subsampled every {:d} frames.".format(int(np.ceil(statinef))))
-                    # use the subsampleCorrelatedData function to get the subsample index
-                    indices = subsampleCorrelatedData(ts, g=statinef,
-                                                      conservative=True)
-                    xvg_df = xvg_df.iloc[indices]
+                    # use the statistical_inefficiency function to subsample the data
+                    xvg_df = statistical_inefficiency(xvg_df, ts, conservative=True)
+                    logger.info("The statistical inefficiency value is {:.4f}.".format(full_len/len(xvg_df)/2))
+                    logger.info("The data are subsampled every {:d} frames.".format(int(np.ceil(full_len/len(xvg_df)/2))))
                 val.append(xvg_df)
             self.results.xvg[component] = (np.array(lambdas), pd.concat(val))
 
