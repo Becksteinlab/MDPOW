@@ -20,6 +20,7 @@ Changes
   EnsembleAnalysis.run() method, no longer needed (per comments, #199)
 * added support for Python 3.10 (#202)
 * dropped testing on Python 3.6 (PR #220, #202)
+* dropped testing on Python 3.7 (minimally supported Python >= 3.8, #248)
 * use pymbar >= 4 and alchemlyb >= 2 (#246)
 * internal log_banner() now uses logger as argument (PR #247)
 
@@ -32,6 +33,8 @@ Enhancements
 * new workflows module (#217)
 * new automated dihedral analysis workflow (detect dihedrals with SMARTS,
   analyze with EnsembleAnalysis, and generate seaborn violinplots) (#217)
+* add new exit_on_error=False|True argument to run.runMD_or_exit() so
+  that failures just raise exceptions and not call sys.exit() (PR #249)
 
 Fixes
 

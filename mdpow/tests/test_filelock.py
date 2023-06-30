@@ -2,7 +2,7 @@ import os.path
 
 import pytest
 
-from .. import filelock
+from mdpow import filelock
 
 def test_FileLock_acquire(tmpdir, filename="test.txt"):
     with tmpdir.as_cwd():

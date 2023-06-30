@@ -34,12 +34,12 @@ ensemble_keys = [('water', 'Coulomb', '0000'),
 
 
 class TestEnsemble(object):
-    def setup(self):
+    def setup_method(self):
         self.tmpdir = td.TempDir()
         self.m = pybol.Manifest(str(RESOURCES / 'manifest.yml'))
         self.m.assemble('example_FEP', self.tmpdir.name)
 
-    def teardown(self):
+    def teardown_method(self):
         self.tmpdir.dissolve()
 
     def test_build_ensemble(self):
@@ -161,23 +161,23 @@ class TestEnsemble(object):
 
         Sim = Ensemble(dirname=self.tmpdir.name, solvents=['water'])
         TestRun = TestAnalysis(Sim)
-        
+
         with pytest.raises(NotImplementedError):
             TestRun._single_frame()
-        
+
     def test_ensemble_analysis_run_universe(self):
         class TestAnalysis(EnsembleAnalysis):
             def __init__(self, test_ensemble):
                 super(TestAnalysis, self).__init__(test_ensemble)
 
                 self._ens = test_ensemble
-                
+
             def _single_frame(self):
                 pass
 
         Sim = Ensemble(dirname=self.tmpdir.name, solvents=['water'])
         TestRun = TestAnalysis(Sim)
-        
+
         with pytest.raises(NotImplementedError):
             TestRun._single_universe()
 

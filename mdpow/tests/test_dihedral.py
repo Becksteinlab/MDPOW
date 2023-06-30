@@ -29,13 +29,13 @@ class TestDihedral(object):
     DG48910_var = 0.20311120667628546
     DG491011_var = 0.006976126708773456
 
-    def setup(self):
+    def setup_method(self):
         self.tmpdir = td.TempDir()
         self.m = pybol.Manifest(str(RESOURCES / 'manifest.yml'))
         self.m.assemble('example_FEP', self.tmpdir.name)
         self.Ens = Ensemble(dirname=self.tmpdir.name, solvents=['water'])
 
-    def teardown(self):
+    def teardown_method(self):
         self.tmpdir.dissolve()
 
     def test_dataframe(self):

@@ -35,9 +35,6 @@ jobs:
         gromacs-version: ["4.6.5", "2018.6", "2020.6", "2021.1"]
         include:
           - os: ubuntu-latest
-            python-version:  "3.7"
-            gromacs-version: "2021.1"
-          - os: ubuntu-latest
             python-version: "3.8"
             gromacs-version: "2021.1"
           - os: ubuntu-latest

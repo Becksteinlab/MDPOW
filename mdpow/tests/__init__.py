@@ -6,6 +6,8 @@ from pkg_resources import resource_filename
 
 RESOURCES = py.path.local(resource_filename(__name__, 'testing_resources'))
 
+MANIFEST = RESOURCES / "manifest.yml"
+
 MOLECULES = {
     "benzene": RESOURCES.join("molecules", "benzene"),
 }

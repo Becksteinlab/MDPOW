@@ -42,6 +42,7 @@ import os
 import errno
 
 import gromacs.run
+import gromacs.exceptions
 
 from .config import (get_configuration, set_gromacsoutput,
                      NoSectionError)
@@ -93,7 +94,7 @@ def get_mdp_files(cfg, protocols):
             logger.debug("%(protocol)s: Using MDP file %(mdp)r from config file", vars())
     return mdpfiles
 
-def runMD_or_exit(S, protocol, params, cfg, **kwargs):
+def runMD_or_exit(S, protocol, params, cfg, exit_on_error=True, **kwargs):
     """run simulation
 
     Can launch :program:`mdrun` itself (:class:`gromacs.run.MDrunner`) or exit so
@@ -107,10 +108,16 @@ def runMD_or_exit(S, protocol, params, cfg, **kwargs):
     - The directory in which the simulation input files reside can be provided
       as keyword argument *dirname* or taken from `S.dirs[protocol]`.
 
+    - The `exit_on_error` kwarg determines if :func:`sys.exit` is called if
+      mdrun fails to complete (``True``, default) or if instead we raise an
+      :exc:`gromacs.exceptions.GromacsError` (``False``).
+
     - Other *kwargs* are interpreted as options for
       :class:`~gromacs.tools.Mdrun`.
 
-    It never returns ``False`` but instead does a :func:`sys.exit`.
+    .. versionchanged:: 0.9.0
+       New kwarg `exit_on_error`.
+
     """
     dirname = kwargs.pop("dirname", None)
     if dirname is None:
@@ -135,7 +142,11 @@ def runMD_or_exit(S, protocol, params, cfg, **kwargs):
         if not simulation_done:
             # should probably stop
             logger.critical("Failed %(protocol)s, investigate manually.", vars())
-            sys.exit(1)
+            if exit_on_error:
+                sys.exit(1)
+            else:
+                raise gromacs.exceptions.GromacsError(
+                    f"Failed {protocol}, investigate manually.")
     else:
         # must check if the simulation was run externally
         logfile = os.path.join(dirname, params['deffnm']+os.extsep+"log")
@@ -143,10 +154,17 @@ def runMD_or_exit(S, protocol, params, cfg, **kwargs):
         simulation_done = gromacs.run.check_mdrun_success(logfile) ### broken??
         if simulation_done is None:
             logger.info("Now go and run %(protocol)s in directory %(dirname)r.", vars())
-            sys.exit(0)
+            if exit_on_error:
+                sys.exit(0)
+            else:
+                return simulation_done
         elif simulation_done is False:
-            logger.warning("Simulation %(protocol)s in directory %(dirname)r is incomplete (log=%)logfile)s).", vars())
-            sys.exit(1)
+            logger.warning("Simulation %(protocol)s in directory %(dirname)r is incomplete (log=%(logfile)s).", vars())
+            if exit_on_error:
+                sys.exit(1)
+            else:
+                raise gromacs.exceptions.MissingDataError(
+                    f"Simulation {protocol} in directory {dirname} is incomplete (log={logfile}).")
         logger.info("Simulation %(protocol)s seems complete (log=%(logfile)s)", vars())
     return simulation_done
 
@@ -272,7 +290,7 @@ def fep_simulation(cfg, solvent, **kwargs):
        recommended to use ``runlocal = False`` in the run input file
        and submit all window simulations to a cluster.
     """
-
+    exit_on_error = kwargs.pop('exit_on_error', True)
     deffnm = kwargs.pop('deffnm', "md")
     EquilSimulations = {
         'water': equil.WaterSimulation,
