@@ -64,6 +64,7 @@ setup(name="MDPOW",
                         'rdkit',
                         'svgutils',
                         'cairosvg',
+                        'pypdf'
       ],
       #setup_requires=['pytest-runner',],
       tests_require=['pytest', 'pybol', 'py'],
