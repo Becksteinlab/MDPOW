@@ -24,8 +24,6 @@ import os
 import re
 import pandas as pd
 
-from mdpow.workflows import registry
-
 import logging
 
 logger = logging.getLogger('mdpow.workflows.base')
@@ -147,6 +145,8 @@ def automated_project_analysis(project_paths, ensemble_analysis, **kwargs):
            automated_project_analysis(project_paths, ensemble_analysis='DihedralAnalysis', **kwargs)
 
     """
+    # import inside function to avoid circular imports
+    from .registry import registry
 
     for row in project_paths.itertuples():
         molname = row.molecule
@@ -156,24 +156,19 @@ def automated_project_analysis(project_paths, ensemble_analysis, **kwargs):
         logger.info(f'starting {molname}')
 
         try:
-            registry.registry[ensemble_analysis](dirname=dirname, resname=resname, molname=molname, **kwargs)
-
+            registry[ensemble_analysis](dirname=dirname, resname=resname, molname=molname, **kwargs)
             logger.info(f'{molname} completed')
-
         except KeyError as err:
             msg = (f"Invalid ensemble_analysis {err}. An EnsembleAnalysis type that corresponds "
                     "to an existing automated workflow module must be input as a kwarg. "
                     "ex: ensemble_analysis='DihedralAnalysis'")
             logger.error(f'{err} is an invalid selection')
-
             raise KeyError(msg)
-
         except TypeError as err:
             msg = (f"Invalid ensemble_analysis {ensemble_analysis}. An EnsembleAnalysis type that "
                     "corresponds to an existing automated workflow module must be input as a kwarg. "
                     "ex: ensemble_analysis='DihedralAnalysis'")
             logger.error(f'workflow module for {ensemble_analysis} does not exist yet')
-
             raise TypeError(msg)
 
     logger.info('all analyses completed')
