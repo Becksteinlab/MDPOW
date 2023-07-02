@@ -662,7 +662,8 @@ def plot_dihedral_violins(df, resname, mol, name_index_pairs, figdir=None, molna
            .. seealso:: :func:`~mdpow.workflows.dihedrals.get_paired_indices`
 
        *figdir*
-           path to the location to save figures
+           path to the location to save figures (REQUIRED but marked
+           as a kwarg for technical reasons; will be changed in #244)
 
        *molname*
            molecule name to be used for labelling
@@ -763,7 +764,8 @@ def automated_dihedral_analysis(dirname, resname,
            available.
 
        *figdir*
-           path to the location to save figures
+           path to the location to save figures (REQUIRED but marked
+           as a kwarg for technical reasons; will be changed in #244)
 
        *resname*
            `resname` for the molecule as defined in 
