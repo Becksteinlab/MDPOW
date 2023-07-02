@@ -6,6 +6,7 @@
 
 .. |P_ow| replace:: *P*\ :sub:`OW`
 .. |P_cw| replace:: *P*\ :sub:`CW`
+.. |P_tw| replace:: *P*\ :sub:`TW`  
 
 *MDPOW* is a python package that automates the calculation of
 solvation free energies via molecular dynamics (MD) simulations. In
@@ -14,7 +15,8 @@ coefficients. Currently implemented:
 
 - *water-octanol* partition coefficient (|P_ow|)
 - *water-cyclohexane* partition coefficient (|P_cw|)
-
+- *water-toluene* partition coefficient (|P_tw|)
+  
 Calculations are performed with the Gromacs_ MD software package
 [#GromacsWrapperNote]_. Currently, *OPLS-AA*, *CHARMM/CGENFF*, and
 *AMBER/GAFF* parameters are supported.
@@ -47,7 +49,7 @@ See `INSTALL`_ for detailed instructions. MDPOW currently supports and
 is tested with Python 3.8 to 3.10.
 
 You will also need `Gromacs`_ (currently tested with versions 4.6.5,
-2018, 2020, 2021 but 2016 and 2019 should also work).
+2018, 2020, 2021, 2022, 2023 but 2016 and 2019 should also work).
 
 
 Development version
