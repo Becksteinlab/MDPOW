@@ -10,6 +10,11 @@ cadeduckworth, orbeckst, VOD555
 
 Changes
 
+* added support for Python 3.10 (#202)
+* dropped testing on Python 3.6 (PR #220, #202)
+* dropped testing on Python 3.7 (minimally supported Python >= 3.8, #248)
+* support Gromacs 2022.4 and 2023.1 (#256)
+* use pymbar >= 4 and alchemlyb >= 2 (#246)
 * for ensemble.EnsembleAnalysis._single_frame() 
   changed 'pass' to 'raise NotImplementedError' (#216)
 * for ensemble.EnsembleAnalysis._single_universe() 
@@ -18,10 +23,6 @@ Changes
   and use _single_frame OR _single_universe (#216)
 * _prepare_universe and _conclude_universe removed from 
   EnsembleAnalysis.run() method, no longer needed (per comments, #199)
-* added support for Python 3.10 (#202)
-* dropped testing on Python 3.6 (PR #220, #202)
-* dropped testing on Python 3.7 (minimally supported Python >= 3.8, #248)
-* use pymbar >= 4 and alchemlyb >= 2 (#246)
 * internal log_banner() now uses logger as argument (PR #247)
 
 Enhancements
