@@ -2,19 +2,16 @@ import re
 import os
 import sys
 import yaml
-import pybol
-import pytest
 import pathlib
 import logging
 
+import pybol
+import pytest
 import pandas as pd
 
-from mdpow.workflows import base
-
-from pkg_resources import resource_filename
-
 from . import RESOURCES, MANIFEST, STATES
-
+from pkg_resources import resource_filename
+from mdpow.workflows import base
 
 @pytest.fixture(scope='function')
 def molname_workflows_directory(tmp_path):

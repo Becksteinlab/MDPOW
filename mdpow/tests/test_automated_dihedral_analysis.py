@@ -1,27 +1,22 @@
 import os
 import sys
 import yaml
-import pybol
-import pytest
+import py.path
 import pathlib
 import logging
 
 import scipy
-import numpy as np
-import pandas as pd
-
-import seaborn
-
-from numpy.testing import assert_almost_equal
 from scipy.stats import circvar, circmean
+import seaborn
+import numpy as np
+from numpy.testing import assert_almost_equal
+import pandas as pd
+import pybol
+import pytest
 
 from . import RESOURCES
-
-import py.path
-
-from mdpow.workflows import dihedrals
-
 from pkg_resources import resource_filename
+from mdpow.workflows import dihedrals
 
 RESOURCES = pathlib.PurePath(resource_filename(__name__, 'testing_resources'))
 MANIFEST = RESOURCES / "manifest.yml"

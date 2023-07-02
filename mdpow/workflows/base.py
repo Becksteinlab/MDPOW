@@ -22,11 +22,11 @@ under the top-level directory provided to :func:`project_paths`.
 
 import os
 import re
+import logging
+
 import pandas as pd
 
-from ..workflows import registry
-
-import logging
+from . import registry
 
 logger = logging.getLogger('mdpow.workflows.base')
 

@@ -42,30 +42,26 @@ but atom `names` in plots and file names are 1-based.
 """
 
 import os
+import logging
 import pathlib
+
 import numpy as np
 import pandas as pd
-
+import MDAnalysis as mda
+from MDAnalysis.topology.guessers import guess_types
+from rdkit import Chem
+from rdkit.Chem import rdCoordGen
+from rdkit.Chem.Draw import rdMolDraw2D
+import matplotlib.pyplot as plt
+import seaborn as sns
 import pypdf
 import cairosvg
 import svgutils
 import svgutils.compose
 import svgutils.transform
 
-from rdkit import Chem
-from rdkit.Chem import rdCoordGen
-from rdkit.Chem.Draw import rdMolDraw2D
-
-import seaborn as sns
-import matplotlib.pyplot as plt
-
 import mdpow
 from mdpow.analysis.dihedral import DihedralAnalysis
-
-import MDAnalysis as mda
-from MDAnalysis.topology.guessers import guess_types
-
-import logging
 
 logger = logging.getLogger('mdpow.workflows.dihedrals')
 
