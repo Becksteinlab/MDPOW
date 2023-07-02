@@ -108,9 +108,10 @@ PLOT_WIDTH_DEFAULT = 190
    default value: 190 mm = 718.110236229 pixels
 """
 
-def build_universe(dirname):
-    """Builds :class:`~MDAnalysis.core.universe.Universe` from
-       ``water/Coulomb/0000`` topology and trajectory for the specified project.
+def build_universe(dirname, solvents=SOLVENTS_DEFAULT):
+    """Builds :class:`~MDAnalysis.core.universe.Universe` from the
+       ``./Coulomb/0000`` topology and trajectory of the project for
+       the first solvent specified.
        
        Output used by :func:`~mdpow.workflows.dihedrals.rdkit_conversion`
        and :func:`~mdpow.workflows.dihedrals.get_atom_indices` to obtain atom indices
@@ -127,6 +128,9 @@ def build_universe(dirname):
            searches for .gro, .gro.bz2, .gro.gz, and .tpr files for topology,
            and .xtc files for trajectory. It will default to using the tpr file
            available.
+
+        *solvents*
+           The default solvents are documented under :data:`SOLVENTS_DEFAULT`.
            
        :returns:
 
@@ -136,8 +140,8 @@ def build_universe(dirname):
     """
 
     path = pathlib.Path(dirname)
-    topology = path / 'FEP/water/Coulomb/0000' / 'md.tpr'
-    trajectory = path / 'FEP/water/Coulomb/0000' / 'md.xtc'
+    topology = path / f'FEP/{solvents[0]}/Coulomb/0000' / 'md.tpr'
+    trajectory = path / f'FEP/{solvents[0]}/Coulomb/0000' / 'md.xtc'
     u = mda.Universe(str(topology), str(trajectory))
 
     return u
