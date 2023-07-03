@@ -249,6 +249,8 @@ class TestAutomatedDihedralAnalysis(object):
         aug_dh2_var == pytest.approx(self.ADG_C13141520_var)
 
     # Possible ordering issue (#239)
+    # Tests using similar instances of the automated analyses
+    # will use module or class-scoped fixtures, pending #235
     def test_save_fig(self, SM25_tmp_dir):
         dihedrals.automated_dihedral_analysis(dirname=SM25_tmp_dir, figdir=SM25_tmp_dir,
                                               resname=resname, molname='SM25',
@@ -256,6 +258,8 @@ class TestAutomatedDihedralAnalysis(object):
         assert (SM25_tmp_dir / 'SM25' / 'SM25_C10-C5-S4-O11_violins.pdf').exists(), 'PDF file not generated'
 
     # Possible ordering issue (#239)
+    # Tests using similar instances of the automated analyses
+    # will use module or class-scoped fixtures, pending #235
     def test_save_fig_info(self, SM25_tmp_dir, caplog):
         caplog.clear()
         caplog.set_level(logging.INFO, logger='mdpow.workflows.dihedrals')
@@ -264,6 +268,8 @@ class TestAutomatedDihedralAnalysis(object):
                                               solvents=('water',))
         assert f'Figure saved as {SM25_tmp_dir}/SM25/SM25_C10-C5-S4-O11_violins.pdf' in caplog.text, 'PDF file not saved'
 
+    # Tests using similar instances of the automated analyses
+    # will use module or class-scoped fixtures, pending #235
     def test_DataFrame_input(self, SM25_tmp_dir, dihedral_data):
         df, _ = dihedral_data
         dihedrals.automated_dihedral_analysis(dirname=SM25_tmp_dir, figdir=SM25_tmp_dir,
@@ -271,6 +277,8 @@ class TestAutomatedDihedralAnalysis(object):
                                               solvents=('water',), dataframe=df)
         assert (SM25_tmp_dir / 'SM25' / 'SM25_C10-C5-S4-O11_violins.pdf').exists(), 'PDF file not generated'
 
+    # Tests using similar instances of the automated analyses
+    # will use module or class-scoped fixtures, pending #235
     def test_DataFrame_input_info(self, SM25_tmp_dir, dihedral_data, caplog):
         caplog.clear()
         caplog.set_level(logging.INFO, logger='mdpow.workflows.dihedrals')
