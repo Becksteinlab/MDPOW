@@ -536,6 +536,8 @@ def dihedral_violins(df, width=0.9, solvents=SOLVENTS_DEFAULT, plot_title=None):
                     len(df[df['interaction'] == "VDW"]["lambda"].unique()),
                     len(df[df['interaction'] == "Coulomb"]["lambda"].unique()) - 1]
 
+    # Usage in Jupyter causes matplotlib figure object output, not the completed figure
+    # Upcoming fix in issue #260
     assert 0 < len(solvents) < 3, "one or two solvents must be specified, otherwise SOLVENTS_DEFAULT is used"
     if len(list(solvents)) < 2: 
         g = sns.catplot(data=df, x="lambda", y="dihedral", hue="solvent", col="interaction",
