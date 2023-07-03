@@ -189,7 +189,6 @@ def rdkit_conversion(u, resname):
         solute = u.select_atoms(f'resname {resname}')
         mol = solute.convert_to('RDKIT')
 
-    solute.unwrap(compound='residues', reference='com')
     rdCoordGen.AddCoords(mol)
 
     for atom in mol.GetAtoms():
@@ -542,7 +541,7 @@ def dihedral_violins(df, width=0.9, solvents=SOLVENTS_DEFAULT, plot_title=None):
         g = sns.catplot(data=df, x="lambda", y="dihedral", hue="solvent", col="interaction",
                         kind="violin", split=False, width=width, inner=None, cut=0,
                         linewidth=0.5,
-                        hue_order=list(solvents[0]), col_order=["Coulomb", "VDW", "Structure"],
+                        hue_order=list(solvents), col_order=["Coulomb", "VDW", "Structure"],
                         sharex=False, sharey=True,
                         height=3.0, aspect=2.0,
                         facet_kws={'ylim': (-180, 180),
@@ -552,7 +551,7 @@ def dihedral_violins(df, width=0.9, solvents=SOLVENTS_DEFAULT, plot_title=None):
         g = sns.catplot(data=df, x="lambda", y="dihedral", hue="solvent", col="interaction",
                         kind="violin", split=True, width=width, inner=None, cut=0,
                         linewidth=0.5,
-                        hue_order=list(solvents[:2]), col_order=["Coulomb", "VDW", "Structure"],
+                        hue_order=list(solvents), col_order=["Coulomb", "VDW", "Structure"],
                         sharex=False, sharey=True,
                         height=3.0, aspect=2.0,
                         facet_kws={'ylim': (-180, 180),
