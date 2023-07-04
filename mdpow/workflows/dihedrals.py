@@ -539,26 +539,18 @@ def dihedral_violins(df, width=0.9, solvents=SOLVENTS_DEFAULT, plot_title=None):
     # Usage in Jupyter causes matplotlib figure object output, not the completed figure
     # Upcoming fix in issue #260
     assert 0 < len(solvents) < 3, "one or two solvents must be specified, otherwise SOLVENTS_DEFAULT is used"
-    if len(list(solvents)) < 2: 
-        g = sns.catplot(data=df, x="lambda", y="dihedral", hue="solvent", col="interaction",
-                        kind="violin", split=False, width=width, inner=None, cut=0,
-                        linewidth=0.5,
-                        hue_order=list(solvents), col_order=["Coulomb", "VDW", "Structure"],
-                        sharex=False, sharey=True,
-                        height=3.0, aspect=2.0,
-                        facet_kws={'ylim': (-180, 180),
-                                'gridspec_kws': {'width_ratios': width_ratios,
-                                                    }})
-    else:
-        g = sns.catplot(data=df, x="lambda", y="dihedral", hue="solvent", col="interaction",
-                        kind="violin", split=True, width=width, inner=None, cut=0,
-                        linewidth=0.5,
-                        hue_order=list(solvents), col_order=["Coulomb", "VDW", "Structure"],
-                        sharex=False, sharey=True,
-                        height=3.0, aspect=2.0,
-                        facet_kws={'ylim': (-180, 180),
-                                'gridspec_kws': {'width_ratios': width_ratios,
-                                                    }})
+    split = len(solvents) > 1
+    g = sns.catplot(data=df, x="lambda", y="dihedral", hue="solvent", col="interaction",
+                    kind="violin", split=split, width=width, inner=None, cut=0,
+                    linewidth=0.5,
+                    hue_order=list(solvents), col_order=["Coulomb", "VDW", "Structure"],
+                    sharex=False, sharey=True,
+                    height=3.0, aspect=2.0,
+                    facet_kws={'ylim': (-180, 180),
+                               'gridspec_kws': {'width_ratios': width_ratios,
+                                               }
+                              }
+                   )
 
     g.set_xlabels(r"$\lambda$")
     g.set_ylabels(r"dihedral angle $\phi$")

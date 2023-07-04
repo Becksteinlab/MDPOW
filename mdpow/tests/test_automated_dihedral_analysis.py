@@ -287,3 +287,12 @@ class TestAutomatedDihedralAnalysis(object):
                                               resname=resname, molname=molname,
                                               solvents=('water',), dataframe=df)
         assert 'Proceeding with results DataFrame provided.' in caplog.text, 'No dataframe provided or dataframe not recognized'
+
+    # testing resources only contain analyses with single solvent input
+    def test_single_solvent(self, dihedral_data):
+        df, _ = dihedral_data
+        # all analysis data in one violin plot
+        g = dihedrals.dihedral_violins(df=df, width=0.9, solvents=('water',), plot_title='test')
+        # number of solvents in DataFrame used to generate plot
+        number_of_solvents = g.data['solvent'].nunique()
+        assert number_of_solvents == 1
