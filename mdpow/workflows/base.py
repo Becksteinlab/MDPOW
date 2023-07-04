@@ -22,9 +22,9 @@ under the top-level directory provided to :func:`project_paths`.
 
 import os
 import re
-import pandas as pd
-
 import logging
+
+import pandas as pd
 
 logger = logging.getLogger('mdpow.workflows.base')
 

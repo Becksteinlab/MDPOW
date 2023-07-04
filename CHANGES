@@ -27,6 +27,12 @@ Changes
 
 Enhancements
 
+* convert figure components to SVG, save as individual PDFs,
+  and generate PDF of all figures combined in one file,
+  for workflows dihedrals module (#243)
+* add RDKit mol object to dihedrals plot with dihedral atom
+  indices labeled and dihedral atom group bonds highlighted
+  for workflows dihedrals module (#243)
 * new workflows registry that contains each EnsembleAnalysis for which
   a workflows module exists, for use with workflows base module (#229)
 * new workflows base module that provides iterative workflow use for

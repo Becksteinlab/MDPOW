@@ -18,6 +18,9 @@ dependencies:
 - pymbar >=4
 - rdkit
 - seaborn
+- svgutils
+- cairosvg
+- pypdf
 
   # Testing
 - pytest
