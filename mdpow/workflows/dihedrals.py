@@ -845,7 +845,7 @@ def automated_dihedral_analysis(dirname, resname,
                                            start=0, stop=100, step=10)
     '''
 
-    u = build_universe(dirname=dirname)
+    u = build_universe(dirname=dirname, solvents=solvents)
     mol, solute = rdkit_conversion(u=u, resname=resname)
     atom_indices = get_atom_indices(mol=mol, SMARTS=SMARTS)
     bond_indices = get_bond_indices(mol=mol, atom_indices=atom_indices)
