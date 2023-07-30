@@ -27,6 +27,7 @@ but atom `names` in plots and file names are 1-based.
     :annotation: = 190
 .. autofunction:: automated_dihedral_analysis
 .. autofunction:: build_universe
+.. autofunction:: guess_atoms
 .. autofunction:: rdkit_conversion
 .. autofunction:: get_atom_indices
 .. autofunction:: get_bond_indices
@@ -146,6 +147,9 @@ def build_universe(dirname, solvents=SOLVENTS_DEFAULT):
     u = mda.Universe(str(topology), str(trajectory))
 
     return u
+
+def guess_atoms():
+    return
 
 def rdkit_conversion(u, resname):
     """Converts the solute, `resname`, of the
