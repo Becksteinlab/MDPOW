@@ -63,7 +63,7 @@ class TestWorkflowsBase(object):
         u = create_universe
         guessed_elements = base.guess_elements(u.atoms)
 
-        assert guessed_elements == self.check_guessed_elements
+        assert guessed_elements.all() == self.check_guessed_elements.all()
 
     def test_project_paths(self, test_df_data, project_paths_data):
         test_df = test_df_data
