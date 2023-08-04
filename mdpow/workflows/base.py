@@ -17,14 +17,19 @@ under the top-level directory provided to :func:`project_paths`.
 
 .. autofunction:: project_paths
 .. autofunction:: automated_project_analysis
+.. autofunction:: guess_elements
 
 """
 
 import os
 import re
+import math
 import logging
 
+import numpy as np
 import pandas as pd
+import MDAnalysis as mda
+from MDAnalysis.topology import guessers, tables
 
 logger = logging.getLogger('mdpow.workflows.base')
 
@@ -173,3 +178,34 @@ def automated_project_analysis(project_paths, ensemble_analysis, **kwargs):
 
     logger.info('all analyses completed')
     return
+
+def guess_elements(universe_atom_group):
+    # input from dihedrals module
+    # universe_atom_group = universe.atoms
+    # universe from MDPOW FEP project results
+    names = universe_atom_group.names
+    masses = universe_atom_group.masses
+
+    guessed_elements = guessers.guess_types(names)
+    guessed_masses = np.array([guessers.get_atom_mass(n) for n in guessed_elements])
+
+    problem_cases = []
+    i=0
+    while i < len(masses):
+        if masses[i] != 0:
+            value = math.isclose(guessed_masses[i], masses[i], rel_tol=0.001)
+            value = not(value)
+        else:
+            value = False
+        problem_cases.append(value)
+        i+=1
+    problems = np.array(problem_cases)
+
+    problem_elements = []
+    for m in masses[problems]:
+        element = [k for k,v in tables.masses.items() if  np.isclose(m, v, rtol=0.001)][0]
+        problem_elements.append(element)
+
+    guessed_elements[problems] = problem_elements
+
+    return guessed_elements

@@ -7,7 +7,9 @@ import logging
 
 import pybol
 import pytest
+import numpy as np
 import pandas as pd
+import MDAnalysis as mda
 
 from . import RESOURCES, MANIFEST, STATES
 from pkg_resources import resource_filename
@@ -20,6 +22,19 @@ def molname_workflows_directory(tmp_path):
     return tmp_path
 
 class TestWorkflowsBase(object):
+
+    check_guessed_elements = np.array(['C', 'N', 'C', 'Cl', 'C'])
+
+    @pytest.fixture(scope='function')
+    def create_universe(self):
+        masses = np.array([12.011, 14.007, 12.011, 35.45, 12.011])
+        names = np.array(["C", "Nx", "C0S", "Cl123", "C0U"])
+
+        # build minimal test universe
+        u = mda.Universe.empty(n_atoms=len(names))
+        u.add_TopologyAttr("names", names)
+        u.add_TopologyAttr("masses", masses)
+        return u
 
     @pytest.fixture(scope='function')
     def SM_tmp_dir(self, molname_workflows_directory):
@@ -43,6 +58,12 @@ class TestWorkflowsBase(object):
     def project_paths_data(self, SM_tmp_dir):
         project_paths = base.project_paths(parent_directory=SM_tmp_dir)
         return project_paths
+    
+    def test_guess_elements(self, create_universe):
+        u = create_universe
+        guessed_elements = base.guess_elements(u.atoms)
+
+        assert guessed_elements == self.check_guessed_elements
 
     def test_project_paths(self, test_df_data, project_paths_data):
         test_df = test_df_data

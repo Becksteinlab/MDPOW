@@ -27,7 +27,6 @@ but atom `names` in plots and file names are 1-based.
     :annotation: = 190
 .. autofunction:: automated_dihedral_analysis
 .. autofunction:: build_universe
-.. autofunction:: guess_atoms
 .. autofunction:: rdkit_conversion
 .. autofunction:: get_atom_indices
 .. autofunction:: get_bond_indices
@@ -148,9 +147,6 @@ def build_universe(dirname, solvents=SOLVENTS_DEFAULT):
 
     return u
 
-def guess_atoms():
-    return
-
 def rdkit_conversion(u, resname):
     """Converts the solute, `resname`, of the
        :class:`~MDAnalysis.core.universe.Universe` to :class:`rdkit.Chem.rdchem.Mol` object
@@ -185,11 +181,16 @@ def rdkit_conversion(u, resname):
 
     """
 
+    from .base import guess_elements
+    # temporary
+    # keep here to avoid circular imports?
+
     try:
         solute = u.select_atoms(f'resname {resname}')
         mol = solute.convert_to('RDKIT')
     except AttributeError:
-        u.add_TopologyAttr("elements", guess_types(u.atoms.names))
+        guessed_elements = guess_elements(u.atoms)
+        u.add_TopologyAttr("elements", guessed_elements)
         solute = u.select_atoms(f'resname {resname}')
         mol = solute.convert_to('RDKIT')
 
