@@ -60,6 +60,7 @@ import svgutils
 import svgutils.compose
 import svgutils.transform
 
+from .base import guess_elements
 from ..analysis import ensemble, dihedral
 
 logger = logging.getLogger('mdpow.workflows.dihedrals')
@@ -181,9 +182,6 @@ def rdkit_conversion(u, resname):
 
     """
 
-    from .base import guess_elements
-    # temporary
-    # keep here to avoid circular imports?
 
     try:
         solute = u.select_atoms(f'resname {resname}')

@@ -8,6 +8,7 @@ import logging
 import pybol
 import pytest
 import numpy as np
+from numpy.testing import assert_equal
 import pandas as pd
 import MDAnalysis as mda
 
@@ -15,7 +16,7 @@ from . import RESOURCES, MANIFEST, STATES
 from pkg_resources import resource_filename
 from mdpow.workflows import base
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def molname_workflows_directory(tmp_path):
     m = pybol.Manifest(str(MANIFEST))
     m.assemble('workflows', tmp_path)
@@ -23,10 +24,10 @@ def molname_workflows_directory(tmp_path):
 
 class TestWorkflowsBase(object):
 
-    check_guessed_elements = np.array(['C', 'N', 'C', 'Cl', 'C'])
+    reference_guessed_elements = np.array(['C', 'N', 'C', 'Cl', 'C'])
 
-    @pytest.fixture(scope='function')
-    def create_universe(self):
+    @pytest.fixture()
+    def universe(self):
         masses = np.array([12.011, 14.007, 12.011, 35.45, 12.011])
         names = np.array(["C", "Nx", "C0S", "Cl123", "C0U"])
 
@@ -36,34 +37,34 @@ class TestWorkflowsBase(object):
         u.add_TopologyAttr("masses", masses)
         return u
 
-    @pytest.fixture(scope='function')
+    @pytest.fixture()
     def SM_tmp_dir(self, molname_workflows_directory):
         dirname = molname_workflows_directory
         return dirname
 
-    @pytest.fixture(scope='function')
+    @pytest.fixture()
     def csv_input_data(self):
         csv_path = STATES['workflows'] / 'project_paths.csv'
         csv_df = pd.read_csv(csv_path).reset_index(drop=True)
         return csv_path, csv_df
 
-    @pytest.fixture(scope='function')
+    @pytest.fixture()
     def test_df_data(self):
         test_dict = {'molecule' : ['SM25', 'SM26'],
                     'resname' : ['SM25', 'SM26']}
         test_df = pd.DataFrame(test_dict).reset_index(drop=True)
         return test_df
 
-    @pytest.fixture(scope='function')
+    @pytest.fixture()
     def project_paths_data(self, SM_tmp_dir):
         project_paths = base.project_paths(parent_directory=SM_tmp_dir)
         return project_paths
     
-    def test_guess_elements(self, create_universe):
-        u = create_universe
+    def test_guess_elements(self, universe):
+        u = universe
         guessed_elements = base.guess_elements(u.atoms)
 
-        assert guessed_elements.all() == self.check_guessed_elements.all()
+        assert_equal(guessed_elements, self.reference_guessed_elements)
 
     def test_project_paths(self, test_df_data, project_paths_data):
         test_df = test_df_data
