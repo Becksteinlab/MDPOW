@@ -60,6 +60,7 @@ import svgutils
 import svgutils.compose
 import svgutils.transform
 
+from .base import guess_elements
 from ..analysis import ensemble, dihedral
 
 logger = logging.getLogger('mdpow.workflows.dihedrals')
@@ -181,11 +182,13 @@ def rdkit_conversion(u, resname):
 
     """
 
+
     try:
         solute = u.select_atoms(f'resname {resname}')
         mol = solute.convert_to('RDKIT')
     except AttributeError:
-        u.add_TopologyAttr("elements", guess_types(u.atoms.names))
+        guessed_elements = guess_elements(u.atoms)
+        u.add_TopologyAttr("elements", guessed_elements)
         solute = u.select_atoms(f'resname {resname}')
         mol = solute.convert_to('RDKIT')
 

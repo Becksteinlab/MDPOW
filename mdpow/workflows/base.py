@@ -17,6 +17,7 @@ under the top-level directory provided to :func:`project_paths`.
 
 .. autofunction:: project_paths
 .. autofunction:: automated_project_analysis
+.. autofunction:: guess_elements
 
 """
 
@@ -24,7 +25,9 @@ import os
 import re
 import logging
 
+import numpy as np
 import pandas as pd
+from MDAnalysis.topology import guessers, tables
 
 logger = logging.getLogger('mdpow.workflows.base')
 
@@ -173,3 +176,71 @@ def automated_project_analysis(project_paths, ensemble_analysis, **kwargs):
 
     logger.info('all analyses completed')
     return
+
+def guess_elements(atoms, rtol=1e-3):
+    """guess elements for atoms from masses
+
+    Given masses, we perform a reverse lookup on
+    :data:`MDAnalysis.topology.tables.masses` to find the corresponding
+    element. Only atoms where the standard MDAnalysis guesser finds elements
+    with masses contradicting the topology masses are corrected.
+
+    .. Note:: This function *requires* correct masses to be present.
+              No sanity checks because MDPOW always uses TPR files that
+              contain correct masses.
+
+    :arguments:
+
+    *atoms*
+         MDAnalysis AtomGroup *with masses defined*
+
+    :keywords:
+
+    *rtol*
+         relative tolerance for a match (as used in :func:`numpy.isclose`);
+         atol=1e-6 is at a fixed value, which means that "zero" is only
+         recognized for values =< 1e-6
+
+         .. note:: In order to reliably match GROMACS masses, *rtol* should
+                   be at least 1e-3.
+
+    :returns:
+
+    *elements*
+         array of guessed element symbols, in same order as `atoms`
+
+    .. rubric:: Example
+
+    As an example we guess masses and then set the elements for all atoms::
+
+       elements = guess_elements(atoms)
+       atoms.add_TopologyAttr("elements", elements)
+
+    """
+    ATOL = 1e-6
+
+    names = atoms.names
+    masses = atoms.masses
+
+    mda_elements = np.fromiter(tables.masses.keys(), dtype="U5")
+    mda_masses = np.fromiter(tables.masses.values(), dtype=np.float64)
+
+    guessed_elements = guessers.guess_types(names)
+    guessed_masses = np.array([guessers.get_atom_mass(n) for n in guessed_elements])
+    problems = np.logical_not(np.isclose(masses, guessed_masses, atol=ATOL, rtol=rtol))
+
+    # match only problematic  masses against the MDA reference masses
+    iproblem, ielem = np.nonzero(np.isclose(masses[problems, np.newaxis], mda_masses,
+                                            atol=ATOL, rtol=rtol))
+    # We should normally find a match for each problem but just in case, assert and
+    # give some useful information for debugging.
+    assert len(ielem) == sum(problems),\
+        ("Not all masses could be assigned an element, "
+         f"missing names {set(names[problems]) - set(names[problems][iproblem])}")
+
+    guessed_elements[problems] = mda_elements[ielem]
+
+    # manually fix some dummies that are labelled "D": set ALL zero masses to DUMMY
+    guessed_elements[np.isclose(masses, 0, atol=ATOL)] = "DUMMY"
+
+    return np.array(guessed_elements)

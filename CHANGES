@@ -40,6 +40,8 @@ Enhancements
 * new workflows module (#217)
 * new automated dihedral analysis workflow (detect dihedrals with SMARTS,
   analyze with EnsembleAnalysis, and generate seaborn violinplots) (#217)
+* new workflows.base.guess_elements() function to guess elements
+  from masses (PR #264)  
 * add new exit_on_error=False|True argument to run.runMD_or_exit() so
   that failures just raise exceptions and not call sys.exit() (PR #249)
 
