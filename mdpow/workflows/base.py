@@ -180,20 +180,22 @@ def automated_project_analysis(project_paths, ensemble_analysis, **kwargs):
 def guess_elements(atoms):
     """guess elements for atoms from masses
 
-    We guess elements using the standard MDAnalysis guesser and then check if the 
+    We guess elements using the standard MDAnalysis guesser and then check if the
     masses correspond to known element masses. For all mismatches we perform a
-    reverse lookup on :data:`MDAnalysis.topology.tables.masses` to find the 
+    reverse lookup on :data:`MDAnalysis.topology.tables.masses` to find the
     corresponding element.
 
-    .. Note:: This function *requires* correct masses to be present. 
+    .. Note:: This function *requires* correct masses to be present.
               No sanity checks because MDPOW always uses TPR files that
               contain correct masses.
 
     :arguments:
+
     *atoms*
          MDAnalysis AtomGroup *with masses defined*
 
     :returns:
+
     *elements*
          array of guessed element symbols, in same order as `atoms`
 
@@ -216,7 +218,7 @@ def guess_elements(atoms):
     problem_elements = []
     for m in masses[problems]:
         # slow implementation, could be optimized
-        element = [k for k,v in tables.masses.items() if  np.isclose(m, v, rtol=0.0001)][:1]
+        element = [k for k,v in tables.masses.items() if  np.isclose(m, v, rtol=0.0001)][0]
         problem_elements.append(element)
 
     guessed_elements[problems] = problem_elements

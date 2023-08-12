@@ -24,12 +24,12 @@ def molname_workflows_directory(tmp_path):
 
 class TestWorkflowsBase(object):
 
-    reference_guessed_elements = np.array(['C', 'N', 'C', 'CL', 'C'])
+    reference_guessed_elements = np.array(['C', 'N', 'D', 'C', 'CL', 'C'])
 
     @pytest.fixture()
     def universe(self):
-        masses = np.array([12.011, 14.007, 12.011, 35.45, 12.011])
-        names = np.array(["C", "Nx", "C0S", "Cl123", "C0U"])
+        masses = np.array([12.011, 14.007, 0, 12.011, 35.45, 12.011])
+        names = np.array(["C", "Nx", "DUM", "C0S", "Cl123", "C0U"])
 
         # build minimal test universe
         u = mda.Universe.empty(n_atoms=len(names))
@@ -59,7 +59,7 @@ class TestWorkflowsBase(object):
     def project_paths_data(self, SM_tmp_dir):
         project_paths = base.project_paths(parent_directory=SM_tmp_dir)
         return project_paths
-    
+
     def test_guess_elements(self, universe):
         u = universe
         guessed_elements = base.guess_elements(u.atoms)
@@ -84,7 +84,7 @@ class TestWorkflowsBase(object):
     def test_dihedral_analysis_figdir_requirement(self, project_paths_data, caplog):
         caplog.clear()
         caplog.set_level(logging.ERROR, logger='mdpow.workflows.base')
-        
+
         project_paths = project_paths_data
         # change resname to match topology (every SAMPL7 resname is 'UNK')
         # only necessary for this dataset, not necessary for normal use
@@ -92,7 +92,7 @@ class TestWorkflowsBase(object):
 
         with pytest.raises(AssertionError,
                            match="figdir MUST be set, even though it is a kwarg. Will be changed with #244"):
-        
+
             base.automated_project_analysis(project_paths, solvents=('water',),
                                             ensemble_analysis='DihedralAnalysis')
 
