@@ -45,9 +45,14 @@ def universe(request):
                             np.array(['C', 'N', 'DUMMY', 'CL'])
                             ],
                             [
-                            (np.array([16, 0, 0, 40.08, 40.08, 40.08, 24.305, 132.9]),
-                             np.array(["OW", "MW", "DUMMY", "C0", "CAL", "CA2+", "MG2+", "CES"])),
-                            np.array(['O', 'DUMMY', 'DUMMY', 'CA', 'CA', 'CA', 'MG', 'CS'])
+                            (np.array([15.999, 0, 40.08, 40.08, 40.08, 24.305, 132.9]),
+                             np.array(["OW", "MW", "C0", "CAL", "CA2+", "MG2+", "CES"])),
+                            np.array(['O', 'DUMMY', 'CA', 'CA', 'CA', 'MG', 'CS'])
+                            ],
+                            [
+                            (np.array([16, 1e-6, 40.085, 133]),
+                             np.array(["OW", "MW", "CA2+", "CES"])),
+                            np.array(['O', 'DUMMY', 'CA', 'CS'])
                             ],
                          ],
                         indirect=["universe"])
