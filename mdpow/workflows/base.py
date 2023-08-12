@@ -177,7 +177,7 @@ def automated_project_analysis(project_paths, ensemble_analysis, **kwargs):
     logger.info('all analyses completed')
     return
 
-def guess_elements(atoms):
+def guess_elements(atoms, rtol=1e-3):
     """guess elements for atoms from masses
 
     We guess elements using the standard MDAnalysis guesser and then check if the
@@ -193,6 +193,14 @@ def guess_elements(atoms):
 
     *atoms*
          MDAnalysis AtomGroup *with masses defined*
+
+    :keywords:
+
+    *rtol*
+         relative tolerance for a match (as used in :func:`numpy.isclose`)
+
+         .. note:: In order to reliably match GROMACS masses, *rtol* should
+                   be at least 1e-3.
 
     :returns:
 
@@ -218,7 +226,7 @@ def guess_elements(atoms):
     problem_elements = []
     for m in masses[problems]:
         # slow implementation, could be optimized
-        element = [k for k,v in tables.masses.items() if  np.isclose(m, v, rtol=0.0001)][0]
+        element = [k for k,v in tables.masses.items() if  np.isclose(m, v, rtol=rtol)][0]
         problem_elements.append(element)
 
     guessed_elements[problems] = problem_elements
