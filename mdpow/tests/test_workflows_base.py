@@ -24,7 +24,7 @@ def molname_workflows_directory(tmp_path):
 
 class TestWorkflowsBase(object):
 
-    reference_guessed_elements = np.array(['C', 'N', 'C', 'Cl', 'C'])
+    reference_guessed_elements = np.array(['C', 'N', 'C', 'CL', 'C'])
 
     @pytest.fixture()
     def universe(self):
