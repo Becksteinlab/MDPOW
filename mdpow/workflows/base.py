@@ -180,9 +180,8 @@ def automated_project_analysis(project_paths, ensemble_analysis, **kwargs):
 def guess_elements(atoms, rtol=1e-3):
     """guess elements for atoms from masses
 
-    We guess elements using the standard MDAnalysis guesser and then check if the
-    masses correspond to known element masses. For all mismatches we perform a
-    reverse lookup on :data:`MDAnalysis.topology.tables.masses` to find the
+    Given masses, we perform a reverse lookup on
+    :data:`MDAnalysis.topology.tables.masses` to find the
     corresponding element.
 
     .. Note:: This function *requires* correct masses to be present.
@@ -213,22 +212,18 @@ def guess_elements(atoms, rtol=1e-3):
 
        elements = guess_elements(atoms)
        atoms.add_TopologyAttr("elements", elements)
+
     """
     names = atoms.names
     masses = atoms.masses
 
-    guessed_elements = guessers.guess_types(names)
-    guessed_masses = np.array([guessers.get_atom_mass(n) for n in guessed_elements])
+    mda_elements = np.fromiter(tables.masses.keys(), dtype="U5")
+    mda_masses = np.fromiter(tables.masses.values(), dtype=np.float64)
 
-    problems = np.logical_not(np.isclose(masses, guessed_masses))
-    problems[np.isclose(masses, 0)] = False
+    # match all masses against the MDA reference masses
+    elix = np.isclose(masses[:, np.newaxis], mda_masses)
+    assert elix.any(axis=1).all(), "no match for a mass/element"
 
-    problem_elements = []
-    for m in masses[problems]:
-        # slow implementation, could be optimized
-        element = [k for k,v in tables.masses.items() if  np.isclose(m, v, rtol=rtol)][0]
-        problem_elements.append(element)
+    guessed_elements = [mda_elements[ix][0] for ix in elix]
 
-    guessed_elements[problems] = problem_elements
-
-    return guessed_elements
+    return np.array(guessed_elements)

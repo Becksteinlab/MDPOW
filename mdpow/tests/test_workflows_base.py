@@ -24,12 +24,12 @@ def molname_workflows_directory(tmp_path):
 
 class TestWorkflowsBase(object):
 
-    reference_guessed_elements = np.array(['C', 'N', 'D', 'C', 'CL', 'C'])
+    reference_guessed_elements = np.array(['C', 'N', 'DUMMY', 'C', 'CL', 'C'])
 
     @pytest.fixture()
     def universe(self):
         masses = np.array([12.011, 14.007, 0, 12.011, 35.45, 12.011])
-        names = np.array(["C", "Nx", "DUM", "C0S", "Cl123", "C0U"])
+        names = np.array(["C", "Nx", "DUMMY", "C0S", "Cl123", "C0U"])
 
         # build minimal test universe
         u = mda.Universe.empty(n_atoms=len(names))
