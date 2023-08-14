@@ -243,4 +243,4 @@ def guess_elements(atoms, rtol=1e-3):
     # manually fix some dummies that are labelled "D": set ALL zero masses to DUMMY
     guessed_elements[np.isclose(masses, 0, atol=ATOL)] = "DUMMY"
 
-    return np.array(guessed_elements)
+    return guessed_elements
