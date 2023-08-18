@@ -112,7 +112,7 @@ class TestSolventModels(object):
         defaultmodel = mdpow.forcefields.DEFAULT_WATER_MODEL
         assert (
             mdpow.forcefields.get_solvent_model(model)
-            is mdpow.forcefields.GROMACS_WATER_MODELS[defaultmodel]
+            == mdpow.forcefields.GROMACS_WATER_MODELS[defaultmodel]
         )
 
     @staticmethod
