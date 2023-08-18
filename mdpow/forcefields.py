@@ -47,6 +47,9 @@ Internal classes and functions
 .. autoclass:: GromacsSolventModel
    :members:
 
+.. autoclass:: Forcefield
+   :members:
+
 .. autofunction:: get_water_model
 
 .. autofunction:: get_solvent_identifier
