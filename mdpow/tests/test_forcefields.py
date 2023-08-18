@@ -100,7 +100,7 @@ class TestSolventModels(object):
     def test_get_solvent_default_water():
         model = "water"
         defaultmodel = mdpow.forcefields.DEFAULT_WATER_MODEL
-        assert (mdpow.forcefields.get_solvent_model(model) is
+        assert (mdpow.forcefields.get_solvent_model(model) ==
                 mdpow.forcefields.GROMACS_WATER_MODELS[defaultmodel])
 
     @staticmethod
