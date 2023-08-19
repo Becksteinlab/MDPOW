@@ -34,6 +34,7 @@ but atom `names` in plots and file names are 1-based.
 .. autofunction:: get_paired_indices
 .. autofunction:: dihedral_groups_ensemble
 .. autofunction:: save_df
+.. autofunction:: get_initial_dihedrals
 .. autofunction:: periodic_angle_padding
 .. autofunction:: dihedral_violins
 .. autofunction:: build_svg
@@ -449,6 +450,13 @@ def save_df(df, df_save_dir, resname, molname=None):
               index=False, compression='bz2')
 
     logger.info(f'Results DataFrame saved as {newdir}/{molname}_full_df.csv.bz2')
+
+def get_initial_dihedrals(df):
+    '''Obtain the initial dihedral values for each atom group
+       to add to final figures (for each solvent specified).
+
+    '''
+    return
 
 def periodic_angle_padding(df, padding=45):
     '''Pads the angles from the results :class:`~pandas.DataFrame`
