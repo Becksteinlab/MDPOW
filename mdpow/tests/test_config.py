@@ -7,10 +7,12 @@ from numpy.testing import assert_almost_equal, assert_equal
 
 import mdpow.config
 
+
 @pytest.fixture
 def cfg():
     # default bundled config
     return mdpow.config.get_configuration()
+
 
 @pytest.fixture
 def minicfg():
@@ -18,22 +20,26 @@ def minicfg():
     yield s
     s.close()
 
+
 class TestConfigurationParser:
     def test_get_NoSectionError(self):
         cfg = mdpow.config.POWConfigParser()
-        with pytest.raises(mdpow.config.NoSectionError,
-                           match="Config file has no section Jabberwocky"):
-            cfg.get('Jabberwocky', 'elump')
+        with pytest.raises(
+            mdpow.config.NoSectionError, match="Config file has no section Jabberwocky"
+        ):
+            cfg.get("Jabberwocky", "elump")
 
     def test_get_NoOptionWarning_gives_None(self, cfg):
-        with pytest.warns(mdpow.config.NoOptionWarning,
-                           match="Config file section FEP contains no "
-                                 "option Jabberwocky. Using 'None'."):
+        with pytest.warns(
+            mdpow.config.NoOptionWarning,
+            match="Config file section FEP contains no "
+            "option Jabberwocky. Using 'None'.",
+        ):
             item = cfg.get("FEP", "Jabberwocky")
         assert item is None
 
     def test_get(self, cfg):
-        item = cfg.get("setup","solventmodel")
+        item = cfg.get("setup", "solventmodel")
         assert isinstance(item, str)
         assert item == "tip4p"
 
@@ -42,7 +48,7 @@ class TestConfigurationParser:
         assert item is None
 
     def test_getstr(self, cfg):
-        args = "setup","solventmodel"
+        args = "setup", "solventmodel"
         item = cfg.getstr(*args)
         assert isinstance(item, str)
         assert item == "tip4p"
@@ -75,7 +81,7 @@ class TestConfigurationParser:
 
     def test_getpath(self, cfg):
         pth = "~/mirrors/jbwck.itp"
-        cfg.conf['setup']['itp'] = pth
+        cfg.conf["setup"]["itp"] = pth
 
         item = cfg.getpath("setup", "itp")
 
@@ -99,7 +105,7 @@ class TestConfigurationParser:
         item = cfg.getlist("FEP_schedule_Coulomb", "lambdas")
 
         assert isinstance(item, list)
-        assert item == ['0', '0.25', '0.5', '0.75', '1.0']
+        assert item == ["0", "0.25", "0.5", "0.75", "1.0"]
 
     def test_getlist_empty(self, cfg):
         # get an option with None for this test
