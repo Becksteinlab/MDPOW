@@ -1,0 +1,101 @@
+integrator               = sd
+; start time and timestep in ps = 
+tinit                    = 0
+dt                       = 0.020
+
+nsteps               = 200000
+
+; We remove center of mass motion.  In periodic boundary conditions, the center of mass motion is spurious; the periodic system is the same in all translational directions.
+comm-mode                = Linear
+; number of steps for center of mass motion removal = 
+nstcomm                  = 10
+
+; Output frequency for energies to log file and energy file = 
+nstxout                  = 0
+nstvout                  = 0
+nstfout                  = 0
+nstlog                   = 10000
+nstenergy                = 10000
+nstcalcenergy            = 10
+nstxtcout                = 10000
+
+cutoff-scheme            = Verlet
+nstlist                  = 20
+;rlist                    = 1.2
+
+coulombtype              = cutoff 
+coulomb-modifier         = Potential-shift-verlet
+rcoulomb                 = 1.1
+epsilon_r                = 15   ; 2.5 (with polarizable water)
+vdw_type                 = cutoff  
+vdw-modifier             = Potential-shift-verlet
+rvdw                     = 1.1
+
+;coulombtype              = Shift 
+;rcoulomb_switch          = 0.0
+;rcoulomb                 = 1.2
+;epsilon_r                = 15
+;vdw_type                 = Shift 
+;rvdw_switch              = 0.9
+;rvdw                     = 1.2
+
+
+gen-vel                  = no
+gen_seed                 = 175547
+tc-grps                  = System
+tcoupl                   = v-rescale
+tau_t                    = 1.0
+ref_t                    = 300
+; Pressure coupling      = 
+Pcoupl                   = Parrinello-Rahman
+tau_p                    = 4.0
+compressibility          = 4.5e-5
+ref_p         = 1.0
+
+;lincs-iter = 2
+;lincs-order = 8
+
+;--------------------
+; Free energy parameters
+free-energy              = yes
+sc-power                 = 1  
+sc-alpha                 = 0.5
+sc-r-power               = 6
+
+; Which intermediate state do we start with?  Doesn't really matter, it leaves soon
+-------
+init-lambda-state        = 0 
+
+; What are the values of lambda at the intermediate states?
+;------- 
+vdw-lambdas              = 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 
+
+; This makes sure we print out the differences in Hamiltonians between all states, and not just the neighboring states
+;--------
+calc-lambda-neighbors = -1
+
+; the frequency the free energy information is calculated.  This 
+; frequency (every 0.2 ps) is pretty good for small molecule solvation.
+;-------
+nstdhdl                  = 10 
+
+; not required, but useful if you are doing any temperature reweighting.  Without 
+; temperature reweighting, you don't need the total energy -- differences are enough
+dhdl-print-energy        = yes
+
+; We are doing free energies with the solute molecule alone
+couple-moltype           = SOLUTE
+
+; decharging free energy
+;    couple-lambda0 = vdw-q
+;    couple-lambda1 = vdw
+; LJ decoupling free energy
+;    couple-lambda0 = vdw
+;    couple-lambda1 = none
+;
+; fully coupled (change for BAR!)
+couple-lambda0 = vdw-q
+couple-lambda1 = vdw-q
+
+; we are keeping the intramolecular interactions ON in all the interactions from state 0 to state 8
+couple-intramol          = no
