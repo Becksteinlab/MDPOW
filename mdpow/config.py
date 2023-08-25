@@ -104,6 +104,7 @@ import gromacs.utilities
 
 import warnings
 import logging
+
 logger = logging.getLogger("mdpow.config")
 
 # Reading of configuration files
@@ -112,7 +113,8 @@ logger = logging.getLogger("mdpow.config")
 #: Locations of default run input files and configurations.
 defaults = {
     "runinput": resource_filename(__name__, "templates/runinput.yml"),
-    }
+}
+
 
 class NoSectionError(ValueError):
     """Section entry is missing.
@@ -120,12 +122,15 @@ class NoSectionError(ValueError):
     .. versionadded:: 0.8.0
     """
 
+
 # not used at the moment
 # class NoOptionError(ValueError):
 #    """Option entry is missing from section"""
 
+
 class NoOptionWarning(UserWarning):
     """Warning that an option is missing."""
+
 
 def merge_dicts(user, default):
     """Merge two dictionaries recursively.
@@ -186,7 +191,7 @@ class POWConfigParser(object):
         return self.conf
 
     def write(self, filename):
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             f.write(yaml.dump(self.conf))
 
     def get(self, section, option):
@@ -213,10 +218,12 @@ class POWConfigParser(object):
             value = value if value != "None" else None  # still needed??
         except KeyError:
             # Returning None has been standard behavior.
-            #raise NoOptionError(f"Config file section {section} contains "
+            # raise NoOptionError(f"Config file section {section} contains "
             #                    f"no option {option}.")
-            msg = (f"Config file section {section} contains "
-                  f"no option {option}. Using 'None'.")
+            msg = (
+                f"Config file section {section} contains "
+                f"no option {option}. Using 'None'."
+            )
             warnings.warn(msg, category=NoOptionWarning)
             logger.warning(msg)
             value = None
@@ -240,8 +247,9 @@ class POWConfigParser(object):
            instead of raising a :exc:`TypeError`.
         """
         item = self.get(section, option)
-        return os.path.expanduser(
-            os.path.expandvars(item)) if item is not None else None
+        return (
+            os.path.expanduser(os.path.expandvars(item)) if item is not None else None
+        )
 
     def findfile(self, section, option):
         """Return location of a file ``option`` or ``None``.
@@ -263,8 +271,7 @@ class POWConfigParser(object):
            instead of raising a :exc:`TypeError`.
         """
         item = self.get(section, option)
-        return [x.strip()
-            for x in str(item).split(",")] if item is not None else []
+        return [x.strip() for x in str(item).split(",")] if item is not None else []
 
     def getarray(self, section, option):
         """Return option as a numpy array of floats or ``np.array([])``.
@@ -277,6 +284,7 @@ class POWConfigParser(object):
         """
         return np.asarray(self.getlist(section, option), dtype=float)
 
+
 #    def getintarray(self, section, option):
 #        """Return option as a numpy array of integers.
 #
@@ -284,6 +292,7 @@ class POWConfigParser(object):
 #        is stripped and quotes are treated verbatim.
 #        """
 #        return np.asarray(self.getlist(section, option), dtype=int)
+
 
 def get_configuration(filename=None):
     """Reads and parses a run input config file.
@@ -294,25 +303,35 @@ def get_configuration(filename=None):
     cfg.readfp(open(defaults["runinput"]))
     logger.debug("Loaded runinput defaults from %r", defaults["runinput"])
     if filename is not None:
-        cfg.merge(open(filename))   # override package defaults
+        cfg.merge(open(filename))  # override package defaults
         logger.debug("Loaded user runinput from %r (replacing defaults)", filename)
     else:
-        logger.warning("Running with package defaults for the run; you should supply a runinput file!")
+        logger.warning(
+            "Running with package defaults for the run; you should supply a runinput file!"
+        )
     return cfg
+
 
 def modify_gromacs_environment(name, value):
     from gromacs.environment import flags
+
     if flags[name] != value:
-        logger.warning("Changing GromacsWrapper environment: flags[%(name)r] = %(value)r", vars())
+        logger.warning(
+            "Changing GromacsWrapper environment: flags[%(name)r] = %(value)r", vars()
+        )
         flags[name] = value
+
 
 def set_gromacsoutput(cfg):
     # maybe allow setting this on a per protocol basis?
-    modify_gromacs_environment('capture_output', not cfg.getboolean('setup', 'gromacsoutput'))
+    modify_gromacs_environment(
+        "capture_output", not cfg.getboolean("setup", "gromacsoutput")
+    )
 
 
 # Functions to locate template files
 # ----------------------------------
+
 
 def _generate_template_dict(dirname):
     """Generate a list of included top-level files *and* extract them to a temp space.
@@ -320,20 +339,24 @@ def _generate_template_dict(dirname):
     Only lists files and directories at the *top level* of the *dirname*;
     however, all directories are extracted recursively and will be available.
     """
-    return dict((resource_basename(fn), resource_filename(__name__, dirname+'/'+fn))
-                for fn in resource_listdir(__name__, dirname)
-                if not fn.endswith('~'))
+    return dict(
+        (resource_basename(fn), resource_filename(__name__, dirname + "/" + fn))
+        for fn in resource_listdir(__name__, dirname)
+        if not fn.endswith("~")
+    )
+
 
 def resource_basename(resource):
-     """Last component of a resource (which always uses '/' as sep)."""
-     if resource.endswith('/'):
-          resource = resource[:-1]
-     parts = resource.split('/')
-     return parts[-1]
+    """Last component of a resource (which always uses '/' as sep)."""
+    if resource.endswith("/"):
+        resource = resource[:-1]
+    parts = resource.split("/")
+    return parts[-1]
 
 
 # Functions to access configuration data
 # --------------------------------------
+
 
 def get_template(t):
     """Find template file *t* and return its real path.
@@ -358,8 +381,9 @@ def get_template(t):
     # Not sure if this is the best way to get asiterables
     templates = [_get_template(s) for s in gromacs.utilities.asiterable(t)]
     if len(templates) == 1:
-         return templates[0]
+        return templates[0]
     return templates
+
 
 def get_templates(t):
     """Find template file(s) *t* and return their real paths.
@@ -381,26 +405,27 @@ def get_templates(t):
     """
     return [_get_template(s) for s in gromacs.utilities.asiterable(t)]
 
+
 def _get_template(t):
     """Return a single template *t*."""
-    if os.path.exists(t):           # 1) Is it an accessible file?
+    if os.path.exists(t):  # 1) Is it an accessible file?
         pass
-    else:                           # 2) check the packaged template files
+    else:  # 2) check the packaged template files
         _t = os.path.basename(t)
         _t_found = False
         for p in templates.values():
             if _t == os.path.basename(p):
                 t = p
-                _t_found = True     # NOTE: in principle this could match multiple
-                break               #       times if more than one template dir existed.
-        if not _t_found:            # 3) try it as a key into templates
+                _t_found = True  # NOTE: in principle this could match multiple
+                break  #       times if more than one template dir existed.
+        if not _t_found:  # 3) try it as a key into templates
             try:
                 t = templates[t]
             except KeyError:
                 pass
             else:
                 _t_found = True
-        if not _t_found:            # 4) nothing else to try... or introduce a PATH?
+        if not _t_found:  # 4) nothing else to try... or introduce a PATH?
             raise ValueError("Failed to locate the template file %(t)r." % vars())
     return os.path.realpath(t)
 
@@ -408,18 +433,20 @@ def _get_template(t):
 # utility functions  (from gromacs.utilities)
 # Copied so that config does not have a dependency on gromacs.utilities
 
+
 def iterable(obj):
     """Returns ``True`` if *obj* can be iterated over and is *not* a  string."""
     if isinstance(obj, str):
         return False  # avoid iterating over characters of a string
 
-    if hasattr(obj, 'next'):
-        return True    # any iterator will do
+    if hasattr(obj, "next"):
+        return True  # any iterator will do
     try:
-        len(obj)       # anything else that might work
+        len(obj)  # anything else that might work
     except TypeError:
         return False
     return True
+
 
 def asiterable(obj):
     """Returns obj so that it can be iterated over; a string is *not* treated as iterable"""
@@ -429,9 +456,9 @@ def asiterable(obj):
 
 
 # Setting up configuration variables and paths
-#---------------------------------------------
+# ---------------------------------------------
 
-templates = _generate_template_dict('templates')
+templates = _generate_template_dict("templates")
 """*POW* comes with a number of templates for run input files
 and queuing system scripts. They are provided as a convenience and
 examples but **WITHOUT ANY GUARANTEE FOR CORRECTNESS OR SUITABILITY FOR
@@ -459,8 +486,8 @@ code: find the actual file locations from this variable.
 
 #: List of all topology files that are included in the package.
 #: (includes force field files under ``top/oplsaa.ff``)
-topfiles = _generate_template_dict('top')
-topfiles.update(_generate_template_dict('top/oplsaa.ff'))  # added manually!
+topfiles = _generate_template_dict("top")
+topfiles.update(_generate_template_dict("top/oplsaa.ff"))  # added manually!
 
 # Find the top include dir by looking for an important file 'ffoplsaa.itp'.
 # Since Gromacs 4.5.x, force fields are ONLY found in
@@ -471,21 +498,30 @@ try:
     #: The package's include directory for :func:`gromacs.grompp`; the
     #: environment variable :envvar:`GMXLIB` is set to :data:`includedir`
     #: so that the bundled version of the force field is picked up.
-    includedir = os.path.dirname(topfiles['ffoplsaa.itp'])
+    includedir = os.path.dirname(topfiles["ffoplsaa.itp"])
 except KeyError:
     errmsg = "Missing required data files (ffoplsaa.itp). Check your installation."
     logger.fatal(errmsg)
     raise ImportError(errmsg)
 
-if not 'GMXLIB' in os.environ:
+if not "GMXLIB" in os.environ:
     if not os.path.exists(includedir):
-        errmsg = "Likely installation problem: cannot access the package GMXLIB " \
+        errmsg = (
+            "Likely installation problem: cannot access the package GMXLIB "
             "directory (try re-installing): "
+        )
         logger.fatal(errmsg + includedir)
         raise OSError(errno.ENOENT, errmsg, includedir)
-    os.environ['GMXLIB'] = includedir
+    os.environ["GMXLIB"] = includedir
     logger.info("Using the bundled force fields from GMXLIB=%(includedir)r.", vars())
-    logger.info("If required, override this behaviour by setting the environment variable GMXLIB yourself.")
+    logger.info(
+        "If required, override this behaviour by setting the environment variable GMXLIB yourself."
+    )
 else:
-    logger.warning("Using user-supplied environment variable GMXLIB=%r to find force fields", os.environ['GMXLIB'])
-    logger.info("(You can use the MDPOW default by executing 'unset GMXLIB' in your shell before running MDPOW.)")
+    logger.warning(
+        "Using user-supplied environment variable GMXLIB=%r to find force fields",
+        os.environ["GMXLIB"],
+    )
+    logger.info(
+        "(You can use the MDPOW default by executing 'unset GMXLIB' in your shell before running MDPOW.)"
+    )

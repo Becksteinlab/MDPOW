@@ -26,15 +26,19 @@ import pickle
 import os
 
 import logging
-logger = logging.getLogger('mdpow.checkpoint')
+
+logger = logging.getLogger("mdpow.checkpoint")
+
 
 def checkpoint(name, sim, filename):
     """Execute the :meth:`Journalled.save` method and log the event."""
     logger.info("checkpoint: %(name)s", vars())
     sim.save(filename)
 
+
 class JournalSequenceError(Exception):
     """Raised when a stage is started without another one having been completed."""
+
 
 class Journal(object):
     """Class that keeps track of the stage in a protocol.
@@ -69,6 +73,7 @@ class Journal(object):
       # raises JournalSequenceError
 
     """
+
     def __init__(self, stages):
         """Initialise the journal that keeps track of stages.
 
@@ -92,8 +97,10 @@ class Journal(object):
     @current.setter
     def current(self, stage):
         if not stage in self.stages:
-            raise ValueError("Can only assign a registered stage from %r, not %r" %
-                             (self.stages, stage))
+            raise ValueError(
+                "Can only assign a registered stage from %r, not %r"
+                % (self.stages, stage)
+            )
         self.__current = stage
 
     @current.deleter
@@ -108,7 +115,9 @@ class Journal(object):
     @incomplete.setter
     def incomplete(self, stage):
         if not stage in self.stages:
-            raise ValueError("can only assign a registered stage from %(stages)r" % vars(self))
+            raise ValueError(
+                "can only assign a registered stage from %(stages)r" % vars(self)
+            )
         self.__incomplete = stage
 
     @incomplete.deleter
@@ -126,15 +135,19 @@ class Journal(object):
 
     def completed(self, stage):
         """Record completed stage and reset :attr:`Journal.current`"""
-        assert stage == self.current, "Program logic error: can only complete the current stage"
+        assert (
+            stage == self.current
+        ), "Program logic error: can only complete the current stage"
         self.__history.append(self.current)
         del self.current
 
     def start(self, stage):
         """Record that *stage* is starting."""
         if self.current is not None:
-            errmsg = "Cannot start stage %s because previously started stage %s " \
+            errmsg = (
+                "Cannot start stage %s because previously started stage %s "
                 "has not been completed." % (stage, self.current)
+            )
             logger.error(errmsg)
             raise JournalSequenceError(errmsg)
         self.current = stage
@@ -155,12 +168,14 @@ class Journal(object):
     def __repr__(self):
         return "%s(%r)" % (self.__class__.__name__, self.stages)
 
+
 class Journalled(object):
     """A base class providing methods for journalling and restarts.
 
     It installs an instance of :class:`Journal` in the attribute
     :attr:`Journalled.journal` if it does not exist already.
     """
+
     #: Class-attribute that contains the names of computation protocols
     #: supported by the class. These are either method names or dummy names,
     #: whose logic is provided by an external callback function.
@@ -199,7 +214,9 @@ class Journalled(object):
 
         """
         if protocol not in self.protocols:
-            raise ValueError("%r: protocol must be one of %r" % (protocol, self.protocols))
+            raise ValueError(
+                "%r: protocol must be one of %r" % (protocol, self.protocols)
+            )
         try:
             return self.__getattribute__(protocol)
         except AttributeError:
@@ -216,6 +233,7 @@ class Journalled(object):
             if success:
                 self.journal.completed(protocol)
             return success
+
         return dummy_protocol
 
     def save(self, filename=None):
@@ -237,7 +255,7 @@ class Journalled(object):
                 raise ValueError(errmsg)
         else:
             self.filename = os.path.abspath(filename)
-        with open(self.filename, 'wb') as f:
+        with open(self.filename, "wb") as f:
             pickle.dump(self, f)
         logger.debug("Instance pickled to %(filename)r" % vars(self))
 
@@ -264,12 +282,12 @@ class Journalled(object):
 
         # Do not remove this code when dropping Py 2.7 support as it is needed to
         # be able to read old data files with Python 3 MDPOW.
-        with open(filename, 'rb') as f:
+        with open(filename, "rb") as f:
             try:
                 instance = pickle.load(f)
             except UnicodeDecodeError:
                 logger.debug("Reading old Python 2 Pickle file %(filename)r" % vars())
-                instance = pickle.load(f, encoding='latin1')
+                instance = pickle.load(f, encoding="latin1")
 
         self.__dict__.update(instance.__dict__)
         logger.debug("Instance loaded from %(filename)r" % vars())

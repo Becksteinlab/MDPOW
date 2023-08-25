@@ -16,10 +16,11 @@ from . import RESOURCES, MANIFEST, STATES
 from pkg_resources import resource_filename
 from mdpow.workflows import base
 
+
 @pytest.fixture
 def molname_workflows_directory(tmp_path):
     m = pybol.Manifest(str(MANIFEST))
-    m.assemble('workflows', tmp_path)
+    m.assemble("workflows", tmp_path)
     return tmp_path
 
 
@@ -32,36 +33,43 @@ def universe(request):
     u.add_TopologyAttr("masses", masses)
     return u
 
-@pytest.mark.parametrize("universe,elements",
-                        [
-                            [
-                            (np.array([12.011, 14.007, 0, 12.011, 35.45, 12.011]),
-                             np.array(["C", "Nx", "DUMMY", "C0S", "Cl123", "C0U"])),
-                            np.array(['C', 'N', 'DUMMY', 'C', 'CL', 'C'])
-                            ],
-                            [
-                            (np.array([12.011, 14.007, 0, 35.45]),
-                             np.array(["C", "Nx", "DUMMY", "Cl123"])),
-                            np.array(['C', 'N', 'DUMMY', 'CL'])
-                            ],
-                            [
-                            (np.array([15.999, 0, 40.08, 40.08, 40.08, 24.305, 132.9]),
-                             np.array(["OW", "MW", "C0", "CAL", "CA2+", "MG2+", "CES"])),
-                            np.array(['O', 'DUMMY', 'CA', 'CA', 'CA', 'MG', 'CS'])
-                            ],
-                            [
-                            (np.array([16, 1e-6, 40.085, 133]),
-                             np.array(["OW", "MW", "CA2+", "CES"])),
-                            np.array(['O', 'DUMMY', 'CA', 'CS'])
-                            ],
-                         ],
-                        indirect=["universe"])
+
+@pytest.mark.parametrize(
+    "universe,elements",
+    [
+        [
+            (
+                np.array([12.011, 14.007, 0, 12.011, 35.45, 12.011]),
+                np.array(["C", "Nx", "DUMMY", "C0S", "Cl123", "C0U"]),
+            ),
+            np.array(["C", "N", "DUMMY", "C", "CL", "C"]),
+        ],
+        [
+            (
+                np.array([12.011, 14.007, 0, 35.45]),
+                np.array(["C", "Nx", "DUMMY", "Cl123"]),
+            ),
+            np.array(["C", "N", "DUMMY", "CL"]),
+        ],
+        [
+            (
+                np.array([15.999, 0, 40.08, 40.08, 40.08, 24.305, 132.9]),
+                np.array(["OW", "MW", "C0", "CAL", "CA2+", "MG2+", "CES"]),
+            ),
+            np.array(["O", "DUMMY", "CA", "CA", "CA", "MG", "CS"]),
+        ],
+        [
+            (np.array([16, 1e-6, 40.085, 133]), np.array(["OW", "MW", "CA2+", "CES"])),
+            np.array(["O", "DUMMY", "CA", "CS"]),
+        ],
+    ],
+    indirect=["universe"],
+)
 def test_guess_elements(universe, elements):
     u = universe
     guessed_elements = base.guess_elements(u.atoms)
 
     assert_equal(guessed_elements, elements)
-
 
 
 class TestWorkflowsBase(object):
@@ -72,14 +80,13 @@ class TestWorkflowsBase(object):
 
     @pytest.fixture
     def csv_input_data(self):
-        csv_path = STATES['workflows'] / 'project_paths.csv'
+        csv_path = STATES["workflows"] / "project_paths.csv"
         csv_df = pd.read_csv(csv_path).reset_index(drop=True)
         return csv_path, csv_df
 
     @pytest.fixture
     def test_df_data(self):
-        test_dict = {'molecule' : ['SM25', 'SM26'],
-                    'resname' : ['SM25', 'SM26']}
+        test_dict = {"molecule": ["SM25", "SM26"], "resname": ["SM25", "SM26"]}
         test_df = pd.DataFrame(test_dict).reset_index(drop=True)
         return test_df
 
@@ -92,10 +99,10 @@ class TestWorkflowsBase(object):
         test_df = test_df_data
         project_paths = project_paths_data
 
-        assert project_paths['molecule'][0] == test_df['molecule'][0]
-        assert project_paths['molecule'][1] == test_df['molecule'][1]
-        assert project_paths['resname'][0] == test_df['resname'][0]
-        assert project_paths['resname'][1] == test_df['resname'][1]
+        assert project_paths["molecule"][0] == test_df["molecule"][0]
+        assert project_paths["molecule"][1] == test_df["molecule"][1]
+        assert project_paths["resname"][0] == test_df["resname"][0]
+        assert project_paths["resname"][1] == test_df["resname"][1]
 
     def test_project_paths_csv_input(self, csv_input_data):
         csv_path, csv_df = csv_input_data
@@ -105,39 +112,51 @@ class TestWorkflowsBase(object):
 
     def test_dihedral_analysis_figdir_requirement(self, project_paths_data, caplog):
         caplog.clear()
-        caplog.set_level(logging.ERROR, logger='mdpow.workflows.base')
+        caplog.set_level(logging.ERROR, logger="mdpow.workflows.base")
 
         project_paths = project_paths_data
         # change resname to match topology (every SAMPL7 resname is 'UNK')
         # only necessary for this dataset, not necessary for normal use
-        project_paths['resname'] = 'UNK'
+        project_paths["resname"] = "UNK"
 
-        with pytest.raises(AssertionError,
-                           match="figdir MUST be set, even though it is a kwarg. Will be changed with #244"):
+        with pytest.raises(
+            AssertionError,
+            match="figdir MUST be set, even though it is a kwarg. Will be changed with #244",
+        ):
+            base.automated_project_analysis(
+                project_paths, solvents=("water",), ensemble_analysis="DihedralAnalysis"
+            )
 
-            base.automated_project_analysis(project_paths, solvents=('water',),
-                                            ensemble_analysis='DihedralAnalysis')
-
-            assert 'all analyses completed' in caplog.text, ('automated_dihedral_analysis '
-                   'did not iteratively run to completion for the provided project')
+            assert "all analyses completed" in caplog.text, (
+                "automated_dihedral_analysis "
+                "did not iteratively run to completion for the provided project"
+            )
 
     def test_automated_project_analysis_KeyError(self, project_paths_data, caplog):
         caplog.clear()
-        caplog.set_level(logging.ERROR, logger='mdpow.workflows.base')
+        caplog.set_level(logging.ERROR, logger="mdpow.workflows.base")
 
         project_paths = project_paths_data
         # change resname to match topology (every SAMPL7 resname is 'UNK')
         # only necessary for this dataset, not necessary for normal use
-        project_paths['resname'] = 'UNK'
+        project_paths["resname"] = "UNK"
 
         # test error output when raised
-        with pytest.raises(KeyError,
-                           match="Invalid ensemble_analysis 'DarthVaderAnalysis'. "
-                                 "An EnsembleAnalysis type that corresponds to an existing "
-                                 "automated workflow module must be input as a kwarg. ex: "
-                                 "ensemble_analysis='DihedralAnalysis'"):
-            base.automated_project_analysis(project_paths, ensemble_analysis='DarthVaderAnalysis', solvents=('water',))
+        with pytest.raises(
+            KeyError,
+            match="Invalid ensemble_analysis 'DarthVaderAnalysis'. "
+            "An EnsembleAnalysis type that corresponds to an existing "
+            "automated workflow module must be input as a kwarg. ex: "
+            "ensemble_analysis='DihedralAnalysis'",
+        ):
+            base.automated_project_analysis(
+                project_paths,
+                ensemble_analysis="DarthVaderAnalysis",
+                solvents=("water",),
+            )
 
         # test logger error recording
-        assert "'DarthVaderAnalysis' is an invalid selection" in caplog.text, ('did not catch incorrect '
-               'key specification for workflows.registry that results in KeyError')
+        assert "'DarthVaderAnalysis' is an invalid selection" in caplog.text, (
+            "did not catch incorrect "
+            "key specification for workflows.registry that results in KeyError"
+        )
