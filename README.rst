@@ -2,10 +2,11 @@
  README for MDPOW
 ===================
 
-|build| |cov| |docs|
+|build| |cov| |docs| |black| |zenodo|
 
 .. |P_ow| replace:: *P*\ :sub:`OW`
 .. |P_cw| replace:: *P*\ :sub:`CW`
+.. |P_tw| replace:: *P*\ :sub:`TW`  
 
 *MDPOW* is a python package that automates the calculation of
 solvation free energies via molecular dynamics (MD) simulations. In
@@ -14,7 +15,8 @@ coefficients. Currently implemented:
 
 - *water-octanol* partition coefficient (|P_ow|)
 - *water-cyclohexane* partition coefficient (|P_cw|)
-
+- *water-toluene* partition coefficient (|P_tw|)
+  
 Calculations are performed with the Gromacs_ MD software package
 [#GromacsWrapperNote]_. Currently, *OPLS-AA*, *CHARMM/CGENFF*, and
 *AMBER/GAFF* parameters are supported.
@@ -44,10 +46,10 @@ Installation
 ------------
 
 See `INSTALL`_ for detailed instructions. MDPOW currently supports and
-is tested with Python 3.7 to 3.9.
+is tested with Python 3.8 to 3.10.
 
 You will also need `Gromacs`_ (currently tested with versions 4.6.5,
-2018, 2020, 2021 but 2016 and 2019 should also work).
+2018, 2020, 2021, 2022, 2023 but 2016 and 2019 should also work).
 
 
 Development version
@@ -72,8 +74,13 @@ Source code
 *MDPOW* is open source and published under the `GNU General Public License
 v3`_. Source code is available at https://github.com/Becksteinlab/MDPOW .
 
+We use `black`_ for uniform code formatting.
+
 .. _`GNU General Public License v3`:
    http://www.gnu.org/licenses/gpl-3.0.html
+
+.. _`black`: https://github.com/psf/black
+
 
 Footnotes
 ---------
@@ -92,5 +99,13 @@ Footnotes
 .. |docs| image:: https://readthedocs.org/projects/mdpow/badge/?version=latest
    :target: http://mdpow.readthedocs.org/en/latest/?badge=latest
    :alt: Documentation
+   
+.. |zenodo| image:: https://zenodo.org/badge/44999898.svg
+   :target: https://zenodo.org/badge/latestdoi/44999898
+   :alt: Zenodo
+
+.. |black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
+   :target: https://github.com/psf/black	 
+   :alt: black   
 
 .. _INSTALL: INSTALL.rst

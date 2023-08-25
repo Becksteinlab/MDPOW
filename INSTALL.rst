@@ -2,7 +2,7 @@
  Quick installation instructions for *MDPOW*
 =============================================
 
-MDPOW is compatible with Python 3.7+ and tested
+MDPOW is compatible with Python >=3.8 and tested
 on Ubuntu and Mac OS.
 
 We recommend that you install MDPOW in a virtual environment.
@@ -28,11 +28,11 @@ GROMACS_.
 Conda environment with pre-requisites
 -------------------------------------
 
-Make a conda environment with the latest packages for Python 3.7 and
+Make a conda environment with the latest packages for Python 3.8 or
 higher with the name *mdpow*; this installs the larger dependencies that are
 pre-requisites for MDPOW::
 
-  conda create -c conda-forge -n mdpow  numpy scipy matplotlib mdanalysis pyyaml alchemlyb pandas gromacswrapper
+  conda create -c conda-forge -n mdpow  numpy scipy matplotlib seaborn mdanalysis pyyaml alchemlyb pandas gromacswrapper rdkit
   conda activate mdpow
 
 Install MDPOW with ``pip``::

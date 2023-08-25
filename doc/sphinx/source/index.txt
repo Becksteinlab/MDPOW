@@ -7,7 +7,7 @@
 .. |POW|  replace:: *P*\ :sub:`OW`
 .. |P_ow| replace:: *P*\ :sub:`OW`
 .. |P_cw| replace:: *P*\ :sub:`CW`
-
+.. |P_tw| replace:: *P*\ :sub:`TW`
 
 
 MDPOW documentation
@@ -19,15 +19,16 @@ MDPOW documentation
 
 **MDPOW** is a python package that automates the calculation of
 solvation free energies via molecular dynamics (MD) simulations. In
-particular, it facilitates the computation of partition coeffcients. Currently implemented:
+particular, it facilitates the computation of partition
+coeffcients. Currently implemented:
 
 - *water-octanol* partition coefficient (|P_ow|)
 - *water-cyclohexane* partition coefficient (|P_cw|)
-
-.. warning:: Development is still very much in flux and the
-             documentation is at least partially out of date. If
-             something appears unclear or just wrong, then please ask
-             questions on the `MDPOW Issue Tracker`_.
+- *water-toluene* partition coefficient (|P_tw|)
+  
+The package is being actively developed and incorporates recent ideas
+and advances. If something appears unclear or just wrong, then please
+ask questions on the `MDPOW Issue Tracker`_.
 
 .. _`MDPOW Issue Tracker`: https://github.com/Becksteinlab/mdpow/issues
 
@@ -44,6 +45,8 @@ software package [#GromacsWrapperFramework]_. MDPOW is tested with
 * Gromacs 2018.6
 * Gromacs 2020.6
 * Gromacs 2021.1
+* Gromacs 2022.4 
+* Gromacs 2023.1 
 
 but versions 5.x, 2016.x, and 2019.x should also work.
 It should be possible to use any of these Gromacs versions without
@@ -139,7 +142,8 @@ For current issues and open feature requests please look through the
    scripts
    equil
    fep
-   analysis   
+   analysis
+   workflows
    utilities
    forcefields
 

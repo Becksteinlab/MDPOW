@@ -10,36 +10,52 @@ from mdpow.config import get_configuration
 
 from . import RESOURCES
 
+
 class TestEquilibriumScript(object):
-    def setup(self):
+    def setup_method(self):
         self.tmpdir = td.TempDir()
         self.old_path = os.getcwd()
         self.resources = RESOURCES
-        m = pybol.Manifest(str(self.resources / 'manifest.yml'))
-        m.assemble('base', self.tmpdir.name)
+        m = pybol.Manifest(str(self.resources / "manifest.yml"))
+        m.assemble("base", self.tmpdir.name)
 
-    def teardown(self):
+    def teardown_method(self):
         self.tmpdir.dissolve()
 
     def _run_equil(self, solvent, dirname):
-        cfg = get_configuration('runinput.yml')
+        cfg = get_configuration("runinput.yml")
         self.S = equilibrium_simulation(cfg, solvent, dirname=dirname)
 
     def test_basic_run(self):
         with in_dir(self.tmpdir.name, create=False):
             try:
-                self._run_equil('water','benzene/')
+                self._run_equil("water", "benzene/")
                 self._new_structures()
             except Exception as err:
-                raise AssertionError('Equilibration simulations failed with exception:\n{0}'.format(str(err)))
+                raise AssertionError(
+                    "Equilibration simulations failed with exception:\n{0}".format(
+                        str(err)
+                    )
+                )
 
     def _new_structures(self):
         assert os.path.exists(
-            os.path.join(self.tmpdir.name,
-                         'benzene', 'Equilibrium', 'water', 'em', 'em.pdb'))
+            os.path.join(
+                self.tmpdir.name, "benzene", "Equilibrium", "water", "em", "em.pdb"
+            )
+        )
         assert os.path.exists(
-            os.path.join(self.tmpdir.name,
-                         'benzene', 'Equilibrium', 'water', 'solvation', 'solvated.gro'))
+            os.path.join(
+                self.tmpdir.name,
+                "benzene",
+                "Equilibrium",
+                "water",
+                "solvation",
+                "solvated.gro",
+            )
+        )
         assert os.path.exists(
-            os.path.join(self.tmpdir.name,
-                         'benzene', 'Equilibrium', 'water', 'MD_NPT', 'md.gro'))
+            os.path.join(
+                self.tmpdir.name, "benzene", "Equilibrium", "water", "MD_NPT", "md.gro"
+            )
+        )

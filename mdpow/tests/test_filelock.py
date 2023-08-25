@@ -2,7 +2,8 @@ import os.path
 
 import pytest
 
-from .. import filelock
+from mdpow import filelock
+
 
 def test_FileLock_acquire(tmpdir, filename="test.txt"):
     with tmpdir.as_cwd():
@@ -10,6 +11,7 @@ def test_FileLock_acquire(tmpdir, filename="test.txt"):
             with open(filename, "w") as f:
                 f.write("Humpty Dumpty sat on a wall")
         assert os.path.exists(filename)
+
 
 def test_FileLock_lock(filename="test.txt"):
     with filelock.FileLock(filename, timeout=2) as lock:

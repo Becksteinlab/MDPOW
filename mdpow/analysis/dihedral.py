@@ -14,7 +14,7 @@ from .ensemble import EnsembleAtomGroup, EnsembleAnalysis
 
 import logging
 
-logger = logging.getLogger('mdpow.analysis.dihedral')
+logger = logging.getLogger("mdpow.analysis.dihedral")
 
 
 class DihedralAnalysis(EnsembleAnalysis):
@@ -31,7 +31,7 @@ class DihedralAnalysis(EnsembleAnalysis):
     Data is returned in a :class:`pandas.DataFrame` with observations sorted by
     selection, solvent, interaction, lambda, time.
 
-    .. ruberic:: Example
+    .. rubric:: Example
 
     Typical Workflow::
 
@@ -48,7 +48,9 @@ class DihedralAnalysis(EnsembleAnalysis):
         self.check_groups_from_common_ensemble(dihedral_groups)
         self.check_dihedral_inputs(dihedral_groups)
         super(DihedralAnalysis, self).__init__(dihedral_groups[0].ensemble)
-        self.g1, self.g2, self.g3, self.g4, self.names = self._reorg_groups(dihedral_groups)
+        self.g1, self.g2, self.g3, self.g4, self.names = self._reorg_groups(
+            dihedral_groups
+        )
 
     @staticmethod
     def _reorg_groups(groups: List[EnsembleAtomGroup]):
@@ -63,14 +65,30 @@ class DihedralAnalysis(EnsembleAnalysis):
             ag2 += [mda.AtomGroup([ag[1]]) for ag in [group[k] for k in group.keys()]]
             ag3 += [mda.AtomGroup([ag[2]]) for ag in [group[k] for k in group.keys()]]
             ag4 += [mda.AtomGroup([ag[3]]) for ag in [group[k] for k in group.keys()]]
-            names.append('-'.join([ag1[-1].atoms[0].name, ag2[-1].atoms[0].name,
-                                   ag3[-1].atoms[0].name, ag4[-1].atoms[0].name]))
+            names.append(
+                "-".join(
+                    [
+                        ag1[-1].atoms[0].name,
+                        ag2[-1].atoms[0].name,
+                        ag3[-1].atoms[0].name,
+                        ag4[-1].atoms[0].name,
+                    ]
+                )
+            )
             for k in group.keys():
                 ag_keys.append((names[-1], k[0], k[1], k[2]))
-        eag1 = EnsembleAtomGroup({ag_keys[i]: ag1[i] for i in range(len(ag_keys))}, groups[0].ensemble)
-        eag2 = EnsembleAtomGroup({ag_keys[i]: ag2[i] for i in range(len(ag_keys))}, groups[0].ensemble)
-        eag3 = EnsembleAtomGroup({ag_keys[i]: ag3[i] for i in range(len(ag_keys))}, groups[0].ensemble)
-        eag4 = EnsembleAtomGroup({ag_keys[i]: ag4[i] for i in range(len(ag_keys))}, groups[0].ensemble)
+        eag1 = EnsembleAtomGroup(
+            {ag_keys[i]: ag1[i] for i in range(len(ag_keys))}, groups[0].ensemble
+        )
+        eag2 = EnsembleAtomGroup(
+            {ag_keys[i]: ag2[i] for i in range(len(ag_keys))}, groups[0].ensemble
+        )
+        eag3 = EnsembleAtomGroup(
+            {ag_keys[i]: ag3[i] for i in range(len(ag_keys))}, groups[0].ensemble
+        )
+        eag4 = EnsembleAtomGroup(
+            {ag_keys[i]: ag4[i] for i in range(len(ag_keys))}, groups[0].ensemble
+        )
         return eag1, eag2, eag3, eag4, names
 
     @staticmethod
@@ -78,14 +96,22 @@ class DihedralAnalysis(EnsembleAnalysis):
         for group in selections:
             for k in group.keys():
                 if len(group[k]) != 4:
-                    msg = ("Dihedral calculations require AtomGroups with "
-                           f"only 4 atoms, {len(group)} selected")
+                    msg = (
+                        "Dihedral calculations require AtomGroups with "
+                        f"only 4 atoms, {len(group)} selected"
+                    )
                     logger.error(msg)
                     raise SelectionError(msg)
 
     def _prepare_ensemble(self):
-        self._col = ['selection', 'solvent', 'interaction',
-                     'lambda', 'time', 'dihedral']
+        self._col = [
+            "selection",
+            "solvent",
+            "interaction",
+            "lambda",
+            "time",
+            "dihedral",
+        ]
         self.results = pd.DataFrame(columns=self._col)
         self._res_dict = {key: [] for key in self._col}
 
@@ -99,8 +125,9 @@ class DihedralAnalysis(EnsembleAnalysis):
         cord2 = np.concatenate(tuple([cord_dict2[k] for k in key_list]))
         cord3 = np.concatenate(tuple([cord_dict3[k] for k in key_list]))
         cord4 = np.concatenate(tuple([cord_dict4[k] for k in key_list]))
-        angle = calc_dihedrals(cord1, cord2, cord3, cord4,
-                               box=self.g1[key_list[0]].dimensions)
+        angle = calc_dihedrals(
+            cord1, cord2, cord3, cord4, box=self.g1[key_list[0]].dimensions
+        )
         angle = np.rad2deg(angle)
         for i in range(len(self.names)):
             result = list(key_list[i]) + [self._ts.time, angle[i]]

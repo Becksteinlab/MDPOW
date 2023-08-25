@@ -26,6 +26,7 @@ In modules simply use::
 
 import logging
 
+
 def create(logname, logfile):
     """Create a top level logger.
 
@@ -38,7 +39,9 @@ def create(logname, logfile):
     logger.setLevel(logging.DEBUG)
 
     logfile = logging.FileHandler(logfile)
-    logfile_formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+    logfile_formatter = logging.Formatter(
+        "%(asctime)s %(name)-12s %(levelname)-8s %(message)s"
+    )
     logfile.setFormatter(logfile_formatter)
     logger.addHandler(logfile)
 
@@ -46,11 +49,12 @@ def create(logname, logfile):
     console = logging.StreamHandler()
     console.setLevel(logging.INFO)
     # set a format which is simpler for console use
-    formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
+    formatter = logging.Formatter("%(name)-12s: %(levelname)-8s %(message)s")
     console.setFormatter(formatter)
     logger.addHandler(console)
 
     return logger
+
 
 def clear_handlers(logger):
     """clean out handlers in the library top level logger
@@ -59,5 +63,3 @@ def clear_handlers(logger):
     """
     for h in logger.handlers:
         logger.removeHandler(h)
-
-

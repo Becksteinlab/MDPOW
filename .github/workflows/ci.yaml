@@ -32,20 +32,17 @@ jobs:
       
         os: [ubuntu-latest]
         python-version: ["3.10"]
-        gromacs-version: ["4.6.5", "2018.6", "2020.6", "2021.1"]
+        gromacs-version: ["4.6.5", "2018.6", "2020.6", "2021.1", "2022.4", "2023.1"]
         include:
           - os: ubuntu-latest
-            python-version:  "3.7"
-            gromacs-version: "2021.1"
-          - os: ubuntu-latest
             python-version: "3.8"
-            gromacs-version: "2021.1"
+            gromacs-version: "2023.1"
           - os: ubuntu-latest
             python-version: "3.9"
-            gromacs-version: "2021.1"
+            gromacs-version: "2023.1"
           - os: macos-latest
             python-version: "3.10"
-            gromacs-version: "2021.1"
+            gromacs-version: "2023.1"
 
     env:
       MPLBACKEND: agg
@@ -55,13 +52,17 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: mamba environment and package installation
-      uses: mamba-org/provision-with-micromamba@main
+      uses: mamba-org/setup-micromamba@v1
       with:
         environment-file: devtools/conda-envs/test_env.yaml
-        channel-priority: "flexible"
+        condarc: |
+           channels:
+              - conda-forge
+              - bioconda
+           channel_priority: flexible
         cache-downloads: true
-        cache-env: true
-        extra-specs: |
+        cache-environment: true
+        create-args: >-
            python=${{ matrix.python-version }}
           
     - name: Python version information
@@ -78,8 +79,10 @@ jobs:
          python -m pip install pybol
 
     - name: Install GROMACS (${{ matrix.gromacs-version }})
+      # include mdanalysis here AGAIN to work around micromamba removing mdanalysis 
+      # while downgrading libxml2 (see issue #252)
       run: |
-         micromamba install 'gromacs==${{ matrix.gromacs-version }}' pocl
+         micromamba install 'gromacs==${{ matrix.gromacs-version }}' pocl mdanalysis
 
     - name: Install package (with no dependencies)
       run: |

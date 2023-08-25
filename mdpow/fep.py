@@ -87,10 +87,15 @@ solvation free energy in octanol there is
    :members:
    :inherited-members:
 
+.. autoclass:: Gtol
+   :members:
+   :inherited-members:
+
 .. autofunction:: pOW
 
 .. autofunction:: pCW
 
+.. autofunction:: pTW
 
 Developer notes
 ---------------
@@ -154,10 +159,11 @@ from numkit.observables import QuantityWithError
 from alchemlyb.parsing.gmx import extract_dHdl, extract_u_nk
 from alchemlyb.estimators import TI, BAR, MBAR
 from alchemlyb.parsing.gmx import _extract_dataframe
-from pymbar.timeseries import (statisticalInefficiency,
-                               subsampleCorrelatedData, )
+from alchemlyb.preprocessing.subsampling import statistical_inefficiency
+
 import gromacs
 import gromacs.utilities
+
 try:
     import gromacs.setup
 except (ImportError, OSError):
@@ -165,15 +171,18 @@ except (ImportError, OSError):
 from gromacs.utilities import asiterable, AttributeDict, in_dir, openany
 
 import logging
-logger = logging.getLogger('mdpow.fep')
+
+logger = logging.getLogger("mdpow.fep")
 
 from . import config
 from .restart import Journalled
 from . import kBOLTZ, N_AVOGADRO
 
+
 def molar_to_nm3(c):
     """Convert a concentration in Molar to nm|^-3|."""
     return c * N_AVOGADRO * 1e-24
+
 
 def bar_to_kJmolnm3(p):
     """Convert pressure in bar to kJ mol|^-1| nm|^-3|.
@@ -182,17 +191,20 @@ def bar_to_kJmolnm3(p):
     """
     return p * N_AVOGADRO * 1e-25
 
+
 def kcal_to_kJ(x):
     """Convert a energy in kcal to kJ."""
     return 4.184 * x
+
 
 def kJ_to_kcal(x):
     """Convert a energy in kJ to kcal."""
     return x / 4.184
 
+
 def kBT_to_kJ(x, T):
     """Convert a energy in kBT to kJ/mol."""
-    return x * constants.N_A*constants.k*T*1e-3
+    return x * constants.N_A * constants.k * T * 1e-3
 
 
 class FEPschedule(AttributeDict):
@@ -227,19 +239,23 @@ class FEPschedule(AttributeDict):
        lambdas = 0.0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1
 
     """
-    mdp_keywords = dict((('sc_alpha', float),
-                         ('sc_power', int),
-                         ('sc_sigma', float),
-                         ('couple_lambda0', str),
-                         ('couple_lambda1', str),
-                         ))
-    meta_keywords = dict((('name', str), ('description', str), ('label', str)))
-    other_keywords = dict((('lambdas', list), ))
+
+    mdp_keywords = dict(
+        (
+            ("sc_alpha", float),
+            ("sc_power", int),
+            ("sc_sigma", float),
+            ("couple_lambda0", str),
+            ("couple_lambda1", str),
+        )
+    )
+    meta_keywords = dict((("name", str), ("description", str), ("label", str)))
+    other_keywords = dict((("lambdas", list),))
 
     @property
     def mdp_dict(self):
         """Dict of key-values that can be set in a mdp file."""
-        return dict(((k,v) for k,v in self.items() if k in self.mdp_keywords))
+        return dict(((k, v) for k, v in self.items() if k in self.mdp_keywords))
 
     @staticmethod
     def load(cfg, section):
@@ -249,12 +265,14 @@ class FEPschedule(AttributeDict):
         keys.update(FEPschedule.meta_keywords)
         keys.update(FEPschedule.other_keywords)
 
-        cfg_get = {float: cfg.getfloat,
-                   int: cfg.getint,
-                   str: cfg.getstr,    # literal strings, no conversion of None (which we need for the MDP!)
-                                       # CHECK: THIS IS LIKELY NOT GUARANTEED ANYMORE since getstr == get
-                   list: cfg.getarray  # numpy float array from list
-                   }
+        cfg_get = {
+            float: cfg.getfloat,
+            int: cfg.getint,
+            str: cfg.getstr,  # literal strings, no conversion of None (which we need for the MDP!)
+            # CHECK: THIS IS LIKELY NOT GUARANTEED ANYMORE since getstr == get
+            list: cfg.getarray,  # numpy float array from list
+        }
+
         def getter(type, section, key):
             value = cfg_get[type](section, key)
             try:
@@ -264,15 +282,20 @@ class FEPschedule(AttributeDict):
             except TypeError:
                 pass
             return value
+
         # skip any None values
-        return FEPschedule((key, getter(keytype, section, key)) for key,keytype in keys.items()
-                           if getter(keytype, section, key) is not None)
+        return FEPschedule(
+            (key, getter(keytype, section, key))
+            for key, keytype in keys.items()
+            if getter(keytype, section, key) is not None
+        )
 
     def __deepcopy__(self, memo):
         x = FEPschedule()
         for k, v in self.items():
             x[k] = copy.deepcopy(v)
         return x
+
 
 class Gsolv(Journalled):
     r"""Simulations to calculate and analyze the solvation free energy.
@@ -321,36 +344,58 @@ class Gsolv(Journalled):
     protocols = ["setup", "fep_run"]
 
     #: Estimators in alchemlyb
-    estimators = {'TI': {'extract': extract_dHdl, 'estimator': TI},
-                  'BAR': {'extract': extract_u_nk, 'estimator': BAR},
-                  'MBAR': {'extract': extract_u_nk, 'estimator': MBAR}
-                  }
+    estimators = {
+        "TI": {"extract": extract_dHdl, "estimator": TI},
+        "BAR": {"extract": extract_u_nk, "estimator": BAR},
+        "MBAR": {"extract": extract_u_nk, "estimator": MBAR},
+    }
 
     # TODO: initialize from default cfg
-    schedules_default = {'coulomb':
-                         FEPschedule(name='coulomb',
-                                     description="dis-charging vdw+q --> vdw",
-                                     label='Coul',
-                                     couple_lambda0='vdw-q', couple_lambda1='vdw',
-                                     sc_alpha=0,      # linear scaling for coulomb
-                                     lambdas=np.array([0.0, 0.25, 0.5, 0.75, 1.0]),  # default values
-                                 ),
-                         'vdw':
-                         FEPschedule(name='vdw',
-                                     description="decoupling vdw --> none",
-                                     label='VDW',
-                                     couple_lambda0='vdw', couple_lambda1='none',
-                                     sc_alpha=0.5, sc_power=1, sc_sigma=0.3, # recommended values
-                                     lambdas=np.array([0.0, 0.05, 0.1, 0.2, 0.3,
-                                              0.4, 0.5, 0.6, 0.65, 0.7, 0.75, 0.8,
-                                              0.85, 0.9, 0.95, 1]), # defaults
-                                 ),
-                     }
+    schedules_default = {
+        "coulomb": FEPschedule(
+            name="coulomb",
+            description="dis-charging vdw+q --> vdw",
+            label="Coul",
+            couple_lambda0="vdw-q",
+            couple_lambda1="vdw",
+            sc_alpha=0,  # linear scaling for coulomb
+            lambdas=np.array([0.0, 0.25, 0.5, 0.75, 1.0]),  # default values
+        ),
+        "vdw": FEPschedule(
+            name="vdw",
+            description="decoupling vdw --> none",
+            label="VDW",
+            couple_lambda0="vdw",
+            couple_lambda1="none",
+            sc_alpha=0.5,
+            sc_power=1,
+            sc_sigma=0.3,  # recommended values
+            lambdas=np.array(
+                [
+                    0.0,
+                    0.05,
+                    0.1,
+                    0.2,
+                    0.3,
+                    0.4,
+                    0.5,
+                    0.6,
+                    0.65,
+                    0.7,
+                    0.75,
+                    0.8,
+                    0.85,
+                    0.9,
+                    0.95,
+                    1,
+                ]
+            ),  # defaults
+        ),
+    }
 
     #: Default Gromacs *MDP* run parameter file for FEP.
     #: (The file is part of the package and is found with :func:`mdpow.config.get_template`.)
-    mdp_default = 'bar_opls.mdp'
-
+    mdp_default = "bar_opls.mdp"
 
     def __init__(self, molecule=None, top=None, struct=None, method="BAR", **kwargs):
         """Set up Gsolv from input files or a equilibrium simulation.
@@ -431,41 +476,49 @@ class Gsolv(Journalled):
            parameters.
 
         """
-        required_args = ('molecule', 'top', 'struct')
+        required_args = ("molecule", "top", "struct")
 
         # should this be below somewhere?
         if not method in ("TI", "BAR", "MBAR"):
             raise ValueError("method can only be TI, BAR, or MBAR")
         self.method = method
 
-        filename = kwargs.pop('filename', None)
-        basedir = kwargs.pop('basedir', os.path.curdir)  # all other dirs relative to basedir
-        simulation = kwargs.pop('simulation', None)
-        solvent = kwargs.pop('solvent', self.solvent_default)
-        if (None in (molecule, top, struct) and simulation is None) and filename is not None:
+        filename = kwargs.pop("filename", None)
+        basedir = kwargs.pop(
+            "basedir", os.path.curdir
+        )  # all other dirs relative to basedir
+        simulation = kwargs.pop("simulation", None)
+        solvent = kwargs.pop("solvent", self.solvent_default)
+        if (
+            None in (molecule, top, struct) and simulation is None
+        ) and filename is not None:
             # load from pickle file
             self.load(filename)
             self.filename = filename
-            kwargs = {}    # for super
+            kwargs = {}  # for super
         else:
             if simulation is not None:
                 # load data from Simulation instance
                 self.molecule = simulation.molecule
-                self.top = simulation.files.processed_topology or simulation.files.topology
+                self.top = (
+                    simulation.files.processed_topology or simulation.files.topology
+                )
                 self.struct = simulation.files.MD_NPT
                 self.ndx = simulation.files.ndx
                 if simulation.solvent_type == solvent:
                     self.solvent_type = simulation.solvent_type
                 else:
-                    errmsg = "Solvent mismatch: simulation was run for %s but Gsolv is set up for %s" % \
-                        (simulation.solvent_type, solvent)
+                    errmsg = (
+                        "Solvent mismatch: simulation was run for %s but Gsolv is set up for %s"
+                        % (simulation.solvent_type, solvent)
+                    )
                     logger.error(errmsg)
                     raise ValueError(errmsg)
             else:
-                self.molecule = molecule   # should check that this is in top (?)
+                self.molecule = molecule  # should check that this is in top (?)
                 self.top = top
                 self.struct = struct
-                self.ndx = kwargs.pop('ndx', None)
+                self.ndx = kwargs.pop("ndx", None)
                 self.solvent_type = solvent
 
             for attr in required_args:
@@ -475,54 +528,71 @@ class Gsolv(Journalled):
             # fix struct (issue with qscripts being independent from rest of code)
             if not os.path.exists(self.struct):
                 # struct is not reliable as it depends on qscript so now we just try everything...
-                struct = gromacs.utilities.find_first(self.struct, suffices=['pdb', 'gro'])
+                struct = gromacs.utilities.find_first(
+                    self.struct, suffices=["pdb", "gro"]
+                )
                 if struct is None:
                     logger.error("Starting structure %r does not exist.", self.struct)
-                    raise IOError(errno.ENOENT, "Starting structure not found", self.struct)
+                    raise IOError(
+                        errno.ENOENT, "Starting structure not found", self.struct
+                    )
                 else:
-                    logger.info("Found starting structure %r (instead of %r).", struct, self.struct)
+                    logger.info(
+                        "Found starting structure %r (instead of %r).",
+                        struct,
+                        self.struct,
+                    )
                     self.struct = struct
 
-            self.Temperature = kwargs.pop('temperature', 300.0)
-            self.qscript = kwargs.pop('qscript', ['local.sh'])
-            self.deffnm = kwargs.pop('deffnm', 'md')
+            self.Temperature = kwargs.pop("temperature", 300.0)
+            self.qscript = kwargs.pop("qscript", ["local.sh"])
+            self.deffnm = kwargs.pop("deffnm", "md")
 
-            self.mdp = kwargs.pop('mdp', config.get_template(self.mdp_default))
+            self.mdp = kwargs.pop("mdp", config.get_template(self.mdp_default))
 
             # schedules (deepcopy because we might modify)
             # For some reason 2.7 tests failed with deepcopy in 2.7 so used merge_dict instead
             self.schedules = config.merge_dicts(self.schedules_default, {})
-            schedules = kwargs.pop('schedules', {})
+            schedules = kwargs.pop("schedules", {})
             self.schedules.update(schedules)
             self.lambdas = {
-                'coulomb': kwargs.pop('lambda_coulomb', self.schedules['coulomb'].lambdas),
-                'vdw':     kwargs.pop('lambda_vdw', self.schedules['vdw'].lambdas),
-                }
-            self.runtime = kwargs.pop('runtime', 5000.0)   # ps
-            self.dirname = kwargs.pop('dirname', self.dirname_default)
-            self.includes = list(asiterable(kwargs.pop('includes',[]))) + [config.includedir]
-            self.component_dirs = {'coulomb': os.path.join(self.dirname, 'Coulomb'),
-                                   'vdw': os.path.join(self.dirname, 'VDW')}
+                "coulomb": kwargs.pop(
+                    "lambda_coulomb", self.schedules["coulomb"].lambdas
+                ),
+                "vdw": kwargs.pop("lambda_vdw", self.schedules["vdw"].lambdas),
+            }
+            self.runtime = kwargs.pop("runtime", 5000.0)  # ps
+            self.dirname = kwargs.pop("dirname", self.dirname_default)
+            self.includes = list(asiterable(kwargs.pop("includes", []))) + [
+                config.includedir
+            ]
+            self.component_dirs = {
+                "coulomb": os.path.join(self.dirname, "Coulomb"),
+                "vdw": os.path.join(self.dirname, "VDW"),
+            }
 
             # for analysis
-            self.stride = kwargs.pop('stride', 1)
-            self.start = kwargs.pop('start', 0)
-            self.stop = kwargs.pop('stop', None)
-            self.SI = kwargs.pop('SI', True)
+            self.stride = kwargs.pop("stride", 1)
+            self.start = kwargs.pop("start", 0)
+            self.stop = kwargs.pop("stop", None)
+            self.SI = kwargs.pop("SI", True)
 
             # other variables
             #: Results from the analysis
-            self.results = AttributeDict(xvg=AttributeDict(),
-                                         dvdl=AttributeDict(),
-                                         DeltaA=AttributeDict(),  # contains QuantityWithError
-                                         )
+            self.results = AttributeDict(
+                xvg=AttributeDict(),
+                dvdl=AttributeDict(),
+                DeltaA=AttributeDict(),  # contains QuantityWithError
+            )
             #: Generated run scripts
             self.scripts = AttributeDict()
 
             # sanity checks
             if os.path.exists(self.dirname):
-                wmsg = "Directory %(dirname)r already exists --- will overwrite " \
-                       "existing files." % vars(self)
+                wmsg = (
+                    "Directory %(dirname)r already exists --- will overwrite "
+                    "existing files." % vars(self)
+                )
                 warnings.warn(wmsg)
                 logger.warning(wmsg)
 
@@ -536,16 +606,23 @@ class Gsolv(Journalled):
             self.filename = os.path.abspath(self.filename)
         except (AttributeError, TypeError):
             # default filename if none was provided
-            self.filename = self.frombase(self.dirname, self.__class__.__name__+os.extsep+'fep')
+            self.filename = self.frombase(
+                self.dirname, self.__class__.__name__ + os.extsep + "fep"
+            )
 
         # override pickle file for this dangerous option: must be set
         # on a case-by-case basis
-        self.permissive = kwargs.pop('permissive', False)
+        self.permissive = kwargs.pop("permissive", False)
 
-        logger.info("Solvation free energy calculation for molecule "
-                    "%(molecule)s in solvent %(solvent_type)s.", vars(self))
+        logger.info(
+            "Solvation free energy calculation for molecule "
+            "%(molecule)s in solvent %(solvent_type)s.",
+            vars(self),
+        )
         logger.info("Base directory is %(basedir)r", vars(self))
-        logger.info("Using setup directories under %(dirname)r: %(component_dirs)r", vars(self))
+        logger.info(
+            "Using setup directories under %(dirname)r: %(component_dirs)r", vars(self)
+        )
         logger.info("Default checkpoint file is %(filename)r", vars(self))
         logger.debug("Coulomb lambdas = %(coulomb)r", self.lambdas)
         logger.debug("VDW lambdas = %(vdw)r", self.lambdas)
@@ -580,11 +657,16 @@ class Gsolv(Journalled):
 
     def tasklabel(self, component, lmbda):
         """Batch submission script name for a single task job."""
-        return self.molecule[:3]+'_'+self.schedules[component].label+"%04d" % (1000 * lmbda)
+        return (
+            self.molecule[:3]
+            + "_"
+            + self.schedules[component].label
+            + "%04d" % (1000 * lmbda)
+        )
 
     def arraylabel(self, component):
         """Batch submission script name for a job array."""
-        return self.molecule[:3]+'_'+self.schedules[component].label
+        return self.molecule[:3] + "_" + self.schedules[component].label
 
     def fep_dirs(self):
         """Generator for all simulation sub directories"""
@@ -620,39 +702,46 @@ class Gsolv(Journalled):
         .. versionchanged:: 0.6.0
            Gromacs now uses option ``-dhdl`` instead of ``-dgdl``.
         """
-        self.journal.start('setup')
+        self.journal.start("setup")
 
         # -dgdl for FEP output (although that seems to have been changed to -dHdl in Gromacs 4.5.3)
         # NOW use -dhdl
-        kwargs['mdrun_opts'] = " ".join([kwargs.pop('mdrun_opts',''), '-dhdl'])
-        kwargs['includes'] = asiterable(kwargs.pop('includes',[])) + self.includes
-        kwargs['deffnm'] = self.deffnm
-        kwargs.setdefault('maxwarn', 1)
+        kwargs["mdrun_opts"] = " ".join([kwargs.pop("mdrun_opts", ""), "-dhdl"])
+        kwargs["includes"] = asiterable(kwargs.pop("includes", [])) + self.includes
+        kwargs["deffnm"] = self.deffnm
+        kwargs.setdefault("maxwarn", 1)
         qsubargs = kwargs.copy()
-        qsubargs['dirname'] = self.frombase(self.dirname)
+        qsubargs["dirname"] = self.frombase(self.dirname)
         # handle templates separately (necessary for array jobs)
-        qscripts = qsubargs.pop('sge', None) or self.qscript
-        qscripts.extend(qsubargs.pop('qscript',[]))  # also allow canonical 'templates'
+        qscripts = qsubargs.pop("sge", None) or self.qscript
+        qscripts.extend(qsubargs.pop("qscript", []))  # also allow canonical 'templates'
         # make sure that the individual batch scripts are also written
-        kwargs.setdefault('qscript', qscripts)
+        kwargs.setdefault("qscript", qscripts)
 
         for component, lambdas in self.lambdas.items():
             for l in lambdas:
-                params = self._setup(component, l,
-                                         foreign_lambdas=lambdas, **kwargs)
+                params = self._setup(component, l, foreign_lambdas=lambdas, **kwargs)
 
             # generate queuing system script for array job
             directories = [self.wdir(component, l) for l in lambdas]
-            qsubargs['jobname'] = self.arraylabel(component)
-            qsubargs['prefix'] = self.label(component)+'_'
-            self.scripts[component] = gromacs.qsub.generate_submit_array(qscripts, directories, **qsubargs)
-            logger.info("[%s] Wrote array job scripts %r", component, self.scripts[component])
+            qsubargs["jobname"] = self.arraylabel(component)
+            qsubargs["prefix"] = self.label(component) + "_"
+            self.scripts[component] = gromacs.qsub.generate_submit_array(
+                qscripts, directories, **qsubargs
+            )
+            logger.info(
+                "[%s] Wrote array job scripts %r", component, self.scripts[component]
+            )
 
-        self.journal.completed('setup')
+        self.journal.completed("setup")
         self.save(self.filename)
-        logger.info("Saved state information to %r; reload later with G = %r.", self.filename, self)
+        logger.info(
+            "Saved state information to %r; reload later with G = %r.",
+            self.filename,
+            self,
+        )
         logger.info("Finished setting up all individual simulations. Now run them...")
-        params.pop('struct', None)   # scrub window-specific params
+        params.pop("struct", None)  # scrub window-specific params
         return params
 
     def _setup(self, component, lmbda, foreign_lambdas, **kwargs):
@@ -663,36 +752,41 @@ class Gsolv(Journalled):
         logger.info("Preparing %(component)s for lambda=%(lmbda)g" % vars())
 
         wdir = self.wdir(component, lmbda)
-        kwargs.setdefault('couple-intramol', 'no')
+        kwargs.setdefault("couple-intramol", "no")
 
         ### XXX Issue 20: if an entry is None then the dict will not be updated:
         ###     I *must* keep "none" as a legal string value
-        kwargs.update(self.schedules[component].mdp_dict)  # sets soft core & lambda0/1 state
+        kwargs.update(
+            self.schedules[component].mdp_dict
+        )  # sets soft core & lambda0/1 state
 
-        if kwargs.pop('edr', True):
-            logger.info('Setting dhdl file to edr format')
-            kwargs.setdefault('separate-dhdl-file', 'no')
+        if kwargs.pop("edr", True):
+            logger.info("Setting dhdl file to edr format")
+            kwargs.setdefault("separate-dhdl-file", "no")
         else:
-            logger.info('Setting dhdl file to xvg format')
-            kwargs.setdefault('separate-dhdl-file', 'yes')
+            logger.info("Setting dhdl file to xvg format")
+            kwargs.setdefault("separate-dhdl-file", "yes")
 
         foreign_lambdas = np.asarray(foreign_lambdas)
         lambda_index = np.where(foreign_lambdas == lmbda)[0][0]
 
-        kwargs.update(dirname=wdir, struct=self.struct, top=self.top,
-                      mdp=self.mdp,
-                      ndx=self.ndx,
-                      mainselection=None,
-                      runtime=self.runtime,
-                      ref_t=self.Temperature,    # TODO: maybe not working yet, check _setup()
-                      gen_temp=self.Temperature, # needed until gromacs.setup() is smarter
-                      qname=self.tasklabel(component,lmbda),
-                      free_energy='yes',
-                      couple_moltype=self.molecule,
-                      init_lambda_state=lambda_index,
-                      fep_lambdas=foreign_lambdas,
-                      calc_lambda_neighbors=-1,
-                      )
+        kwargs.update(
+            dirname=wdir,
+            struct=self.struct,
+            top=self.top,
+            mdp=self.mdp,
+            ndx=self.ndx,
+            mainselection=None,
+            runtime=self.runtime,
+            ref_t=self.Temperature,  # TODO: maybe not working yet, check _setup()
+            gen_temp=self.Temperature,  # needed until gromacs.setup() is smarter
+            qname=self.tasklabel(component, lmbda),
+            free_energy="yes",
+            couple_moltype=self.molecule,
+            init_lambda_state=lambda_index,
+            fep_lambdas=foreign_lambdas,
+            calc_lambda_neighbors=-1,
+        )
 
         return gromacs.setup.MD(**kwargs)
 
@@ -713,9 +807,9 @@ class Gsolv(Journalled):
         :Raises: :exc:`IOError` with error code ENOENT if no file
                  could be found
 
-         """
-        EXTENSIONS = ('', os.path.extsep+'bz2', os.path.extsep+'gz')
-        root = os.path.join(*args + (self.deffnm + '.xvg',))
+        """
+        EXTENSIONS = ("", os.path.extsep + "bz2", os.path.extsep + "gz")
+        root = os.path.join(*args + (self.deffnm + ".xvg",))
         for ext in EXTENSIONS:
             fn = root + ext
             if os.path.exists(fn):
@@ -736,8 +830,8 @@ class Gsolv(Journalled):
         :Raises: :exc:`IOError` with error code ENOENT if no file
                  could be found
 
-         """
-        pattern = os.path.join(*args + (self.deffnm + '*.edr',))
+        """
+        pattern = os.path.join(*args + (self.deffnm + "*.edr",))
         edrs = glob(pattern)
         if not edrs:
             logger.error("Missing dgdl.edr file %(pattern)r.", vars())
@@ -757,8 +851,8 @@ class Gsolv(Journalled):
         :Raises: :exc:`IOError` with error code ENOENT if no file
                  could be found
 
-         """
-        fn = os.path.join(*args + (self.deffnm + '.tpr',))
+        """
+        fn = os.path.join(*args + (self.deffnm + ".tpr",))
         if not os.path.exists(fn):
             logger.error("Missing TPR file %(fn)r.", vars())
             raise IOError(errno.ENOENT, "Missing TPR file", fn)
@@ -797,7 +891,7 @@ class Gsolv(Journalled):
                     total_edr = edr[0]
                 else:
                     total_edr = self.dgdl_total_edr(dirct)
-                    logger.info("  {0} --> {1}".format('edrs', total_edr))
+                    logger.info("  {0} --> {1}".format("edrs", total_edr))
                     gromacs.eneconv(f=edr, o=total_edr)
                 xvgfile = os.path.join(dirct, self.deffnm + ".xvg")  # hack
                 logger.info("  {0} --> {1}".format(total_edr, xvgfile))
@@ -824,14 +918,20 @@ class Gsolv(Journalled):
             # must be done before adding to results.xvg or we will not find the file later
             self.compress_dgdl_xvg()
 
-        logger.info("[%(dirname)s] Finding dgdl xvg files, reading with "
-                    "stride=%(stride)d permissive=%(permissive)r." % vars(self))
+        logger.info(
+            "[%(dirname)s] Finding dgdl xvg files, reading with "
+            "stride=%(stride)d permissive=%(permissive)r." % vars(self)
+        )
 
         for component, lambdas in self.lambdas.items():
             xvg_files = [self.dgdl_xvg(self.wdir(component, l)) for l in lambdas]
-            self.results.xvg[component] = (np.array(lambdas),
-                                           [XVG(xvg, permissive=self.permissive, stride=self.stride)
-                                            for xvg in xvg_files])
+            self.results.xvg[component] = (
+                np.array(lambdas),
+                [
+                    XVG(xvg, permissive=self.permissive, stride=self.stride)
+                    for xvg in xvg_files
+                ],
+            )
         if autosave:
             self.save()
 
@@ -847,23 +947,30 @@ class Gsolv(Journalled):
         for component, lambdas in self.lambdas.items():
             xvg_files = [self.dgdl_xvg(self.wdir(component, l)) for l in lambdas]
             for xvg in xvg_files:
-                root,ext = os.path.splitext(xvg)
-                if ext == os.path.extsep+"xvg":
+                root, ext = os.path.splitext(xvg)
+                if ext == os.path.extsep + "xvg":
                     fnbz2 = xvg + os.path.extsep + "bz2"
-                    logger.info("[%s] Compressing dgdl file %r with bzip2", self.dirname, xvg)
+                    logger.info(
+                        "[%s] Compressing dgdl file %r with bzip2", self.dirname, xvg
+                    )
                     # speed is similar to 'bzip2 -9 FILE' (using a 1 Mio buffer)
                     # (Since GW 0.8, openany() does not take kwargs anymore so the write buffer cannot be
                     # set anymore (buffering=1048576) so the performance might be lower in MDPOW >= 0.7.0)
-                    with open(xvg, 'rb', buffering=1048576) as source:
-                        with openany(fnbz2, 'wb') as target:
+                    with open(xvg, "rb", buffering=1048576) as source:
+                        with openany(fnbz2, "wb") as target:
                             target.writelines(source)
                     if os.path.exists(fnbz2) and os.path.exists(xvg):
                         os.unlink(xvg)
                     if not os.path.exists(fnbz2):
-                        logger.error("[%s] Failed to compress %r --- mysterious!", self.dirname, fnbz2)
+                        logger.error(
+                            "[%s] Failed to compress %r --- mysterious!",
+                            self.dirname,
+                            fnbz2,
+                        )
                     else:
-                        logger.info("[%s] Compression complete: %r", self.dirname, fnbz2)
-
+                        logger.info(
+                            "[%s] Compression complete: %r", self.dirname, fnbz2
+                        )
 
     def contains_corrupted_xvgs(self):
         """Check if any of the source datafiles had reported corrupted lines.
@@ -875,18 +982,22 @@ class Gsolv(Journalled):
         :attr:`Gsolv._corrupted` as dicts of dicts with the component as
         primary and the lambda as secondary key.
         """
+
         def _lencorrupted(xvg):
             try:
                 return len(xvg.corrupted_lineno)
             except AttributeError:  # backwards compatible (pre gw 0.1.10 are always ok)
                 return 0
-            except TypeError:       # len(None): XVG.parse() has not been run yet
-                return 0            # ... so we cannot conclude that it does contain bad ones
+            except TypeError:  # len(None): XVG.parse() has not been run yet
+                return 0  # ... so we cannot conclude that it does contain bad ones
+
         corrupted = {}
-        self._corrupted = {}        # debugging ...
+        self._corrupted = {}  # debugging ...
         for component, (lambdas, xvgs) in self.results.xvg.items():
             corrupted[component] = np.any([(_lencorrupted(xvg) > 0) for xvg in xvgs])
-            self._corrupted[component] = dict(((l, _lencorrupted(xvg)) for l,xvg in zip(lambdas, xvgs)))
+            self._corrupted[component] = dict(
+                ((l, _lencorrupted(xvg)) for l, xvg in zip(lambdas, xvgs))
+            )
         return np.any([x for x in corrupted.values()])
 
     def analyze(self, force=False, stride=None, autosave=True, ncorrel=25000):
@@ -972,7 +1083,7 @@ class Gsolv(Journalled):
         .. _p526: http://books.google.co.uk/books?id=XmyO2oRUg0cC&pg=PA526
         """
         stride = stride or self.stride
-        logger.info("Analysis stride is %s.",stride)
+        logger.info("Analysis stride is %s.", stride)
 
         if force or not self.has_dVdl():
             try:
@@ -988,36 +1099,52 @@ class Gsolv(Journalled):
             logger.info("Analyzing stored data.")
 
         # total free energy difference at const P (all simulations are done in NPT)
-        GibbsFreeEnergy = QuantityWithError(0,0)
+        GibbsFreeEnergy = QuantityWithError(0, 0)
 
         for component, (lambdas, xvgs) in self.results.xvg.items():
-            logger.info("[%s %s] Computing averages <dV/dl> and errors for %d lambda values.",
-                        self.molecule, component, len(lambdas))
+            logger.info(
+                "[%s %s] Computing averages <dV/dl> and errors for %d lambda values.",
+                self.molecule,
+                component,
+                len(lambdas),
+            )
             # for TI just get the average dv/dl value (in array column 1; col 0 is the time)
             # (This can take a while if the XVG is now reading the array from disk first time)
             # Use XVG class properties: first data in column 0!
             Y = np.array([x.mean[0] for x in xvgs])
-            stdY = np.array([x.std[0]  for x in xvgs])
+            stdY = np.array([x.std[0] for x in xvgs])
 
             # compute auto correlation time and error estimate for independent samples
             # (this can take a while). x.array[0] == time, x.array[1] == dHdl
             # nstep is calculated to give ncorrel samples (or all samples if less than ncorrel are
             # available)
-            tc_data = [numkit.timeseries.tcorrel(x.array[0], x.array[1],
-                                                 nstep=int(np.ceil(len(x.array[0])/float(ncorrel))))
-                                                 for x in xvgs]
-            DY = np.array([tc['sigma'] for tc in tc_data])
-            tc = np.array([tc['tc'] for tc in tc_data])
+            tc_data = [
+                numkit.timeseries.tcorrel(
+                    x.array[0],
+                    x.array[1],
+                    nstep=int(np.ceil(len(x.array[0]) / float(ncorrel))),
+                )
+                for x in xvgs
+            ]
+            DY = np.array([tc["sigma"] for tc in tc_data])
+            tc = np.array([tc["tc"] for tc in tc_data])
 
-            self.results.dvdl[component] = {'lambdas':lambdas, 'mean':Y, 'error':DY,
-                                            'stddev':stdY, 'tcorrel':tc}
+            self.results.dvdl[component] = {
+                "lambdas": lambdas,
+                "mean": Y,
+                "error": DY,
+                "stddev": stdY,
+                "tcorrel": tc,
+            }
             # Combined Simpson rule integration:
             # even="last" because dV/dl is smoother at the beginning so using trapezoidal
             # integration there makes less of an error (one hopes...)
-            a = scipy.integrate.simps(Y, x=lambdas, even='last')
-            da = numkit.integration.simps_error(DY, x=lambdas, even='last')
+            a = scipy.integrate.simps(Y, x=lambdas, even="last")
+            da = numkit.integration.simps_error(DY, x=lambdas, even="last")
             self.results.DeltaA[component] = QuantityWithError(a, da)
-            GibbsFreeEnergy += self.results.DeltaA[component]  # error propagation is automagic!
+            GibbsFreeEnergy += self.results.DeltaA[
+                component
+            ]  # error propagation is automagic!
 
         # hydration free energy Delta A = -(Delta A_coul + Delta A_vdw)
         GibbsFreeEnergy *= -1
@@ -1029,45 +1156,59 @@ class Gsolv(Journalled):
         self.logger_DeltaA0()
         return self.results.DeltaA.Gibbs
 
-    def collect_alchemlyb(self, SI=True, start=0, stop=None, stride=None, autosave=True, autocompress=True):
+    def collect_alchemlyb(
+        self, SI=True, start=0, stop=None, stride=None, autosave=True, autocompress=True
+    ):
         """Collect the data files using alchemlyb.
 
         Unlike :meth:`collect`, this method can subsample with the
         statistical inefficiency (parameter `SI`).
         """
-        extract = self.estimators[self.method]['extract']
+        extract = self.estimators[self.method]["extract"]
 
         if autocompress:
             # must be done before adding to results.xvg or we will not find the file later
             self.compress_dgdl_xvg()
 
-        logger.info("[%(dirname)s] Finding dgdl xvg files, reading with "
-                    "stride=%(stride)d permissive=%(permissive)r." % vars(self))
+        logger.info(
+            "[%(dirname)s] Finding dgdl xvg files, reading with "
+            "stride=%(stride)d permissive=%(permissive)r." % vars(self)
+        )
         for component, lambdas in self.lambdas.items():
             val = []
             for l in lambdas:
                 xvg_file = self.dgdl_xvg(self.wdir(component, l))
                 xvg_df = extract(xvg_file, T=self.Temperature).iloc[start:stop:stride]
+                full_len = len(xvg_df)
                 if SI:
-                    logger.info("Performing statistical inefficiency analysis for window %s %04d" % (component, 1000 * l))
+                    logger.info(
+                        "Performing statistical inefficiency analysis for window %s %04d"
+                        % (component, 1000 * l)
+                    )
                     ts = _extract_dataframe(xvg_file).iloc[start:stop:stride]
-                    ts = pd.DataFrame({'time': ts.iloc[:,0], 'dhdl': ts.iloc[:,1]})
-                    ts = ts.set_index('time')
-                    # calculate statistical inefficiency of series
-                    statinef  = statisticalInefficiency(ts, fast=False)
-                    logger.info("The statistical inefficiency value is {:.4f}.".format(statinef))
-                    logger.info("The data are subsampled every {:d} frames.".format(int(np.ceil(statinef))))
-                    # use the subsampleCorrelatedData function to get the subsample index
-                    indices = subsampleCorrelatedData(ts, g=statinef,
-                                                      conservative=True)
-                    xvg_df = xvg_df.iloc[indices]
+                    ts = pd.DataFrame({"time": ts.iloc[:, 0], "dhdl": ts.iloc[:, 1]})
+                    ts = ts.set_index("time")
+                    # use the statistical_inefficiency function to subsample the data
+                    xvg_df = statistical_inefficiency(xvg_df, ts, conservative=True)
+                    logger.info(
+                        "The statistical inefficiency value is {:.4f}.".format(
+                            full_len / len(xvg_df) / 2
+                        )
+                    )
+                    logger.info(
+                        "The data are subsampled every {:d} frames.".format(
+                            int(np.ceil(full_len / len(xvg_df) / 2))
+                        )
+                    )
                 val.append(xvg_df)
             self.results.xvg[component] = (np.array(lambdas), pd.concat(val))
 
         if autosave:
             self.save()
 
-    def analyze_alchemlyb(self, SI=True, start=0, stop=None, stride=None, force=False, autosave=True):
+    def analyze_alchemlyb(
+        self, SI=True, start=0, stop=None, stride=None, force=False, autosave=True
+    ):
         """Compute the free energy from the simulation data with alchemlyb.
 
         Unlike :meth:`analyze`, the MBAR estimator is available (in
@@ -1079,12 +1220,12 @@ class Gsolv(Journalled):
         start = start or self.start
         stop = stop or self.stop
 
-        logger.info("Analysis stride is %s.",stride)
-        logger.info("Analysis starts from frame %s.",start)
+        logger.info("Analysis stride is %s.", stride)
+        logger.info("Analysis starts from frame %s.", start)
         logger.info("Analysis stops at frame %s.", stop)
 
-        if self.method in ['TI', 'BAR', 'MBAR']:
-            estimator = self.estimators[self.method]['estimator']
+        if self.method in ["TI", "BAR", "MBAR"]:
+            estimator = self.estimators[self.method]["estimator"]
         else:
             errmsg = "The method is not supported."
             logger.error(errmsg)
@@ -1104,13 +1245,13 @@ class Gsolv(Journalled):
             logger.info("Analyzing stored data.")
 
         # total free energy difference at const P (all simulations are done in NPT)
-        GibbsFreeEnergy = QuantityWithError(0,0)
+        GibbsFreeEnergy = QuantityWithError(0, 0)
 
         for component, (lambdas, xvgs) in self.results.xvg.items():
             result = estimator().fit(xvgs)
-            if self.method == 'BAR':
-                DeltaA = QuantityWithError(0,0)
-                a_s= np.diagonal(result.delta_f_, offset=1)
+            if self.method == "BAR":
+                DeltaA = QuantityWithError(0, 0)
+                a_s = np.diagonal(result.delta_f_, offset=1)
                 da_s = np.diagonal(result.d_delta_f_, offset=1)
                 for a, da in zip(a_s, da_s):
                     DeltaA += QuantityWithError(a, da)
@@ -1118,8 +1259,12 @@ class Gsolv(Journalled):
             else:
                 a = result.delta_f_.loc[0.00, 1.00]
                 da = result.d_delta_f_.loc[0.00, 1.00]
-                self.results.DeltaA[component] = kBT_to_kJ(QuantityWithError(a, da), self.Temperature)
-            GibbsFreeEnergy += self.results.DeltaA[component]  # error propagation is automagic!
+                self.results.DeltaA[component] = kBT_to_kJ(
+                    QuantityWithError(a, da), self.Temperature
+                )
+            GibbsFreeEnergy += self.results.DeltaA[
+                component
+            ]  # error propagation is automagic!
 
         # hydration free energy Delta A = -(Delta A_coul + Delta A_vdw)
         GibbsFreeEnergy *= -1
@@ -1134,7 +1279,7 @@ class Gsolv(Journalled):
         if autosave:
             self.save()
 
-    def write_DeltaA0(self, filename, mode='w'):
+    def write_DeltaA0(self, filename, mode="w"):
         """Write free energy components to a file.
 
         :Arguments:
@@ -1148,7 +1293,7 @@ class Gsolv(Journalled):
           molecule solvent  total  coulomb  vdw
         """
         with open(filename, mode) as tab:
-            tab.write(self.summary() + '\n')
+            tab.write(self.summary() + "\n")
 
     def summary(self):
         """Return a string that summarizes the energetics.
@@ -1163,21 +1308,29 @@ class Gsolv(Journalled):
         """
         fmt = "%-10s %-14s %+8.2f %8.2f  %+8.2f %8.2f  %+8.2f %8.2f"
         d = self.results.DeltaA
-        return fmt % ((self.molecule, self.solvent_type) + \
-            d.Gibbs.astuple() +  d.coulomb.astuple() + \
-            d.vdw.astuple())
+        return fmt % (
+            (self.molecule, self.solvent_type)
+            + d.Gibbs.astuple()
+            + d.coulomb.astuple()
+            + d.vdw.astuple()
+        )
 
     def logger_DeltaA0(self):
         """Print the free energy contributions (errors in parentheses)."""
-        if not 'DeltaA' in self.results or len(self.results.DeltaA) == 0:
+        if not "DeltaA" in self.results or len(self.results.DeltaA) == 0:
             logger.info("No DeltaA free energies computed yet.")
             return
 
         logger.info("DeltaG0 = -(DeltaG_coul + DeltaG_vdw)")
         for component, energy in self.results.DeltaA.items():
-            logger.info("[%s] %s solvation free energy (%s) %g (%.2f) kJ/mol",
-                        self.molecule, self.solvent_type.capitalize(), component,
-                        energy.value, energy.error)
+            logger.info(
+                "[%s] %s solvation free energy (%s) %g (%.2f) kJ/mol",
+                self.molecule,
+                self.solvent_type.capitalize(),
+                component,
+                energy.value,
+                energy.error,
+            )
 
     def has_dVdl(self):
         """Check if dV/dl data have already been collected.
@@ -1190,7 +1343,9 @@ class Gsolv(Journalled):
                 return False
         except AttributeError:
             return False
-        return np.all(np.array([len(xvgs) for (lambdas,xvgs) in self.results.xvg.values()]) > 0)
+        return np.all(
+            np.array([len(xvgs) for (lambdas, xvgs) in self.results.xvg.values()]) > 0
+        )
 
     def plot(self, **kwargs):
         """Plot the TI data with error bars.
@@ -1204,9 +1359,9 @@ class Gsolv(Journalled):
         import matplotlib
         import matplotlib.pyplot as plt
 
-        kwargs.setdefault('color', 'black')
-        kwargs.setdefault('capsize', 0)
-        kwargs.setdefault('elinewidth', 2)
+        kwargs.setdefault("color", "black")
+        kwargs.setdefault("capsize", 0)
+        kwargs.setdefault("elinewidth", 2)
 
         try:
             if self.results.DeltaA.Gibbs is None or len(self.results.dvdl) == 0:
@@ -1219,20 +1374,32 @@ class Gsolv(Journalled):
         nplots = len(dvdl)
         fig, axs = plt.subplots(nrows=1, ncols=nplots)
         for i, component in enumerate(np.sort(dvdl.keys())):  # stable plot order
-            x,y,dy = [dvdl[component][k] for k in ('lambdas', 'mean', 'error')]
+            x, y, dy = [dvdl[component][k] for k in ("lambdas", "mean", "error")]
             iplot = i
             ax = axs[i]
             energy = self.results.DeltaA[component]
-            label = r"$\Delta A^{\rm{%s}}_{\rm{%s}} = %.2f\pm%.2f$ kJ/mol" \
-                    % (component, self.solvent_type, energy.value, energy.error)
+            label = r"$\Delta A^{\rm{%s}}_{\rm{%s}} = %.2f\pm%.2f$ kJ/mol" % (
+                component,
+                self.solvent_type,
+                energy.value,
+                energy.error,
+            )
             ax.errorbar(x, y, yerr=dy, label=label, **kwargs)
-            ax.set_xlabel(r'$\lambda$')
-            ax.legend(loc='best')
+            ax.set_xlabel(r"$\lambda$")
+            ax.legend(loc="best")
             ax.set_xlim(-0.05, 1.05)
-        axs[0].set_ylabel(r'$dV/d\lambda$ in kJ/mol')
-        fig.suptitle(r"Free energy difference $\Delta A^{0}_{\rm{%s}}$ for %s: $%.2f\pm%.2f$ kJ/mol" %
-              ((self.solvent_type, self.molecule,) + self.results.DeltaA.Gibbs.astuple()))
-        fig.savefig('DeltaA.png')
+        axs[0].set_ylabel(r"$dV/d\lambda$ in kJ/mol")
+        fig.suptitle(
+            r"Free energy difference $\Delta A^{0}_{\rm{%s}}$ for %s: $%.2f\pm%.2f$ kJ/mol"
+            % (
+                (
+                    self.solvent_type,
+                    self.molecule,
+                )
+                + self.results.DeltaA.Gibbs.astuple()
+            )
+        )
+        fig.savefig("DeltaA.png")
         plt.close()
         return fig
 
@@ -1257,8 +1424,10 @@ class Gsolv(Journalled):
 
         with in_dir(self.dirname, create=False):
             for component, scripts in self.scripts.items():
-                s = relpath(choose_script_from(scripts), self.dirname) # relative to dirname
-                cmd = ['qsub', s]
+                s = relpath(
+                    choose_script_from(scripts), self.dirname
+                )  # relative to dirname
+                cmd = ["qsub", s]
                 logger.debug("[%s] submitting locally: %s", " ".join(cmd), component)
                 rc = call(cmd)
                 if rc != 0:
@@ -1266,7 +1435,9 @@ class Gsolv(Journalled):
                     logger.error(errmsg)
                     raise OSError(errmsg)
 
-        logger.info("[%r] Submitted jobs locally for %r", self.dirname, self.scripts.keys())
+        logger.info(
+            "[%r] Submitted jobs locally for %r", self.dirname, self.scripts.keys()
+        )
 
     def __repr__(self):
         return "%s(filename=%r)" % (self.__class__.__name__, self.filename)
@@ -1274,6 +1445,7 @@ class Gsolv(Journalled):
 
 class Ghyd(Gsolv):
     """Sets up and analyses MD to obtain the hydration free energy of a solute."""
+
     solvent_default = "water"
     dirname_default = os.path.join(Gsolv.topdir_default, solvent_default)
 
@@ -1290,28 +1462,50 @@ class Goct(Gsolv):
     part of the dV/dl curve is quite sensitive. By adding two additional points
     we hope to reduce the overall error on the dis-charging free energy.
     """
+
     solvent_default = "octanol"
     dirname_default = os.path.join(Gsolv.topdir_default, solvent_default)
 
-    schedules = {'coulomb':
-                 FEPschedule(name='coulomb',
-                             description="dis-charging vdw+q --> vdw",
-                             label='Coul',
-                             couple_lambda0='vdw-q', couple_lambda1='vdw',
-                             sc_alpha=0,      # linear scaling for coulomb
-                             #lambdas=[0, 0.25, 0.5, 0.75, 1.0],  # default
-                             lambdas=[0, 0.125, 0.25, 0.375, 0.5, 0.75, 1.0],  # +0.125, 0.375 enhanced
-                             ),
-                 'vdw':
-                 FEPschedule(name='vdw',
-                             description="decoupling vdw --> none",
-                             label='VDW',
-                             couple_lambda0='vdw', couple_lambda1='none',
-                             sc_alpha=0.5, sc_power=1, sc_sigma=0.3, # recommended values
-                             lambdas=[0.0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6,  # defaults
-                                      0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1],
-                             ),
-                 }
+    schedules = {
+        "coulomb": FEPschedule(
+            name="coulomb",
+            description="dis-charging vdw+q --> vdw",
+            label="Coul",
+            couple_lambda0="vdw-q",
+            couple_lambda1="vdw",
+            sc_alpha=0,  # linear scaling for coulomb
+            # lambdas=[0, 0.25, 0.5, 0.75, 1.0],  # default
+            lambdas=[0, 0.125, 0.25, 0.375, 0.5, 0.75, 1.0],  # +0.125, 0.375 enhanced
+        ),
+        "vdw": FEPschedule(
+            name="vdw",
+            description="decoupling vdw --> none",
+            label="VDW",
+            couple_lambda0="vdw",
+            couple_lambda1="none",
+            sc_alpha=0.5,
+            sc_power=1,
+            sc_sigma=0.3,  # recommended values
+            lambdas=[
+                0.0,
+                0.05,
+                0.1,
+                0.2,
+                0.3,
+                0.4,
+                0.5,
+                0.6,  # defaults
+                0.65,
+                0.7,
+                0.75,
+                0.8,
+                0.85,
+                0.9,
+                0.95,
+                1,
+            ],
+        ),
+    }
 
 
 class Gwoct(Goct):
@@ -1321,7 +1515,15 @@ class Gwoct(Goct):
     part of the dV/dl curve is quite sensitive. By adding two additional points
     we hope to reduce the overall error on the dis-charging free energy.
     """
+
     solvent_default = "wetoctanol"
+    dirname_default = os.path.join(Gsolv.topdir_default, solvent_default)
+
+
+class Gtol(Gsolv):
+    """Sets up and analyses MD to obtain the solvation free energy of a solute in toluene."""
+
+    solvent_default = "toluene"
     dirname_default = os.path.join(Gsolv.topdir_default, solvent_default)
 
 
@@ -1379,10 +1581,13 @@ def p_transfer(G1, G2, **kwargs):
 
     """
 
-    kwargs.setdefault('force', False)
-    estimator = kwargs.pop('estimator', 'alchemlyb')
-    if not estimator in ('mdpow', 'alchemlyb'):
-        errmsg = "estimator = %r is not supported, must be 'mdpow' or 'alchemlyb'" % estimator
+    kwargs.setdefault("force", False)
+    estimator = kwargs.pop("estimator", "alchemlyb")
+    if not estimator in ("mdpow", "alchemlyb"):
+        errmsg = (
+            "estimator = %r is not supported, must be 'mdpow' or 'alchemlyb'"
+            % estimator
+        )
         logger.error(errmsg)
         raise ValueError(errmsg)
 
@@ -1391,40 +1596,49 @@ def p_transfer(G1, G2, **kwargs):
     if G1.Temperature != G2.Temperature:
         raise ValueError("The two simulations were done at different temperatures.")
 
-    logger.info("[%s] transfer free energy %s --> %s calculation",
-                G1.molecule, G1.solvent_type, G2.solvent_type)
+    logger.info(
+        "[%s] transfer free energy %s --> %s calculation",
+        G1.molecule,
+        G1.solvent_type,
+        G2.solvent_type,
+    )
     for G in (G1, G2):
         G_kwargs = kwargs.copy()
         # for fep files generated with old code which doesn't have these attributes
-        if not hasattr(G, 'start'):
-            G.start = G_kwargs.pop('start', 0)
-        if not hasattr(G, 'stop'):
-            G.stop = G_kwargs.pop('stop', None)
-        if not hasattr(G, 'SI'):
-            G_kwargs.setdefault('SI', True)
+        if not hasattr(G, "start"):
+            G.start = G_kwargs.pop("start", 0)
+        if not hasattr(G, "stop"):
+            G.stop = G_kwargs.pop("stop", None)
+        if not hasattr(G, "SI"):
+            G_kwargs.setdefault("SI", True)
         else:
-            G_kwargs.setdefault('SI', G.SI)
+            G_kwargs.setdefault("SI", G.SI)
 
         # for this version. use the method given instead of the one in the input cfg file
-        G.method = G_kwargs.pop('method', 'MBAR')
-        if estimator == 'mdpow':
+        G.method = G_kwargs.pop("method", "MBAR")
+        if estimator == "mdpow":
             if G.method != "TI":
-                errmsg = "Method %s is not implemented in MDPOW, use estimator='alchemlyb'" % G.method
+                errmsg = (
+                    "Method %s is not implemented in MDPOW, use estimator='alchemlyb'"
+                    % G.method
+                )
                 logger.error(errmsg)
                 raise ValueError(errmsg)
 
         logger.info("The solvent is %s .", G.solvent_type)
-        if kwargs['force'] or 'Gibbs' not in G.results.DeltaA:
+        if kwargs["force"] or "Gibbs" not in G.results.DeltaA:
             # write out the settings when the analysis is performed
             logger.info("Estimator is %s.", estimator)
             logger.info("Free energy calculation method is %s.", G.method)
 
-            if estimator == 'mdpow':
-                G_kwargs.pop('SI', None)  # G.analyze() does not know SI
+            if estimator == "mdpow":
+                G_kwargs.pop("SI", None)  # G.analyze() does not know SI
                 G.analyze(**G_kwargs)
-            elif estimator == 'alchemlyb':
-                logger.info("Statistical inefficiency analysis will %s be performed." %
-                            ("" if G_kwargs['SI'] else "not"))
+            elif estimator == "alchemlyb":
+                logger.info(
+                    "Statistical inefficiency analysis will %s be performed."
+                    % ("" if G_kwargs["SI"] else "not")
+                )
                 G.analyze_alchemlyb(**G_kwargs)
         else:
             logger.info("Using already calculated free energy DeltaA")
@@ -1440,18 +1654,26 @@ def p_transfer(G1, G2, **kwargs):
     # lower case initials, in reverse order of transfer, e.g.
     # water -> octanol:      P_ow
     # water -> cyclohexane:  P_cw
+    # water -> toluene:      P_tw
     coefficient = "P_{0}{1}".format(
-        G2.solvent_type.lower()[0], G1.solvent_type.lower()[0])
+        G2.solvent_type.lower()[0], G1.solvent_type.lower()[0]
+    )
 
     logger.info("[%s] Values at T = %g K", molecule, G1.Temperature)
-    logger.info("[%s] Free energy of transfer %s --> %s: %.3f (%.3f) kJ/mol",
-                molecule,
-                G1.solvent_type, G2.solvent_type,
-                transferFE.value, transferFE.error)
-    logger.info("[%s] log %s: %.3f (%.3f)",
-                molecule, coefficient, logPow.value, logPow.error)
+    logger.info(
+        "[%s] Free energy of transfer %s --> %s: %.3f (%.3f) kJ/mol",
+        molecule,
+        G1.solvent_type,
+        G2.solvent_type,
+        transferFE.value,
+        transferFE.error,
+    )
+    logger.info(
+        "[%s] log %s: %.3f (%.3f)", molecule, coefficient, logPow.value, logPow.error
+    )
 
     return transferFE, logPow
+
 
 def pOW(G1, G2, **kwargs):
     """Compute water-octanol partition coefficient from two :class:`Gsolv` objects.
@@ -1493,10 +1715,12 @@ def pOW(G1, G2, **kwargs):
         args = (G2, G1)
     else:
         msg = "For pOW need water and octanol simulations but instead got {0} and {1}".format(
-            G1.solvent_type, G2.solvent_type)
+            G1.solvent_type, G2.solvent_type
+        )
         logger.error(msg)
         raise ValueError(msg)
     return p_transfer(*args, **kwargs)
+
 
 def pCW(G1, G2, **kwargs):
     """Compute water-cyclohexane partition coefficient from two :class:`Gsolv` objects.
@@ -1538,7 +1762,55 @@ def pCW(G1, G2, **kwargs):
         args = (G2, G1)
     else:
         msg = "For pCW need water and cyclohexane simulations but instead got {0} and {1}".format(
-            G1.solvent_type, G2.solvent_type)
+            G1.solvent_type, G2.solvent_type
+        )
+        logger.error(msg)
+        raise ValueError(msg)
+    return p_transfer(*args, **kwargs)
+
+
+def pTW(G1, G2, **kwargs):
+    """Compute water-toluene partition coefficient from two :class:`Gsolv` objects.
+
+    transfer free energy from water into toluene::
+
+            DeltaDeltaG0 = DeltaG0_tol - DeltaG0_water
+
+    toluene/water partition coefficient::
+
+            log P_tol/wat =  log [X]_tol/[X]_wat
+
+    :Arguments:
+       *G1*, *G2*
+           *G1* and *G2* should be a :class:`Ghyd` and a :class:`Gtol` instance,
+           but order does not matter
+       *force*
+           force rereading of data files even if some data were already stored [False]
+       *stride*
+           analyze every *stride*-th datapoint in the dV/dlambda files
+       *start*
+           Start frame of data analyzed in every fep window.
+       *stop*
+           Stop frame of data analyzed in every fep window.
+       *SI*
+           Set to ``True`` if you want to perform statistical inefficiency
+           to preprocess the data.
+       *estimator*
+           Set to ``alchemlyb`` if you want to use alchemlyb estimators,
+           or ``mdpow`` if you want the default TI method.
+       *method*
+           Use `TI`, `BAR` or `MBAR` method in `alchemlyb`, or `TI` in `mdpow`.
+
+    :Returns: (transfer free energy, log10 of the toluene/water partition coefficient = log Ptw)
+    """
+    if G1.solvent_type == "water" and G2.solvent_type == "toluene":
+        args = (G1, G2)
+    elif G1.solvent_type == "toluene" and G2.solvent_type == "water":
+        args = (G2, G1)
+    else:
+        msg = "For pTW need water and toluene simulations but instead got {0} and {1}".format(
+            G1.solvent_type, G2.solvent_type
+        )
         logger.error(msg)
         raise ValueError(msg)
     return p_transfer(*args, **kwargs)

@@ -5,10 +5,12 @@
 from . import log
 
 from ._version import get_versions
-__version__ = get_versions()['version']
+
+__version__ = get_versions()["version"]
 del get_versions
 
-__all__ = ['fep', 'equil']
+__all__ = ["fep", "equil"]
+
 
 def create_logger(logfile="mdpow.log"):
     """Create the default logger.
@@ -16,20 +18,28 @@ def create_logger(logfile="mdpow.log"):
     Channels the output from :mod:`mdpow`, :mod:`gromacs`, and
     :mod:`numkit` into the file *logfile*.
     """
-    logger = log.create('mdpow', logfile)
-    log.create('numkit', logfile)   # capture numkit messages to same file
-    log.create('gromacs', logfile)  # and the GromacsWrapper messages
+    logger = log.create("mdpow", logfile)
+    log.create("numkit", logfile)  # capture numkit messages to same file
+    log.create("gromacs", logfile)  # and the GromacsWrapper messages
     return logger
 
-def log_banner():
+
+def log_banner(logger):
     """Log program name and licence at INFO level."""
     logger.info("MDPOW %s starting.", __version__)
-    logger.info("Copyright (c) 2010-2021 Shujie Fan, Ian Kenney, Alia Lescoulie, Bogdan Iorga, and Oliver Beckstein")
+    logger.info(
+        "Copyright (c) 2010-2023 Shujie Fan, Ian Kenney, "
+        "Alia Lescoulie, Cade Duckworth, Bogdan Iorga, and "
+        "Oliver Beckstein"
+    )
     logger.info("Released under the GNU Public Licence, version 3.")
-    logger.info("For bug reports and help: https://github.com/Becksteinlab/MDPOW/issues")
+    logger.info(
+        "For bug reports and help: https://github.com/Becksteinlab/MDPOW/issues"
+    )
+
 
 logger = create_logger()
-log_banner()
+log_banner(logger)
 
 # AVOID IMPORTS OF OTHER PACKAGES IN __init__.py; only standard
 # library and mdpow.log are allowed. Anything else will break 'pip
@@ -41,5 +51,4 @@ log_banner()
 #: Avogadro's constant |NA| in mol^-1 (`NA NIST value`_).
 N_AVOGADRO = 6.02214179e23
 #: Boltzmann's constant |kB| in kJ mol^-1 (`kB NIST value`_).
-kBOLTZ = 1.3806504e-23 *1e-3 * N_AVOGADRO
-
+kBOLTZ = 1.3806504e-23 * 1e-3 * N_AVOGADRO

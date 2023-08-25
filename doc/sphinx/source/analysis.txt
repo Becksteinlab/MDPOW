@@ -20,11 +20,10 @@ all FEP simulations. They then make data available (typically, as a
 :class:`pandas.DataFrame`).
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    analysis/solvation
    analysis/dihedral
-
 
 .. _framework:   
 
@@ -45,9 +44,8 @@ in more detail in [Lescoulie2021]_.
 .. toctree::
    :maxdepth: 1
 
-   analysis/ensemble_analysis	      
+   analysis/ensemble_analysis
    analysis/ensemble
-
 
 References
 ----------
