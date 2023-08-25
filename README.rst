@@ -2,7 +2,7 @@
  README for MDPOW
 ===================
 
-|build| |cov| |docs| |zenodo|
+|build| |cov| |docs| |black| |zenodo|
 
 .. |P_ow| replace:: *P*\ :sub:`OW`
 .. |P_cw| replace:: *P*\ :sub:`CW`
@@ -74,8 +74,13 @@ Source code
 *MDPOW* is open source and published under the `GNU General Public License
 v3`_. Source code is available at https://github.com/Becksteinlab/MDPOW .
 
+We use `black`_ for uniform code formatting.
+
 .. _`GNU General Public License v3`:
    http://www.gnu.org/licenses/gpl-3.0.html
+
+.. _`black`: https://github.com/psf/black
+
 
 Footnotes
 ---------
@@ -99,6 +104,8 @@ Footnotes
    :target: https://zenodo.org/badge/latestdoi/44999898
    :alt: Zenodo
 
-   
+.. |black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
+   :target: https://github.com/psf/black	 
+   :alt: black   
 
 .. _INSTALL: INSTALL.rst
