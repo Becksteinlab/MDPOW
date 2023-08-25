@@ -28,9 +28,7 @@ The :mod:`mdpow.workflows.registry` module hosts a dictionary with keys that cor
 # NOTE: analysis modules should NOT import registry to avoid circular imports
 from . import dihedrals
 
-registry = {
-    'DihedralAnalysis' : dihedrals.automated_dihedral_analysis
-}
+registry = {"DihedralAnalysis": dihedrals.automated_dihedral_analysis}
 """
 In the `registry`, each entry corresponds to an
 :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`

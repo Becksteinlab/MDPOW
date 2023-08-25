@@ -6,7 +6,7 @@ Add summary of changes for each release. Use ISO 8061 dates. Reference
 GitHub issues numbers and PR numbers.
 
 2023-??-??    0.9.0
-cadeduckworth, orbeckst, VOD555
+cadeduckworth, orbeckst, VOD555, a-ws-m
 
 Changes
 
@@ -24,6 +24,7 @@ Changes
 * _prepare_universe and _conclude_universe removed from 
   EnsembleAnalysis.run() method, no longer needed (per comments, #199)
 * internal log_banner() now uses logger as argument (PR #247)
+* use `black` formatter for codebase (#271)
 
 Enhancements
 
