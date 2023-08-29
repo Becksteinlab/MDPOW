@@ -75,24 +75,8 @@ TOP_DIR = HERE / "top"
 #: default here as this behavior is not tested.
 DEFAULT_FORCEFIELD = "OPLS-AA"
 
-# ------------------------------------------------------------
-# Gromacs water models
-# ------------------------------------------------------------
 
-#: See the file ``top/oplsaa.ff/watermodels.dat`` for a description of
-#: available water models that are bundled with MDPOW.
-GMX_WATERMODELS_DAT = """
-tip4p       TIP4P      TIP 4-point, recommended
-tip3p       TIP3P      TIP 3-point
-tip5p       TIP5P      TIP 5-point
-spc         SPC        simple point charge
-spce        SPC/E      extended simple point charge
-m24         M24        TIP 3-point with modified LJ (M24)
-tip4pd      TIP4P-D    TIP 4-point with modified dispersion (TIP4P-D)
-tip4pew     TIP4PEW    TIP 4-point modified for use with Ewald techniques (TIP4PEW)
-"""
-
-
+@dataclass
 class GromacsSolventModel(object):
     """Data for a solvent model in Gromacs."""
 
@@ -126,6 +110,22 @@ class GromacsSolventModel(object):
         )
 
 
+# ------------------------------------------------------------
+# Gromacs water models
+# ------------------------------------------------------------
+
+#: See the file ``top/oplsaa.ff/watermodels.dat`` for a description of
+#: available water models that are bundled with MDPOW.
+GMX_WATERMODELS_DAT = """
+tip4p       TIP4P      TIP 4-point, recommended
+tip3p       TIP3P      TIP 3-point
+tip5p       TIP5P      TIP 5-point
+spc         SPC        simple point charge
+spce        SPC/E      extended simple point charge
+m24         M24        TIP 3-point with modified LJ (M24)
+tip4pd      TIP4P-D    TIP 4-point with modified dispersion (TIP4P-D)
+tip4pew     TIP4PEW    TIP 4-point modified for use with Ewald techniques (TIP4PEW)
+"""
 #: For some water models we cannot derive the filename for the equilibrated box
 #: so we supply them explicitly.
 SPECIAL_WATER_COORDINATE_FILES = defaultdict(
@@ -158,17 +158,8 @@ def _create_water_models(watermodelsdat: Path) -> Dict[str, GromacsSolventModel]
     return models
 
 
-#: Use the default water model unless another water model is chosen in the
-#: :ref:`run input file <runinput-file>` file by setting the
-#: ``setup.watermodel`` parameter.
-#:
-#: .. warning::
-#:    Select the native water model **manually** and do not rely on the default
-#:    set here. For CHARMM/GAFF the CHARMM TIP3P model is recommended.
-#:    For AMBER/GAFF the TIP3P mdeol is often used. Choosing the correct water model
-#:    is a *scientific* decision that *you* have to make conscientiously.
-#:
-DEFAULT_WATER_MODEL = "tip4p"
+#: See the file ``top/oplsaa.ff/watermodels.dat`` for a description of
+#: available water models that are bundled with MDPOW.
 
 #: Dictionary of :class:`GromacsSolventModel` instances, one for each Gromacs water
 #: model  available under the force field directory. The keys are the water model
@@ -225,6 +216,18 @@ GROMACS_WATER_MODELS: Dict[str, GromacsSolventModel] = {
     ),
 }
 
+#: Use the default water model unless another water model is chosen in the
+#: :ref:`run input file <runinput-file>` file by setting the
+#: ``setup.watermodel`` parameter.
+#:
+#: .. warning::
+#:    Select the native water model **manually** and do not rely on the default
+#:    set here. For CHARMM/GAFF the CHARMM TIP3P model is recommended.
+#:    For AMBER/GAFF the TIP3P mdeol is often used. Choosing the correct water model
+#:    is a *scientific* decision that *you* have to make conscientiously.
+#:
+DEFAULT_WATER_MODEL = "tip4p"
+
 
 def get_water_model(watermodel=DEFAULT_WATER_MODEL):
     """Return a :class:`GromacsSolventModel` corresponding to identifier *watermodel*"""
@@ -271,10 +274,6 @@ class Forcefield:
 
 #: Other solvents (not water, see :data:`GROMACS_WATER_MODELS` for those).
 NEW_OCTANOL_DESC = "Zangi R (2018) Refinement of the OPLSAA force-field for liquid alcohols.; ACS Omega 3(12):18089-18099.  doi: 10.1021/acsomega.8b03132"
-
-
-#: See the file ``top/oplsaa.ff/watermodels.dat`` for a description of
-#: available water models that are bundled with MDPOW.
 
 OPLS_AA_FF_DIR = TOP_DIR / "oplsaa.ff"
 OPLS_AA = Forcefield(
@@ -410,12 +409,7 @@ def get_solvent_identifier(
 
     if solvent_type == "water":
         identifier = model if not model in (None, "water") else DEFAULT_WATER_MODEL
-        if identifier in forcefield.water_models:
-            return identifier
-        else:
-            raise ValueError(
-                f"Cannot find {identifier} in {forcefield.name} water models."
-            )
+        return identifier if identifier in forcefield.water_models else None
     if model not in forcefield.solvent_models:
         if solvent_type in forcefield.solvent_models:
             model = solvent_type
