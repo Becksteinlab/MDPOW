@@ -447,11 +447,11 @@ def get_top_template(identifier):
     """Return the topology file template suitable for the solvent model."""
 
     templates = {
-        "water": "system.top",
-        "octanol": "system.top",
-        "cyclohexane": "system.top",
-        "wetoctanol": "system_octwet.top",
-        "toluene": "system.top",
+        "water": "system.top.template",
+        "octanol": "system.top.template",
+        "cyclohexane": "system.top.template",
+        "wetoctanol": "system_octwet.top.template",
+        "toluene": "system.top.template",
     }
     try:
         return templates[identifier]
