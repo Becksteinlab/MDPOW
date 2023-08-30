@@ -22,3 +22,4 @@ doc/examples/martini/*
 !doc/examples/martini/*.ipynb
 !doc/examples/martini/water.gro
 !doc/examples/martini/octanol.gro
+!doc/examples/martini/benzene.pdb

@@ -60,11 +60,12 @@ import os
 from dataclasses import dataclass
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Optional
 
 import logging
 
 logger = logging.getLogger("mdpow.forecefields")
+Pathy = Union[str, os.PathLike]
 
 HERE = Path(__file__).parent
 TOP_DIR = HERE / "top"
@@ -76,26 +77,25 @@ DEFAULT_FORCEFIELD = "OPLS-AA"
 
 
 @dataclass
-class GromacsSolventModel(object):
+class GromacsSolventModel:
     """Data for a solvent model in Gromacs."""
 
-    def __init__(
+    identifier: str
+    name: Optional[str] = None
+    itp: Optional[Pathy] = None
+    coordinates: Optional[Pathy] = None
+    description: Optional[str] = None
+    forcefield: str = "OPLS-AA"
+
+    def __post_init__(
         self,
-        identifier,
-        name=None,
-        itp=None,
-        coordinates=None,
-        description=None,
-        forcefield="OPLS-AA",
     ):
-        self.identifier = identifier
-        self.name = name if name is not None else str(identifier).upper()
-        self.itp = itp if itp is not None else self.guess_filename("itp")
-        self.coordinates = (
-            coordinates if coordinates is not None else self.guess_filename("gro")
-        )
-        self.description = description
-        self.forcefield = forcefield
+        if self.name is None:
+            self.name = str(self.identifier).upper()
+        if self.itp is None:
+            self.itp = self.guess_filename("itp")
+        if self.coordinates is None:
+            self.coordinates = self.guess_filename("gro")
 
     def guess_filename(self, extension):
         """Guess the filename for the model and add *extension*"""
@@ -239,6 +239,7 @@ class Forcefield:
     ions_itp: Path
     default_water_itp: Path
     default_water_model: str = "tip4p"
+    water_models: Optional[Dict[str, GromacsSolventModel]] = None
 
     def __post_init__(self):
         """Check that the provided paths exist and populate the :attr:`water_models`."""
@@ -246,9 +247,10 @@ class Forcefield:
             if not path_.exists():
                 raise ValueError(f"Could not find required forcefield files: {path_}")
 
-        self.water_models: Dict[str, GromacsSolventModel] = _create_water_models(
-            self.forcefield_dir / "watermodels.dat"
-        )
+        if self.water_models is None:
+            self.water_models = _create_water_models(
+                self.forcefield_dir / "watermodels.dat"
+            )
 
     @property
     def ff_paths(self) -> List[Path]:
