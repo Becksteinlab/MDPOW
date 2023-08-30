@@ -63,7 +63,7 @@ class TestIncludedSolvents(object):
 class TestWatermodels(object):
     @staticmethod
     def test_default_water_model():
-        assert mdpow.forcefields.DEFAULT_WATER_MODEL == "tip4p"
+        assert mdpow.forcefields.OPLS_AA.default_water_model == "tip4p"
 
     def test_watermodelsdat(self):
         included_watermodels = open(mdpow.config.topfiles["watermodels.dat"]).read()
@@ -93,7 +93,7 @@ class TestWatermodels(object):
 
     @staticmethod
     def test_get_water_model():
-        model = mdpow.forcefields.DEFAULT_WATER_MODEL
+        model = mdpow.forcefields.OPLS_AA.default_water_model
         assert (
             mdpow.forcefields.get_water_model(model)
             is mdpow.forcefields.GROMACS_WATER_MODELS[model]
@@ -109,7 +109,7 @@ class TestSolventModels(object):
     @staticmethod
     def test_get_solvent_default_water():
         model = "water"
-        defaultmodel = mdpow.forcefields.DEFAULT_WATER_MODEL
+        defaultmodel = mdpow.forcefields.OPLS_AA.default_water_model
         assert (
             mdpow.forcefields.get_solvent_model(model)
             == mdpow.forcefields.GROMACS_WATER_MODELS[defaultmodel]
@@ -157,7 +157,7 @@ class TestSolventModels(object):
     def test_get_solvent_identifier_default_is_water():
         assert (
             mdpow.forcefields.get_solvent_identifier("water")
-            is mdpow.forcefields.DEFAULT_WATER_MODEL
+            is mdpow.forcefields.OPLS_AA.default_water_model
         )
 
     @pytest.mark.parametrize("model", WATERMODELS)
