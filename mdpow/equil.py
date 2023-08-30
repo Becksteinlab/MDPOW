@@ -33,6 +33,7 @@ import re
 
 import os, errno
 import shutil
+from pathlib import Path
 from string import Template
 from typing import Optional
 
@@ -371,7 +372,18 @@ class Simulation(Journalled):
         template = forcefields.get_top_template(self.solvent_type)
 
         top_template = config.get_template(kwargs.pop("top_template", template))
-        topol = kwargs.pop("topol", os.path.basename(top_template))
+
+        default_top_path = Path(top_template)
+        if ".top" in default_top_path.suffixes:
+            # Include all suffixes up to that one
+            default_top_name = default_top_path.name
+            default_top_name = (
+                default_top_name[: default_top_name.index(".top")] + ".top"
+            )
+        else:
+            default_top_name = default_top_path.with_suffix(".top").name
+
+        topol = kwargs.pop("topol", default_top_name)
         self.top_template = top_template
         itp = os.path.realpath(itp)
         _itp = os.path.basename(itp)

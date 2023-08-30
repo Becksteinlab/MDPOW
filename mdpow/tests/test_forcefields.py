@@ -174,5 +174,7 @@ class TestSolventModels(object):
 
     @staticmethod
     def test_get_solvent_identifier_None():
-        assert mdpow.forcefields.get_solvent_identifier("water", model="foobar") is None
-        assert mdpow.forcefields.get_solvent_identifier("benzene") is None
+        with pytest.raises(ValueError):
+            mdpow.forcefields.get_solvent_identifier("water", model="foobar")
+        with pytest.raises(ValueError):
+            mdpow.forcefields.get_solvent_identifier("benzene")

@@ -408,8 +408,15 @@ def get_solvent_identifier(
         forcefield = _get_forcefield(forcefield)
 
     if solvent_type == "water":
-        identifier = model if not model in (None, "water") else DEFAULT_WATER_MODEL
-        return identifier if identifier in forcefield.water_models else None
+        identifier = DEFAULT_WATER_MODEL if model in [None, "water"] else model
+
+        if identifier in forcefield.water_models:
+            return identifier
+        else:
+            raise ValueError(
+                f"{identifier} is not a valid water model for {forcefield.name}."
+            )
+
     if model not in forcefield.solvent_models:
         if solvent_type in forcefield.solvent_models:
             model = solvent_type
@@ -417,6 +424,7 @@ def get_solvent_identifier(
             raise ValueError(
                 f"Solvent type {solvent_type} not available in {forcefield.name} solvent models."
             )
+
     return model
 
 
