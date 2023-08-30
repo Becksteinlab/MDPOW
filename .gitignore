@@ -21,3 +21,4 @@ doc/examples/martini/*
 !doc/examples/martini/*.mdp
 !doc/examples/martini/*.ipynb
 !doc/examples/martini/water.gro
+!doc/examples/martini/octanol.gro
