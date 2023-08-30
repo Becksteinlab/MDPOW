@@ -17,7 +17,6 @@ different force field by supplying alternative template
 files.
 
 .. autodata:: DEFAULT_FORCEFIELD
-.. autodata:: DEFAULT_WATER_MODEL
 
 
 Solvent models
@@ -216,20 +215,8 @@ GROMACS_WATER_MODELS: Dict[str, GromacsSolventModel] = {
     ),
 }
 
-#: Use the default water model unless another water model is chosen in the
-#: :ref:`run input file <runinput-file>` file by setting the
-#: ``setup.watermodel`` parameter.
-#:
-#: .. warning::
-#:    Select the native water model **manually** and do not rely on the default
-#:    set here. For CHARMM/GAFF the CHARMM TIP3P model is recommended.
-#:    For AMBER/GAFF the TIP3P mdeol is often used. Choosing the correct water model
-#:    is a *scientific* decision that *you* have to make conscientiously.
-#:
-DEFAULT_WATER_MODEL = "tip4p"
 
-
-def get_water_model(watermodel=DEFAULT_WATER_MODEL):
+def get_water_model(watermodel="tip4p"):
     """Return a :class:`GromacsSolventModel` corresponding to identifier *watermodel*"""
 
     try:
@@ -251,6 +238,7 @@ class Forcefield:
     forcefield_dir: Path
     ions_itp: Path
     default_water_itp: Path
+    default_water_model: str = "tip4p"
 
     def __post_init__(self):
         """Check that the provided paths exist and populate the :attr:`water_models`."""
@@ -329,6 +317,7 @@ CHARMM = Forcefield(
     CHARMM_FF_DIR,
     CHARMM_FF_DIR / "ions.itp",
     CHARMM_FF_DIR / "tip3p.itp",
+    default_water_model="tip3p",
 )
 
 AMBER_FF_DIR = TOP_DIR / "amber99sb.ff"
@@ -351,6 +340,7 @@ AMBER = Forcefield(
     AMBER_FF_DIR,
     AMBER_FF_DIR / "ions.itp",
     AMBER_FF_DIR / "tip3p.itp",
+    default_water_model="tip3p",
 )
 
 ALL_FORCEFIELDS: Dict[str, Forcefield] = {
@@ -382,23 +372,21 @@ def get_solvent_identifier(
     """Get the identifier for a solvent model.
 
     The identifier is needed to access a water model (i.e., a
-    :class:`GromacsSolventModel`) through
-    :func:`get_solvent_model`. Because we have multiple water models
-    but only limited other solvents, the organization of these models
-    is a bit convoluted and it is best to obtain the desired water
-    model in these two steps::
+    :class:`GromacsSolventModel`) through :func:`get_solvent_model`. Because we
+    have multiple water models but only limited other solvents, the organization
+    of these models is a bit convoluted and it is best to obtain the desired
+    water model in these two steps::
 
-      identifier = get_solvent_identifier("water", model="tip3p")
-      model = get_solvent_model(identifier)
+      identifier = get_solvent_identifier("water", model="tip3p") model =
+      get_solvent_model(identifier)
 
 
-    For ``solvent_type`` *water*: either provide ``None`` or "water"
-    for the specific ``model`` (and the default
-    :data:`DEFAULT_WATER_MODEL` will be selected, or a specific water
-    model such as "tip3p" or "spce" (see
-    :data:`GROMACS_WATER_MODELS`). For other "octanol" or "wetoctanol"
-    of OPLS-AA forcefield, the ``model`` is used to select a specific
-    model. For other solvents and forcefields, "model" is not required.
+    For ``solvent_type`` *water*: either provide ``None`` or "water" for the
+    specific ``model`` (and the default water model for the :class:`Forcefield`
+    will be selected, or a specific water model such as "tip3p" or "spce" (see
+    :data:`GROMACS_WATER_MODELS`). For other "octanol" or "wetoctanol" of
+    OPLS-AA forcefield, the ``model`` is used to select a specific model. For
+    other solvents and forcefields, "model" is not required.
 
     :Raises ValueError: If there is no identifier found for the combination.
 
@@ -408,7 +396,9 @@ def get_solvent_identifier(
         forcefield = _get_forcefield(forcefield)
 
     if solvent_type == "water":
-        identifier = DEFAULT_WATER_MODEL if model in [None, "water"] else model
+        identifier = (
+            forcefield.default_water_model if model in [None, "water"] else model
+        )
 
         if identifier in forcefield.water_models:
             return identifier
@@ -431,13 +421,14 @@ def get_solvent_identifier(
 def get_solvent_model(identifier, forcefield: Union[Forcefield, str] = OPLS_AA):
     """Return a :class:`GromacsSolventModel` corresponding to identifier *identifier*.
 
-    If identifier is "water" then the :data:`DEFAULT_WATER_MODEL` is assumed.
+    If identifier is "water" then the default water model for the :class:`Forcefield` is assumed.
+
     """
     if isinstance(forcefield, str):
         forcefield = _get_forcefield(forcefield)
 
     if identifier == "water":
-        identifier = DEFAULT_WATER_MODEL
+        identifier = forcefield.default_water_model
     try:
         return forcefield.water_models[identifier]
     except KeyError:

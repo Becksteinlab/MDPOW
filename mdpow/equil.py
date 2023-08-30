@@ -169,10 +169,12 @@ class Simulation(Journalled):
           *solvent*
               'water' or 'octanol' or 'cyclohexane' or 'wetoctanol' or 'toluene'
           *solventmodel*
-              ``None`` chooses the default (e.g, :data:`mdpow.forcefields.DEFAULT_WATER_MODEL`
-              for ``solvent == "water"``. Other options are the models defined in
-              :data:`mdpow.forcefields.GROMACS_WATER_MODELS`. At the moment, there are no
-              alternative parameterizations included for other solvents.
+              ``None`` chooses the default (e.g, the
+              :class:`mdpow.forcefields.Forcefield` default water model for
+              ``solvent == "water"``. Other options are the models defined in
+              :data:`mdpow.forcefields.GROMACS_WATER_MODELS`. At the moment,
+              there are no alternative parameterizations included for other
+              solvents.
           *mdp*
               dict with keys corresponding to the stages ``energy_minimize``,
               ``MD_restrained``, ``MD_relaxed``,
