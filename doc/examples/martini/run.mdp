@@ -11,14 +11,16 @@ comm-mode                = Linear
 ; number of steps for center of mass motion removal = 
 nstcomm                  = 10
 
-; Output frequency for energies to log file and energy file = 
 nstxout                  = 0
 nstvout                  = 0
 nstfout                  = 0
-nstlog                   = 10000
-nstenergy                = 10000
+; Output frequency for energies to log file and energy file
+nstlog                   = 500
+nstenergy                = 200
 nstcalcenergy            = 10
-nstxtcout                = 10000
+; Output frequency and precisi500on for xtc file
+nstxtcout                = 250
+xtc-precision            = 1000
 
 cutoff-scheme            = Verlet
 nstlist                  = 20
@@ -41,7 +43,8 @@ rvdw                     = 1.1
 ;rvdw                     = 1.2
 
 
-gen-vel                  = no
+gen-vel                  = yes
+gen-temp                 = 300
 gen_seed                 = 175547
 tc-grps                  = System
 tcoupl                   = v-rescale
@@ -61,15 +64,17 @@ ref_p         = 1.0
 free-energy              = yes
 sc-power                 = 1  
 sc-alpha                 = 0.5
+sc-sigma                 = 0.3
 sc-r-power               = 6
 
 ; Which intermediate state do we start with?  Doesn't really matter, it leaves soon
--------
-init-lambda-state        = 0 
+;-------
+init-lambda-state        = sedstate
 
 ; What are the values of lambda at the intermediate states?
 ;------- 
 vdw-lambdas              = 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 
+; fep_lambdas		 = 0.0 0.25 0.5 0.75 1.0
 
 ; This makes sure we print out the differences in Hamiltonians between all states, and not just the neighboring states
 ;--------
@@ -86,6 +91,8 @@ dhdl-print-energy        = yes
 
 ; We are doing free energies with the solute molecule alone
 couple-moltype           = SOLUTE
+
+separate-dhdl-file       = yes
 
 ; decharging free energy
 ;    couple-lambda0 = vdw-q
