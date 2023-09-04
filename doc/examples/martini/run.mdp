@@ -73,8 +73,7 @@ init-lambda-state        = sedstate
 
 ; What are the values of lambda at the intermediate states?
 ;------- 
-vdw-lambdas              = 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 
-; fep_lambdas		 = 0.0 0.25 0.5 0.75 1.0
+fep_lambdas		 = 0
 
 ; This makes sure we print out the differences in Hamiltonians between all states, and not just the neighboring states
 ;--------
