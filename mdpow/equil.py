@@ -192,7 +192,8 @@ class Simulation(Journalled):
         dirname = kwargs.pop("dirname", self.dirname_default)
 
         if ff_class is not None:
-            assert isinstance(ff_class, forcefields.Forcefield)
+            if not isinstance(ff_class, forcefields.Forcefield):
+                raise TypeError(f"`ff_class` must be a `forcefields.Forcefield` instance.")
             forcefield: forcefields.Forcefield = ff_class
         else:
             forcefield_name = kwargs.pop("forcefield", "OPLS-AA")
