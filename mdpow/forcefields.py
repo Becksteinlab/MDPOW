@@ -64,11 +64,10 @@ from typing import Dict, List, Union, Optional
 
 import logging
 
+from . import config
+
 logger = logging.getLogger("mdpow.forecefields")
 Pathy = Union[str, os.PathLike]
-
-HERE = Path(__file__).parent
-TOP_DIR = HERE / "top"
 
 #: Default force field. At the moment, OPLS-AA, CHARMM/CGENFF, and AMBER/GAFF
 #: are directly supported. However, it is not recommended to change the
@@ -231,7 +230,11 @@ def get_water_model(watermodel="tip4p"):
 
 @dataclass
 class Forcefield:
-    """Contains information about files corresponding to a forcefield."""
+    """Contains information about files corresponding to a forcefield.
+
+    .. versionadded: 0.9.0
+
+    """
 
     name: str
     solvent_models: Dict[str, GromacsSolventModel]
@@ -265,7 +268,7 @@ class Forcefield:
 #: Other solvents (not water, see :data:`GROMACS_WATER_MODELS` for those).
 NEW_OCTANOL_DESC = "Zangi R (2018) Refinement of the OPLSAA force-field for liquid alcohols.; ACS Omega 3(12):18089-18099.  doi: 10.1021/acsomega.8b03132"
 
-OPLS_AA_FF_DIR = TOP_DIR / "oplsaa.ff"
+OPLS_AA_FF_DIR = Path(config.topfiles["oplsaa.ff"])
 OPLS_AA = Forcefield(
     "OPLS-AA",
     {
@@ -299,7 +302,7 @@ OPLS_AA = Forcefield(
     OPLS_AA_FF_DIR / "tip4p.itp",
 )
 
-CHARMM_FF_DIR = TOP_DIR / "charmm36-mar2019.ff"
+CHARMM_FF_DIR = Path(config.topfiles["charmm36-mar2019.ff"])
 CHARMM = Forcefield(
     "CHARMM",
     {
@@ -322,7 +325,7 @@ CHARMM = Forcefield(
     default_water_model="tip3p",
 )
 
-AMBER_FF_DIR = TOP_DIR / "amber99sb.ff"
+AMBER_FF_DIR = Path(config.topfiles["amber99sb.ff"])
 AMBER = Forcefield(
     "AMBER",
     {
@@ -360,12 +363,14 @@ GROMACS_SOLVENT_MODELS = {
 }
 
 
-def _get_forcefield(ff_name: str) -> Forcefield:
+def _get_forcefield(ff: Union[str, Forcefield]) -> Forcefield:
     """Get the :class:`Forcefield` instance corresponding to a given name."""
+    if isinstance(ff, Forcefield):
+        return ff
     try:
-        return ALL_FORCEFIELDS[ff_name]
+        return ALL_FORCEFIELDS[ff]
     except KeyError:
-        raise ValueError(f"Forcefield `{ff_name}` not found.")
+        raise ValueError(f"Forcefield `{ff}` not found.")
 
 
 def get_solvent_identifier(
@@ -374,13 +379,14 @@ def get_solvent_identifier(
     """Get the identifier for a solvent model.
 
     The identifier is needed to access a water model (i.e., a
-    :class:`GromacsSolventModel`) through :func:`get_solvent_model`. Because we
-    have multiple water models but only limited other solvents, the organization
-    of these models is a bit convoluted and it is best to obtain the desired
-    water model in these two steps::
+    :class:`GromacsSolventModel`) through
+    :func:`get_solvent_model`. Because we have multiple water models
+    but only limited other solvents, the organization of these models
+    is a bit convoluted and it is best to obtain the desired water
+    model in these two steps::
 
-      identifier = get_solvent_identifier("water", model="tip3p") model =
-      get_solvent_model(identifier)
+      identifier = get_solvent_identifier("water", model="tip3p")
+      model = get_solvent_model(identifier)
 
 
     For ``solvent_type`` *water*: either provide ``None`` or "water" for the
@@ -393,9 +399,12 @@ def get_solvent_identifier(
     :Raises ValueError: If there is no identifier found for the combination.
 
     :Returns: An identifier
+
+    .. versionchanged:: 0.9.0
+        Raises :exc:`ValueError` instead of returning ``None``.
+
     """
-    if isinstance(forcefield, str):
-        forcefield = _get_forcefield(forcefield)
+    forcefield = _get_forcefield(forcefield)
 
     if solvent_type == "water":
         identifier = (
@@ -425,9 +434,11 @@ def get_solvent_model(identifier, forcefield: Union[Forcefield, str] = OPLS_AA):
 
     If identifier is "water" then the default water model for the :class:`Forcefield` is assumed.
 
+    .. versionchanged:: 0.9.0
+        Function can now also accept a :class:`Forcefield` for the ``forcefield`` argument.
+
     """
-    if isinstance(forcefield, str):
-        forcefield = _get_forcefield(forcefield)
+    forcefield = _get_forcefield(forcefield)
 
     if identifier == "water":
         identifier = forcefield.default_water_model

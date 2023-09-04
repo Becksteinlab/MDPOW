@@ -25,6 +25,17 @@ Changes
   EnsembleAnalysis.run() method, no longer needed (per comments, #199)
 * internal log_banner() now uses logger as argument (PR #247)
 * use `black` formatter for codebase (#271)
+* implemented `forcefields.Forcefield` class (#267)
+  - facilitates users using non-default forcefields without changing package code
+  - `equil.Simulation` has new `ff_class` argument
+  - each `Forcefield` has unique `default_water_model`, replacing global `DEFAULT_WATER_MODEL`
+  - `get_solvent_model()` and `get_solvent_identifier()` take either `str` or `Forcefield` type for the `forcefield` argument
+  - both functions also use the `Forcefield`-specific `default_water_model` (fixes #112)
+* `forcefields.DEFAULT_WATER_MODEL` removed (#267)
+* changed `system.top` and `system_octwet.top` to act as templates and added `.template` suffix (#267)
+* removed `forcefields.get_ff_paths()` (#267)
+* changed `forcefields.get_solvent_identifier()`: will raise `ValueError` instead of returning `None` (#267)
+
 
 Enhancements
 
