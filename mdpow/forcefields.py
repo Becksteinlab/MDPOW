@@ -358,12 +358,14 @@ GROMACS_SOLVENT_MODELS = {
 }
 
 
-def _get_forcefield(ff_name: str) -> Forcefield:
+def _get_forcefield(ff: Union[str, Forcefield]) -> Forcefield:
     """Get the :class:`Forcefield` instance corresponding to a given name."""
+    if isinstance(ff, Forcefield):
+        return ff
     try:
-        return ALL_FORCEFIELDS[ff_name]
+        return ALL_FORCEFIELDS[ff]
     except KeyError:
-        raise ValueError(f"Forcefield `{ff_name}` not found.")
+        raise ValueError(f"Forcefield `{ff}` not found.")
 
 
 def get_solvent_identifier(
@@ -392,8 +394,7 @@ def get_solvent_identifier(
 
     :Returns: An identifier
     """
-    if isinstance(forcefield, str):
-        forcefield = _get_forcefield(forcefield)
+    forcefield = _get_forcefield(forcefield)
 
     if solvent_type == "water":
         identifier = (
@@ -424,8 +425,7 @@ def get_solvent_model(identifier, forcefield: Union[Forcefield, str] = OPLS_AA):
     If identifier is "water" then the default water model for the :class:`Forcefield` is assumed.
 
     """
-    if isinstance(forcefield, str):
-        forcefield = _get_forcefield(forcefield)
+    forcefield = _get_forcefield(forcefield)
 
     if identifier == "water":
         identifier = forcefield.default_water_model

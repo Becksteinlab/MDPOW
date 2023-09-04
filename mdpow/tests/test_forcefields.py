@@ -9,6 +9,8 @@ import mdpow.forcefields
 WATERMODELS = ("tip4p", "tip3p", "tip5p", "spc", "spce", "m24", "tip4pd")
 SOLVENTMODELS = ("water", "cyclohexane", "octanol", "toluene")
 
+forcefields = mdpow.forcefields
+
 
 class TestIncludedForcefiels(object):
     @staticmethod
@@ -28,6 +30,24 @@ class TestIncludedForcefiels(object):
         assert mdpow.config.topfiles["oplsaa.ff"].endswith(
             os.path.join("mdpow", "top", "oplsaa.ff")
         )
+
+    @pytest.mark.parametrize(
+        "ff_str,ff_instance",
+        [
+            ("OPLS-AA", forcefields.OPLS_AA),
+            ("CHARMM", forcefields.CHARMM),
+            ("AMBER", forcefields.AMBER),
+            ("Violet Parr", None),
+        ],
+    )
+    def test_get_forcefield(self, ff_str, ff_instance):
+        """Check that we can correctly cast a `Forcefield`."""
+        if ff_instance is not None:
+            assert forcefields._get_forcefield(ff_str) == ff_instance
+            assert forcefields._get_forcefield(ff_instance) == ff_instance
+        else:
+            with pytest.raises(ValueError):
+                forcefields._get_forcefield(ff_str)
 
 
 class TestIncludedSolvents(object):
