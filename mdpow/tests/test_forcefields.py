@@ -33,21 +33,28 @@ class TestIncludedForcefiels(object):
 
     @pytest.mark.parametrize(
         "ff_str,ff_instance",
-        [
-            ("OPLS-AA", forcefields.OPLS_AA),
-            ("CHARMM", forcefields.CHARMM),
-            ("AMBER", forcefields.AMBER),
-            ("Violet Parr", None),
+        list(
+            forcefields.ALL_FORCEFIELDS.items()
+        )  # List of (ff_name, ff_instance) for all builtins
+        + [
+            ("Violet Parr", None),  # Nonexistent builtin
         ],
     )
     def test_get_forcefield(self, ff_str, ff_instance):
         """Check that we can correctly cast a `Forcefield`."""
         if ff_instance is not None:
-            assert forcefields._get_forcefield(ff_str) == ff_instance
-            assert forcefields._get_forcefield(ff_instance) == ff_instance
+            assert forcefields.get_forcefield(ff_str) == ff_instance
+            assert forcefields.get_forcefield(ff_instance) == ff_instance
         else:
             with pytest.raises(ValueError):
-                forcefields._get_forcefield(ff_str)
+                forcefields.get_forcefield(ff_str)
+
+    @pytest.mark.parametrize(
+        "ff_str,ff_instance", list(forcefields.ALL_FORCEFIELDS.items())
+    )
+    def test_ff_repr(self, ff_str: str, ff_instance: forcefields.Forcefield):
+        """Test that forcefields are correctly represented by their names."""
+        assert repr(ff_instance) == ff_str
 
 
 class TestIncludedSolvents(object):
