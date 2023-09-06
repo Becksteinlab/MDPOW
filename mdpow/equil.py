@@ -35,7 +35,7 @@ import os, errno
 import shutil
 from pathlib import Path
 from string import Template
-from typing import Optional
+from typing import Union
 
 import MDAnalysis as mda
 
@@ -144,7 +144,10 @@ class Simulation(Journalled):
     }
 
     def __init__(
-        self, molecule=None, ff_class: Optional[forcefields.Forcefield] = None, **kwargs
+        self,
+        molecule=None,
+        forcefield: Union[forcefields.Forcefield, str] = "OPLS-AA",
+        **kwargs,
     ):
         """Set up Simulation instance.
 
@@ -161,11 +164,9 @@ class Simulation(Journalled):
               :meth:`~mdpow.equil.Simulation.save`.
           *dirname*
               base directory; all other directories are created under it
-          *ff_class*
-              A :class:`mdpow.forcefields.Forcefield` instance.
           *forcefield*
-              A string representation of the forcefield, when using one of the defaults:
-              'OPLS-AA' or 'CHARMM' or 'AMBER'. Not needed when :arg:`ff_class` is specified.
+              A :class:`~forcefields.Forcefield`, or the string name of a
+              packaged forcefield: 'OPLS-AA', 'CHARMM' or 'AMBER'.
           *solvent*
               'water' or 'octanol' or 'cyclohexane' or 'wetoctanol' or 'toluene'
           *solventmodel*
@@ -186,25 +187,16 @@ class Simulation(Journalled):
               advanced keywords for short-circuiting; see
               :data:`mdpow.equil.Simulation.filekeys`.
 
+        .. versionchanged:: 0.9.0
+            `forcefield` may now be either a :class:`~forcefields.Forcefield` or
+            the string name of a builtin forcefield.
+
         """
         self.__cache = {}
         filename = kwargs.pop("filename", None)
         dirname = kwargs.pop("dirname", self.dirname_default)
 
-        if ff_class is not None:
-            if not isinstance(ff_class, forcefields.Forcefield):
-                raise TypeError(
-                    f"`ff_class` must be a `forcefields.Forcefield` instance."
-                )
-            forcefield: forcefields.Forcefield = ff_class
-        else:
-            forcefield_name = kwargs.pop("forcefield", "OPLS-AA")
-            try:
-                forcefield = forcefields.ALL_FORCEFIELDS[forcefield_name]
-            except KeyError:
-                raise ValueError(
-                    f"No forcefield called `{forcefield_name}` is implemented. Please amend the `mdpow.forcefields.ALL_FORCEFIELDS` dictionary if you think it should be."
-                )
+        forcefield = forcefields.get_forcefield(forcefield)
         solvent = kwargs.pop("solvent", self.solvent_default)
         # mdp files --- should get values from default runinput.cfg
         # None values in the kwarg mdp dict are ignored

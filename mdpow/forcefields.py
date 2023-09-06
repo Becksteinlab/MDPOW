@@ -12,9 +12,10 @@ The :mod:`mdpow.forcefields` module contains settings for selecting
 different force fields and the corresponding solvent topologies.
 
 The OPLS-AA, CHARMM/CGENFF and the AMBER/GAFF force field are directly
-supported. In the principle it is possible to switch to a
-different force field by supplying alternative template
-files.
+supported. It is possible to use a different forcefield by implementing
+a :class:`Forcefield` with the correct files and supplying suitable
+``.mdp`` files. For an example of how to do this, look at the
+``martini-example.ipynb`` under ``doc/examples/martini-example``.
 
 .. autodata:: DEFAULT_FORCEFIELD
 
@@ -38,6 +39,8 @@ Internal data
 .. autodata:: GROMACS_WATER_MODELS
    :noindex:
 .. autodata:: GROMACS_SOLVENT_MODELS
+   :noindex:
+.. autodata:: ALL_FORCEFIELDS
    :noindex:
 
 Internal classes and functions
@@ -232,7 +235,7 @@ def get_water_model(watermodel="tip4p"):
 class Forcefield:
     """Contains information about files corresponding to a forcefield.
 
-    .. versionadded: 0.9.0
+    .. versionadded:: 0.9.0
 
     """
 
@@ -348,6 +351,8 @@ AMBER = Forcefield(
     default_water_model="tip3p",
 )
 
+#: The builtin forcefields' names and the corresponding :class:`Forcefield`
+#: instance
 ALL_FORCEFIELDS: Dict[str, Forcefield] = {
     "OPLS-AA": OPLS_AA,
     "CHARMM": CHARMM,
@@ -363,8 +368,12 @@ GROMACS_SOLVENT_MODELS = {
 }
 
 
-def _get_forcefield(ff: Union[str, Forcefield]) -> Forcefield:
-    """Get the :class:`Forcefield` instance corresponding to a given name."""
+def get_forcefield(ff: Union[str, Forcefield]) -> Forcefield:
+    """Get the :class:`Forcefield` instance corresponding to a given name.
+
+    .. versionadded:: 0.9.0
+
+    """
     if isinstance(ff, Forcefield):
         return ff
     try:
@@ -404,7 +413,7 @@ def get_solvent_identifier(
         Raises :exc:`ValueError` instead of returning ``None``.
 
     """
-    forcefield = _get_forcefield(forcefield)
+    forcefield = get_forcefield(forcefield)
 
     if solvent_type == "water":
         identifier = (
@@ -438,7 +447,7 @@ def get_solvent_model(identifier, forcefield: Union[Forcefield, str] = OPLS_AA):
         Function can now also accept a :class:`Forcefield` for the ``forcefield`` argument.
 
     """
-    forcefield = _get_forcefield(forcefield)
+    forcefield = get_forcefield(forcefield)
 
     if identifier == "water":
         identifier = forcefield.default_water_model
