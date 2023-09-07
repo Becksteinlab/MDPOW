@@ -1179,7 +1179,6 @@ class Gsolv(Journalled):
             for l in lambdas:
                 xvg_file = self.dgdl_xvg(self.wdir(component, l))
                 xvg_df = extract(xvg_file, T=self.Temperature).iloc[start:stop:stride]
-                full_len = len(xvg_df)
                 if SI:
                     logger.info(
                         "Performing statistical inefficiency analysis for window %s %04d"
@@ -1190,16 +1189,6 @@ class Gsolv(Journalled):
                     ts = ts.set_index("time")
                     # use the statistical_inefficiency function to subsample the data
                     xvg_df = statistical_inefficiency(xvg_df, ts, conservative=True)
-                    logger.info(
-                        "The statistical inefficiency value is {:.4f}.".format(
-                            full_len / len(xvg_df) / 2
-                        )
-                    )
-                    logger.info(
-                        "The data are subsampled every {:d} frames.".format(
-                            int(np.ceil(full_len / len(xvg_df) / 2))
-                        )
-                    )
                 val.append(xvg_df)
             self.results.xvg[component] = (np.array(lambdas), pd.concat(val))
 
