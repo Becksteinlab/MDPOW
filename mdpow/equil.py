@@ -29,9 +29,13 @@ model.
 .. autodata:: DIST
 """
 import pickle
+import re
 
 import os, errno
 import shutil
+from pathlib import Path
+from string import Template
+from typing import Union
 
 import MDAnalysis as mda
 
@@ -139,7 +143,12 @@ class Simulation(Journalled):
         "energy_minimize": "em_opls.mdp",
     }
 
-    def __init__(self, molecule=None, **kwargs):
+    def __init__(
+        self,
+        molecule=None,
+        forcefield: Union[forcefields.Forcefield, str] = "OPLS-AA",
+        **kwargs,
+    ):
         """Set up Simulation instance.
 
         The *molecule* of the compound molecule should be supplied. Existing files
@@ -156,14 +165,17 @@ class Simulation(Journalled):
           *dirname*
               base directory; all other directories are created under it
           *forcefield*
-              'OPLS-AA' or 'CHARMM' or 'AMBER'
+              A :class:`~forcefields.Forcefield`, or the string name of a
+              packaged forcefield: 'OPLS-AA', 'CHARMM' or 'AMBER'.
           *solvent*
               'water' or 'octanol' or 'cyclohexane' or 'wetoctanol' or 'toluene'
           *solventmodel*
-              ``None`` chooses the default (e.g, :data:`mdpow.forcefields.DEFAULT_WATER_MODEL`
-              for ``solvent == "water"``. Other options are the models defined in
-              :data:`mdpow.forcefields.GROMACS_WATER_MODELS`. At the moment, there are no
-              alternative parameterizations included for other solvents.
+              ``None`` chooses the default (e.g, the
+              :class:`mdpow.forcefields.Forcefield` default water model for
+              ``solvent == "water"``. Other options are the models defined in
+              :data:`mdpow.forcefields.GROMACS_WATER_MODELS`. At the moment,
+              there are no alternative parameterizations included for other
+              solvents.
           *mdp*
               dict with keys corresponding to the stages ``energy_minimize``,
               ``MD_restrained``, ``MD_relaxed``,
@@ -175,12 +187,16 @@ class Simulation(Journalled):
               advanced keywords for short-circuiting; see
               :data:`mdpow.equil.Simulation.filekeys`.
 
+        .. versionchanged:: 0.9.0
+            `forcefield` may now be either a :class:`~forcefields.Forcefield` or
+            the string name of a builtin forcefield.
+
         """
         self.__cache = {}
         filename = kwargs.pop("filename", None)
         dirname = kwargs.pop("dirname", self.dirname_default)
 
-        forcefield = kwargs.pop("forcefield", "OPLS-AA")
+        forcefield = forcefields.get_forcefield(forcefield)
         solvent = kwargs.pop("solvent", self.solvent_default)
         # mdp files --- should get values from default runinput.cfg
         # None values in the kwarg mdp dict are ignored
@@ -350,11 +366,21 @@ class Simulation(Journalled):
         dirname = kwargs.pop("dirname", self.BASEDIR("top"))
         self.dirs.topology = realpath(dirname)
 
-        setting = forcefields.get_ff_paths(self.forcefield)
         template = forcefields.get_top_template(self.solvent_type)
 
         top_template = config.get_template(kwargs.pop("top_template", template))
-        topol = kwargs.pop("topol", os.path.basename(top_template))
+
+        default_top_path = Path(top_template)
+        if ".top" in default_top_path.suffixes:
+            # Include all suffixes up to that one
+            default_top_name = default_top_path.name
+            default_top_name = (
+                default_top_name[: default_top_name.index(".top")] + ".top"
+            )
+        else:
+            default_top_name = default_top_path.with_suffix(".top").name
+
+        topol = kwargs.pop("topol", default_top_name)
         self.top_template = top_template
         itp = os.path.realpath(itp)
         _itp = os.path.basename(itp)
@@ -367,40 +393,23 @@ class Simulation(Journalled):
             prm_kw = '#include "{}"'.format(_prm)
 
         with in_dir(dirname):
+            with open(top_template, "r") as f:
+                top_string_template = Template(f.read())
+            top_string_formatted = top_string_template.substitute(
+                forcefield_itp=self.forcefield.forcefield_dir / "forcefield.itp",
+                prm_line=f'#include "{prm_kw}"' if prm_kw else "",
+                compound_itp=_itp,
+                solvent_itp=self.forcefield.forcefield_dir / self.solvent.itp,
+                ions_itp=self.forcefield.ions_itp,
+                water_itp=self.forcefield.default_water_itp,
+                compound_name=self.molecule,
+                solvent=self.solvent_type,
+            )
+            with open(topol, "w") as f:
+                f.write(top_string_formatted)
             shutil.copy(itp, _itp)
             if prm is not None:
                 shutil.copy(prm, _prm)
-            gromacs.cbook.edit_txt(
-                top_template,
-                [
-                    (
-                        r'#include +"oplsaa\.ff/forcefield\.itp"',
-                        r"oplsaa\.ff/",
-                        setting[0],
-                    ),
-                    (r'#include +"compound\.itp"', r"compound\.itp", _itp),
-                    (
-                        r'#include +"oplsaa\.ff/tip4p\.itp"',
-                        r"oplsaa\.ff/tip4p\.itp",
-                        setting[0] + self.solvent.itp,
-                    ),
-                    (
-                        r'#include +"oplsaa\.ff/ions_opls\.itp"',
-                        r"oplsaa\.ff/ions_opls\.itp",
-                        setting[1],
-                    ),
-                    (
-                        r'#include +"compound\.prm"',
-                        r'#include +"compound\.prm"',
-                        prm_kw,
-                    ),
-                    (r'#include +"water\.itp"', r"water\.itp", setting[2]),
-                    (r"Compound", "solvent", self.solvent_type),
-                    (r"Compound", "DRUG", self.molecule),
-                    (r"DRUG\s*1", "DRUG", self.molecule),
-                ],
-                newname=topol,
-            )
         logger.info(
             "[%(dirname)s] Created topology %(topol)r that includes %(_itp)r", vars()
         )

@@ -6,24 +6,22 @@
 ;       to change it as needed. See the source mdpow/equil.py for details.
 
 ; Include forcefield parameters
-#include "oplsaa.ff/forcefield.itp"
+#include "$forcefield_itp"
 
 ; Include compound topology
-#include "compound.prm"
-#include "compound.itp"
+$prm_line
+#include "$compound_itp"
 
 ; Include solvent topology
-#include "oplsaa.ff/tip4p.itp"
-#include "water.itp"
+#include "$solvent_itp"
 
 ; Include topology for OPLS/AA ions
-#include "oplsaa.ff/ions_opls.itp"
+#include "$ions_itp"
 
 [ system ]
 ; Name
-Compound DRUG in solvent
+Compound $compound_name in $solvent
 
 [ molecules ]
 ; Compound        #mols
-DRUG               1
-;OcOH               1
+$compound_name      1

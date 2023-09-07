@@ -1,5 +1,7 @@
 import os
 import shutil
+from pathlib import Path
+from typing import Dict, Type
 
 from gromacs.utilities import in_dir
 import gromacs
@@ -10,7 +12,7 @@ from mdpow import equil
 
 from . import RESOURCES
 
-sims = {
+sims: Dict[str, Type[equil.Simulation]] = {
     "water": equil.WaterSimulation,
     "octanol": equil.OctanolSimulation,
     "cyclohexane": equil.CyclohexaneSimulation,
@@ -35,7 +37,7 @@ def setup(tmpdir):
     return newdir.dirname
 
 
-def solvation(setup, solvent, ff="OPLS-AA"):
+def solvation(setup: Path, solvent: str, ff="OPLS-AA"):
     itp = test_file[ff]
     with in_dir(setup, create=False):
         try:

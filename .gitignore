@@ -15,3 +15,11 @@ coverage.xml
 *.lock
 *.npz
 dir.csv
+
+# Files for the Martini example that can be downloaded at runtime
+doc/examples/martini/*
+!doc/examples/martini/*.mdp
+!doc/examples/martini/*.ipynb
+!doc/examples/martini/water.gro
+!doc/examples/martini/octanol.gro
+!doc/examples/martini/benzene.pdb
