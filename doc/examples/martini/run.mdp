@@ -69,7 +69,7 @@ sc-r-power               = 6
 
 ; Which intermediate state do we start with?  Doesn't really matter, it leaves soon
 ;-------
-init-lambda-state        = sedstate
+init-lambda-state        = 0.0
 
 ; What are the values of lambda at the intermediate states?
 ;------- 
