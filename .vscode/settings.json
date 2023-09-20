@@ -1,0 +1,10 @@
+{
+    "[python]": {
+        "editor.formatOnSave": true
+    },
+    "python.testing.pytestArgs": [
+        "mdpow"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
+}

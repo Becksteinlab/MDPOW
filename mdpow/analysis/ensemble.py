@@ -9,17 +9,22 @@ import numpy as np
 
 import MDAnalysis as mda
 from MDAnalysis.lib.log import ProgressBar
-from MDAnalysis.exceptions import FileFormatWarning, NoDataError, MissingDataWarning, SelectionError
+from MDAnalysis.exceptions import (
+    FileFormatWarning,
+    NoDataError,
+    MissingDataWarning,
+    SelectionError,
+)
 
 from gromacs.utilities import in_dir
 
 import logging
 
-logger = logging.getLogger('mdpow._ensemble')
+logger = logging.getLogger("mdpow._ensemble")
 
 
 class Ensemble(object):
-    """ Collection of related :class:`MDAnalysis.Universe <MDAnalysis.core.groups.universe.Universe>`
+    """Collection of related :class:`MDAnalysis.Universe <MDAnalysis.core.groups.universe.Universe>`
     objects.
 
     Stores systems produced by running mdpow-fep organized
@@ -86,9 +91,14 @@ class Ensemble(object):
     .. versionadded:: 0.8.0
     """
 
-    def __init__(self, dirname=None, solvents=('octanol', 'water'),
-                 topology_paths=None, interactions=('Coulomb', 'VDW'),
-                 **universe_kwargs):
+    def __init__(
+        self,
+        dirname=None,
+        solvents=("octanol", "water"),
+        topology_paths=None,
+        interactions=("Coulomb", "VDW"),
+        **universe_kwargs,
+    ):
         self.top_dict = topology_paths
         self._num_systems = 0
         self._ensemble = {}
@@ -102,8 +112,7 @@ class Ensemble(object):
 
         if not os.path.exists(dirname):
             logger.error(f"Directory {dirname} does not exist")
-            raise FileNotFoundError(errno.ENOENT, 'Directory does not'
-                                                  'exist', dirname)
+            raise FileNotFoundError(errno.ENOENT, "Directory does not" "exist", dirname)
 
         self._ensemble_dir = dirname
         self._build_ensemble()
@@ -119,7 +128,9 @@ class Ensemble(object):
         return self._ensemble[index]
 
     @staticmethod
-    def _load_universe_from_dir(solv_dir=None, **universe_kwargs) -> Optional[mda.Universe]:
+    def _load_universe_from_dir(
+        solv_dir=None, **universe_kwargs
+    ) -> Optional[mda.Universe]:
         """Loads system simulation files in directory into an
         :class:`MDAnalysis.Universe <MDAnalysis.core.groups.universe.Universe>`
 
@@ -141,10 +152,12 @@ class Ensemble(object):
         def _sort_topologies(topologies: list) -> list:
             """sorts list of trajectory files with .tpr first"""
             tops = []
-            logger.info('If more than one topology is present the tpr will be the one used')
+            logger.info(
+                "If more than one topology is present the tpr will be the one used"
+            )
             for i in range(len(topologies)):
                 f = topologies[i]
-                if f.endswith('.tpr'):
+                if f.endswith(".tpr"):
                     topologies.pop(i)
                     tops = [f] + topologies
                     break
@@ -159,16 +172,20 @@ class Ensemble(object):
             top = [solv_dir]
 
         for file in cur_dir:
-            if file.endswith('.xtc'):
+            if file.endswith(".xtc"):
                 # Saving trajectory directories
                 trj.append(file)
-            elif (file.endswith('gro') or file.endswith('.tpr') or file.endswith('gro.bz2')
-                  or file.endswith('gro.gz')) and solv_dir is None:
+            elif (
+                file.endswith("gro")
+                or file.endswith(".tpr")
+                or file.endswith("gro.bz2")
+                or file.endswith("gro.gz")
+            ) and solv_dir is None:
                 # Saving topology directories
                 top.append(file)
 
         if len(top) == 0 or len(trj) == 0:
-            logger.warning('No MD files detected in %s', os.curdir)
+            logger.warning("No MD files detected in %s", os.curdir)
             return
 
         trj = _sort_trajectories(trj)
@@ -177,8 +194,14 @@ class Ensemble(object):
 
         try:
             return mda.Universe(os.path.abspath(top[0]), trj, **universe_kwargs)
-        except (ValueError, FileFormatWarning, NoDataError, MissingDataWarning, OSError) as err:
-            logger.error(f'{err} raised while loading {top[0]} {trj} in dir {cur_dir}')
+        except (
+            ValueError,
+            FileFormatWarning,
+            NoDataError,
+            MissingDataWarning,
+            OSError,
+        ) as err:
+            logger.error(f"{err} raised while loading {top[0]} {trj} in dir {cur_dir}")
             raise NoDataError
 
     def keys(self):
@@ -193,9 +216,11 @@ class Ensemble(object):
         Run if :code:`dirname` argument is given when initializing the class.
         First enters FEP directory, then traverses solvent and interaction
         directories to search lambda directories for system files."""
-        fep_dir = os.path.join(self._ensemble_dir, 'FEP')
+        fep_dir = os.path.join(self._ensemble_dir, "FEP")
         solv_top_path = None
-        for solvent in self._solvents:  # Ugly set of loops, may have to find way to clean up
+        for (
+            solvent
+        ) in self._solvents:  # Ugly set of loops, may have to find way to clean up
             if self.top_dict is not None:
                 solv_top_path = self.top_dict[solvent]
             for dirs in self._interactions:  # Attribute folder names
@@ -206,10 +231,11 @@ class Ensemble(object):
                     for file in sorted(files):  # Traversing lambda directories
                         if os.path.isdir(file):
                             with in_dir(file, create=False):
-                                u = self._load_universe_from_dir(solv_dir=solv_top_path,
-                                                                 **self.unv_kwargs)
+                                u = self._load_universe_from_dir(
+                                    solv_dir=solv_top_path, **self.unv_kwargs
+                                )
                                 if u is None:
-                                    logger.warning(f'No system loaded in {file}')
+                                    logger.warning(f"No system loaded in {file}")
                                 else:
                                     self.add_system((solvent, dirs, file), u)
 
@@ -236,20 +262,33 @@ class Ensemble(object):
 
         Uses the same
         `selection commands <https://docs.mdanalysis.org/stable/documentation_pages/selections.html>`_
-        as MDAnalysis, and has the same keys as the :class:`~mdpow.analysis.ensemble.Ensemble`"""
+        as MDAnalysis, and has the same keys as the :class:`~mdpow.analysis.ensemble.Ensemble`
+        """
         selections = {}
         for key in self.keys():
             try:
                 ag = self[key].select_atoms(*args, **kwargs)
             except SelectionError as err:
-                logger.error("%r on system %r with selection settings %r %r", err, key, args, kwargs)
+                logger.error(
+                    "%r on system %r with selection settings %r %r",
+                    err,
+                    key,
+                    args,
+                    kwargs,
+                )
                 raise
             else:
                 selections[key] = ag
         return EnsembleAtomGroup(selections, ensemble=self)
 
-    def select_systems(self, keys=None, solvents=None, interactions=None,
-                       lambdas=None, lambda_range=None):
+    def select_systems(
+        self,
+        keys=None,
+        solvents=None,
+        interactions=None,
+        lambdas=None,
+        lambda_range=None,
+    ):
         """
         Select specific subset of systems and returns them in an Ensemble.
 
@@ -318,10 +357,14 @@ class Ensemble(object):
                         elif lambda_range is not None:
                             # Selecting range of lambdas
                             for k in self.keys():
-                                if lambda_range[0] <= int(k[2]) / 1000 <= lambda_range[1]:
+                                if (
+                                    lambda_range[0]
+                                    <= int(k[2]) / 1000
+                                    <= lambda_range[1]
+                                ):
                                     new_key.append((s, i, k[2]))
         for k in new_key:
-            logger.info('adding system %r to ensemble', k)
+            logger.info("adding system %r to ensemble", k)
             new_ens.add_system(k, universe=self[k])
         new_ens._ensemble_dir = self._ensemble_dir
         return new_ens
@@ -374,13 +417,20 @@ class EnsembleAtomGroup(object):
 
         Uses the same
         `selection commands <https://docs.mdanalysis.org/stable/documentation_pages/selections.html>`_
-        as MDAnalysis, and has the same keys as :class:`~mdpow.analysis.ensemble.EnsembleAtomGroup`"""
+        as MDAnalysis, and has the same keys as :class:`~mdpow.analysis.ensemble.EnsembleAtomGroup`
+        """
         selections = {}
         for key in self.keys():
             try:
                 ag = self[key].select_atoms(*args, **kwargs)
             except SelectionError as err:
-                logger.error("%r on system %r with selection settings %r %r", err, key, args, kwargs)
+                logger.error(
+                    "%r on system %r with selection settings %r %r",
+                    err,
+                    key,
+                    args,
+                    kwargs,
+                )
                 raise
             else:
                 selections[key] = ag
@@ -458,39 +508,41 @@ class EnsembleAnalysis(object):
 
     def _setup_frames(self, trajectory):
         self._trajectory = trajectory
-        start, stop, step = trajectory.check_slice_indices(self.start, self.stop, self.step)
+        start, stop, step = trajectory.check_slice_indices(
+            self.start, self.stop, self.step
+        )
         self.n_frames = len(range(start, stop, step))
         self.frames = np.zeros(self.n_frames, dtype=int)
         self.times = np.zeros(self.n_frames)
 
     def _single_universe(self):
-        """Calculations on a single :class:`MDAnalysis.Universe 
-           <MDAnalysis.core.groups.universe.Universe>` object.
+        """Calculations on a single :class:`MDAnalysis.Universe
+        <MDAnalysis.core.groups.universe.Universe>` object.
 
-           Run on each :class:`MDAnalysis.Universe 
-           <MDAnalysis.core.groups.universe.Universe>` 
-           in the :class:`~mdpow.analysis.ensemble.Ensemble` 
-           during when :meth:`run` in called.
-           :exc:`NotImplementedError` will detect whether 
-           :meth:`~EnsembleAnalysis._single_universe`
-           or :meth:`~EnsembleAnalysis._single_frame` 
-           should be implemented, based on which is defined 
-           in the :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`.
+        Run on each :class:`MDAnalysis.Universe
+        <MDAnalysis.core.groups.universe.Universe>`
+        in the :class:`~mdpow.analysis.ensemble.Ensemble`
+        during when :meth:`run` in called.
+        :exc:`NotImplementedError` will detect whether
+        :meth:`~EnsembleAnalysis._single_universe`
+        or :meth:`~EnsembleAnalysis._single_frame`
+        should be implemented, based on which is defined
+        in the :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`.
         """
         raise NotImplementedError
 
     def _single_frame(self):
         """Calculate data from a single frame of trajectory.
 
-           Called on each frame for each 
-           :class:`MDAnalysis.Universe <MDAnalysis.core.groups.universe.Universe>` 
-           in the :class:`~mdpow.analysis.ensemble.Ensemble`.
-           
-           :exc:`NotImplementedError` will detect whether 
-           :meth:`~EnsembleAnalysis._single_universe`
-           or :meth:`~EnsembleAnalysis._single_frame` 
-           should be implemented, based on which is defined 
-           in the :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`.
+        Called on each frame for each
+        :class:`MDAnalysis.Universe <MDAnalysis.core.groups.universe.Universe>`
+        in the :class:`~mdpow.analysis.ensemble.Ensemble`.
+
+        :exc:`NotImplementedError` will detect whether
+        :meth:`~EnsembleAnalysis._single_universe`
+        or :meth:`~EnsembleAnalysis._single_frame`
+        should be implemented, based on which is defined
+        in the :class:`~mdpow.analysis.ensemble.EnsembleAnalysis`.
         """
         raise NotImplementedError
 
@@ -521,15 +573,15 @@ class EnsembleAnalysis(object):
         pass  # pragma: no cover
 
     def run(self, start=None, stop=None, step=None):
-        """Runs :meth:`~EnsembleAnalysis._single_universe` 
+        """Runs :meth:`~EnsembleAnalysis._single_universe`
         on each system or :meth:`~EnsembleAnalysis._single_frame`
         on each frame in the system.
 
-        First iterates through keys of ensemble, then runs 
-        :meth:`~EnsembleAnalysis._setup_system`which defines 
+        First iterates through keys of ensemble, then runs
+        :meth:`~EnsembleAnalysis._setup_system`which defines
         the system and trajectory. Then iterates over each
-        system universe or trajectory frames of each universe 
-        as defined by :meth:`~EnsembleAnalysis._single_universe` 
+        system universe or trajectory frames of each universe
+        as defined by :meth:`~EnsembleAnalysis._single_universe`
         or :meth:`~EnsembleAnalysis._single_frame`.
         """
         logger.info("Setting up systems")
@@ -539,8 +591,13 @@ class EnsembleAnalysis(object):
             try:
                 self._single_universe()
             except NotImplementedError:
-                for i, ts in enumerate(ProgressBar(self._trajectory[self.start:self.stop:self.step], verbose=True,
-                                               postfix=f'running system {self._key}')):
+                for i, ts in enumerate(
+                    ProgressBar(
+                        self._trajectory[self.start : self.stop : self.step],
+                        verbose=True,
+                        postfix=f"running system {self._key}",
+                    )
+                ):
                     self._frame_index = i
                     self._ts = ts
                     self.frames[i] = ts.frame
@@ -566,9 +623,11 @@ class EnsembleAnalysis(object):
             for j in range(i + 1, len(groups)):
                 # Checking if EnsembleAtomGroup.ensemble references same object in memory
                 if groups[i].ensemble is not groups[j].ensemble:
-                    msg = ('Dihedral selections from different Ensembles, '
-                           'ensure that all EnsembleAtomGroups are created '
-                           'from the same Ensemble. '
-                           f'mismatch: group[{i}].ensemble != group[{j}].ensemble')
+                    msg = (
+                        "Dihedral selections from different Ensembles, "
+                        "ensure that all EnsembleAtomGroups are created "
+                        "from the same Ensemble. "
+                        f"mismatch: group[{i}].ensemble != group[{j}].ensemble"
+                    )
                     logger.error(msg)
                     raise ValueError(msg)

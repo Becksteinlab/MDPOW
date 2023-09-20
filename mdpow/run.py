@@ -44,14 +44,14 @@ import errno
 import gromacs.run
 import gromacs.exceptions
 
-from .config import (get_configuration, set_gromacsoutput,
-                     NoSectionError)
+from .config import get_configuration, set_gromacsoutput, NoSectionError
 from . import equil
 from . import fep
 from .restart import checkpoint
 
 import logging
-logger = logging.getLogger('mdpow.run')
+
+logger = logging.getLogger("mdpow.run")
 
 
 def setupMD(S, protocol, cfg):
@@ -63,36 +63,47 @@ def setupMD(S, protocol, cfg):
         maxwarn = 0
 
     simulation_protocol = S.get_protocol(protocol)
-    params = simulation_protocol(runtime=cfg.getfloat(protocol, "runtime"),
-                                 qscript=cfg.getlist(protocol, "qscript"),
-                                 maxwarn=maxwarn,
-                                 )
+    params = simulation_protocol(
+        runtime=cfg.getfloat(protocol, "runtime"),
+        qscript=cfg.getlist(protocol, "qscript"),
+        maxwarn=maxwarn,
+    )
     return params
+
 
 def get_mdp_files(cfg, protocols):
     """Get file names of MDP files from *cfg* for all *protocols*"""
     mdpfiles = {}
     for protocol in protocols:
         try:
-            mdp = cfg.findfile(protocol, 'mdp')
+            mdp = cfg.findfile(protocol, "mdp")
         except NoSectionError:
             # skip anything for which we do not define sections, such as
             # the dummy run protocols
             mdp = None
         except ValueError:
             # But it is a problem if we can't find a file!
-            logger.critical("Failed to find custom MDP file %r for protocol [%s]",
-                            cfg.get(protocol, 'mdp'), protocol)
+            logger.critical(
+                "Failed to find custom MDP file %r for protocol [%s]",
+                cfg.get(protocol, "mdp"),
+                protocol,
+            )
             raise
         else:
             if mdp is None:
                 # Should not happen... let's continue and wait for hard-coded defaults
-                logger.warning("No 'mdp' config file entry for protocol [%s]---check input files! "
-                               "Using package defaults.", protocol)
+                logger.warning(
+                    "No 'mdp' config file entry for protocol [%s]---check input files! "
+                    "Using package defaults.",
+                    protocol,
+                )
         if mdp:
             mdpfiles[protocol] = mdp
-            logger.debug("%(protocol)s: Using MDP file %(mdp)r from config file", vars())
+            logger.debug(
+                "%(protocol)s: Using MDP file %(mdp)r from config file", vars()
+            )
     return mdpfiles
+
 
 def runMD_or_exit(S, protocol, params, cfg, exit_on_error=True, **kwargs):
     """run simulation
@@ -129,15 +140,17 @@ def runMD_or_exit(S, protocol, params, cfg, exit_on_error=True, **kwargs):
             raise ValueError("supply dirname as a keyword argument")
     simulation_done = False
     if cfg.getboolean(protocol, "runlocal"):
-        logger.info("Running %s (%s.log) ... stand by.", protocol, params['deffnm'])
+        logger.info("Running %s (%s.log) ... stand by.", protocol, params["deffnm"])
         logger.info("Run directory: %(dirname)s", vars())
         mdrun = gromacs.run.MDrunner(
-            dirname=dirname, deffnm=params['deffnm'],
-            v=cfg.getboolean('mdrun','verbose'),
-            stepout=cfg.getint('mdrun','stepout'),
-            nice=cfg.getint('mdrun','nice'),
-            nt=cfg.get('mdrun','maxthreads'),
-            cpi=True)
+            dirname=dirname,
+            deffnm=params["deffnm"],
+            v=cfg.getboolean("mdrun", "verbose"),
+            stepout=cfg.getint("mdrun", "stepout"),
+            nice=cfg.getint("mdrun", "nice"),
+            nt=cfg.get("mdrun", "maxthreads"),
+            cpi=True,
+        )
         simulation_done = mdrun.run_check()
         if not simulation_done:
             # should probably stop
@@ -146,12 +159,13 @@ def runMD_or_exit(S, protocol, params, cfg, exit_on_error=True, **kwargs):
                 sys.exit(1)
             else:
                 raise gromacs.exceptions.GromacsError(
-                    f"Failed {protocol}, investigate manually.")
+                    f"Failed {protocol}, investigate manually."
+                )
     else:
         # must check if the simulation was run externally
-        logfile = os.path.join(dirname, params['deffnm']+os.extsep+"log")
+        logfile = os.path.join(dirname, params["deffnm"] + os.extsep + "log")
         logger.debug("Checking logfile %r if simulation has been completed.", logfile)
-        simulation_done = gromacs.run.check_mdrun_success(logfile) ### broken??
+        simulation_done = gromacs.run.check_mdrun_success(logfile)  ### broken??
         if simulation_done is None:
             logger.info("Now go and run %(protocol)s in directory %(dirname)r.", vars())
             if exit_on_error:
@@ -159,12 +173,16 @@ def runMD_or_exit(S, protocol, params, cfg, exit_on_error=True, **kwargs):
             else:
                 return simulation_done
         elif simulation_done is False:
-            logger.warning("Simulation %(protocol)s in directory %(dirname)r is incomplete (log=%(logfile)s).", vars())
+            logger.warning(
+                "Simulation %(protocol)s in directory %(dirname)r is incomplete (log=%(logfile)s).",
+                vars(),
+            )
             if exit_on_error:
                 sys.exit(1)
             else:
                 raise gromacs.exceptions.MissingDataError(
-                    f"Simulation {protocol} in directory {dirname} is incomplete (log={logfile}).")
+                    f"Simulation {protocol} in directory {dirname} is incomplete (log={logfile})."
+                )
         logger.info("Simulation %(protocol)s seems complete (log=%(logfile)s)", vars())
     return simulation_done
 
@@ -178,19 +196,20 @@ def equilibrium_simulation(cfg, solvent, **kwargs):
        (``runlocal``), :program:`mdrun` is executed at various stages,
        and hence this process can take a while.
     """
-    deffnm = kwargs.pop('deffnm', "md")
+    deffnm = kwargs.pop("deffnm", "md")
     Simulations = {
-        'water': equil.WaterSimulation,
-        'octanol': equil.OctanolSimulation,
-        'wetoctanol': equil.WetOctanolSimulation,
-        'cyclohexane':equil.CyclohexaneSimulation,
-        'toluene': equil.TolueneSimulation,
-        }
+        "water": equil.WaterSimulation,
+        "octanol": equil.OctanolSimulation,
+        "wetoctanol": equil.WetOctanolSimulation,
+        "cyclohexane": equil.CyclohexaneSimulation,
+        "toluene": equil.TolueneSimulation,
+    }
     try:
         Simulation = Simulations[solvent]
     except KeyError:
-        raise ValueError("solvent must be one of {0}".format(
-            ", ".join(Simulations.keys())))
+        raise ValueError(
+            "solvent must be one of {0}".format(", ".join(Simulations.keys()))
+        )
 
     # generate a canonical path under dirname
     topdir = kwargs.get("dirname", None)
@@ -208,18 +227,17 @@ def equilibrium_simulation(cfg, solvent, **kwargs):
         # custom mdp files
         mdpfiles = get_mdp_files(cfg, Simulation.protocols)
         try:
-            distance = cfg.get('setup', 'distance')
+            distance = cfg.get("setup", "distance")
         except KeyError:
-            distance = None # if no distance is specified, None = default
+            distance = None  # if no distance is specified, None = default
         try:
-            boxtype = cfg.get('setup', 'boxtype')
+            boxtype = cfg.get("setup", "boxtype")
         except KeyError:
-            boxtype = None # if no distance is specified, None = default
-
+            boxtype = None  # if no distance is specified, None = default
 
         solventmodel = None
         try:
-            solventmodel = cfg.get('setup', 'solventmodel')
+            solventmodel = cfg.get("setup", "solventmodel")
             logger.info("Selected solvent model: {0}".format(solventmodel))
         except KeyError:
             solventmodel = None
@@ -228,22 +246,28 @@ def equilibrium_simulation(cfg, solvent, **kwargs):
         # parameterization included and hence there is no mechanism to
         # choose between different models.
 
-        S = Simulation(molecule=cfg.get("setup", "molecule"),
-                       forcefield=cfg.get("setup", "forcefield"),
-                       dirname=dirname, deffnm=deffnm, mdp=mdpfiles,
-                       distance=distance,
-                       solventmodel=solventmodel)
+        S = Simulation(
+            molecule=cfg.get("setup", "molecule"),
+            forcefield=cfg.get("setup", "forcefield"),
+            dirname=dirname,
+            deffnm=deffnm,
+            mdp=mdpfiles,
+            distance=distance,
+            solventmodel=solventmodel,
+        )
 
     if S.journal.has_not_completed("energy_minimize"):
         maxwarn = cfg.getint("setup", "maxwarn") or None
         prm = cfg.get("setup", "prm") or None
-        maxthreads = cfg.get('mdrun', 'maxthreads') or None
+        maxthreads = cfg.get("mdrun", "maxthreads") or None
         S.topology(itp=cfg.getpath("setup", "itp"), prm=prm)
-        S.solvate(struct=cfg.getpath("setup", "structure"),
-                  bt=cfg.get("setup", "boxtype"),
-                  maxwarn=maxwarn)
-        S.energy_minimize(maxwarn=maxwarn, mdrun_args={'nt': maxthreads})
-        checkpoint('energy_minize', S, savefilename)
+        S.solvate(
+            struct=cfg.getpath("setup", "structure"),
+            bt=cfg.get("setup", "boxtype"),
+            maxwarn=maxwarn,
+        )
+        S.energy_minimize(maxwarn=maxwarn, mdrun_args={"nt": maxthreads})
+        checkpoint("energy_minize", S, savefilename)
     else:
         logger.info("Fast-forwarding: setup + energy_minimize done")
 
@@ -251,12 +275,14 @@ def equilibrium_simulation(cfg, solvent, **kwargs):
         params = setupMD(S, "MD_relaxed", cfg)
         checkpoint("MD_relaxed", S, savefilename)
     else:
-        params = {'deffnm': deffnm}
+        params = {"deffnm": deffnm}
         logger.info("Fast-forwarding: MD_relaxed (setup) done")
 
     if S.journal.has_not_completed("MD_relaxed_run"):
         wrapper = S.get_protocol("MD_relaxed_run")
-        success = wrapper(runMD_or_exit, S, "MD_relaxed", params, cfg)  # note: MD_relaxed!
+        success = wrapper(
+            runMD_or_exit, S, "MD_relaxed", params, cfg
+        )  # note: MD_relaxed!
         checkpoint("MD_relaxed_run", S, savefilename)
     else:
         logger.info("Fast-forwarding: MD_relaxed (run) done")
@@ -269,13 +295,15 @@ def equilibrium_simulation(cfg, solvent, **kwargs):
 
     if S.journal.has_not_completed("MD_NPT_run"):
         wrapper = S.get_protocol("MD_NPT_run")
-        success = wrapper(runMD_or_exit, S, "MD_NPT", params, cfg)   # note: MD_NPT
+        success = wrapper(runMD_or_exit, S, "MD_NPT", params, cfg)  # note: MD_NPT
         checkpoint("MD_NPT_run", S, savefilename)
     else:
         logger.info("Fast-forwarding: MD_NPT (run) done")
 
-    logger.info("Equilibrium simulation phase complete, use %(savefilename)r to continue.",
-                vars())
+    logger.info(
+        "Equilibrium simulation phase complete, use %(savefilename)r to continue.",
+        vars(),
+    )
     return savefilename
 
 
@@ -290,27 +318,29 @@ def fep_simulation(cfg, solvent, **kwargs):
        recommended to use ``runlocal = False`` in the run input file
        and submit all window simulations to a cluster.
     """
-    exit_on_error = kwargs.pop('exit_on_error', True)
-    deffnm = kwargs.pop('deffnm', "md")
+    exit_on_error = kwargs.pop("exit_on_error", True)
+    deffnm = kwargs.pop("deffnm", "md")
     EquilSimulations = {
-        'water': equil.WaterSimulation,
-        'octanol': equil.OctanolSimulation,
-        'wetoctanol': equil.WetOctanolSimulation,
-        'cyclohexane': equil.CyclohexaneSimulation,
-        'toluene': equil.TolueneSimulation,
-        }
+        "water": equil.WaterSimulation,
+        "octanol": equil.OctanolSimulation,
+        "wetoctanol": equil.WetOctanolSimulation,
+        "cyclohexane": equil.CyclohexaneSimulation,
+        "toluene": equil.TolueneSimulation,
+    }
     Simulations = {
-        'water': fep.Ghyd,
-        'octanol': fep.Goct,
-        'wetoctanol': fep.Gwoct,
-        'cyclohexane': fep.Gcyclo,
-        'toluene': fep.Gtol,
-        }
+        "water": fep.Ghyd,
+        "octanol": fep.Goct,
+        "wetoctanol": fep.Gwoct,
+        "cyclohexane": fep.Gcyclo,
+        "toluene": fep.Gtol,
+    }
     try:
         EquilSimulation = EquilSimulations[solvent]
         Simulation = Simulations[solvent]
     except KeyError:
-        raise ValueError("solvent must be 'water', 'octanol', 'wetoctanol', 'cyclohexane' or 'toluene'")
+        raise ValueError(
+            "solvent must be 'water', 'octanol', 'wetoctanol', 'cyclohexane' or 'toluene'"
+        )
     # generate a canonical path under dirname
     topdir = kwargs.get("dirname", None)
     if topdir is None:
@@ -320,15 +350,19 @@ def fep_simulation(cfg, solvent, **kwargs):
     # Gsolv ... should be a static method or something else I can use before
     # the class is instantiated. Note that the pickle files live under dirname
     # and NOT topdir (bit of an historic inconsistency)
-    savefilename = os.path.join(dirname, Simulation.__name__ + os.extsep + 'fep')
+    savefilename = os.path.join(dirname, Simulation.__name__ + os.extsep + "fep")
     # need pickle files for the equilibrium simulation ... another nasty guess:
     equil_savefilename = os.path.join(topdir, "%(solvent)s.simulation" % vars())
     try:
         equil_S = EquilSimulation(filename=equil_savefilename)
     except IOError as err:
         if err.errno == errno.ENOENT:
-            logger.critical("Missing the equilibrium simulation %(equil_savefilename)r.", vars())
-            logger.critical("Run `mdpow-equilibrium -S %s %s'  first!", solvent, "RUNINPUT.cfg")
+            logger.critical(
+                "Missing the equilibrium simulation %(equil_savefilename)r.", vars()
+            )
+            logger.critical(
+                "Run `mdpow-equilibrium -S %s %s'  first!", solvent, "RUNINPUT.cfg"
+            )
         raise
 
     # output to screen or hidden?
@@ -347,33 +381,44 @@ def fep_simulation(cfg, solvent, **kwargs):
         logger.debug("Using [FEP] MDP file %r from config file", mdp)
 
         # lambda schedules can be read from [FEP_schedule_*] sections
-        schedules = {'coulomb': fep.FEPschedule.load(cfg, "FEP_schedule_Coulomb"),
-                     'vdw': fep.FEPschedule.load(cfg, "FEP_schedule_VDW"),
-                     }
+        schedules = {
+            "coulomb": fep.FEPschedule.load(cfg, "FEP_schedule_Coulomb"),
+            "vdw": fep.FEPschedule.load(cfg, "FEP_schedule_VDW"),
+        }
         logger.debug("Loaded FEP schedules %r from config file", schedules.keys())
 
         # Note that we set basedir=topdir (and *not* dirname=dirname!)...FEP is a bit convoluted
-        S = Simulation(simulation=equil_S, runtime=cfg.getfloat("FEP", "runtime"),
-                       basedir=topdir, deffnm=deffnm, mdp=mdp, schedules=schedules,
-                       method=method)
+        S = Simulation(
+            simulation=equil_S,
+            runtime=cfg.getfloat("FEP", "runtime"),
+            basedir=topdir,
+            deffnm=deffnm,
+            mdp=mdp,
+            schedules=schedules,
+            method=method,
+        )
     if S.journal.has_not_completed("setup"):
-        params = S.setup(qscript=cfg.getlist("FEP", "qscript"),
-                         maxwarn=cfg.getint("FEP", "maxwarn"))
+        params = S.setup(
+            qscript=cfg.getlist("FEP", "qscript"), maxwarn=cfg.getint("FEP", "maxwarn")
+        )
         checkpoint("setup", S, savefilename)
     else:
-        params = {'deffnm': deffnm}
+        params = {"deffnm": deffnm}
         logger.info("Fast-forwarding: FEP setup done")
 
     if S.journal.has_not_completed("fep_run"):
+
         def run_all_FEPS():
             for wdir in S.fep_dirs():
                 runMD_or_exit(S, "FEP", params, cfg, dirname=wdir, dgdl=True)
+
         wrapper = S.get_protocol("fep_run")
         wrapper(run_all_FEPS)
         checkpoint("fep_run", S, savefilename)
     else:
         logger.info("Fast-forwarding: fep (run) done")
 
-    logger.info("FEP simulation phase complete, use %(savefilename)r to continue.",
-                vars())
+    logger.info(
+        "FEP simulation phase complete, use %(savefilename)r to continue.", vars()
+    )
     return savefilename

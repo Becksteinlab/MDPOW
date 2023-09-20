@@ -312,7 +312,7 @@ Hydration free energy
 Reopen the python session and set up a :class:`~mdpow.fep.Ghyd` object::
 
    import mdpow.fep
-   gwat = mdpow.fep.Ghyd(molecule="OcOH", top="Equilibrium/water/top/system.top", struct="Equilibrium/water/MD_NPT/md.pdb", ndx="Equilibrium/water/solvation/main.ndx", runtime=100)
+   gwat = mdpow.fep.Ghyd(molecule="OcOH", top="Equilibrium/water/top/system.top.template", struct="Equilibrium/water/MD_NPT/md.pdb", ndx="Equilibrium/water/solvation/main.ndx", runtime=100)
 
 Alternatively, one can save some typing if we continue the last session and use
 the :class:`mdpow.equil.Simulation` object (which we can re-load from its saved

@@ -18,7 +18,7 @@ print("Converting %s.cfg ..." % sys.argv[1].split(".")[0])
 
 full_file = []
 
-with open(sys.argv[1],'r') as f:
+with open(sys.argv[1], "r") as f:
     for line in f:
         newline = line.strip()
         if not newline.startswith("#") and not newline == "":
@@ -32,28 +32,31 @@ for x in range(len(full_file)):
 
 sections = []
 
-for x in range(len(heads)-1):
-    sections.append(full_file[heads[x]:heads[x+1]])
+for x in range(len(heads) - 1):
+    sections.append(full_file[heads[x] : heads[x + 1]])
 
-sections.append(full_file[heads[-1]:])
+sections.append(full_file[heads[-1] :])
 
 yaml_formatting = {}
 
 for x in sections:
     options = x[1:]
-    split = [[str(y.split("=")[0].strip()),str(y.split("=")[1].strip()).strip()] for y in options]
-    yaml_formatting[x[0][1:-1]]=split
+    split = [
+        [str(y.split("=")[0].strip()), str(y.split("=")[1].strip()).strip()]
+        for y in options
+    ]
+    yaml_formatting[x[0][1:-1]] = split
 
 for x in yaml_formatting:
-    d = dict((key,value) for (key,value) in yaml_formatting[x])
+    d = dict((key, value) for (key, value) in yaml_formatting[x])
     yaml_formatting[x] = d
 
-with open("result.yml",'w') as f:
-    f.write(yaml.dump(yaml_formatting,default_flow_style=False))
+with open("result.yml", "w") as f:
+    f.write(yaml.dump(yaml_formatting, default_flow_style=False))
 
-with open("result.yml",'r') as infile, open(sys.argv[-1],'w') as outfile:
+with open("result.yml", "r") as infile, open(sys.argv[-1], "w") as outfile:
     data = infile.read()
-    data = data.replace("'","")
+    data = data.replace("'", "")
     outfile.write(data)
 
 os.remove("result.yml")
