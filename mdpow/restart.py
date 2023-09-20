@@ -132,8 +132,9 @@ class Journal(object):
 
     def start(self, stage):
         """Record that *stage* is starting."""
-        if self.current is not None:
-            errmsg = "Cannot start stage %s because previously started stage %s " \
+        if self.current is not None and self.current != stage:
+            errmsg = (
+                "Cannot start stage %s because previously started stage %s "
                 "has not been completed." % (stage, self.current)
             logger.error(errmsg)
             raise JournalSequenceError(errmsg)
