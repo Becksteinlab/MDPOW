@@ -1087,7 +1087,7 @@ class Gsolv(Journalled):
            :func:`scipy.integrate.simpson`) handles even number of intervals:
            Previously, the old `even="last"` was used but now Cartwright's
            approach is always used. This change **leads to numerically
-           slightly different results** between MDPOW 0.9.0 and earlier 
+           slightly different results** between MDPOW 0.9.0 and earlier
            versions.
         """
         stride = stride or self.stride

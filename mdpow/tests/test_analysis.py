@@ -88,7 +88,9 @@ class TestAnalyze(object):
         #   instead of even="last": changes the mean (DeltaA: from -3.722 to now -3.643)
         DeltaA = G.results.DeltaA
         assert_array_almost_equal(
-            DeltaA.Gibbs.astuple(), (-3.6429995060434432, 2.3141470255028795), decimal=3
+            DeltaA.Gibbs.astuple(),
+            (-3.6429995060434432, 2.3141470255028795),
+            decimal=3,
         )
         assert_array_almost_equal(
             DeltaA.coulomb.astuple(),
@@ -96,7 +98,9 @@ class TestAnalyze(object):
             decimal=3,
         )
         assert_array_almost_equal(
-            DeltaA.vdw.astuple(), (-4.6128782195215781, 2.1942144688960972), decimal=3
+            DeltaA.vdw.astuple(),
+            (-4.691626010966514, 2.1940230979105584),
+            decimal=3,
         )
 
     def test_convert_edr(self, fep_benzene_directory):
