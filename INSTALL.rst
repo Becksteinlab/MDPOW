@@ -28,7 +28,7 @@ GROMACS_.
 Conda environment with pre-requisites
 -------------------------------------
 
-Make a conda environment with the latest packages for Python 3.8 or
+Make a conda environment with the latest packages for Python 3.10 or
 higher with the name *mdpow*; this installs the larger dependencies that are
 pre-requisites for MDPOW::
 

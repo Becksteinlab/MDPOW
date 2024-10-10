@@ -14,8 +14,9 @@ Changes
   now always uses Cartwright's approach to compute the last interval instead of
   the old `even="last"` behavior. This change **may lead to small numerical 
   differences in output** (#281)
-* added support for Python 3.10 (#202)
-* dropped testing/support for Python 3.8 (#281), 3.7 (#248). 3.6 (PR #220, #202)
+* added testing/support for Python 3.10 (#202) to 3.12 (#283)
+* dropped testing/support for Python 3.9 (#286), 3.8 (#281), 3.7 (#248),
+  3.6 (PR #220, #202)
 * support Gromacs 2022.4 and 2023.1 (#256)
 * use pymbar >= 4 and alchemlyb >= 2 (#246)
 * for ensemble.EnsembleAnalysis._single_frame() 
