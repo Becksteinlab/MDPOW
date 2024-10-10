@@ -15,8 +15,7 @@ Changes
   the old `even="last"` behavior. This change **may lead to small numerical 
   differences in output** (#281)
 * added support for Python 3.10 (#202)
-* dropped testing on Python 3.6 (PR #220, #202)
-* dropped testing on Python 3.7 (minimally supported Python >= 3.8, #248)
+* dropped testing/support for Python 3.8 (#281), 3.7 (#248). 3.6 (PR #220, #202)
 * support Gromacs 2022.4 and 2023.1 (#256)
 * use pymbar >= 4 and alchemlyb >= 2 (#246)
 * for ensemble.EnsembleAnalysis._single_frame() 
