@@ -2,7 +2,6 @@
 # Copyright (c) 2010 Oliver Beckstein <orbeckst@gmail.com>
 # Released under the GNU Public License 3 (or higher, your choice)
 
-import sys
 from setuptools import setup, find_packages
 import versioneer
 
@@ -77,6 +76,6 @@ setup(
         "pypdf",
     ],
     # setup_requires=['pytest-runner',],
-    tests_require=["pytest", "pybol", "py"],
+    # tests_require=["pytest", "pybol", "py"],
     zip_safe=True,
 )
