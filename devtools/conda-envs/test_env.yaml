@@ -6,7 +6,7 @@ dependencies:
 - python
 - six
 - numpy
-- scipy
+- scipy >=1.6.0
 - matplotlib-base
 - pandas
 - scikit-learn
@@ -22,7 +22,7 @@ dependencies:
 - cairosvg
 - pypdf
 
-  # Testing
+# Testing
 - pytest
 - pytest-pep8
 - pytest-cov
