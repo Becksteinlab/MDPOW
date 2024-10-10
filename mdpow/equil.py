@@ -535,9 +535,8 @@ class Simulation(Journalled):
         kwargs["top"] = self.files.topology
         kwargs["includes"] = asiterable(kwargs.pop("includes", [])) + self.dirs.includes
         kwargs["ndx"] = self.files.ndx
-        kwargs[
-            "mainselection"
-        ] = None  # important for SD (use custom mdp and ndx!, gromacs.setup._MD)
+        # important for SD (use custom mdp and ndx!, gromacs.setup._MD):
+        kwargs["mainselection"] = None
         self._checknotempty(kwargs["struct"], "struct")
         if not os.path.exists(kwargs["struct"]):
             # struct is not reliable as it depends on qscript so now we just try everything...
