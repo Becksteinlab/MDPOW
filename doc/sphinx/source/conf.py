@@ -55,9 +55,8 @@ master_doc = "index"
 # General information about the project.
 project = "MDPOW"
 now = datetime.datetime.now()
-copyright = "2010–{}, Shujie Fan, Ian Kenney, Alia Lescoulie, Bogdan Iorga, and Oliver Beckstein".format(
-    now.year
-)
+authors = "Shujie Fan, Ian Kenney, Alia Lescoulie, Bogdan Iorga, and Oliver Beckstein"
+copyright = "2010–{}, ".format(now.year) + authors
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -220,16 +219,16 @@ htmlhelp_basename = "MDPOWdoc"
 latex_documents = [
     (
         "index",
-        "MDpow.tex",
-        "MDpow Documentation",
-        "Ian Kenney, Bogdan Iorga, and Oliver Beckstein",
+        "MDPOW.tex",
+        "MDPOW Documentation",
+        authors,
         "manual",
     ),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
-# latex_logo = None
+latex_logo = html_logo
 
 # For "manual" documents, if this is true, then toplevel headings are parts,
 # not chapters.
@@ -250,17 +249,16 @@ latex_documents = [
 # intersphinx: reference standard lib and RecSQL
 # http://sphinx.pocoo.org/latest/ext/intersphinx.html
 intersphinx_mapping = {
-    "https://docs.python.org/": None,
-    "https://numpy.org/doc/stable/": None,
-    "https://docs.scipy.org/doc/scipy/reference/": None,
-    "https://gromacswrapper.readthedocs.io/en/latest": None,
-    "https://docs.mdanalysis.org/stable/": None,
-    "https://www.rdkit.org/docs/": None,
-    "https://pandas.pydata.org/docs/": None,
-    "https://seaborn.pydata.org": None,
-    "https://cairosvg.org/documentation/": None,
-    "https://svgutils.readthedocs.io/en/latest/": None,
-    "https://pypdf.readthedocs.io/en/stable/": None,
+    "python": ("https://docs.python.org/3", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy", None),
+    "GromacsWrapper": ("https://gromacswrapper.readthedocs.io/en/latest", None),
+    "MDAnalysis": ("https://docs.mdanalysis.org/stable/", None),
+    "RDKit": ("https://www.rdkit.org/docs/", None),
+    "pandas": ("https://pandas.pydata.org/docs/", None),
+    "seaborn": ("https://seaborn.pydata.org", None),
+    "svgutils": ("https://svgutils.readthedocs.io/en/latest/", None),
+    "pypdf": ("https://pypdf.readthedocs.io/en/stable/", None),
 }
 
 
