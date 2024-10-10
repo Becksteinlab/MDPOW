@@ -5,11 +5,15 @@ CHANGES for MDPOW
 Add summary of changes for each release. Use ISO 8061 dates. Reference
 GitHub issues numbers and PR numbers.
 
-2023-??-??    0.9.0
+2024-??-??    0.9.0
 cadeduckworth, orbeckst, VOD555, a-ws-m
 
 Changes
 
+* change in TI implementation in fep.Gsolv.analysis(): scipy.integrate.simpson()
+  now always uses Cartwright's approach to compute the last interval instead of
+  the old `even="last"` behavior. This change **may lead to small numerical 
+  differences in output** (#281)
 * added support for Python 3.10 (#202)
 * dropped testing on Python 3.6 (PR #220, #202)
 * dropped testing on Python 3.7 (minimally supported Python >= 3.8, #248)
