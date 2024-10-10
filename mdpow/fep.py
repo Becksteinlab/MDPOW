@@ -1137,7 +1137,7 @@ class Gsolv(Journalled):
                 "tcorrel": tc,
             }
             # Combined Simpson rule integration:
-            # Used to have 'even="last"' because dV/dl is smoother at the beginning so 
+            # Used to have 'even="last"' because dV/dl is smoother at the beginning so
             # using trapezoidal integration there makes less of an error (one hopes...)
             # but recent versions of scipy (eg 1.14) always use Cartwright's approach
             # for the last interval and "even" is not a kwarg anymore.
