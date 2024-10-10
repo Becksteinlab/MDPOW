@@ -1,0 +1,26 @@
+name: readthedocs
+channels:
+- conda-forge
+dependencies:
+- python >=3.10
+- six
+- numpy
+- scipy >=1.11.0
+- matplotlib-base
+- pandas
+- scikit-learn
+- pyyaml
+- mdanalysis >=2
+- numkit
+- gromacswrapper
+- alchemlyb >=2
+- pymbar >=4
+- rdkit
+- seaborn
+- svgutils
+- cairosvg
+- pypdf
+
+# sphinx and RTD
+- sphinx
+- sphinx_rtd_theme
