@@ -66,6 +66,7 @@ Fixes
   to explicitly make a copy DataFrame of the data for angle padding (#242)
 * fix rcoulomb in CHARMM energy minimization MDP template file (PR #210)
 * fix ensemble.EnsembleAnalysis.check_groups_from_common_ensemble (#212)
+* updated versioneer (#285)
 
 
 2022-01-03    0.8.0
