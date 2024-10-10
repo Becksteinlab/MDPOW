@@ -26,20 +26,23 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # only test all GROMACS version on the oldest and latest
-        # Python to keep the testing matrix manageable and only use 2
-        # macos runners (latest GROMACS, oldest and latest Python)
+        # only test all GROMACS version on the latest
+        # Python to keep the testing matrix manageable and only use 1
+        # macos runners (latest GROMACS, latest Python)
       
         os: [ubuntu-latest]
-        python-version: ["3.10"]
-        gromacs-version: ["4.6.5", "2018.6", "2020.6", "2021.1", "2022.4", "2023.1"]
+        python-version: ["3.12"]
+        gromacs-version: ["4.6.5", "2018.6", "2020.6", "2021.1", "2022.4", "2023.1", "2024.3"]
         include:
           - os: ubuntu-latest
-            python-version: "3.9"
-            gromacs-version: "2023.1"
-          - os: macos-latest
             python-version: "3.10"
-            gromacs-version: "2023.1"
+            gromacs-version: "2024.3"
+          - os: ubuntu-latest
+            python-version: "3.11"
+            gromacs-version: "2024.3"	    
+          - os: macos-latest
+            python-version: "3.12"
+            gromacs-version: "2024.3"
 
     env:
       MPLBACKEND: agg
