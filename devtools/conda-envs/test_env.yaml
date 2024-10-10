@@ -6,7 +6,7 @@ dependencies:
 - python
 - six
 - numpy
-- scipy >=1.6.0
+- scipy >=1.11.0
 - matplotlib-base
 - pandas
 - scikit-learn

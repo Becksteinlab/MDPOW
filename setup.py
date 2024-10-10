@@ -60,7 +60,7 @@ setup(
     },
     install_requires=[
         "numpy>=1.6",
-        "scipy>=1.6.0",
+        "scipy>=1.11.0",
         "pyyaml",
         "GromacsWrapper>=0.5.1",
         "numkit",

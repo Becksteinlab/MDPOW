@@ -1085,8 +1085,8 @@ class Gsolv(Journalled):
         .. versionchanged:: 0.9.0
            Change in how the Simpson's rule integration algorithm (namely,
            :func:`scipy.integrate.simpson`) handles even number of intervals:
-           Previously, the old `even="last"` was used but now Cartwright's
-           approach is always used. This change **leads to numerically
+           Previously, the old `even="last"` was used but since scipy 1.11.0
+           Cartwright's approach is used. This change **leads to numerically
            slightly different results** between MDPOW 0.9.0 and earlier
            versions.
         """
