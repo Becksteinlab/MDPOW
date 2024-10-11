@@ -5,7 +5,7 @@ CHANGES for MDPOW
 Add summary of changes for each release. Use ISO 8061 dates. Reference
 GitHub issues numbers and PR numbers.
 
-2024-10-10    0.9.0
+2024-10-11    0.9.0
 cadeduckworth, orbeckst, VOD555, a-ws-m
 
 Changes
@@ -74,6 +74,9 @@ Fixes
 * fix ensemble.EnsembleAnalysis.check_groups_from_common_ensemble (#212)
 * updated versioneer (#285)
 * fix that simulation stages cannot be restarted after error (#272)
+* fix that testing resource data files were not packaged at all; they are now
+  included with the sdist (tar.gz) (23 MiB) but excluded from the wheel (whl)
+  (2.3 MiB) (#293)
 
 
 2022-01-03    0.8.0

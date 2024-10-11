@@ -46,6 +46,8 @@ setup(
         "scripts/mdpow-solvationenergy",
         "scripts/mdpow-get-runinput",
     ],
+    # exclude large data sets in tests/testing_resources/*
+    include_package_data=True,
     package_data={
         "mdpow": [
             "top/*.dat",
@@ -56,6 +58,11 @@ setup(
             "top/amber99sb.ff/*",
             "templates/*",
         ],
+    },
+    exclude_package_data={
+        "mdpow.tests": [
+            "testing_resources/*",
+        ]
     },
     install_requires=[
         "numpy>=1.6",

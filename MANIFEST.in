@@ -1,5 +1,7 @@
 include   setup.py setup.cfg COPYING INSTALL.rst README.rst AUTHORS CHANGES
+include   versioneer.py
+include   mdpow/_version.py
 graft     mdpow/templates/
 graft     mdpow/top/
-include versioneer.py
-include mdpow/_version.py
+graft     mdpow/tests/testing_resources/
+global-exclude *.py[cod]
