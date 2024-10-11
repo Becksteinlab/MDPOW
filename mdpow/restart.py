@@ -116,7 +116,7 @@ class Journal(object):
     def incomplete(self, stage):
         if not stage in self.stages:
             raise ValueError(
-                "can only assign a registered stage from %(stages)r" % vars(self)
+                "Can only assign a registered stage from %(stages)r" % vars(self)
             )
         self.__incomplete = stage
 
@@ -157,7 +157,16 @@ class Journal(object):
         return stage in self.history
 
     def has_not_completed(self, stage):
-        """Returns ``True`` if the *stage* had been started but not completed yet."""
+        """Returns ``True`` if the *stage* had been started but not completed yet.
+
+        This is subtly different from ``not`` :func:`has_completed` in
+        that two things have to be true:
+
+        1. No stage is active (which is the case when a restart is attempted).
+        2. The `stage` has not been completed previously (i.e.,
+           :func:`has_completed` returns ``False``)
+
+        """
         return self.current is None and not self.has_completed(stage)
 
     def clear(self):
@@ -190,13 +199,14 @@ class Journalled(object):
             len(self.journal.history)
         except AttributeError:
             self.journal = Journal(self.protocols)
-        super(Journalled, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def get_protocol(self, protocol):
         """Return method for *protocol*.
 
         - If *protocol* is a real method of the class then the method is
-          returned.
+          returned. This method should implement its own use of
+          :meth:`Journal.start` and :meth:`Journal.completed`.
 
         - If *protocol* is a registered protocol name but no method of
           the name exists (i.e. *protocol* is a "dummy protocol") then
@@ -205,9 +215,12 @@ class Journalled(object):
 
           .. function:: dummy_protocol(func, *args, **kwargs)
 
-             Runs *func* with the arguments and keywords between calls
-             to :meth:`Journal.start` and :meth:`Journal.completed`,
-             with the stage set to *protocol*.
+             Runs *func* with the arguments and keywords between calls to
+             :meth:`Journal.start` and :meth:`Journal.completed`, with the
+             stage set to *protocol*.
+
+             The function should return ``True`` on success and ``False`` on
+             failure.
 
         - Raises a :exc:`ValueError` if the *protocol* is not
           registered (i.e. not found in :attr:`Journalled.protocols`).
