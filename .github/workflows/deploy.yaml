@@ -53,5 +53,5 @@ jobs:
         if: github.event_name == 'release' && github.event.action == 'published'
         with:        
           package_name: 'MDPOW'
-          module_name: 'gromacs'
+          module_name: 'mdpow'
           tests: false
