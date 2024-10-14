@@ -1020,7 +1020,7 @@ class Gsolv(Journalled):
 
         The dV/dlambda graphs are integrated with the composite Simpson's rule
         (and if the number of datapoints are even, the first interval is
-        evaluated with the trapezoidal rule); see :func:`scipy.integrate.simps`
+        evaluated with the trapezoidal rule); see :func:`scipy.integrate.simpson`
         for details). Note that this implementation of Simpson's rule does not
         require equidistant spacing on the lambda axis.
 
@@ -1081,6 +1081,14 @@ class Gsolv(Journalled):
                              Diego 2002
 
         .. _p526: http://books.google.co.uk/books?id=XmyO2oRUg0cC&pg=PA526
+
+        .. versionchanged:: 0.9.0
+           Change in how the Simpson's rule integration algorithm (namely,
+           :func:`scipy.integrate.simpson`) handles even number of intervals:
+           Previously, the old `even="last"` was used but since scipy 1.11.0
+           Cartwright's approach is used. This change **leads to numerically
+           slightly different results** between MDPOW 0.9.0 and earlier
+           versions.
         """
         stride = stride or self.stride
         logger.info("Analysis stride is %s.", stride)
@@ -1137,9 +1145,11 @@ class Gsolv(Journalled):
                 "tcorrel": tc,
             }
             # Combined Simpson rule integration:
-            # even="last" because dV/dl is smoother at the beginning so using trapezoidal
-            # integration there makes less of an error (one hopes...)
-            a = scipy.integrate.simps(Y, x=lambdas, even="last")
+            # Used to have 'even="last"' because dV/dl is smoother at the beginning so
+            # using trapezoidal integration there makes less of an error (one hopes...)
+            # but recent versions of scipy (eg 1.14) always use Cartwright's approach
+            # for the last interval and "even" is not a kwarg anymore.
+            a = scipy.integrate.simpson(Y, x=lambdas)
             da = numkit.integration.simps_error(DY, x=lambdas, even="last")
             self.results.DeltaA[component] = QuantityWithError(a, da)
             GibbsFreeEnergy += self.results.DeltaA[
@@ -1179,7 +1189,6 @@ class Gsolv(Journalled):
             for l in lambdas:
                 xvg_file = self.dgdl_xvg(self.wdir(component, l))
                 xvg_df = extract(xvg_file, T=self.Temperature).iloc[start:stop:stride]
-                full_len = len(xvg_df)
                 if SI:
                     logger.info(
                         "Performing statistical inefficiency analysis for window %s %04d"
@@ -1190,16 +1199,6 @@ class Gsolv(Journalled):
                     ts = ts.set_index("time")
                     # use the statistical_inefficiency function to subsample the data
                     xvg_df = statistical_inefficiency(xvg_df, ts, conservative=True)
-                    logger.info(
-                        "The statistical inefficiency value is {:.4f}.".format(
-                            full_len / len(xvg_df) / 2
-                        )
-                    )
-                    logger.info(
-                        "The data are subsampled every {:d} frames.".format(
-                            int(np.ceil(full_len / len(xvg_df) / 2))
-                        )
-                    )
                 val.append(xvg_df)
             self.results.xvg[component] = (np.array(lambdas), pd.concat(val))
 

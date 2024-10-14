@@ -1,9 +1,8 @@
-name: test
+name: readthedocs
 channels:
 - conda-forge
-- bioconda
 dependencies:
-- python
+- python >=3.10
 - six
 - numpy
 - scipy >=1.11.0
@@ -22,8 +21,6 @@ dependencies:
 - cairosvg
 - pypdf
 
-# Testing
-- pytest
-- pytest-pep8
-- pytest-cov
-- codecov
+# sphinx and RTD
+- sphinx
+- sphinx_rtd_theme

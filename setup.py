@@ -2,7 +2,6 @@
 # Copyright (c) 2010 Oliver Beckstein <orbeckst@gmail.com>
 # Released under the GNU Public License 3 (or higher, your choice)
 
-import sys
 from setuptools import setup, find_packages
 import versioneer
 
@@ -27,9 +26,9 @@ setup(
         "Operating System :: MacOS :: MacOS X",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Topic :: Scientific/Engineering :: Chemistry",
         "Topic :: Scientific/Engineering :: Physics",
     ],
@@ -47,6 +46,8 @@ setup(
         "scripts/mdpow-solvationenergy",
         "scripts/mdpow-get-runinput",
     ],
+    # exclude large data sets in tests/testing_resources/*
+    include_package_data=True,
     package_data={
         "mdpow": [
             "top/*.dat",
@@ -58,9 +59,14 @@ setup(
             "templates/*",
         ],
     },
+    exclude_package_data={
+        "mdpow.tests": [
+            "testing_resources/*",
+        ]
+    },
     install_requires=[
         "numpy>=1.6",
-        "scipy",
+        "scipy>=1.11.0",
         "pyyaml",
         "GromacsWrapper>=0.5.1",
         "numkit",
@@ -77,6 +83,6 @@ setup(
         "pypdf",
     ],
     # setup_requires=['pytest-runner',],
-    tests_require=["pytest", "pybol", "py"],
+    # tests_require=["pytest", "pybol", "py"],
     zip_safe=True,
 )

@@ -5,15 +5,19 @@ CHANGES for MDPOW
 Add summary of changes for each release. Use ISO 8061 dates. Reference
 GitHub issues numbers and PR numbers.
 
-2023-??-??    0.9.0
+2024-10-11    0.9.0
 cadeduckworth, orbeckst, VOD555, a-ws-m
 
 Changes
 
-* added support for Python 3.10 (#202)
-* dropped testing on Python 3.6 (PR #220, #202)
-* dropped testing on Python 3.7 (minimally supported Python >= 3.8, #248)
-* support Gromacs 2022.4 and 2023.1 (#256)
+* change in TI implementation in fep.Gsolv.analysis(): scipy.integrate.simpson()
+  now always uses Cartwright's approach to compute the last interval instead of
+  the old `even="last"` behavior. This change **may lead to small numerical 
+  differences in output** (#281)
+* added testing/support for Python 3.10 (#202) to 3.12 (#283)
+* dropped testing/support for Python 3.9 (#286), 3.8 (#281), 3.7 (#248),
+  3.6 (PR #220, #202)
+* support Gromacs 2022.4 and 2023.1 (#256) and 2024.3 (PR #290)
 * use pymbar >= 4 and alchemlyb >= 2 (#246)
 * for ensemble.EnsembleAnalysis._single_frame() 
   changed 'pass' to 'raise NotImplementedError' (#216)
@@ -25,6 +29,22 @@ Changes
   EnsembleAnalysis.run() method, no longer needed (per comments, #199)
 * internal log_banner() now uses logger as argument (PR #247)
 * use `black` formatter for codebase (#271)
+* implemented `forcefields.Forcefield` class (#267)
+  - facilitates users using non-default forcefields without changing package
+    code  
+  - `equil.Simulation` has new `ff_class` argument
+  - each `Forcefield` has unique `default_water_model`, replacing global
+    `DEFAULT_WATER_MODEL`
+  - `get_solvent_model()` and `get_solvent_identifier()` take either `str` or
+    `Forcefield` type for the `forcefield` argument    
+  - both functions also use the `Forcefield`-specific `default_water_model`
+    (fixes #112)  
+* `forcefields.DEFAULT_WATER_MODEL` removed (#267)
+* changed `system.top` and `system_octwet.top` to act as templates and added
+  `.template` suffix (#267)  
+* removed `forcefields.get_ff_paths()` (#267)
+* changed `forcefields.get_solvent_identifier()`: will raise `ValueError`
+  instead of returning `None` (#267)
 
 Enhancements
 
@@ -52,6 +72,11 @@ Fixes
   to explicitly make a copy DataFrame of the data for angle padding (#242)
 * fix rcoulomb in CHARMM energy minimization MDP template file (PR #210)
 * fix ensemble.EnsembleAnalysis.check_groups_from_common_ensemble (#212)
+* updated versioneer (#285)
+* fix that simulation stages cannot be restarted after error (#272)
+* fix that testing resource data files were not packaged at all; they are now
+  included with the sdist (tar.gz) (23 MiB) but excluded from the wheel (whl)
+  (2.3 MiB) (#293)
 
 
 2022-01-03    0.8.0

@@ -9,6 +9,8 @@ import mdpow.forcefields
 WATERMODELS = ("tip4p", "tip3p", "tip5p", "spc", "spce", "m24", "tip4pd")
 SOLVENTMODELS = ("water", "cyclohexane", "octanol", "toluene")
 
+forcefields = mdpow.forcefields
+
 
 class TestIncludedForcefiels(object):
     @staticmethod
@@ -28,6 +30,31 @@ class TestIncludedForcefiels(object):
         assert mdpow.config.topfiles["oplsaa.ff"].endswith(
             os.path.join("mdpow", "top", "oplsaa.ff")
         )
+
+    @pytest.mark.parametrize(
+        "ff_str,ff_instance",
+        list(
+            forcefields.ALL_FORCEFIELDS.items()
+        )  # List of (ff_name, ff_instance) for all builtins
+        + [
+            ("Violet Parr", None),  # Nonexistent builtin
+        ],
+    )
+    def test_get_forcefield(self, ff_str, ff_instance):
+        """Check that we can correctly cast a `Forcefield`."""
+        if ff_instance is not None:
+            assert forcefields.get_forcefield(ff_str) == ff_instance
+            assert forcefields.get_forcefield(ff_instance) == ff_instance
+        else:
+            with pytest.raises(ValueError):
+                forcefields.get_forcefield(ff_str)
+
+    @pytest.mark.parametrize(
+        "ff_str,ff_instance", list(forcefields.ALL_FORCEFIELDS.items())
+    )
+    def test_ff_repr(self, ff_str: str, ff_instance: forcefields.Forcefield):
+        """Test that forcefields are correctly represented by their names."""
+        assert repr(ff_instance) == ff_str
 
 
 class TestIncludedSolvents(object):
@@ -63,7 +90,7 @@ class TestIncludedSolvents(object):
 class TestWatermodels(object):
     @staticmethod
     def test_default_water_model():
-        assert mdpow.forcefields.DEFAULT_WATER_MODEL == "tip4p"
+        assert mdpow.forcefields.OPLS_AA.default_water_model == "tip4p"
 
     def test_watermodelsdat(self):
         included_watermodels = open(mdpow.config.topfiles["watermodels.dat"]).read()
@@ -93,7 +120,7 @@ class TestWatermodels(object):
 
     @staticmethod
     def test_get_water_model():
-        model = mdpow.forcefields.DEFAULT_WATER_MODEL
+        model = mdpow.forcefields.OPLS_AA.default_water_model
         assert (
             mdpow.forcefields.get_water_model(model)
             is mdpow.forcefields.GROMACS_WATER_MODELS[model]
@@ -109,10 +136,10 @@ class TestSolventModels(object):
     @staticmethod
     def test_get_solvent_default_water():
         model = "water"
-        defaultmodel = mdpow.forcefields.DEFAULT_WATER_MODEL
+        defaultmodel = mdpow.forcefields.OPLS_AA.default_water_model
         assert (
             mdpow.forcefields.get_solvent_model(model)
-            is mdpow.forcefields.GROMACS_WATER_MODELS[defaultmodel]
+            == mdpow.forcefields.GROMACS_WATER_MODELS[defaultmodel]
         )
 
     @staticmethod
@@ -157,7 +184,7 @@ class TestSolventModels(object):
     def test_get_solvent_identifier_default_is_water():
         assert (
             mdpow.forcefields.get_solvent_identifier("water")
-            is mdpow.forcefields.DEFAULT_WATER_MODEL
+            is mdpow.forcefields.OPLS_AA.default_water_model
         )
 
     @pytest.mark.parametrize("model", WATERMODELS)
@@ -174,5 +201,7 @@ class TestSolventModels(object):
 
     @staticmethod
     def test_get_solvent_identifier_None():
-        assert mdpow.forcefields.get_solvent_identifier("water", model="foobar") is None
-        assert mdpow.forcefields.get_solvent_identifier("benzene") is None
+        with pytest.raises(ValueError):
+            mdpow.forcefields.get_solvent_identifier("water", model="foobar")
+        with pytest.raises(ValueError):
+            mdpow.forcefields.get_solvent_identifier("benzene")
